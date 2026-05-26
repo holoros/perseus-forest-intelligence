@@ -1,0 +1,249 @@
+{
+ "GA": {
+  "engines": 6,
+  "metrics": 41,
+  "rows": 432,
+  "name": "Georgia",
+  "centroid": [
+   -83.4,
+   32.6
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "animal_rate_state_pct",
+   "any_disturbance_rate_pct",
+   "cwd_drybio_per_ac",
+   "cwd_n_plots",
+   "disease_rate_state_pct",
+   "fire_rate_state_pct",
+   "human_rate_state_pct",
+   "insect_rate_state_pct",
+   "live_c_total",
+   "mature_forest_share_80",
+   "mean_stand_age",
+   "old_forest_share_120",
+   "snag_biomass_per_ac",
+   "snag_density_per_ac",
+   "weather_rate_state_pct"
+  ]
+ },
+ "ID": {
+  "engines": 4,
+  "metrics": 33,
+  "rows": 95,
+  "name": "Idaho",
+  "centroid": [
+   -114.6,
+   44.2
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "any_disturbance_rate_pct",
+   "cwd_drybio_per_ac",
+   "cwd_n_plots",
+   "disease_rate_state_pct",
+   "fire_rate_state_pct",
+   "insect_rate_state_pct",
+   "mature_forest_share_80",
+   "mean_stand_age",
+   "old_forest_share_120"
+  ]
+ },
+ "IN": {
+  "engines": 4,
+  "metrics": 33,
+  "rows": 107,
+  "name": "Indiana",
+  "centroid": [
+   -86.3,
+   39.9
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "any_disturbance_rate_pct",
+   "cwd_drybio_per_ac",
+   "cwd_n_plots",
+   "disease_rate_state_pct",
+   "human_rate_state_pct",
+   "insect_rate_state_pct",
+   "mature_forest_share_80",
+   "mean_stand_age",
+   "old_forest_share_120",
+   "weather_rate_state_pct"
+  ]
+ },
+ "ME": {
+  "engines": 31,
+  "metrics": 65,
+  "rows": 28151,
+  "name": "Maine",
+  "centroid": [
+   -69.2,
+   45.4
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "agb_dry",
+   "agc_live_ag",
+   "agc_live_total",
+   "animal_rate_state_pct",
+   "any_disturbance_rate_pct",
+   "bgc_live_total",
+   "cwd_drybio_per_ac",
+   "cwd_n_plots",
+   "dead_wood_c",
+   "disease_rate_state_pct",
+   "harvest_c_yr",
+   "human_rate_state_pct",
+   "insect_rate_state_pct",
+   "litter_c",
+   "live_biomass_c_total",
+   "live_c_total",
+   "mature_forest_share_80",
+   "mean_stand_age",
+   "merch_vol_mcf",
+   "old_forest_share_120",
+   "rd_mean_wtd",
+   "sdi_mean_wtd",
+   "snag_biomass_per_ac",
+   "snag_density_per_ac",
+   "soil_c",
+   "subtile_coverage_pct",
+   "total_area_mha_cem",
+   "total_ecosystem_c",
+   "understory_c",
+   "vol_stem",
+   "weather_rate_state_pct"
+  ]
+ },
+ "MN": {
+  "engines": 6,
+  "metrics": 41,
+  "rows": 432,
+  "name": "Minnesota",
+  "centroid": [
+   -94.3,
+   46.3
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "animal_rate_state_pct",
+   "any_disturbance_rate_pct",
+   "cwd_drybio_per_ac",
+   "cwd_n_plots",
+   "disease_rate_state_pct",
+   "fire_rate_state_pct",
+   "human_rate_state_pct",
+   "insect_rate_state_pct",
+   "live_c_total",
+   "mature_forest_share_80",
+   "mean_stand_age",
+   "old_forest_share_120",
+   "snag_biomass_per_ac",
+   "snag_density_per_ac",
+   "weather_rate_state_pct"
+  ]
+ },
+ "NH": {
+  "engines": 1,
+  "metrics": 5,
+  "rows": 30,
+  "name": "New Hampshire",
+  "centroid": [
+   -71.6,
+   43.7
+  ],
+  "has_series": false
+ },
+ "NY": {
+  "engines": 1,
+  "metrics": 5,
+  "rows": 30,
+  "name": "New York",
+  "centroid": [
+   -75.5,
+   42.9
+  ],
+  "has_series": false
+ },
+ "OR": {
+  "engines": 4,
+  "metrics": 28,
+  "rows": 391,
+  "name": "Oregon",
+  "centroid": [
+   -120.5,
+   43.9
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "any_disturbance_rate_pct",
+   "cwd_drybio_per_ac",
+   "cwd_n_plots",
+   "fire_rate_state_pct",
+   "insect_rate_state_pct",
+   "live_c_total",
+   "mature_forest_share_80",
+   "mean_stand_age",
+   "old_forest_share_120",
+   "snag_biomass_per_ac",
+   "snag_density_per_ac",
+   "weather_rate_state_pct"
+  ]
+ },
+ "US": {
+  "engines": 1,
+  "metrics": 5,
+  "rows": 55,
+  "name": "United States",
+  "centroid": [
+   -98.6,
+   39.8
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "animal_observed_pct",
+   "disease_observed_pct",
+   "fire_observed_pct",
+   "insect_observed_pct",
+   "weather_observed_pct"
+  ]
+ },
+ "VT": {
+  "engines": 1,
+  "metrics": 5,
+  "rows": 30,
+  "name": "Vermont",
+  "centroid": [
+   -72.7,
+   44.0
+  ],
+  "has_series": false
+ },
+ "WA": {
+  "engines": 7,
+  "metrics": 42,
+  "rows": 656,
+  "name": "Washington",
+  "centroid": [
+   -120.4,
+   47.4
+  ],
+  "has_series": true,
+  "series_metrics": [
+   "any_disturbance_rate_pct",
+   "cwd_drybio_per_ac",
+   "cwd_n_plots",
+   "fire_rate_state_pct",
+   "insect_rate_state_pct",
+   "live_biomass_c_total",
+   "live_c_total",
+   "mature_forest_share_80",
+   "mean_stand_age",
+   "old_forest_share_120",
+   "snag_biomass_per_ac",
+   "snag_density_per_ac",
+   "weather_rate_state_pct"
+  ]
+ }
+}
