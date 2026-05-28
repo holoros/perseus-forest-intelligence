@@ -10,6 +10,7 @@
   ],
   "has_series": true,
   "series_metrics": [
+   "agc_live_total",
    "animal_rate_state_pct",
    "any_disturbance_rate_pct",
    "cwd_drybio_per_ac",
@@ -18,7 +19,6 @@
    "fire_rate_state_pct",
    "human_rate_state_pct",
    "insect_rate_state_pct",
-   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
@@ -50,9 +50,9 @@
   ]
  },
  "IN": {
-  "engines": 4,
-  "metrics": 33,
-  "rows": 107,
+  "engines": 5,
+  "metrics": 34,
+  "rows": 413,
   "name": "Indiana",
   "centroid": [
    -86.3,
@@ -60,6 +60,7 @@
   ],
   "has_series": true,
   "series_metrics": [
+   "agc_live_total",
    "any_disturbance_rate_pct",
    "cwd_drybio_per_ac",
    "cwd_n_plots",
@@ -127,6 +128,7 @@
   ],
   "has_series": true,
   "series_metrics": [
+   "agc_live_total",
    "animal_rate_state_pct",
    "any_disturbance_rate_pct",
    "cwd_drybio_per_ac",
@@ -135,7 +137,6 @@
    "fire_rate_state_pct",
    "human_rate_state_pct",
    "insect_rate_state_pct",
-   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
@@ -177,12 +178,12 @@
   ],
   "has_series": true,
   "series_metrics": [
+   "agc_live_total",
    "any_disturbance_rate_pct",
    "cwd_drybio_per_ac",
    "cwd_n_plots",
    "fire_rate_state_pct",
    "insect_rate_state_pct",
-   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
@@ -231,13 +232,13 @@
   ],
   "has_series": true,
   "series_metrics": [
+   "agc_live_total",
    "any_disturbance_rate_pct",
    "cwd_drybio_per_ac",
    "cwd_n_plots",
    "fire_rate_state_pct",
    "insect_rate_state_pct",
    "live_biomass_c_total",
-   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
