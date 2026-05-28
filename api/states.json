@@ -1,8 +1,8 @@
 {
  "GA": {
   "engines": 6,
-  "metrics": 41,
-  "rows": 432,
+  "metrics": 42,
+  "rows": 738,
   "name": "Georgia",
   "centroid": [
    -83.4,
@@ -19,6 +19,7 @@
    "fire_rate_state_pct",
    "human_rate_state_pct",
    "insect_rate_state_pct",
+   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
@@ -51,8 +52,8 @@
  },
  "IN": {
   "engines": 5,
-  "metrics": 34,
-  "rows": 413,
+  "metrics": 35,
+  "rows": 719,
   "name": "Indiana",
   "centroid": [
    -86.3,
@@ -67,6 +68,7 @@
    "disease_rate_state_pct",
    "human_rate_state_pct",
    "insect_rate_state_pct",
+   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
@@ -76,7 +78,7 @@
  "ME": {
   "engines": 31,
   "metrics": 65,
-  "rows": 28151,
+  "rows": 28457,
   "name": "Maine",
   "centroid": [
    -69.2,
@@ -119,8 +121,8 @@
  },
  "MN": {
   "engines": 6,
-  "metrics": 41,
-  "rows": 432,
+  "metrics": 42,
+  "rows": 738,
   "name": "Minnesota",
   "centroid": [
    -94.3,
@@ -137,6 +139,7 @@
    "fire_rate_state_pct",
    "human_rate_state_pct",
    "insect_rate_state_pct",
+   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
@@ -169,8 +172,8 @@
  },
  "OR": {
   "engines": 4,
-  "metrics": 28,
-  "rows": 391,
+  "metrics": 29,
+  "rows": 697,
   "name": "Oregon",
   "centroid": [
    -120.5,
@@ -184,6 +187,7 @@
    "cwd_n_plots",
    "fire_rate_state_pct",
    "insect_rate_state_pct",
+   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
@@ -223,8 +227,8 @@
  },
  "WA": {
   "engines": 7,
-  "metrics": 42,
-  "rows": 656,
+  "metrics": 43,
+  "rows": 962,
   "name": "Washington",
   "centroid": [
    -120.4,
@@ -239,6 +243,7 @@
    "fire_rate_state_pct",
    "insect_rate_state_pct",
    "live_biomass_c_total",
+   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120",
