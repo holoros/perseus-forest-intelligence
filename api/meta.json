@@ -1,12 +1,12 @@
 {
- "generated": "2026-05-28T11:01:19.716349+00:00",
+ "generated": "2026-05-28T11:17:42.621713+00:00",
  "schema": "perseus_api_v1",
  "db_version": "v0.55",
  "stats": {
   "states": 11,
   "engines": 33,
   "metrics": 70,
-  "rows": 30409
+  "rows": 30715
  },
  "metrics": {
   "agc_live_total": {
