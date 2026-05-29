@@ -21,9 +21,10 @@ function project(lon, lat){
   return [rho * Math.sin(theta), RHO0 - rho * Math.cos(theta)];
 }
 
-// Pre-compute scale + translate to fit CONUS into the viewport
+// Pre-compute scale + translate to fit CONUS into the viewport.
+// Math y grows upward (north = positive); SVG y grows downward.
+// We flip y inside projPath so the rendered choropleth has north on top.
 function computeTransform(){
-  // Approximate CONUS extent in projected units
   const corners = [
     project(-125, 50), project(-66, 50),
     project(-125, 24), project(-66, 24),
@@ -31,18 +32,20 @@ function computeTransform(){
   ];
   const xs = corners.map(c=>c[0]); const ys = corners.map(c=>c[1]);
   const x0 = Math.min(...xs), x1 = Math.max(...xs);
-  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);  // y0 south, y1 north (math)
   const dx = x1 - x0, dy = y1 - y0;
   const s = Math.min((W - 2 * PAD) / dx, (H - 2 * PAD) / dy);
   const tx = -x0 * s + (W - dx * s) / 2;
-  const ty = -y0 * s + (H - dy * s) / 2;
+  // Want northern math y1 to map to screen top (PAD), southern y0 to screen bottom.
+  // screen_y = -y_math * s + ty   with ty = PAD + s * y1
+  const ty = PAD + s * y1 + (H - 2 * PAD - dy * s) / 2;
   return { s, tx, ty };
 }
 const { s: SCALE, tx: TX, ty: TY } = computeTransform();
 
 function projPath(lon, lat){
   const [x, y] = project(lon, lat);
-  return [x * SCALE + TX, y * SCALE + TY];
+  return [x * SCALE + TX, -y * SCALE + TY];
 }
 
 // Convert a single ring (array of [lon,lat]) to SVG path commands

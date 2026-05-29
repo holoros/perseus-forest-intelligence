@@ -79,6 +79,9 @@ export default function App(){
   // v0.65 SVG fallback for the choropleth
   const [geoData,setGeoData] = useState(null);
   const [mapEngine,setMapEngine] = useState("svg"); // svg (default robust) | maplibre
+  // v0.66 scenario focus + simplification
+  const [scenarioFocus,setScenarioFocus] = useState("all"); // all | harvest_baseline | libcbm_reduced | ...
+  const [showAllEngines,setShowAllEngines] = useState(false); // false = auto-hide noisy variants
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -246,10 +249,33 @@ export default function App(){
 
   const cov = states && states[sel];
   const rawNode = series && series[metric] && series[metric][bucket];
-  // Apply class-level filter first, then leave engine-level filter to GrowthChart
-  const node = rawNode ? rawNode.filter(s => !hiddenClasses.has(s.cls)) : null;
+  // v0.66 auto-hide noisy engines unless user opts into "show all":
+  //   uncalibrated FVS variants (native/jenkins not anchored or calibrated)
+  //   quarantined wear-nh series (already retired in v0.52 but may leak)
+  const isOutlier = (eng) =>
+    /(fvs.*(native|jenkins))/i.test(eng) && !/(anchored|calibrated)/i.test(eng) ||
+    /wear_nh/i.test(eng);
+  const filteredByClass = rawNode ? rawNode.filter(s => !hiddenClasses.has(s.cls)) : null;
+  const filteredByOutlier = (filteredByClass && !showAllEngines)
+    ? filteredByClass.filter(s => !isOutlier(s.model))
+    : filteredByClass;
+  // v0.66 scenario focus: when set, replace engine view with libcbm-only trajectory
+  // for that scenario, sourced from timeline.json (per-scenario per-year AGC).
+  const scenarioNode = (scenarioFocus !== "all" && timeline && timeline[sel]
+                        && timeline[sel][scenarioFocus]
+                        && metric === "agc_live_total")
+    ? [{
+        model: `libcbm_cross_state_v2 · ${scenarioFocus}`,
+        cls: "CBM",
+        label: `libcbm cross-state v2 · ${scenarioFocus.replace(/_/g," ")}`,
+        pts: Object.keys(timeline[sel][scenarioFocus]).sort()
+                .map(y => [+y, timeline[sel][scenarioFocus][y]]),
+      }]
+    : null;
+  const node = scenarioNode || filteredByOutlier;
   const overlayNode = (compareOn && cmpSeries && cmpSeries[metric] && cmpSeries[metric][bucket])
     ? cmpSeries[metric][bucket].filter(s => !hiddenClasses.has(s.cls))
+                              .filter(s => showAllEngines || !isOutlier(s.model))
     : null;
   const metricsAvail = series ? Object.keys(series).sort(
     (a,b)=> (METRIC_ORDER.indexOf(a)+1||99) - (METRIC_ORDER.indexOf(b)+1||99)) : [];
@@ -399,14 +425,28 @@ export default function App(){
               <select value={metric} onChange={e=>setMetric(e.target.value)}>
                 {metricsAvail.map(mc=> <option key={mc} value={mc}>{mlabel(mc)}</option>)}
               </select>
-              <select value={bucket} onChange={e=>setBucket(e.target.value)}>
-                {bucketsAvail.map(b=> <option key={b} value={b}>{b}</option>)}
+              <select value={scenarioFocus} onChange={e=>setScenarioFocus(e.target.value)}
+                      title="Pick a specific libcbm scenario, or 'all engines' for the full multi-model view">
+                <option value="all">all engines · {bucket}</option>
+                <option value="harvest_baseline">libcbm BAU only</option>
+                <option value="libcbm_reduced">libcbm reduce only</option>
+                <option value="libcbm_intensified">libcbm intensify only</option>
+                <option value="libcbm_climate_smart">libcbm climate-smart only</option>
+                <option value="harvest_rcp45">libcbm BAU + RCP4.5</option>
+                <option value="noharvest_rcp45">libcbm reserve + RCP4.5</option>
               </select>
+              {scenarioFocus === "all" && (
+                <select value={bucket} onChange={e=>setBucket(e.target.value)}>
+                  {bucketsAvail.map(b=> <option key={b} value={b}>{b}</option>)}
+                </select>)}
               <select value={yMode} onChange={e=>setYMode(e.target.value)} title="Y-axis scaling">
                 <option value="full">Y: full range</option>
                 <option value="auto">Y: zoom to median (q10–q90)</option>
                 <option value="log">Y: log scale</option>
               </select>
+              <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
+                <input type="checkbox" checked={showAllEngines} onChange={e=>setShowAllEngines(e.target.checked)}/> show all engines
+              </label>
               {hasBands && <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
                 <input type="checkbox" checked={showBands} onChange={e=>setShowBands(e.target.checked)}/> uncertainty
               </label>}
@@ -474,11 +514,15 @@ export default function App(){
                 </div>
               </details>)}
             <div className="note">
-              Each solid line is one engine's median for <b>{mlabel(metric)}</b> under <b>{bucket}</b>
-              {node && ` (${node.length-(node.length-node.filter(s=>!hiddenEngines.has(s.model)).length)} visible / ${rawNode.length})`}.
-              {compareOn && overlayNode && <> Dashed = <b>{cmpState}</b> ({overlayNode.length} engines).</>}
+              {scenarioFocus === "all"
+                ? <>Each solid line is one engine's median for <b>{mlabel(metric)}</b> under <b>{bucket}</b>
+                    {node && ` (${node.filter(s=>!hiddenEngines.has(s.model)).length} visible / ${rawNode.length})`}.
+                    {" "}Uncalibrated FVS variants are hidden by default — use <b>show all engines</b> to expose them.
+                    {compareOn && overlayNode && <> Dashed = <b>{cmpState}</b> ({overlayNode.length} engines).</>}</>
+                : <>Showing libcbm cross-state v2 trajectory for <b>{scenarioFocus.replace(/_/g," ")}</b> only.
+                    Switch to "all engines" to see the full multi-model spread under managed/reserve buckets.</>}
               {" "}Class buttons hide whole model families; the per-engine drawer hides individual engines.
-              Y-axis "zoom to median" hides outliers (e.g., uncalibrated FVS rows). Hover a line for the engine. Data: perseus_db v0.61.
+              Y-axis "zoom to median" hides outliers. Hover a line for the engine. Data: perseus_db v0.66.
             </div>
           </>)}
         </div>
