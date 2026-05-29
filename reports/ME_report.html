@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PERSEUS state report — ME</title>
+<style>
+:root { color-scheme: dark; }
+body {
+  background: #0f1418;
+  color: #e8eef2;
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+h1 { color: #f4c430; font-size: 26px; margin: 0 0 4px; }
+h2 { color: #9ad9b8; font-size: 18px; margin: 28px 0 10px;
+     border-bottom: 1px solid #2a3a47; padding-bottom: 5px; }
+h3 { color: #c9d6df; font-size: 15px; margin: 18px 0 6px; }
+em { color: #8aa0b0; font-style: normal; font-size: 12.5px; }
+table { border-collapse: collapse; margin: 8px 0 18px; width: 100%;
+        font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 10px; border-bottom: 1px solid #1f2a33;
+         text-align: left; vertical-align: top; font-size: 13.5px; }
+th { color: #8aa0b0; font-weight: 500; }
+td:nth-child(n+2) { text-align: right; }
+td:first-child { color: #c9d6df; text-align: left; }
+strong { color: #f4c430; font-weight: 600; }
+code { background: #1a242c; padding: 1px 5px; border-radius: 3px;
+       font-size: 12.5px; color: #d6e0e7; }
+.foot { margin-top: 40px; padding-top: 14px;
+        border-top: 1px solid #2a3a47; color: #8aa0b0;
+        font-size: 11.5px; }
+a { color: #66c2a5; }
+</style>
+</head>
+<body>
+<h1>Maine (ME) state summary</h1>
+<p><em>Generated from perseus_db v0.38, 2026-05-17 19:49 EDT</em></p>
+
+<h2>Overview</h2>
+
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>Forest area</td><td>**6.77 Mha**</td></tr>
+<tr><td>Active model engines</td><td>42</td></tr>
+<tr><td>Scenario presets</td><td>50</td></tr>
+<tr><td>Metrics covered</td><td>63</td></tr>
+<tr><td>Total result_v02 rows</td><td>37,939</td></tr>
+</table>
+
+<h2>Latest-year structural snapshot</h2>
+
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Mean stand age (yr)</td><td>63.5</td></tr>
+<tr><td>Basal area (m²/ha)</td><td>3.4</td></tr>
+<tr><td>Mean DBH (cm)</td><td>8.0</td></tr>
+<tr><td>Old-forest share STDAGE ≥ 120 (%)</td><td>4.0</td></tr>
+<tr><td>Sawtimber share (%)</td><td>45.6</td></tr>
+<tr><td>Shannon diversity (H′)</td><td>2.7</td></tr>
+<tr><td>Species richness</td><td>27.0</td></tr>
+<tr><td>v5.1 LSOG share (%)</td><td>12.6</td></tr>
+</table>
+
+<h2>Carbon stock by engine (latest year, median)</h2>
+
+<table>
+<tr><th>Engine</th><th>Latest year</th><th>AGC live total</th></tr>
+<tr><td>fvs_acd_native</td><td>2126</td><td>3033.5 Tg C</td></tr>
+<tr><td>fvs_ne_native</td><td>2126</td><td>2982.7 Tg C</td></tr>
+<tr><td>fvs_acd_native_anchored</td><td>2126</td><td>2193.8 Tg C</td></tr>
+<tr><td>fvs_ne_native_anchored</td><td>2126</td><td>2157.0 Tg C</td></tr>
+<tr><td>fvs_ne_default</td><td>2099</td><td>1308.3 Tg C</td></tr>
+<tr><td>fvs_ne_nsvbe</td><td>2100</td><td>1268.4 Tg C</td></tr>
+<tr><td>fvs_acd_nsvbe</td><td>2100</td><td>1155.1 Tg C</td></tr>
+<tr><td>fvs_ne_jenkins</td><td>2100</td><td>1120.7 Tg C</td></tr>
+<tr><td>fvs_ne_calibrated</td><td>2099</td><td>1120.7 Tg C</td></tr>
+<tr><td>hcm</td><td>2100</td><td>1038.1 Tg C</td></tr>
+<tr><td>fvs_acd_jenkins</td><td>2100</td><td>978.6 Tg C</td></tr>
+<tr><td>osm_jenkins</td><td>2100</td><td>902.0 Tg C</td></tr>
+<tr><td>libcbm_native</td><td>2124</td><td>733.2 Tg C</td></tr>
+<tr><td>fvs_ne_native_calibrated</td><td>2124</td><td>733.2 Tg C</td></tr>
+<tr><td>fvs_acd_native_calibrated</td><td>2124</td><td>733.2 Tg C</td></tr>
+<tr><td>libcbm</td><td>2099</td><td>680.3 Tg C</td></tr>
+<tr><td>fia_yc</td><td>2100</td><td>677.9 Tg C</td></tr>
+<tr><td>landis_t2</td><td>2100</td><td>643.5 Tg C</td></tr>
+<tr><td>libcbm_v3pc</td><td>2099</td><td>633.0 Tg C</td></tr>
+<tr><td>gcbm_native</td><td>2024</td><td>569.8 Tg C</td></tr>
+<tr><td>gcbm_total</td><td>2024</td><td>563.2 Tg C</td></tr>
+<tr><td>libcbm_cross_state_v2</td><td>2074</td><td>488.9 Tg C</td></tr>
+<tr><td>cem_v5_anchored</td><td>2037</td><td>241.5 Tg C</td></tr>
+<tr><td>cem_wear_nh_rcp85</td><td>2099</td><td>123.9 Tg C</td></tr>
+<tr><td>cem_wear_nh_rcp45</td><td>2099</td><td>115.4 Tg C</td></tr>
+<tr><td>cem_wear_rcp85</td><td>2099</td><td>72.9 Tg C</td></tr>
+<tr><td>cem_wear_rcp45</td><td>2099</td><td>70.0 Tg C</td></tr>
+<tr><td>cem_wear_econ_rcp85</td><td>2099</td><td>54.5 Tg C</td></tr>
+<tr><td>cem_policy_rcp85</td><td>2099</td><td>54.5 Tg C</td></tr>
+<tr><td>cem_wear_econ_rcp45</td><td>2099</td><td>53.2 Tg C</td></tr>
+<tr><td>cem_policy_rcp45</td><td>2099</td><td>53.2 Tg C</td></tr>
+</table>
+
+<h2>Cross-engine spread at year 2050</h2>
+<p><strong>8 engines</strong> at year 2050 span 301 – 1791 Tg C, a <strong>5.95x ratio</strong>.</p>
+
+<h2>CONUS-disturbance probability (v5)</h2>
+
+<table>
+<tr><th>Disturbance type</th><th>Probability</th></tr>
+<tr><td>Fire</td><td>0.000</td></tr>
+<tr><td>Insect</td><td>0.028</td></tr>
+<tr><td>Any disturbance</td><td>0.108</td></tr>
+<tr><td>Expected mortality proportion</td><td>0.235</td></tr>
+</table>
+
+<h2>Where to look in perseus_db</h2>
+
+<p>- <code>result_v02 WHERE state_code = 'ME' AND is_current = 1</code></p>
+<p>- State report: <code>logs/reports/state_report_ME.html</code></p>
+<p>- Partner CSVs: <code>logs/perseus_db_*_latest.csv</code></p>
+<div class="foot">
+  Generated 2026-05-29 22:59 UTC from perseus_db state summaries.
+  Live dashboard: <a href="https://holoros.github.io/perseus-forest-intelligence/">PERSEUS Forest Intelligence</a>.
+</div>
+</body>
+</html>
