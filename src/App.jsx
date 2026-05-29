@@ -18,6 +18,80 @@ const LANDIS_LAYERS = [
   { file:"me_RM",   label:"Red maple",   abs:false },
   { file:"me_PINE", label:"Pine",        abs:false },
 ];
+// CONUS overlay legends — colorbar stops + units + axis labels.
+const CONUS_LEGENDS = {
+  lcms_2022: {
+    title: "LCMS disturbance cause (2022)",
+    type: "categorical",
+    stops: [
+      ["#9e9ac8", "Wind"], ["#54278f", "Snow/Ice"],
+      ["#fdae61", "Prescribed fire"], ["#d7191c", "Wildfire"],
+      ["#fc8d59", "Mech land trans"], ["#fdcc6c", "Tree removal"],
+      ["#fee090", "Defoliation"], ["#d73027", "SPB / insect"],
+      ["#f46d43", "Insect/drought"], ["#9970ab", "Other loss"],
+    ],
+    note: "USFS LCMS v2024-10",
+  },
+  fortype_2022: {
+    title: "TreeMap forest type group",
+    type: "categorical",
+    stops: [
+      ["#1b6e4a", "Softwood"], ["#7570b3", "Mixedwood"],
+      ["#d95f02", "Hardwood"], ["#999", "Nonforest / other"],
+    ],
+    note: "FIA FORTYPCD via TreeMap 2022",
+  },
+  rd_treemap: {
+    title: "Relative density (RD)",
+    type: "ramp",
+    ramp: ["#c7e9c0","#74c476","#238b45","#00441b","#001e0c"],
+    lo: "0.0", mid: "0.5", hi: "1.5",
+    note: "Chivehgenge (TreeMap 2022 basis)",
+  },
+  sdimax_treemap: {
+    title: "Reineke SDI max",
+    type: "ramp",
+    ramp: ["#d9d9d9","#9e9ac8","#756bb1","#54278f","#1e0a44"],
+    lo: "0", mid: "600", hi: "1500",
+    note: "trees per acre, TreeMap 2022 basis",
+  },
+  p_harvest_any: {
+    title: "P(harvest · any), TM2016",
+    type: "ramp",
+    ramp: ["#fef0d9","#fdbb84","#fc8d59","#e34a33","#b30000"],
+    lo: "0.0", mid: "0.5", hi: "1.0",
+    note: "Probability per pixel (conus_hcs v1)",
+  },
+  p_harvest_clearcut: {
+    title: "P(harvest · clearcut), TM2016",
+    type: "ramp",
+    ramp: ["#fef0d9","#fdbb84","#fc8d59","#e34a33","#b30000"],
+    lo: "0.0", mid: "0.5", hi: "1.0",
+    note: "Probability per pixel (conus_hcs v1)",
+  },
+  p_harvest_partial: {
+    title: "P(harvest · partial), TM2016",
+    type: "ramp",
+    ramp: ["#fef0d9","#fdbb84","#fc8d59","#e34a33","#b30000"],
+    lo: "0.0", mid: "0.5", hi: "1.0",
+    note: "Probability per pixel (conus_hcs v1)",
+  },
+  site_productivity: {
+    title: "Site productivity strata",
+    type: "ramp",
+    ramp: ["#440154","#3b528b","#21918c","#5ec962","#fde725"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "SAE productivity strata (HRF)",
+  },
+  climate_stress: {
+    title: "Climate stress (CSPI v4)",
+    type: "ramp",
+    ramp: ["#fee08b","#fdae61","#f46d43","#d73027","#a50026"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "1 km CONUS, CSPI v4",
+  },
+};
+
 // Tier B layer B: gcbm_rasters_2022 stack (per-state, 30 m) for all 6 non-ME
 // trajectory states (MN GA IN WA OR ID). Single 2022 snapshot. Six layer types.
 const GCBM_LAYERS = [
@@ -376,15 +450,15 @@ export default function App(){
             </select>
             <select value={conusLayer} onChange={e=>setConusLayer(e.target.value)} title="CONUS overlay">
               <option value="none">CONUS layer: off</option>
-              <optgroup label="Disturbance / Harvest">
+              <optgroup label="Disturbance / Harvest (TM2016 only)">
                 <option value="lcms_2022">LCMS disturbance cause 2022</option>
-                <option value="p_harvest_any">P(harvest, any) TM2016</option>
-                <option value="p_harvest_clearcut">P(harvest, clearcut) TM2016</option>
-                <option value="p_harvest_partial">P(harvest, partial) TM2016</option>
+                <option value="p_harvest_any">P(harvest · any) TM2016</option>
+                <option value="p_harvest_clearcut">P(harvest · clearcut) TM2016</option>
+                <option value="p_harvest_partial">P(harvest · partial) TM2016</option>
               </optgroup>
-              <optgroup label="Forest structure">
+              <optgroup label="Forest structure (TreeMap 2022)">
                 <option value="fortype_2022">TreeMap forest type</option>
-                <option value="rd_treemap">Relative density (Goeking)</option>
+                <option value="rd_treemap">Relative density (Chivehgenge)</option>
                 <option value="sdimax_treemap">SDI max (Reineke)</option>
               </optgroup>
               <optgroup label="Site / Climate">
@@ -428,6 +502,26 @@ export default function App(){
               </div>
               <div style={{marginTop:4,color:"var(--mut)",fontSize:10}}>states without libcbm cross-state v2 grey</div>
             </div>)}
+          {conusLayer !== "none" && CONUS_LEGENDS[conusLayer] && (() => {
+            const lg = CONUS_LEGENDS[conusLayer];
+            return (
+            <div className="legend" style={{left:"auto",right:12,maxWidth:200}}>
+              <div style={{marginBottom:4,fontWeight:600,color:"var(--ink)"}}>{lg.title}</div>
+              {lg.type === "ramp" ? <>
+                <div style={{height:10,width:180,borderRadius:2,
+                  background:`linear-gradient(90deg,${lg.ramp.join(",")})`}}></div>
+                <div style={{display:"flex",justifyContent:"space-between",width:180,fontSize:10.5}}>
+                  <span>{lg.lo}</span><span>{lg.mid}</span><span>{lg.hi}</span>
+                </div>
+              </> : <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:"2px 8px",marginTop:2}}>
+                {lg.stops.map(([col,lbl])=>
+                  <span key={lbl} style={{fontSize:10,whiteSpace:"nowrap"}}>
+                    <i style={{display:"inline-block",width:9,height:9,background:col,
+                      borderRadius:2,marginRight:4,verticalAlign:"middle"}}/>{lbl}
+                  </span>)}
+              </div>}
+              {lg.note && <div style={{marginTop:5,color:"var(--mut)",fontSize:10,fontStyle:"italic"}}>{lg.note}</div>}
+            </div>);})()}
           {rasterOn && LANDIS_STATES.includes(sel) && (() => {
             const cl = LANDIS_LAYERS.find(l=>l.file===rasterLayer) || LANDIS_LAYERS[0];
             return (
