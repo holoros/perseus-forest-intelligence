@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import GrowthChart from "./GrowthChart.jsx";
+import SVGMap from "./SVGMap.jsx";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -75,6 +76,9 @@ export default function App(){
   const [mapYear,setMapYear] = useState(2024);
   const [mapScenario,setMapScenario] = useState("harvest_baseline");
   const [timeline,setTimeline] = useState(null);
+  // v0.65 SVG fallback for the choropleth
+  const [geoData,setGeoData] = useState(null);
+  const [mapEngine,setMapEngine] = useState("svg"); // svg (default robust) | maplibre
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -86,6 +90,9 @@ export default function App(){
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
       ft.properties.focal = FOCAL.includes(st) ? 1 : 0; });
+    setGeoData(geo);
+    // SVG is the default robust map; maplibre stays available for raster overlays.
+    if(mapEngine !== "maplibre"){ setMapReady(true); return; }
     const mp = new maplibregl.Map({ container: mapEl.current,
       style:{ version:8, sources:{},
         layers:[{id:"bg",type:"background",paint:{"background-color":"#0b1015"}}] },
@@ -285,7 +292,14 @@ export default function App(){
           <div className="maptitle">{mapMode === "coverage"
             ? "Coverage — engines per state"
             : `Carbon — libcbm AGC (Tg), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
-          <div id="map" ref={mapEl}></div>
+          {mapEngine === "maplibre"
+            ? <div id="map" ref={mapEl}></div>
+            : <div id="map" style={{position:"absolute",inset:0,padding:"6px"}}>
+                <SVGMap geo={geoData} states={states} focal={FOCAL}
+                        mode={mapMode} timeline={timeline}
+                        mapYear={mapYear} mapScenario={mapScenario}
+                        selected={sel} onPick={st=>setSel(st)}/>
+              </div>}
           <div className="map-ctrl">
             <select value={mapMode} onChange={e=>setMapMode(e.target.value)} title="Map mode">
               <option value="coverage">map: engine coverage</option>
