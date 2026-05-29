@@ -86,6 +86,8 @@ export default function App(){
   const [conusLayer,setConusLayer] = useState("none"); // none | lcms_2022 | fortype_2022 | site_productivity | climate_stress
   const [conusOpacity,setConusOpacity] = useState(0.7);
   const [conusBounds,setConusBounds] = useState({}); // layer -> {x0,x1,y0,y1}
+  // v0.70 chart interactions
+  const [isolatedEngine,setIsolatedEngine] = useState(null);
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -530,7 +532,8 @@ export default function App(){
                 unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} classCol={CLASS_COL}
                 showBands={showBands && hasBands}
                 hiddenEngines={hiddenEngines} yMode={yMode}
-                overlayNode={overlayNode} overlayLabel={cmpState}/>
+                overlayNode={overlayNode} overlayLabel={cmpState}
+                isolatedEngine={isolatedEngine} onIsolate={setIsolatedEngine}/>
             </div>
             {allEngines.length>1 && (
               <details style={{margin:"6px 4px 0",fontSize:12,color:"var(--mut)"}}>
