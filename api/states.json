@@ -29,9 +29,9 @@
   ]
  },
  "ID": {
-  "engines": 4,
-  "metrics": 33,
-  "rows": 95,
+  "engines": 5,
+  "metrics": 35,
+  "rows": 707,
   "name": "Idaho",
   "centroid": [
    -114.6,
@@ -39,12 +39,14 @@
   ],
   "has_series": true,
   "series_metrics": [
+   "agc_live_total",
    "any_disturbance_rate_pct",
    "cwd_drybio_per_ac",
    "cwd_n_plots",
    "disease_rate_state_pct",
    "fire_rate_state_pct",
    "insect_rate_state_pct",
+   "live_c_total",
    "mature_forest_share_80",
    "mean_stand_age",
    "old_forest_share_120"
