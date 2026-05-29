@@ -332,16 +332,26 @@ export default function App(){
             : `Carbon — libcbm AGC (Tg), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
           {mapEngine === "maplibre"
             ? <div id="map" ref={mapEl}></div>
-            : <div id="map" style={{position:"absolute",inset:0,padding:"6px"}}>
-                <SVGMap geo={geoData} states={states} focal={FOCAL}
-                        mode={mapMode} timeline={timeline}
-                        mapYear={mapYear} mapScenario={mapScenario}
-                        selected={sel} onPick={st=>setSel(st)}
-                        conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]
-                                      ? `${BASE}raster/conus_${conusLayer}.png` : null}
-                        conusOverlayBounds={conusLayer !== "none" ? conusBounds[conusLayer] : null}
-                        conusOverlayOpacity={conusOpacity}/>
-              </div>}
+            : (()=>{
+                const stLow = sel.toLowerCase();
+                const stOverlayActive = gcbmOn && states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel) && gcbmBounds[stLow];
+                const stOverlayUrl = stOverlayActive ? `${BASE}raster/${stLow}_${gcbmLayer}.png` : null;
+                const stOverlayB = stOverlayActive ? (()=>{ const c = gcbmBounds[stLow]; return c ? {ul:c[0], ur:c[1], lr:c[2], ll:c[3]} : null; })() : null;
+                return (
+                <div id="map" style={{position:"absolute",inset:0,padding:"6px"}}>
+                  <SVGMap geo={geoData} states={states} focal={FOCAL}
+                          mode={mapMode} timeline={timeline}
+                          mapYear={mapYear} mapScenario={mapScenario}
+                          selected={sel} onPick={st=>setSel(st)}
+                          conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]
+                                        ? `${BASE}raster/conus_${conusLayer}.png` : null}
+                          conusOverlayBounds={conusLayer !== "none" ? conusBounds[conusLayer] : null}
+                          conusOverlayOpacity={conusOpacity}
+                          stateOverlay={stOverlayUrl}
+                          stateOverlayBounds={stOverlayB}
+                          stateOverlayOpacity={gcbmOpacity}/>
+                </div>);
+              })()}
           <div className="map-ctrl">
             <select value={mapMode} onChange={e=>setMapMode(e.target.value)} title="Map mode">
               <option value="coverage">map: engine coverage</option>

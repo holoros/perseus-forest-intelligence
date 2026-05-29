@@ -1,9 +1,14 @@
 // SVG choropleth — pure dependency-free, no WebGL. Hand-rolled US Albers projection.
 // Renders the CONUS states as an SVG so the coverage/carbon map always works,
 // regardless of maplibre / WebGL availability.
+import { useEffect, useRef, useState } from "react";
 
 const W = 640, H = 400;
 const PAD = 8;
+// Earth radius (m) for converting projected Albers meters <-> our unit-sphere
+// projection output (which is in radians). gdalwarp emits bounds in m so the
+// CONUS overlay placement needs this conversion.
+const EARTH_R = 6378137;
 // US Albers parameters (NAD83 Conus Albers standard)
 const PHI0 = 38 * Math.PI / 180;
 const PHI1 = 29.5 * Math.PI / 180;
@@ -97,26 +102,86 @@ function rgbHex(rgb){ return "#" + rgb.map(v=> v.toString(16).padStart(2, "0")).
 
 export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   timeline, mapYear, mapScenario, selected, onPick,
-                                  conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7 }){
+                                  conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7,
+                                  stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7 }){
+  // Zoom + pan
+  const [view, setView] = useState({ k: 1, tx: 0, ty: 0 });
+  const svgRef = useRef(null);
+  const dragRef = useRef(null);
+  useEffect(() => {
+    const el = svgRef.current; if(!el) return;
+    const onWheel = (e) => {
+      e.preventDefault();
+      const rect = el.getBoundingClientRect();
+      const cx = (e.clientX - rect.left) / rect.width * W;
+      const cy = (e.clientY - rect.top) / rect.height * H;
+      const dk = e.deltaY < 0 ? 1.15 : 1/1.15;
+      setView(v => {
+        const k2 = Math.max(0.5, Math.min(8, v.k * dk));
+        // Keep the point under cursor fixed
+        const tx2 = cx - (cx - v.tx) * (k2 / v.k);
+        const ty2 = cy - (cy - v.ty) * (k2 / v.k);
+        return { k: k2, tx: tx2, ty: ty2 };
+      });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+  const onMouseDown = (e) => {
+    dragRef.current = { x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty };
+  };
+  const onMouseMove = (e) => {
+    if(!dragRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const dx = (e.clientX - dragRef.current.x) / rect.width * W;
+    const dy = (e.clientY - dragRef.current.y) / rect.height * H;
+    setView(v => ({ ...v, tx: dragRef.current.tx + dx, ty: dragRef.current.ty + dy }));
+  };
+  const onMouseUp = () => { dragRef.current = null; };
+  const resetView = () => setView({ k: 1, tx: 0, ty: 0 });
+
   if(!geo || !states) return <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"100%",display:"block"}}/>;
   const features = (geo.features || []).filter(ft => ft.properties && ft.properties.state);
   const yrKey = String(mapYear);
-  // CONUS overlay placement: bounds are in projected Albers meters (same proj
-  // as the SVG paths). Convert to SVG coords using the shared SCALE / TX / TY.
+  // CONUS overlay placement: bounds are in projected Albers METERS (gdalwarp
+  // emits proj-meters). Our SVG projection outputs in radians on the unit
+  // sphere, so divide by Earth radius before applying SCALE / TX / TY.
   let conusBox = null;
   if(conusOverlay && conusOverlayBounds){
     const { x0, x1, y0, y1 } = conusOverlayBounds;
-    const sx0 = x0 * SCALE + TX;
-    const sx1 = x1 * SCALE + TX;
-    const sy0 = -y0 * SCALE + TY;  // y0 is southern math y → larger SVG y (bottom)
-    const sy1 = -y1 * SCALE + TY;  // y1 is northern math y → smaller SVG y (top)
+    const rx0 = x0 / EARTH_R, rx1 = x1 / EARTH_R;
+    const ry0 = y0 / EARTH_R, ry1 = y1 / EARTH_R;
+    const sx0 = rx0 * SCALE + TX;
+    const sx1 = rx1 * SCALE + TX;
+    const sy0 = -ry0 * SCALE + TY;
+    const sy1 = -ry1 * SCALE + TY;
     conusBox = { x: Math.min(sx0, sx1), y: Math.min(sy0, sy1),
                  width: Math.abs(sx1 - sx0), height: Math.abs(sy1 - sy0) };
   }
+  // Per-state overlay placement: bounds.json has WGS84 corners (ul/ur/lr/ll).
+  // Project the 4 corners and take their bbox.
+  let stateBox = null;
+  if(stateOverlay && stateOverlayBounds && stateOverlayBounds.ul){
+    const corners = [stateOverlayBounds.ul, stateOverlayBounds.ur,
+                     stateOverlayBounds.lr, stateOverlayBounds.ll];
+    const sxs = [], sys = [];
+    corners.forEach(([lon, lat]) => {
+      const [x, y] = project(lon, lat);
+      sxs.push(x * SCALE + TX);
+      sys.push(-y * SCALE + TY);
+    });
+    stateBox = { x: Math.min(...sxs), y: Math.min(...sys),
+                 width: Math.max(...sxs) - Math.min(...sxs),
+                 height: Math.max(...sys) - Math.min(...sys) };
+  }
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"100%",display:"block"}}
-         preserveAspectRatio="xMidYMid meet">
+    <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
+         style={{width:"100%",height:"100%",display:"block", cursor: dragRef.current ? "grabbing" : "grab"}}
+         preserveAspectRatio="xMidYMid meet"
+         onMouseDown={onMouseDown} onMouseMove={onMouseMove}
+         onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
       <rect x="0" y="0" width={W} height={H} fill="#0b1015"/>
+      <g transform={`translate(${view.tx},${view.ty}) scale(${view.k})`}>
       {conusOverlay && conusBox && (
         <image href={conusOverlay} x={conusBox.x} y={conusBox.y}
                width={conusBox.width} height={conusBox.height}
@@ -157,6 +222,24 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           </path>
         );
       })}
+      {stateOverlay && stateBox && (
+        <image href={stateOverlay} x={stateBox.x} y={stateBox.y}
+               width={stateBox.width} height={stateBox.height}
+               opacity={stateOverlayOpacity} preserveAspectRatio="none"
+               style={{pointerEvents:"none"}}/>
+      )}
+      </g>
+      {/* Zoom controls (fixed, outside the pan/zoom group) */}
+      <g transform={`translate(${W-72},${H-32})`}>
+        <rect x="0" y="0" width="64" height="22" rx="4"
+              fill="rgba(15,20,25,0.85)" stroke="#2a3a47"/>
+        <text x="8" y="15" fill="#8aa0b0" fontSize="10" style={{cursor:"pointer",userSelect:"none"}}
+              onClick={()=> setView(v=>({...v, k: Math.min(8, v.k*1.3)}))}>+</text>
+        <text x="24" y="15" fill="#8aa0b0" fontSize="10" style={{cursor:"pointer",userSelect:"none"}}
+              onClick={()=> setView(v=>({...v, k: Math.max(0.5, v.k/1.3)}))}>−</text>
+        <text x="38" y="15" fill="#8aa0b0" fontSize="9" style={{cursor:"pointer",userSelect:"none"}}
+              onClick={resetView}>reset</text>
+      </g>
     </svg>
   );
 }
