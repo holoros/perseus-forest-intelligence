@@ -5,16 +5,27 @@ import GrowthChart from "./GrowthChart.jsx";
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
 const CARBON = ["agc_live_total","live_c_total","tree_c_total","agb_dry","total_ecosystem_c"];
-// Tier B spatial raster overlays (LANDIS total live biomass, 30 m).
-const RASTER_STATES = ["ME"];
-const RASTER_BOUNDS = [[-71.8317,47.7314],[-66.0072,47.7314],[-66.0072,42.4894],[-71.8317,42.4894]];
-const RASTER_STEPS = [0,5,10];
-const RASTER_LAYERS = [   // LANDIS-II Maine biomass surfaces
+// Tier B layer A: LANDIS total live biomass + species mosaics for Maine (30 m,
+// derived from cbm_maine LANDIS-II runs). Three timesteps (base / +5 / +10).
+const LANDIS_STATES = ["ME"];
+const LANDIS_BOUNDS = [[-71.8317,47.7314],[-66.0072,47.7314],[-66.0072,42.4894],[-71.8317,42.4894]];
+const LANDIS_STEPS = [0,5,10];
+const LANDIS_LAYERS = [
   { file:"me_total_biomass", label:"Total live biomass", abs:true },
   { file:"me_BF",   label:"Balsam fir",  abs:false },
   { file:"me_RS",   label:"Red spruce",  abs:false },
   { file:"me_RM",   label:"Red maple",   abs:false },
   { file:"me_PINE", label:"Pine",        abs:false },
+];
+// Tier B layer B: gcbm_rasters_2022 stack (per-state, 30 m) for all 6 non-ME
+// trajectory states (MN GA IN WA OR ID). Single 2022 snapshot, 3 layer types.
+const GCBM_LAYERS = [
+  { key:"carbon_l_2022", label:"Live tree carbon (Mg C/ha)",
+    ramp:["#f7fcf5","#c7e9c0","#74c476","#238b45","#00441b"], lo:"0", hi:"200+" },
+  { key:"balive_2022",   label:"Basal area live (sq ft/ac)",
+    ramp:["#f7fbff","#c6dbef","#6baed6","#2171b5","#08306b"], lo:"0", hi:"200+" },
+  { key:"lcms_2022",     label:"LCMS disturbance cause (2022)",
+    ramp:["#fdae61","#d73027","#fc8d59","#fee08b","#762a83"], lo:"natural", hi:"anthrop." },
 ];
 const CLASS_COL = { CBM:"#66c2a5", FVS:"#fc8d62", LANDIS:"#8da0cb", OSM:"#e78ac3",
   HCM:"#a6d854", YC:"#ffd92f", CEM:"#e5c494", FIA:"#b3b3b3", VCC:"#7570b3", "?":"#cccccc" };
@@ -41,6 +52,11 @@ export default function App(){
   const [rasterT,setRasterT] = useState(0);
   const [rasterLayer,setRasterLayer] = useState("me_total_biomass");
   const [rasterOpacity,setRasterOpacity] = useState(0.85);
+  // Tier B layer B: gcbm overlays + per-state bounds cache
+  const [gcbmOn,setGcbmOn] = useState(false);
+  const [gcbmLayer,setGcbmLayer] = useState("carbon_l_2022");
+  const [gcbmOpacity,setGcbmOpacity] = useState(0.85);
+  const [gcbmBounds,setGcbmBounds] = useState({}); // st -> coords[4]
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -88,21 +104,49 @@ export default function App(){
   useEffect(()=>{ const mp=map.current; if(mp && mp.getLayer && mp.getLayer("sel"))
     mp.setFilter("sel",["==",["get","state"],sel]); },[sel]);
 
-  // ---- Tier B raster overlay (LANDIS biomass image source) ----
+  // ---- Tier B layer A: LANDIS biomass image source (Maine only) ----
   useEffect(()=>{ const mp=map.current; if(!mp || !mapReady) return;
-    const show = rasterOn && RASTER_STATES.includes(sel);
+    const show = rasterOn && LANDIS_STATES.includes(sel);
     const url = `${BASE}raster/${rasterLayer}_t${rasterT}.png`;
     if(show){
       if(!mp.getSource("mebio")){
-        mp.addSource("mebio",{type:"image",url,coordinates:RASTER_BOUNDS});
+        mp.addSource("mebio",{type:"image",url,coordinates:LANDIS_BOUNDS});
         mp.addLayer({id:"mebio",type:"raster",source:"mebio",paint:{"raster-opacity":rasterOpacity}},"focalline");
-      } else { mp.getSource("mebio").updateImage({url,coordinates:RASTER_BOUNDS}); }
+      } else { mp.getSource("mebio").updateImage({url,coordinates:LANDIS_BOUNDS}); }
       if(mp.getLayer("mebio")) mp.setPaintProperty("mebio","raster-opacity",rasterOpacity);
     } else {
       if(mp.getLayer("mebio")) mp.removeLayer("mebio");
       if(mp.getSource("mebio")) mp.removeSource("mebio");
     }
   },[mapReady,rasterOn,rasterT,rasterLayer,sel,rasterOpacity]);
+
+  // ---- Tier B layer B: gcbm raster overlays (per-state, 2022 snapshot) ----
+  // Lazy-load per-state bounds.json; turn bounds into a coordinates polygon.
+  useEffect(()=>{ if(!gcbmOn) return;
+    const stLow = sel.toLowerCase();
+    if(gcbmBounds[stLow]) return;
+    j(`raster/${stLow}_bounds.json`).then(b=>{
+      const coords = [[b.ul[0],b.ul[1]],[b.ur[0],b.ur[1]],[b.lr[0],b.lr[1]],[b.ll[0],b.ll[1]]];
+      setGcbmBounds(prev=>({...prev,[stLow]:coords}));
+    }).catch(()=>{});
+  },[gcbmOn,sel,gcbmBounds]);
+  useEffect(()=>{ const mp=map.current; if(!mp || !mapReady) return;
+    const stLow = sel.toLowerCase();
+    const eligible = states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel);
+    const coords = gcbmBounds[stLow];
+    const show = gcbmOn && eligible && !!coords;
+    const url = `${BASE}raster/${stLow}_${gcbmLayer}.png`;
+    if(show){
+      if(!mp.getSource("stgcbm")){
+        mp.addSource("stgcbm",{type:"image",url,coordinates:coords});
+        mp.addLayer({id:"stgcbm",type:"raster",source:"stgcbm",paint:{"raster-opacity":gcbmOpacity}},"focalline");
+      } else { mp.getSource("stgcbm").updateImage({url,coordinates:coords}); }
+      if(mp.getLayer("stgcbm")) mp.setPaintProperty("stgcbm","raster-opacity",gcbmOpacity);
+    } else {
+      if(mp.getLayer("stgcbm")) mp.removeLayer("stgcbm");
+      if(mp.getSource("stgcbm")) mp.removeSource("stgcbm");
+    }
+  },[mapReady,gcbmOn,sel,gcbmLayer,gcbmOpacity,gcbmBounds,states]);
 
   // ---- load series for selected state ----
   useEffect(()=>{ if(!states || !states[sel] || !states[sel].has_series){ setSeries(null); return; }
@@ -156,8 +200,8 @@ export default function App(){
             <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
             <div><i style={{background:"#1a2530"}}></i>no model data yet</div>
           </div>
-          {rasterOn && RASTER_STATES.includes(sel) && (() => {
-            const cl = RASTER_LAYERS.find(l=>l.file===rasterLayer) || RASTER_LAYERS[0];
+          {rasterOn && LANDIS_STATES.includes(sel) && (() => {
+            const cl = LANDIS_LAYERS.find(l=>l.file===rasterLayer) || LANDIS_LAYERS[0];
             return (
             <div className="legend" style={{left:"auto",right:12}}>
               <div style={{marginBottom:4}}>LANDIS {cl.label.toLowerCase()} ({rasterT===0?"base year":`+${rasterT} yr`})</div>
@@ -167,25 +211,49 @@ export default function App(){
                 {cl.abs ? <><span>1000</span><span>g/m²</span><span>19000</span></>
                         : <><span>low</span><span>g/m² (relative)</span><span>high</span></>}</div>
             </div>);})()}
+          {gcbmOn && states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel) && (() => {
+            const gl = GCBM_LAYERS.find(l=>l.key===gcbmLayer) || GCBM_LAYERS[0];
+            return (
+            <div className="legend" style={{left:"auto",right:12}}>
+              <div style={{marginBottom:4}}>{gl.label} · {sel} (FIA 2022, gcbm rasters)</div>
+              <div style={{height:10,width:150,borderRadius:2,
+                background:`linear-gradient(90deg,${gl.ramp.join(",")})`}}></div>
+              <div style={{display:"flex",justifyContent:"space-between",width:150}}>
+                <span>{gl.lo}</span><span></span><span>{gl.hi}</span>
+              </div>
+            </div>);})()}
         </div>
         <div className="detail">
           <h2>Detail — growth curves</h2>
           <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>
-          {RASTER_STATES.includes(sel) && (
+          {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
               <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
                 <input type="checkbox" checked={rasterOn} onChange={e=>setRasterOn(e.target.checked)}/> spatial layer: LANDIS biomass (30 m)
               </label>
               {rasterOn && <select value={rasterLayer} onChange={e=>setRasterLayer(e.target.value)}>
-                {RASTER_LAYERS.map(l=> <option key={l.file} value={l.file}>{l.label}</option>)}
+                {LANDIS_LAYERS.map(l=> <option key={l.file} value={l.file}>{l.label}</option>)}
               </select>}
               {rasterOn && <select value={rasterT} onChange={e=>setRasterT(+e.target.value)}
                   title="LANDIS years from the run base (≈ current FIA inventory)">
-                {RASTER_STEPS.map(t=> <option key={t} value={t}>{t===0?"base year":`+${t} yr`}</option>)}
+                {LANDIS_STEPS.map(t=> <option key={t} value={t}>{t===0?"base year":`+${t} yr`}</option>)}
               </select>}
               {rasterOn && <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12,color:"var(--mut)"}}>
                 opacity <input type="range" min="0.2" max="1" step="0.05" value={rasterOpacity}
                   onChange={e=>setRasterOpacity(+e.target.value)} style={{verticalAlign:"middle"}}/>
+              </label>}
+            </div>)}
+          {states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel) && (
+            <div className="controls" style={{margin:"0 4px 8px"}}>
+              <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
+                <input type="checkbox" checked={gcbmOn} onChange={e=>setGcbmOn(e.target.checked)}/> spatial layer: FIA-derived rasters (30 m, 2022)
+              </label>
+              {gcbmOn && <select value={gcbmLayer} onChange={e=>setGcbmLayer(e.target.value)}>
+                {GCBM_LAYERS.map(l=> <option key={l.key} value={l.key}>{l.label}</option>)}
+              </select>}
+              {gcbmOn && <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12,color:"var(--mut)"}}>
+                opacity <input type="range" min="0.2" max="1" step="0.05" value={gcbmOpacity}
+                  onChange={e=>setGcbmOpacity(+e.target.value)} style={{verticalAlign:"middle"}}/>
               </label>}
             </div>)}
           {!series && <div className="empty">No multi-year model series for this state yet. {FOCAL.includes(sel) ? "Model projections for this focal state are pending ingest." : "Pick a focal state — ME · IN · GA."}</div>}
