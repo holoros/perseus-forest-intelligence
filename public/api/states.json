@@ -9,6 +9,7 @@
    32.6
   ],
   "has_series": true,
+  "has_tier_b": true,
   "series_metrics": [
    "agc_live_total",
    "animal_rate_state_pct",
@@ -38,6 +39,7 @@
    44.2
   ],
   "has_series": true,
+  "has_tier_b": true,
   "series_metrics": [
    "agc_live_total",
    "any_disturbance_rate_pct",
@@ -62,6 +64,7 @@
    39.9
   ],
   "has_series": true,
+  "has_tier_b": true,
   "series_metrics": [
    "agc_live_total",
    "any_disturbance_rate_pct",
@@ -87,6 +90,7 @@
    45.4
   ],
   "has_series": true,
+  "has_tier_b": true,
   "series_metrics": [
    "agb_dry",
    "agc_live_ag",
@@ -131,6 +135,7 @@
    46.3
   ],
   "has_series": true,
+  "has_tier_b": true,
   "series_metrics": [
    "agc_live_total",
    "animal_rate_state_pct",
@@ -159,7 +164,8 @@
    -71.6,
    43.7
   ],
-  "has_series": false
+  "has_series": false,
+  "has_tier_b": false
  },
  "NY": {
   "engines": 1,
@@ -170,7 +176,8 @@
    -75.5,
    42.9
   ],
-  "has_series": false
+  "has_series": false,
+  "has_tier_b": false
  },
  "OR": {
   "engines": 4,
@@ -182,6 +189,7 @@
    43.9
   ],
   "has_series": true,
+  "has_tier_b": true,
   "series_metrics": [
    "agc_live_total",
    "any_disturbance_rate_pct",
@@ -208,6 +216,7 @@
    39.8
   ],
   "has_series": true,
+  "has_tier_b": false,
   "series_metrics": [
    "animal_observed_pct",
    "disease_observed_pct",
@@ -225,7 +234,8 @@
    -72.7,
    44.0
   ],
-  "has_series": false
+  "has_series": false,
+  "has_tier_b": false
  },
  "WA": {
   "engines": 7,
@@ -237,6 +247,7 @@
    47.4
   ],
   "has_series": true,
+  "has_tier_b": true,
   "series_metrics": [
    "agc_live_total",
    "any_disturbance_rate_pct",
