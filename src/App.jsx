@@ -87,10 +87,14 @@ export default function App(){
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
       ft.properties.focal = FOCAL.includes(st) ? 1 : 0; });
     const mp = new maplibregl.Map({ container: mapEl.current,
-      style:{ version:8, sources:{}, glyphs:undefined,
+      style:{ version:8, sources:{},
         layers:[{id:"bg",type:"background",paint:{"background-color":"#0b1015"}}] },
       center:[-96,38], zoom:3, attributionControl:false });
     map.current = mp;
+    // Defensive: force resize after layout in case the grid container hadn't
+    // settled when maplibre measured (some browsers race on grid + ResizeObserver).
+    setTimeout(()=>{ try{ mp.resize(); }catch(e){} }, 250);
+    window.addEventListener("resize", ()=>{ try{ mp.resize(); }catch(e){} });
     mp.on("load",()=>{
       mp.addSource("states",{ type:"geojson", data:geo, promoteId:"state" });
       mp.addLayer({ id:"fill", type:"fill", source:"states", paint:{
@@ -124,35 +128,37 @@ export default function App(){
     mp.setFilter("sel",["==",["get","state"],sel]); },[sel]);
 
   // ---- map mode: re-paint per-state by carbon at chosen year/scenario ----
+  // Uses maplibre feature-state (keyed by state code via promoteId:"state")
+  // which avoids mutating the geojson source.
   useEffect(()=>{ const mp=map.current; if(!mp || !mapReady || !mp.getLayer("fill")) return;
-    if(mapMode === "coverage"){
+    try{
+      if(mapMode === "coverage"){
+        mp.setPaintProperty("fill","fill-color",
+          ["case",["==",["get","engines"],0],"#2a3a47",
+           ["step",["get","engines"],"#9ad9b8",4,"#54b88a",6,"#2f9e6a",20,"#1b7a4d"]]);
+        mp.setPaintProperty("fill","fill-opacity",
+          ["case",["==",["get","focal"],1],0.98,
+           ["case",["==",["get","hasSeries"],1],0.85,0.55]]);
+        return;
+      }
+      // carbon mode: set feature-state per state code, then color by it
+      const yrKey = String(mapYear);
+      const allStates = Object.keys(states || {});
+      // Set carbon for every state via feature-state (null if no data)
+      const geoFeatures = mp.getSource("states") && mp.getSource("states")._data && mp.getSource("states")._data.features;
+      const featureStates = geoFeatures ? geoFeatures.map(ft=>ft.properties.state) : allStates;
+      featureStates.forEach(st=>{
+        const v = (timeline && timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]);
+        mp.setFeatureState({source:"states", id: st}, {carbonTg: (v != null ? v : -1)});
+      });
       mp.setPaintProperty("fill","fill-color",
-        ["case",["==",["get","engines"],0],"#2a3a47",
-         ["step",["get","engines"],"#9ad9b8",4,"#54b88a",6,"#2f9e6a",20,"#1b7a4d"]]);
+        ["case",["<",["coalesce",["feature-state","carbonTg"],-1],0],"#2a3a47",
+         ["interpolate",["linear"],["feature-state","carbonTg"],
+           0,"#edf8e9", 100,"#bae4b3", 300,"#74c476", 500,"#31a354", 1000,"#005a32"]]);
       mp.setPaintProperty("fill","fill-opacity",
-        ["case",["==",["get","focal"],1],0.98,
-         ["case",["==",["get","hasSeries"],1],0.85,0.55]]);
-      return;
-    }
-    // carbon mode: update geojson features with carbon[year][scenario] in Tg, then color by it
-    if(!timeline || !mp.getSource("states")) return;
-    const src = mp.getSource("states");
-    const data = src._data;  // current geojson
-    const yrKey = String(mapYear);
-    data.features.forEach(ft=>{
-      const st = ft.properties.state;
-      const v = (timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]) || null;
-      ft.properties.carbonTg = v;
-    });
-    src.setData(data);
-    // ramp on Tg (state-total); 0 -> grey, 100 -> light green, 500 -> mid, 1000 -> deep
-    mp.setPaintProperty("fill","fill-color",
-      ["case",["==",["get","carbonTg"],null],"#2a3a47",
-       ["interpolate",["linear"],["get","carbonTg"],
-         0,"#edf8e9", 100,"#bae4b3", 300,"#74c476", 500,"#31a354", 1000,"#005a32"]]);
-    mp.setPaintProperty("fill","fill-opacity",
-      ["case",["==",["get","carbonTg"],null],0.35,0.9]);
-  },[mapMode, mapYear, mapScenario, mapReady, timeline]);
+        ["case",["<",["coalesce",["feature-state","carbonTg"],-1],0],0.35,0.92]);
+    }catch(err){ console.warn("[map] repaint error", err); }
+  },[mapMode, mapYear, mapScenario, mapReady, timeline, states]);
 
   // ---- Tier B layer A: LANDIS biomass image source (Maine only) ----
   useEffect(()=>{ const mp=map.current; if(!mp || !mapReady) return;
