@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PERSEUS state report — ID</title>
+<style>
+:root { color-scheme: dark; }
+body {
+  background: #0f1418;
+  color: #e8eef2;
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+h1 { color: #f4c430; font-size: 26px; margin: 0 0 4px; }
+h2 { color: #9ad9b8; font-size: 18px; margin: 28px 0 10px;
+     border-bottom: 1px solid #2a3a47; padding-bottom: 5px; }
+h3 { color: #c9d6df; font-size: 15px; margin: 18px 0 6px; }
+em { color: #8aa0b0; font-style: normal; font-size: 12.5px; }
+table { border-collapse: collapse; margin: 8px 0 18px; width: 100%;
+        font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 10px; border-bottom: 1px solid #1f2a33;
+         text-align: left; vertical-align: top; font-size: 13.5px; }
+th { color: #8aa0b0; font-weight: 500; }
+td:nth-child(n+2) { text-align: right; }
+td:first-child { color: #c9d6df; text-align: left; }
+strong { color: #f4c430; font-weight: 600; }
+code { background: #1a242c; padding: 1px 5px; border-radius: 3px;
+       font-size: 12.5px; color: #d6e0e7; }
+.foot { margin-top: 40px; padding-top: 14px;
+        border-top: 1px solid #2a3a47; color: #8aa0b0;
+        font-size: 11.5px; }
+a { color: #66c2a5; }
+</style>
+</head>
+<body>
+<h1>Idaho (ID) state summary</h1>
+<p><em>Generated from perseus_db v0.38, 2026-05-17 19:49 EDT</em></p>
+
+<h2>Overview</h2>
+
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>Forest area</td><td>**8.3 Mha**</td></tr>
+<tr><td>Active model engines</td><td>4</td></tr>
+<tr><td>Scenario presets</td><td>2</td></tr>
+<tr><td>Metrics covered</td><td>33</td></tr>
+<tr><td>Total result_v02 rows</td><td>95</td></tr>
+</table>
+
+<h2>Latest-year structural snapshot</h2>
+
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Mean stand age (yr)</td><td>74.5</td></tr>
+<tr><td>Basal area (m²/ha)</td><td>4.9</td></tr>
+<tr><td>Mean DBH (cm)</td><td>12.7</td></tr>
+<tr><td>Old-forest share STDAGE ≥ 120 (%)</td><td>19.3</td></tr>
+<tr><td>Sawtimber share (%)</td><td>84.6</td></tr>
+<tr><td>Shannon diversity (H′)</td><td>2.2</td></tr>
+<tr><td>Species richness</td><td>20.0</td></tr>
+<tr><td>v5.1 LSOG share (%)</td><td>—</td></tr>
+</table>
+
+<h2>Carbon stock by engine (latest year, median)</h2>
+
+<h2>CONUS-disturbance probability (v5)</h2>
+
+<table>
+<tr><th>Disturbance type</th><th>Probability</th></tr>
+<tr><td>Fire</td><td>0.116</td></tr>
+<tr><td>Insect</td><td>0.134</td></tr>
+<tr><td>Any disturbance</td><td>0.370</td></tr>
+<tr><td>Expected mortality proportion</td><td>0.391</td></tr>
+</table>
+
+<h2>Where to look in perseus_db</h2>
+
+<p>- <code>result_v02 WHERE state_code = 'ID' AND is_current = 1</code></p>
+<p>- State report: <code>logs/reports/state_report_ID.html</code></p>
+<p>- Partner CSVs: <code>logs/perseus_db_*_latest.csv</code></p>
+<div class="foot">
+  Generated 2026-05-29 22:59 UTC from perseus_db state summaries.
+  Live dashboard: <a href="https://holoros.github.io/perseus-forest-intelligence/">PERSEUS Forest Intelligence</a>.
+</div>
+</body>
+</html>
