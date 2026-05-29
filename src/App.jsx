@@ -18,12 +18,18 @@ const LANDIS_LAYERS = [
   { file:"me_PINE", label:"Pine",        abs:false },
 ];
 // Tier B layer B: gcbm_rasters_2022 stack (per-state, 30 m) for all 6 non-ME
-// trajectory states (MN GA IN WA OR ID). Single 2022 snapshot, 3 layer types.
+// trajectory states (MN GA IN WA OR ID). Single 2022 snapshot. Six layer types.
 const GCBM_LAYERS = [
   { key:"carbon_l_2022", label:"Live tree carbon (Mg C/ha)",
     ramp:["#f7fcf5","#c7e9c0","#74c476","#238b45","#00441b"], lo:"0", hi:"200+" },
   { key:"balive_2022",   label:"Basal area live (sq ft/ac)",
     ramp:["#f7fbff","#c6dbef","#6baed6","#2171b5","#08306b"], lo:"0", hi:"200+" },
+  { key:"stdage_2022",   label:"Stand age (years)",
+    ramp:["#feedde","#fdbe85","#fd8d3c","#d94701","#7f2704"], lo:"0", hi:"180+" },
+  { key:"dombio_l_2022", label:"Dead organic biomass (Mg/ha)",
+    ramp:["#f7fcfd","#ccece6","#99d8c9","#66c2a4","#005824"], lo:"0", hi:"100+" },
+  { key:"fortypcd_2022", label:"Forest type group (FIA)",
+    ramp:["#238b45","#117733","#7570b3","#d95f02","#e6ab02"], lo:"softwood", hi:"hardwood" },
   { key:"lcms_2022",     label:"LCMS disturbance cause (2022)",
     ramp:["#fdae61","#d73027","#fc8d59","#fee08b","#762a83"], lo:"natural", hi:"anthrop." },
 ];
@@ -46,7 +52,7 @@ export default function App(){
   const [fia,setFia] = useState({});
   const [metric,setMetric] = useState("agc_live_total");
   const [bucket,setBucket] = useState("managed (harvest)");
-  const [showBands,setShowBands] = useState(false);
+  const [showBands,setShowBands] = useState(true);  // v0.63: default ON
   const [mapReady,setMapReady] = useState(false);
   const [rasterOn,setRasterOn] = useState(false);
   const [rasterT,setRasterT] = useState(0);
@@ -60,7 +66,7 @@ export default function App(){
   // v0.62 interaction additions
   const [hiddenEngines,setHiddenEngines] = useState(new Set()); // per-engine hide
   const [hiddenClasses,setHiddenClasses] = useState(new Set()); // class-level hide
-  const [yMode,setYMode] = useState("full"); // full | auto | log
+  const [yMode,setYMode] = useState("auto"); // v0.63: default to zoom-to-median so FVS outliers don't dominate
   const [compareOn,setCompareOn] = useState(false);
   const [cmpState,setCmpState] = useState("IN");
   const [cmpSeries,setCmpSeries] = useState(null);
@@ -346,7 +352,24 @@ export default function App(){
             {allEngines.length>1 && (
               <details style={{margin:"6px 4px 0",fontSize:12,color:"var(--mut)"}}>
                 <summary style={{cursor:"pointer"}}>per-engine toggle ({allEngines.length} engines · {hiddenEngines.size} hidden)</summary>
-                <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>
+                <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6,alignItems:"center"}}>
+                  <button onClick={()=>{
+                    // hide every FVS native/jenkins variant (outliers), keep anchored/calibrated
+                    const next = new Set(hiddenEngines);
+                    allEngines.forEach(e=>{
+                      if(/fvs.*(native|jenkins)(?!.*anchored)/i.test(e) && !/anchored|calibrated/i.test(e)){
+                        next.add(e);
+                      }
+                    });
+                    setHiddenEngines(next);
+                  }} style={{background:"transparent",color:"#f4c430",border:"1px dashed #f4c430",
+                    borderRadius:5,padding:"1px 8px",fontSize:10.5,cursor:"pointer",fontWeight:600}}>
+                    hide FVS outliers
+                  </button>
+                  <button onClick={()=>setHiddenEngines(new Set())}
+                    style={{background:"transparent",color:"var(--accent)",border:"1px dashed var(--accent)",
+                      borderRadius:5,padding:"1px 8px",fontSize:10.5,cursor:"pointer"}}>show all</button>
+                  <span style={{color:"var(--mut)",margin:"0 4px"}}>|</span>
                   {allEngines.map(eng=>{
                     const off = hiddenEngines.has(eng);
                     const cls = rawNode.find(s=>s.model===eng)?.cls;
@@ -358,9 +381,6 @@ export default function App(){
                         textDecoration:off?"line-through":"none"}}
                       title={off?"show":"hide"}>{eng.replace(/_/g," ").slice(0,28)}</button>;
                   })}
-                  <button onClick={()=>setHiddenEngines(new Set())}
-                    style={{background:"transparent",color:"var(--accent)",border:"1px dashed var(--accent)",
-                      borderRadius:5,padding:"1px 8px",fontSize:10.5,cursor:"pointer"}}>reset</button>
                 </div>
               </details>)}
             <div className="note">
