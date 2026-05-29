@@ -19,76 +19,113 @@ const LANDIS_LAYERS = [
   { file:"me_PINE", label:"Pine",        abs:false },
 ];
 // CONUS overlay legends — colorbar stops + units + axis labels.
+// v0.73 palettes inspired by ggsci R package (Nature, Lancet, GSEA, NPG).
 const CONUS_LEGENDS = {
   lcms_2022: {
     title: "LCMS disturbance cause (2022)",
     type: "categorical",
+    // NPG (Nature) — punchier, more discriminable
     stops: [
-      ["#9e9ac8", "Wind"], ["#54278f", "Snow/Ice"],
-      ["#fdae61", "Prescribed fire"], ["#d7191c", "Wildfire"],
-      ["#fc8d59", "Mech land trans"], ["#fdcc6c", "Tree removal"],
-      ["#fee090", "Defoliation"], ["#d73027", "SPB / insect"],
-      ["#f46d43", "Insect/drought"], ["#9970ab", "Other loss"],
+      ["#E64B35", "Wildfire"], ["#F39B7F", "Prescribed fire"],
+      ["#DC0000", "Insect/drought"], ["#7E6148", "SPB"],
+      ["#4DBBD5", "Wind"], ["#3C5488", "Snow/Ice"],
+      ["#8491B4", "Mech land trans"], ["#91D1C2", "Tree removal"],
+      ["#B09C85", "Defoliation"], ["#00A087", "Other loss"],
     ],
     note: "USFS LCMS v2024-10",
   },
   fortype_2022: {
     title: "TreeMap forest type group",
     type: "categorical",
+    // NPG sea-green / sand-orange split
     stops: [
-      ["#1b6e4a", "Softwood"], ["#7570b3", "Mixedwood"],
-      ["#d95f02", "Hardwood"], ["#999", "Nonforest / other"],
+      ["#00A087", "Softwood"], ["#3C5488", "Mixedwood"],
+      ["#E64B35", "Hardwood"], ["#999", "Nonforest / other"],
     ],
     note: "FIA FORTYPCD via TreeMap 2022",
   },
   rd_treemap: {
     title: "Relative density (RD)",
     type: "ramp",
-    ramp: ["#c7e9c0","#74c476","#238b45","#00441b","#001e0c"],
+    // Sequential lancet green
+    ramp: ["#f0f8ed","#a8dba8","#42b540","#1d7e0f","#053d04"],
     lo: "0.0", mid: "0.5", hi: "1.5",
     note: "Chivehgenge (TreeMap 2022 basis)",
   },
   sdimax_treemap: {
     title: "Reineke SDI max",
     type: "ramp",
-    ramp: ["#d9d9d9","#9e9ac8","#756bb1","#54278f","#1e0a44"],
+    // Viridis-like sequential
+    ramp: ["#fde725","#5ec962","#21918c","#3b528b","#440154"],
     lo: "0", mid: "600", hi: "1500",
-    note: "trees per acre, TreeMap 2022 basis",
+    note: "Trees per acre, TreeMap 2022 basis",
   },
   p_harvest_any: {
     title: "P(harvest · any), TM2016",
     type: "ramp",
-    ramp: ["#fef0d9","#fdbb84","#fc8d59","#e34a33","#b30000"],
+    // GSEA-style hot diverging
+    ramp: ["#ffe9e9","#ffc0e5","#ff7080","#d60c00","#7a0500"],
     lo: "0.0", mid: "0.5", hi: "1.0",
     note: "Probability per pixel (conus_hcs v1)",
   },
   p_harvest_clearcut: {
     title: "P(harvest · clearcut), TM2016",
     type: "ramp",
-    ramp: ["#fef0d9","#fdbb84","#fc8d59","#e34a33","#b30000"],
+    ramp: ["#ffe9e9","#ffc0e5","#ff7080","#d60c00","#7a0500"],
     lo: "0.0", mid: "0.5", hi: "1.0",
     note: "Probability per pixel (conus_hcs v1)",
   },
   p_harvest_partial: {
     title: "P(harvest · partial), TM2016",
     type: "ramp",
-    ramp: ["#fef0d9","#fdbb84","#fc8d59","#e34a33","#b30000"],
+    ramp: ["#ffe9e9","#ffc0e5","#ff7080","#d60c00","#7a0500"],
     lo: "0.0", mid: "0.5", hi: "1.0",
     note: "Probability per pixel (conus_hcs v1)",
   },
-  site_productivity: {
-    title: "Site productivity strata",
-    type: "ramp",
-    ramp: ["#440154","#3b528b","#21918c","#5ec962","#fde725"],
-    lo: "low", mid: "mid", hi: "high",
-    note: "SAE productivity strata (HRF)",
-  },
   climate_stress: {
-    title: "Climate stress (CSPI v4)",
+    title: "CSPI · climate stress (v4, 1 km)",
     type: "ramp",
-    ramp: ["#fee08b","#fdae61","#f46d43","#d73027","#a50026"],
+    // GSEA diverging (purple-low to red-high)
+    ramp: ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"],
     lo: "low", mid: "mid", hi: "high",
-    note: "1 km CONUS, CSPI v4",
+    note: "Composite Site Productivity Index v4",
+  },
+  // v0.73 new layers
+  bgi: {
+    title: "BGI · bioclimatic growth index (1 km)",
+    type: "ramp",
+    // Lancet sequential
+    ramp: ["#00468b","#0099b4","#42b540","#edc000","#ed0000"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "Weiskittel & coauthors v2NEfix",
+  },
+  csi: {
+    title: "CSI · climate site index (1 km)",
+    type: "ramp",
+    ramp: ["#00468b","#0099b4","#42b540","#edc000","#ed0000"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "Weiskittel & coauthors v2NEfix",
+  },
+  csi_2030: {
+    title: "CSI projection · 2030",
+    type: "ramp",
+    ramp: ["#00468b","#0099b4","#42b540","#edc000","#ed0000"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "Future climate site index",
+  },
+  csi_2060: {
+    title: "CSI projection · 2060",
+    type: "ramp",
+    ramp: ["#00468b","#0099b4","#42b540","#edc000","#ed0000"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "Future climate site index",
+  },
+  csi_2090: {
+    title: "CSI projection · 2090",
+    type: "ramp",
+    ramp: ["#00468b","#0099b4","#42b540","#edc000","#ed0000"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "Future climate site index",
   },
 };
 
@@ -450,20 +487,26 @@ export default function App(){
             </select>
             <select value={conusLayer} onChange={e=>setConusLayer(e.target.value)} title="CONUS overlay">
               <option value="none">CONUS layer: off</option>
-              <optgroup label="Disturbance / Harvest (TM2016 only)">
+              <optgroup label="Disturbance / Harvest (TM2016)">
                 <option value="lcms_2022">LCMS disturbance cause 2022</option>
-                <option value="p_harvest_any">P(harvest · any) TM2016</option>
-                <option value="p_harvest_clearcut">P(harvest · clearcut) TM2016</option>
-                <option value="p_harvest_partial">P(harvest · partial) TM2016</option>
+                <option value="p_harvest_any">P(harvest · any)</option>
+                <option value="p_harvest_clearcut">P(harvest · clearcut)</option>
+                <option value="p_harvest_partial">P(harvest · partial)</option>
               </optgroup>
               <optgroup label="Forest structure (TreeMap 2022)">
-                <option value="fortype_2022">TreeMap forest type</option>
-                <option value="rd_treemap">Relative density (Chivehgenge)</option>
-                <option value="sdimax_treemap">SDI max (Reineke)</option>
+                <option value="fortype_2022">Forest type</option>
+                <option value="rd_treemap">Relative density · Chivehgenge</option>
+                <option value="sdimax_treemap">SDI max · Reineke</option>
               </optgroup>
-              <optgroup label="Site / Climate">
-                <option value="site_productivity">Site productivity</option>
-                <option value="climate_stress">Climate stress (CSPI v4)</option>
+              <optgroup label="Site productivity / Climate">
+                <option value="bgi">BGI · Bioclimatic Growth Index</option>
+                <option value="csi">CSI · Climate Site Index</option>
+                <option value="climate_stress">CSPI · Composite SPI (v4)</option>
+              </optgroup>
+              <optgroup label="CSI future projections">
+                <option value="csi_2030">CSI · 2030</option>
+                <option value="csi_2060">CSI · 2060</option>
+                <option value="csi_2090">CSI · 2090</option>
               </optgroup>
             </select>
             {conusLayer !== "none" && (
