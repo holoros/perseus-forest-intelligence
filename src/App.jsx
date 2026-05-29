@@ -376,10 +376,21 @@ export default function App(){
             </select>
             <select value={conusLayer} onChange={e=>setConusLayer(e.target.value)} title="CONUS overlay">
               <option value="none">CONUS layer: off</option>
-              <option value="lcms_2022">LCMS disturbance 2022</option>
-              <option value="fortype_2022">TreeMap forest type</option>
-              <option value="site_productivity">Site productivity</option>
-              <option value="climate_stress">Climate stress (CSPI v4)</option>
+              <optgroup label="Disturbance / Harvest">
+                <option value="lcms_2022">LCMS disturbance cause 2022</option>
+                <option value="p_harvest_any">P(harvest, any) TM2016</option>
+                <option value="p_harvest_clearcut">P(harvest, clearcut) TM2016</option>
+                <option value="p_harvest_partial">P(harvest, partial) TM2016</option>
+              </optgroup>
+              <optgroup label="Forest structure">
+                <option value="fortype_2022">TreeMap forest type</option>
+                <option value="rd_treemap">Relative density (Goeking)</option>
+                <option value="sdimax_treemap">SDI max (Reineke)</option>
+              </optgroup>
+              <optgroup label="Site / Climate">
+                <option value="site_productivity">Site productivity</option>
+                <option value="climate_stress">Climate stress (CSPI v4)</option>
+              </optgroup>
             </select>
             {conusLayer !== "none" && (
               <input type="range" min="0.2" max="1" step="0.05" value={conusOpacity}

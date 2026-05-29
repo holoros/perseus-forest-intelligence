@@ -104,10 +104,31 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   timeline, mapYear, mapScenario, selected, onPick,
                                   conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7,
                                   stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7 }){
-  // Zoom + pan
-  const [view, setView] = useState({ k: 1, tx: 0, ty: 0 });
+  // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
+  // interaction) + rAF-throttled state sync.
+  const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
+  const [, force] = useState(0);
+  const rafRef = useRef(null);
   const svgRef = useRef(null);
   const dragRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const sync = () => {
+    if(rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      force(n => n + 1);
+    });
+  };
+  const clampView = (v) => {
+    // Don't let user pan off-screen: keep at least 1/4 of the map visible.
+    const k = Math.max(0.5, Math.min(8, v.k));
+    const maxPan = Math.max(W, H) * k * 0.75;
+    return {
+      k,
+      tx: Math.max(-maxPan, Math.min(maxPan, v.tx)),
+      ty: Math.max(-maxPan, Math.min(maxPan, v.ty)),
+    };
+  };
   useEffect(() => {
     const el = svgRef.current; if(!el) return;
     const onWheel = (e) => {
@@ -115,30 +136,50 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
       const rect = el.getBoundingClientRect();
       const cx = (e.clientX - rect.left) / rect.width * W;
       const cy = (e.clientY - rect.top) / rect.height * H;
-      const dk = e.deltaY < 0 ? 1.15 : 1/1.15;
-      setView(v => {
-        const k2 = Math.max(0.5, Math.min(8, v.k * dk));
-        // Keep the point under cursor fixed
-        const tx2 = cx - (cx - v.tx) * (k2 / v.k);
-        const ty2 = cy - (cy - v.ty) * (k2 / v.k);
-        return { k: k2, tx: tx2, ty: ty2 };
-      });
+      // Adaptive zoom factor: small wheel delta = small step, big = big step.
+      // Cap deltaY magnitude to prevent extreme jumps on trackpads.
+      const mag = Math.min(50, Math.abs(e.deltaY)) / 50;
+      const dk = e.deltaY < 0 ? (1 + 0.20 * mag) : 1 / (1 + 0.20 * mag);
+      const v = viewRef.current;
+      const k2 = Math.max(0.5, Math.min(8, v.k * dk));
+      const tx2 = cx - (cx - v.tx) * (k2 / v.k);
+      const ty2 = cy - (cy - v.ty) * (k2 / v.k);
+      viewRef.current = clampView({ k: k2, tx: tx2, ty: ty2 });
+      sync();
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
   const onMouseDown = (e) => {
-    dragRef.current = { x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty };
+    if(e.button !== 0) return;
+    dragRef.current = { x: e.clientX, y: e.clientY,
+                         tx: viewRef.current.tx, ty: viewRef.current.ty };
+    setIsDragging(true);
   };
   const onMouseMove = (e) => {
     if(!dragRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const dx = (e.clientX - dragRef.current.x) / rect.width * W;
     const dy = (e.clientY - dragRef.current.y) / rect.height * H;
-    setView(v => ({ ...v, tx: dragRef.current.tx + dx, ty: dragRef.current.ty + dy }));
+    viewRef.current = clampView({ ...viewRef.current,
+      tx: dragRef.current.tx + dx, ty: dragRef.current.ty + dy });
+    sync();
   };
-  const onMouseUp = () => { dragRef.current = null; };
-  const resetView = () => setView({ k: 1, tx: 0, ty: 0 });
+  const onMouseUp = () => {
+    dragRef.current = null;
+    setIsDragging(false);
+  };
+  const resetView = () => { viewRef.current = { k: 1, tx: 0, ty: 0 }; sync(); };
+  const zoomBy = (dk) => {
+    const v = viewRef.current;
+    const k2 = Math.max(0.5, Math.min(8, v.k * dk));
+    // Zoom around viewport center
+    const tx2 = W/2 - (W/2 - v.tx) * (k2 / v.k);
+    const ty2 = H/2 - (H/2 - v.ty) * (k2 / v.k);
+    viewRef.current = clampView({ k: k2, tx: tx2, ty: ty2 });
+    sync();
+  };
+  const view = viewRef.current;
 
   if(!geo || !states) return <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"100%",display:"block"}}/>;
   const features = (geo.features || []).filter(ft => ft.properties && ft.properties.state);
@@ -192,10 +233,13 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
   const selPathD = selFeature ? geomToD(selFeature.geometry) : null;
   return (
     <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
-         style={{width:"100%",height:"100%",display:"block", cursor: dragRef.current ? "grabbing" : "grab"}}
+         style={{width:"100%",height:"100%",display:"block",
+                 cursor: isDragging ? "grabbing" : "grab",
+                 touchAction: "none"}}
          preserveAspectRatio="xMidYMid meet"
          onMouseDown={onMouseDown} onMouseMove={onMouseMove}
-         onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
+         onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+         onDoubleClick={()=> zoomBy(1.5)}>
       <defs>
         {selPathD && (
           <clipPath id="clip-selected-state"><path d={selPathD}/></clipPath>
@@ -252,15 +296,22 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
       )}
       </g>
       {/* Zoom controls (fixed, outside the pan/zoom group) */}
-      <g transform={`translate(${W-72},${H-32})`}>
-        <rect x="0" y="0" width="64" height="22" rx="4"
+      <g transform={`translate(${W-100},${H-32})`}>
+        <rect x="0" y="0" width="92" height="22" rx="4"
               fill="rgba(15,20,25,0.85)" stroke="#2a3a47"/>
-        <text x="8" y="15" fill="#8aa0b0" fontSize="10" style={{cursor:"pointer",userSelect:"none"}}
-              onClick={()=> setView(v=>({...v, k: Math.min(8, v.k*1.3)}))}>+</text>
-        <text x="24" y="15" fill="#8aa0b0" fontSize="10" style={{cursor:"pointer",userSelect:"none"}}
-              onClick={()=> setView(v=>({...v, k: Math.max(0.5, v.k/1.3)}))}>−</text>
-        <text x="38" y="15" fill="#8aa0b0" fontSize="9" style={{cursor:"pointer",userSelect:"none"}}
-              onClick={resetView}>reset</text>
+        <text x="10" y="15" fill="#8aa0b0" fontSize="11" fontWeight="bold"
+              style={{cursor:"pointer",userSelect:"none"}}
+              onClick={(e)=>{ e.stopPropagation(); zoomBy(1.4); }}>+</text>
+        <text x="28" y="15" fill="#8aa0b0" fontSize="11" fontWeight="bold"
+              style={{cursor:"pointer",userSelect:"none"}}
+              onClick={(e)=>{ e.stopPropagation(); zoomBy(1/1.4); }}>−</text>
+        <text x="46" y="15" fill="#8aa0b0" fontSize="9"
+              style={{cursor:"pointer",userSelect:"none"}}
+              onClick={(e)=>{ e.stopPropagation(); resetView(); }}>reset</text>
+        <text x="70" y="15" fill="#5e7180" fontSize="8" textAnchor="end"
+              style={{userSelect:"none"}}>{view.k.toFixed(1)}×</text>
+        <text x="86" y="15" fill="#5e7180" fontSize="8" textAnchor="end"
+              style={{userSelect:"none"}}>·</text>
       </g>
     </svg>
   );
