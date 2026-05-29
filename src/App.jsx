@@ -57,6 +57,13 @@ export default function App(){
   const [gcbmLayer,setGcbmLayer] = useState("carbon_l_2022");
   const [gcbmOpacity,setGcbmOpacity] = useState(0.85);
   const [gcbmBounds,setGcbmBounds] = useState({}); // st -> coords[4]
+  // v0.62 interaction additions
+  const [hiddenEngines,setHiddenEngines] = useState(new Set()); // per-engine hide
+  const [hiddenClasses,setHiddenClasses] = useState(new Set()); // class-level hide
+  const [yMode,setYMode] = useState("full"); // full | auto | log
+  const [compareOn,setCompareOn] = useState(false);
+  const [cmpState,setCmpState] = useState("IN");
+  const [cmpSeries,setCmpSeries] = useState(null);
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -75,12 +82,12 @@ export default function App(){
     mp.on("load",()=>{
       mp.addSource("states",{ type:"geojson", data:geo, promoteId:"state" });
       mp.addLayer({ id:"fill", type:"fill", source:"states", paint:{
-        "fill-color":["case",["==",["get","engines"],0],"#1a2530",
+        "fill-color":["case",["==",["get","engines"],0],"#2a3a47",
           ["step",["get","engines"],"#9ad9b8",4,"#54b88a",6,"#2f9e6a",20,"#1b7a4d"]],
-        "fill-opacity":["case",["==",["get","focal"],1],0.95,
-          ["case",["==",["get","hasSeries"],1],0.5,0.32]] }});
+        "fill-opacity":["case",["==",["get","focal"],1],0.98,
+          ["case",["==",["get","hasSeries"],1],0.85,0.55]] }});
       mp.addLayer({ id:"line", type:"line", source:"states",
-        paint:{"line-color":"#0b1015","line-width":0.6} });
+        paint:{"line-color":"#0b1015","line-width":0.7} });
       mp.addLayer({ id:"focalline", type:"line", source:"states",
         filter:["==",["get","focal"],1],
         paint:{"line-color":"#f4c430","line-width":1.8} });
@@ -174,8 +181,20 @@ export default function App(){
     window.history.replaceState(null, "", `#${p.toString()}`);
   }},[sel,metric,bucket]);
 
+  // ---- load compare-state series (separate from primary) ----
+  useEffect(()=>{
+    if(!compareOn || !cmpState || cmpState === sel){ setCmpSeries(null); return; }
+    if(!states || !states[cmpState] || !states[cmpState].has_series){ setCmpSeries(null); return; }
+    j(`api/series/${cmpState}.json`).then(setCmpSeries).catch(()=>setCmpSeries(null));
+  },[compareOn, cmpState, sel, states]);
+
   const cov = states && states[sel];
-  const node = series && series[metric] && series[metric][bucket];
+  const rawNode = series && series[metric] && series[metric][bucket];
+  // Apply class-level filter first, then leave engine-level filter to GrowthChart
+  const node = rawNode ? rawNode.filter(s => !hiddenClasses.has(s.cls)) : null;
+  const overlayNode = (compareOn && cmpSeries && cmpSeries[metric] && cmpSeries[metric][bucket])
+    ? cmpSeries[metric][bucket].filter(s => !hiddenClasses.has(s.cls))
+    : null;
   const metricsAvail = series ? Object.keys(series).sort(
     (a,b)=> (METRIC_ORDER.indexOf(a)+1||99) - (METRIC_ORDER.indexOf(b)+1||99)) : [];
   const hasCarbon = metricsAvail.some(m=>CARBON.includes(m));
@@ -183,12 +202,33 @@ export default function App(){
   const hasBands = !!(node && node.some(s=> s.pts.some(p=> p.length>=4)));
   const fiaRef = (metric==="agc_live_total" && fia[sel]) ? fia[sel].tg_agc : null;
   const mlabel = (mc)=> (meta && meta.metrics[mc]) ? meta.metrics[mc].label : mc;
+  const allEngines = rawNode ? [...new Set(rawNode.map(s=>s.model))].sort() : [];
+  const allClasses = rawNode ? [...new Set(rawNode.map(s=>s.cls))].sort() : [];
+  const toggleEngine = (eng) => {
+    const next = new Set(hiddenEngines);
+    next.has(eng) ? next.delete(eng) : next.add(eng);
+    setHiddenEngines(next);
+  };
+  const toggleClass = (cls) => {
+    const next = new Set(hiddenClasses);
+    next.has(cls) ? next.delete(cls) : next.add(cls);
+    setHiddenClasses(next);
+  };
+  const seriesStates = states ? Object.keys(states).filter(st => states[st].has_series).sort() : [];
 
   return (
     <div className="app">
       <header className="top">
         <h1>PERSEUS Forest Intelligence <span className="pill">Tier A</span></h1>
-        <span className="sub">Focal states: <b style={{color:"#f4c430"}}>ME · IN · GA</b> · click a state for multi-model growth curves</span>
+        <span className="sub">Focal: <b style={{color:"#f4c430"}}>ME · IN · GA</b> · click map or pick a state →</span>
+        {seriesStates.length>0 && (
+          <select className="state-pick" value={sel} onChange={e=>setSel(e.target.value)} title="Jump to state">
+            {seriesStates.map(st=>{
+              const c = states[st];
+              const focal = FOCAL.includes(st) ? " ★" : "";
+              return <option key={st} value={st}>{st} · {c.name}{focal} · {c.engines}eng · {c.rows.toLocaleString()} rows</option>;
+            })}
+          </select>)}
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
       </header>
       <div className="main">
@@ -266,25 +306,69 @@ export default function App(){
               <select value={bucket} onChange={e=>setBucket(e.target.value)}>
                 {bucketsAvail.map(b=> <option key={b} value={b}>{b}</option>)}
               </select>
+              <select value={yMode} onChange={e=>setYMode(e.target.value)} title="Y-axis scaling">
+                <option value="full">Y: full range</option>
+                <option value="auto">Y: zoom to median (q10–q90)</option>
+                <option value="log">Y: log scale</option>
+              </select>
               {hasBands && <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
                 <input type="checkbox" checked={showBands} onChange={e=>setShowBands(e.target.checked)}/> uncertainty
               </label>}
+              <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
+                <input type="checkbox" checked={compareOn} onChange={e=>setCompareOn(e.target.checked)}/> compare
+              </label>
+              {compareOn && (
+                <select value={cmpState} onChange={e=>setCmpState(e.target.value)} title="Second state to overlay">
+                  {seriesStates.filter(st=>st!==sel).map(st=>
+                    <option key={st} value={st}>vs {st} ({states[st].name})</option>)}
+                </select>)}
             </div>
+            {allClasses.length>1 && (
+              <div className="lgd" style={{marginTop:0,marginBottom:6,gap:"3px 10px"}}>
+                <span style={{color:"var(--mut)",marginRight:4}}>classes:</span>
+                {allClasses.map(c=>{
+                  const off = hiddenClasses.has(c);
+                  return <button key={c} className="filt" onClick={()=>toggleClass(c)}
+                    style={{background:off?"transparent":CLASS_COL[c]||"#bbb",
+                      color:off?"var(--mut)":"#0b1015", border:`1px solid ${CLASS_COL[c]||"#bbb"}`,
+                      borderRadius:6,padding:"1px 7px",fontSize:11,cursor:"pointer",
+                      opacity:off?0.55:1}}>{c}{off?" (off)":""} · {rawNode.filter(s=>s.cls===c).length}</button>;
+                })}
+                {fiaRef && <span style={{marginLeft:8}}><i style={{background:"#9fb3c0"}}></i>FIA observed</span>}
+              </div>)}
             <div className="chartcard">
               <GrowthChart node={node} fiaRef={fiaRef} fiaYear={fia[sel] && fia[sel].year}
                 unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} classCol={CLASS_COL}
-                showBands={showBands && hasBands}/>
+                showBands={showBands && hasBands}
+                hiddenEngines={hiddenEngines} yMode={yMode}
+                overlayNode={overlayNode} overlayLabel={cmpState}/>
             </div>
-            <div className="lgd">
-              {node && [...new Set(node.map(s=>s.cls))].map(c=>
-                <span key={c}><i style={{background:CLASS_COL[c]||"#bbb"}}></i>{c} ({node.filter(s=>s.cls===c).length})</span>)}
-              {fiaRef && <span><i style={{background:"#9fb3c0"}}></i>FIA observed</span>}
-            </div>
+            {allEngines.length>1 && (
+              <details style={{margin:"6px 4px 0",fontSize:12,color:"var(--mut)"}}>
+                <summary style={{cursor:"pointer"}}>per-engine toggle ({allEngines.length} engines · {hiddenEngines.size} hidden)</summary>
+                <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>
+                  {allEngines.map(eng=>{
+                    const off = hiddenEngines.has(eng);
+                    const cls = rawNode.find(s=>s.model===eng)?.cls;
+                    const col = CLASS_COL[cls] || "#bbb";
+                    return <button key={eng} onClick={()=>toggleEngine(eng)}
+                      style={{background:off?"transparent":col+"33",
+                        color:off?"var(--mut)":"var(--ink)",border:`1px solid ${col}`,
+                        borderRadius:5,padding:"1px 6px",fontSize:10.5,cursor:"pointer",
+                        textDecoration:off?"line-through":"none"}}
+                      title={off?"show":"hide"}>{eng.replace(/_/g," ").slice(0,28)}</button>;
+                  })}
+                  <button onClick={()=>setHiddenEngines(new Set())}
+                    style={{background:"transparent",color:"var(--accent)",border:"1px dashed var(--accent)",
+                      borderRadius:5,padding:"1px 8px",fontSize:10.5,cursor:"pointer"}}>reset</button>
+                </div>
+              </details>)}
             <div className="note">
-              Each line is one engine's median trajectory for <b>{mlabel(metric)}</b> under <b>{bucket}</b>
-              {node && ` (${node.length} engine${node.length===1?"":"s"})`}. Data: perseus_db v0.52 (pool-harmonized).
-              Maine carries the full multi-model stack; cross-state engines (libcbm) populate GA/MN/OR/WA.
-              {" "}Management buckets collapse each engine's scenarios by harvest rule, so within-engine scenario spread is folded in. Hover a line for the engine.
+              Each solid line is one engine's median for <b>{mlabel(metric)}</b> under <b>{bucket}</b>
+              {node && ` (${node.length-(node.length-node.filter(s=>!hiddenEngines.has(s.model)).length)} visible / ${rawNode.length})`}.
+              {compareOn && overlayNode && <> Dashed = <b>{cmpState}</b> ({overlayNode.length} engines).</>}
+              {" "}Class buttons hide whole model families; the per-engine drawer hides individual engines.
+              Y-axis "zoom to median" hides outliers (e.g., uncalibrated FVS rows). Hover a line for the engine. Data: perseus_db v0.61.
             </div>
           </>)}
         </div>

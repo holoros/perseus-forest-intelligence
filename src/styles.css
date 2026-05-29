@@ -12,6 +12,10 @@ header.top{padding:12px 20px;border-bottom:1px solid var(--line);
 header.top h1{font-size:17px;margin:0;font-weight:700}
 header.top .sub{color:var(--mut);font-size:12.5px}
 header.top .stat{margin-left:auto;color:var(--accent);font-size:12.5px;font-variant-numeric:tabular-nums}
+header.top .state-pick{background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:7px;padding:5px 8px;font-size:12.5px;max-width:380px}
+header.top .state-pick:hover{border-color:var(--accent)}
+.filt:hover{filter:brightness(1.15)}
 .main{flex:1;display:grid;grid-template-columns:minmax(380px,1fr) minmax(440px,1.2fr);min-height:0}
 .mapwrap{position:relative;border-right:1px solid var(--line)}
 #map{position:absolute;inset:0}
