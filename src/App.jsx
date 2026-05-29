@@ -196,8 +196,17 @@ export default function App(){
     const stLow = sel.toLowerCase();
     if(gcbmBounds[stLow]) return;
     j(`raster/${stLow}_bounds.json`).then(b=>{
-      const coords = [[b.ul[0],b.ul[1]],[b.ur[0],b.ur[1]],[b.lr[0],b.lr[1]],[b.ll[0],b.ll[1]]];
-      setGcbmBounds(prev=>({...prev,[stLow]:coords}));
+      // v0.69+: store raw json so SVGMap can handle both formats
+      // (Albers meters {x0,y0,x1,y1} OR legacy WGS84 corners {ul,ur,lr,ll}).
+      // maplibre code path still needs the legacy 4-point format.
+      if(b.x0 != null){
+        // synthesize the maplibre 4-point format from the meter extent if needed
+        setGcbmBounds(prev=>({...prev,[stLow]: b}));
+      } else {
+        const coords = [[b.ul[0],b.ul[1]],[b.ur[0],b.ur[1]],[b.lr[0],b.lr[1]],[b.ll[0],b.ll[1]]];
+        coords.raw = b;
+        setGcbmBounds(prev=>({...prev,[stLow]: coords}));
+      }
     }).catch(()=>{});
   },[gcbmOn,sel,gcbmBounds]);
   useEffect(()=>{ const mp=map.current; if(!mp || !mapReady) return;
@@ -336,7 +345,13 @@ export default function App(){
                 const stLow = sel.toLowerCase();
                 const stOverlayActive = gcbmOn && states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel) && gcbmBounds[stLow];
                 const stOverlayUrl = stOverlayActive ? `${BASE}raster/${stLow}_${gcbmLayer}.png` : null;
-                const stOverlayB = stOverlayActive ? (()=>{ const c = gcbmBounds[stLow]; return c ? {ul:c[0], ur:c[1], lr:c[2], ll:c[3]} : null; })() : null;
+                // Pass raw json if Albers-meters format, else synthesize ul/ur/lr/ll
+                const stOverlayB = stOverlayActive ? (()=>{
+                  const c = gcbmBounds[stLow];
+                  if(!c) return null;
+                  if(c.x0 != null) return c;  // Albers meters
+                  return {ul:c[0], ur:c[1], lr:c[2], ll:c[3]};
+                })() : null;
                 return (
                 <div id="map" style={{position:"absolute",inset:0,padding:"6px"}}>
                   <SVGMap geo={geoData} states={states} focal={FOCAL}

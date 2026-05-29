@@ -158,28 +158,49 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     conusBox = { x: Math.min(sx0, sx1), y: Math.min(sy0, sy1),
                  width: Math.abs(sx1 - sx0), height: Math.abs(sy1 - sy0) };
   }
-  // Per-state overlay placement: bounds.json has WGS84 corners (ul/ur/lr/ll).
-  // Project the 4 corners and take their bbox.
+  // Per-state overlay placement.
+  //   v0.69+: bounds in Albers meters (x0/y0/x1/y1) when the PNG was warped to
+  //           Albers. Treated identically to CONUS bounds.
+  //   legacy: bounds in WGS84 corners (ul/ur/lr/ll) — project corners + bbox.
   let stateBox = null;
-  if(stateOverlay && stateOverlayBounds && stateOverlayBounds.ul){
-    const corners = [stateOverlayBounds.ul, stateOverlayBounds.ur,
-                     stateOverlayBounds.lr, stateOverlayBounds.ll];
-    const sxs = [], sys = [];
-    corners.forEach(([lon, lat]) => {
-      const [x, y] = project(lon, lat);
-      sxs.push(x * SCALE + TX);
-      sys.push(-y * SCALE + TY);
-    });
-    stateBox = { x: Math.min(...sxs), y: Math.min(...sys),
-                 width: Math.max(...sxs) - Math.min(...sxs),
-                 height: Math.max(...sys) - Math.min(...sys) };
+  if(stateOverlay && stateOverlayBounds){
+    if(stateOverlayBounds.x0 != null){
+      const { x0, x1, y0, y1 } = stateOverlayBounds;
+      const rx0 = x0 / EARTH_R, rx1 = x1 / EARTH_R;
+      const ry0 = y0 / EARTH_R, ry1 = y1 / EARTH_R;
+      const sx0 = rx0 * SCALE + TX, sx1 = rx1 * SCALE + TX;
+      const sy0 = -ry0 * SCALE + TY, sy1 = -ry1 * SCALE + TY;
+      stateBox = { x: Math.min(sx0, sx1), y: Math.min(sy0, sy1),
+                   width: Math.abs(sx1 - sx0), height: Math.abs(sy1 - sy0) };
+    } else if(stateOverlayBounds.ul){
+      const corners = [stateOverlayBounds.ul, stateOverlayBounds.ur,
+                       stateOverlayBounds.lr, stateOverlayBounds.ll];
+      const sxs = [], sys = [];
+      corners.forEach(([lon, lat]) => {
+        const [x, y] = project(lon, lat);
+        sxs.push(x * SCALE + TX);
+        sys.push(-y * SCALE + TY);
+      });
+      stateBox = { x: Math.min(...sxs), y: Math.min(...sys),
+                   width: Math.max(...sxs) - Math.min(...sxs),
+                   height: Math.max(...sys) - Math.min(...sys) };
+    }
   }
+  // Precompute the selected state's path for the clipPath used by the
+  // per-state image overlay (so the PNG is clipped to the state polygon).
+  const selFeature = features.find(ft => ft.properties.state === selected);
+  const selPathD = selFeature ? geomToD(selFeature.geometry) : null;
   return (
     <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
          style={{width:"100%",height:"100%",display:"block", cursor: dragRef.current ? "grabbing" : "grab"}}
          preserveAspectRatio="xMidYMid meet"
          onMouseDown={onMouseDown} onMouseMove={onMouseMove}
          onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
+      <defs>
+        {selPathD && (
+          <clipPath id="clip-selected-state"><path d={selPathD}/></clipPath>
+        )}
+      </defs>
       <rect x="0" y="0" width={W} height={H} fill="#0b1015"/>
       <g transform={`translate(${view.tx},${view.ty}) scale(${view.k})`}>
       {conusOverlay && conusBox && (
@@ -226,6 +247,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         <image href={stateOverlay} x={stateBox.x} y={stateBox.y}
                width={stateBox.width} height={stateBox.height}
                opacity={stateOverlayOpacity} preserveAspectRatio="none"
+               clipPath="url(#clip-selected-state)"
                style={{pointerEvents:"none"}}/>
       )}
       </g>
