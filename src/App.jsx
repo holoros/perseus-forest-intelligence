@@ -82,6 +82,10 @@ export default function App(){
   // v0.66 scenario focus + simplification
   const [scenarioFocus,setScenarioFocus] = useState("all"); // all | harvest_baseline | libcbm_reduced | ...
   const [showAllEngines,setShowAllEngines] = useState(false); // false = auto-hide noisy variants
+  // v0.67 CONUS-wide overlays
+  const [conusLayer,setConusLayer] = useState("none"); // none | lcms_2022 | fortype_2022 | site_productivity | climate_stress
+  const [conusOpacity,setConusOpacity] = useState(0.7);
+  const [conusBounds,setConusBounds] = useState({}); // layer -> {x0,x1,y0,y1}
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -240,6 +244,14 @@ export default function App(){
     window.history.replaceState(null, "", `#${p.toString()}`);
   }},[sel,metric,bucket]);
 
+  // ---- lazy-load CONUS overlay bounds.json ----
+  useEffect(()=>{
+    if(conusLayer === "none" || conusBounds[conusLayer]) return;
+    j(`raster/conus_${conusLayer}_bounds.json`)
+      .then(b => setConusBounds(prev => ({...prev, [conusLayer]: b})))
+      .catch(() => {});
+  },[conusLayer, conusBounds]);
+
   // ---- load compare-state series (separate from primary) ----
   useEffect(()=>{
     if(!compareOn || !cmpState || cmpState === sel){ setCmpSeries(null); return; }
@@ -324,13 +336,29 @@ export default function App(){
                 <SVGMap geo={geoData} states={states} focal={FOCAL}
                         mode={mapMode} timeline={timeline}
                         mapYear={mapYear} mapScenario={mapScenario}
-                        selected={sel} onPick={st=>setSel(st)}/>
+                        selected={sel} onPick={st=>setSel(st)}
+                        conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]
+                                      ? `${BASE}raster/conus_${conusLayer}.png` : null}
+                        conusOverlayBounds={conusLayer !== "none" ? conusBounds[conusLayer] : null}
+                        conusOverlayOpacity={conusOpacity}/>
               </div>}
           <div className="map-ctrl">
             <select value={mapMode} onChange={e=>setMapMode(e.target.value)} title="Map mode">
               <option value="coverage">map: engine coverage</option>
               <option value="carbon">map: carbon trajectory (libcbm)</option>
             </select>
+            <select value={conusLayer} onChange={e=>setConusLayer(e.target.value)} title="CONUS overlay">
+              <option value="none">CONUS layer: off</option>
+              <option value="lcms_2022">LCMS disturbance 2022</option>
+              <option value="fortype_2022">TreeMap forest type</option>
+              <option value="site_productivity">Site productivity</option>
+              <option value="climate_stress">Climate stress (CSPI v4)</option>
+            </select>
+            {conusLayer !== "none" && (
+              <input type="range" min="0.2" max="1" step="0.05" value={conusOpacity}
+                onChange={e=>setConusOpacity(+e.target.value)}
+                title={`CONUS overlay opacity: ${conusOpacity}`} style={{width:80}}/>
+            )}
             {mapMode === "carbon" && timeline && (<>
               <select value={mapScenario} onChange={e=>setMapScenario(e.target.value)} title="Scenario">
                 <option value="harvest_baseline">BAU (baseline harvest)</option>

@@ -96,14 +96,32 @@ function rampCarbon(v){
 function rgbHex(rgb){ return "#" + rgb.map(v=> v.toString(16).padStart(2, "0")).join(""); }
 
 export default function SVGMap({ geo, states, focal = [], mode = "coverage",
-                                  timeline, mapYear, mapScenario, selected, onPick }){
+                                  timeline, mapYear, mapScenario, selected, onPick,
+                                  conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7 }){
   if(!geo || !states) return <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"100%",display:"block"}}/>;
   const features = (geo.features || []).filter(ft => ft.properties && ft.properties.state);
   const yrKey = String(mapYear);
+  // CONUS overlay placement: bounds are in projected Albers meters (same proj
+  // as the SVG paths). Convert to SVG coords using the shared SCALE / TX / TY.
+  let conusBox = null;
+  if(conusOverlay && conusOverlayBounds){
+    const { x0, x1, y0, y1 } = conusOverlayBounds;
+    const sx0 = x0 * SCALE + TX;
+    const sx1 = x1 * SCALE + TX;
+    const sy0 = -y0 * SCALE + TY;  // y0 is southern math y → larger SVG y (bottom)
+    const sy1 = -y1 * SCALE + TY;  // y1 is northern math y → smaller SVG y (top)
+    conusBox = { x: Math.min(sx0, sx1), y: Math.min(sy0, sy1),
+                 width: Math.abs(sx1 - sx0), height: Math.abs(sy1 - sy0) };
+  }
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"100%",display:"block"}}
          preserveAspectRatio="xMidYMid meet">
       <rect x="0" y="0" width={W} height={H} fill="#0b1015"/>
+      {conusOverlay && conusBox && (
+        <image href={conusOverlay} x={conusBox.x} y={conusBox.y}
+               width={conusBox.width} height={conusBox.height}
+               opacity={conusOverlayOpacity} preserveAspectRatio="none"/>
+      )}
       {features.map(ft=>{
         const st = ft.properties.state;
         const cov = states[st] || {};
@@ -118,6 +136,12 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         } else {
           fill = pickColorCoverage(cov.engines || 0, isFocal, hasSeries);
           opacity = isFocal ? 0.98 : (hasSeries ? 0.85 : 0.55);
+        }
+        // When a CONUS overlay is active, dim non-focal state fills so the
+        // raster pattern beneath is visible. Keep focal states + selected
+        // state outlined / opaque so they remain anchors.
+        if(conusOverlay){
+          opacity = isFocal ? 0.55 : (hasSeries ? 0.25 : 0.15);
         }
         const d = geomToD(ft.geometry);
         const isSel = st === selected;
