@@ -70,12 +70,18 @@ export default function App(){
   const [compareOn,setCompareOn] = useState(false);
   const [cmpState,setCmpState] = useState("IN");
   const [cmpSeries,setCmpSeries] = useState(null);
+  // v0.64 map-mode + year slider
+  const [mapMode,setMapMode] = useState("coverage"); // coverage | carbon
+  const [mapYear,setMapYear] = useState(2024);
+  const [mapScenario,setMapScenario] = useState("harvest_baseline");
+  const [timeline,setTimeline] = useState(null);
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
-    const [m,s,geo,f] = await Promise.all([
-      j("api/meta.json"), j("api/states.json"), j("geo/us-states.geojson"), j("api/fia.json")]);
-    setMeta(m); setStates(s); setFia(f);
+    const [m,s,geo,f,tl] = await Promise.all([
+      j("api/meta.json"), j("api/states.json"), j("geo/us-states.geojson"), j("api/fia.json"),
+      j("api/timeline.json").catch(()=>({}))]);
+    setMeta(m); setStates(s); setFia(f); setTimeline(tl);
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -116,6 +122,37 @@ export default function App(){
   // ---- selected-state outline ----
   useEffect(()=>{ const mp=map.current; if(mp && mp.getLayer && mp.getLayer("sel"))
     mp.setFilter("sel",["==",["get","state"],sel]); },[sel]);
+
+  // ---- map mode: re-paint per-state by carbon at chosen year/scenario ----
+  useEffect(()=>{ const mp=map.current; if(!mp || !mapReady || !mp.getLayer("fill")) return;
+    if(mapMode === "coverage"){
+      mp.setPaintProperty("fill","fill-color",
+        ["case",["==",["get","engines"],0],"#2a3a47",
+         ["step",["get","engines"],"#9ad9b8",4,"#54b88a",6,"#2f9e6a",20,"#1b7a4d"]]);
+      mp.setPaintProperty("fill","fill-opacity",
+        ["case",["==",["get","focal"],1],0.98,
+         ["case",["==",["get","hasSeries"],1],0.85,0.55]]);
+      return;
+    }
+    // carbon mode: update geojson features with carbon[year][scenario] in Tg, then color by it
+    if(!timeline || !mp.getSource("states")) return;
+    const src = mp.getSource("states");
+    const data = src._data;  // current geojson
+    const yrKey = String(mapYear);
+    data.features.forEach(ft=>{
+      const st = ft.properties.state;
+      const v = (timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]) || null;
+      ft.properties.carbonTg = v;
+    });
+    src.setData(data);
+    // ramp on Tg (state-total); 0 -> grey, 100 -> light green, 500 -> mid, 1000 -> deep
+    mp.setPaintProperty("fill","fill-color",
+      ["case",["==",["get","carbonTg"],null],"#2a3a47",
+       ["interpolate",["linear"],["get","carbonTg"],
+         0,"#edf8e9", 100,"#bae4b3", 300,"#74c476", 500,"#31a354", 1000,"#005a32"]]);
+    mp.setPaintProperty("fill","fill-opacity",
+      ["case",["==",["get","carbonTg"],null],0.35,0.9]);
+  },[mapMode, mapYear, mapScenario, mapReady, timeline]);
 
   // ---- Tier B layer A: LANDIS biomass image source (Maine only) ----
   useEffect(()=>{ const mp=map.current; if(!mp || !mapReady) return;
@@ -239,13 +276,46 @@ export default function App(){
       </header>
       <div className="main">
         <div className="mapwrap">
-          <div className="maptitle">Coverage — engines per state</div>
+          <div className="maptitle">{mapMode === "coverage"
+            ? "Coverage — engines per state"
+            : `Carbon — libcbm AGC (Tg), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
           <div id="map" ref={mapEl}></div>
-          <div className="legend">
-            <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
-            <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
-            <div><i style={{background:"#1a2530"}}></i>no model data yet</div>
+          <div className="map-ctrl">
+            <select value={mapMode} onChange={e=>setMapMode(e.target.value)} title="Map mode">
+              <option value="coverage">map: engine coverage</option>
+              <option value="carbon">map: carbon trajectory (libcbm)</option>
+            </select>
+            {mapMode === "carbon" && timeline && (<>
+              <select value={mapScenario} onChange={e=>setMapScenario(e.target.value)} title="Scenario">
+                <option value="harvest_baseline">BAU (baseline harvest)</option>
+                <option value="libcbm_reduced">aggressive reduce</option>
+                <option value="libcbm_intensified">aggressive intensify</option>
+                <option value="libcbm_climate_smart">climate-smart</option>
+                <option value="harvest_rcp45">BAU + RCP 4.5</option>
+                <option value="noharvest_rcp45">reserve + RCP 4.5</option>
+              </select>
+              <input type="range" min={2024} max={2074} step={5}
+                value={mapYear} onChange={e=>setMapYear(+e.target.value)}
+                title={`Year: ${mapYear}`} style={{width:140}}/>
+              <span style={{color:"var(--mut)",fontSize:11,fontVariantNumeric:"tabular-nums"}}>{mapYear}</span>
+            </>)}
           </div>
+          {mapMode === "coverage" && (
+            <div className="legend">
+              <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
+              <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
+              <div><i style={{background:"#2a3a47"}}></i>no model data yet</div>
+            </div>)}
+          {mapMode === "carbon" && (
+            <div className="legend">
+              <div style={{marginBottom:4}}>libcbm AGC (Tg, state total)</div>
+              <div style={{height:10,width:160,borderRadius:2,
+                background:"linear-gradient(90deg,#edf8e9,#bae4b3,#74c476,#31a354,#005a32)"}}></div>
+              <div style={{display:"flex",justifyContent:"space-between",width:160,fontSize:10.5}}>
+                <span>0</span><span>300</span><span>1000+</span>
+              </div>
+              <div style={{marginTop:4,color:"var(--mut)",fontSize:10}}>states without libcbm cross-state v2 grey</div>
+            </div>)}
           {rasterOn && LANDIS_STATES.includes(sel) && (() => {
             const cl = LANDIS_LAYERS.find(l=>l.file===rasterLayer) || LANDIS_LAYERS[0];
             return (
