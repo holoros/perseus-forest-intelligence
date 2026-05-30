@@ -367,6 +367,16 @@ independently shift the ratio by less than 0.003 each.
     <div class="metric-sub">5 pilot + 10 Phase 2 + 8 Phase 3 + 17 Phase 4 (South + Midwest)</div>
   </div>
   <div class="metric">
+    <div class="metric-label">CONUS forest area</div>
+    <div class="metric-value">246 Mha</div>
+    <div class="metric-sub">40-state libcbm coverage</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">CONUS B1.3 stock</div>
+    <div class="metric-value">54.6 PgC</div>
+    <div class="metric-sub">+6.8 PgC vs B1.1 (+14%)</div>
+  </div>
+  <div class="metric">
     <div class="metric-label">B1.1 ratio range</div>
     <div class="metric-value">0.74 – 1.05</div>
     <div class="metric-sub">uniform-FT inventory</div>
@@ -558,6 +568,48 @@ The implication for the methods paper is large: the engine gap is real and
 worth reporting, but the magnitude is highly sensitive to a choice that is
 easy to overlook in tooling. Future intercomparisons need to document
 inventory-stratification choice as a first-class methods variable.
+</p>
+
+<h2>CONUS-scale finding: B1.1 vs B1.3 at n=40 (2026-05-30)</h2>
+
+<p>
+With 40 states in hand, the inventory-stratification finding scales nationally.
+Rerunning all 40 with the legacy B1.1 uniform-FT inventory and comparing
+against B1.3 FIA EXPNS shows that the stratification choice alone adds
+<strong>+6.76 PgC to the CONUS total carbon stock</strong> — a +14%
+shift on 246.5 Mha of forested area.
+</p>
+
+<table class="matrix">
+<thead>
+<tr><th>Region</th><th>Forest area (Mha)</th>
+    <th>B1.1 stock (TgC)</th><th>B1.3 stock (TgC)</th>
+    <th>B1.1 mean (Mg/ha)</th><th>B1.3 mean (Mg/ha)</th></tr>
+</thead>
+<tbody>
+<tr><td>Pacific NW (WA, OR, CA)</td><td>34.4</td><td>9,176</td><td>11,557</td><td>267</td><td><strong>336</strong></td></tr>
+<tr><td>Northeast (9 states)</td><td>27.9</td><td>6,681</td><td>7,175</td><td>239</td><td>257</td></tr>
+<tr><td>Mountain West (6 states)</td><td>36.2</td><td>7,651</td><td>8,264</td><td>212</td><td>229</td></tr>
+<tr><td>Midwest (6 states)</td><td>19.3</td><td>3,352</td><td>4,001</td><td>174</td><td>207</td></tr>
+<tr><td>Lake States (MN, WI, MI)</td><td>21.9</td><td>3,654</td><td>4,262</td><td>167</td><td>195</td></tr>
+<tr><td>South + Southeast (13 states)</td><td>106.8</td><td>17,305</td><td>19,319</td><td>162</td><td>181</td></tr>
+<tr><td><strong>CONUS</strong></td><td><strong>246.5</strong></td>
+    <td><strong>47,818</strong></td><td><strong>54,578</strong></td>
+    <td><strong>194</strong></td><td><strong>221</strong></td></tr>
+</tbody>
+</table>
+
+<p>
+Two regional patterns: the Pacific Northwest gets the biggest mean-density
+boost (267 → 336 Mg/ha; the +26% reflects how strongly Pacific Doug-fir
+weighting matters), and the South + Southeast adds the largest absolute
+stock (+2 PgC) because of its scale. Per-state B1.3 / B1.1 ratios span
+0.88 (TX, WY where uniform overestimated) to 1.94 (IN where the spatially
+dominant oak-hickory yields very different from the equal-weight mean).
+The 14% CONUS shift lands close to the +24% libcbm-under-GCBM gap that
+originally motivated this work, supporting the methods paper claim that
+stratification choice is the dominant component of the cross-engine
+uncertainty.
 </p>
 
 <h2>Phase 2 + 3 + 4 update: n=40 (2026-05-30)</h2>
