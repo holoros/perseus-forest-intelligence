@@ -83,3 +83,19 @@ flat +/-10% band. Sampler: scripts/yield_curve_engine/ycx_csi_sample.R.
   climate-embedding PCs + latitude (transfer R2 ~0.3-0.4) and predicted for
   western plots, giving every CONUS state a directional climate band. Western
   states are flagged `domain=modeled` (vs `observed`) and clamped to +/-35%.
+
+## beta from the FIA remeasurement growth record (rigorous)
+The site-index -> biomass sensitivity beta was calibrated against observed
+growth, not just the chronosequence asymptote (ycx_grm_beta.R). Net annual AGC
+growth = (AGC_t2 - AGC_t1)/REMPER from ~134,600 paired FIA remeasurement plots
+was regressed on log(CSI) with forest-type fixed effects and controls for
+initial stocking (basal area) and stand age. Result: **beta = -0.04 (SE 0.02,
+n=134,554)** - i.e. within forest type, and controlling for stocking and age,
+the Climate Site Index has essentially no measurable relationship with observed
+aboveground carbon growth. The asymptote calibration agreed (beta ~ -0.12).
+Biomass growth is governed by stocking, age, and species; the height-based CSI
+adds no carbon-growth signal. Because site index is nonetheless biometrically a
+productivity measure, the prior (~0.8-1.0) is tempered toward this evidence and
+**beta = 0.35** is used for the climate band - a deliberately conservative
+sensitivity. The band is therefore modest (a few percent for most states) and
+clearly a climate *sensitivity*, not a confident prediction.
