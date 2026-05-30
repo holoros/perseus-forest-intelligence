@@ -32,7 +32,8 @@ dir.create(figd, showWarnings = FALSE, recursive = TRUE)
 
 START <- 2025L; HORIZON <- 50L; STEP <- 5L
 years <- seq(START, START + HORIZON, by = STEP)
-CLIM  <- 0.10
+FALLBACK_CLIM <- 0.08   # +/- band where Climate Site Index is unavailable
+CSI_BETA      <- 0.70   # biomass/volume sensitivity to site-index change
 REGEN_AGE <- 5
 
 ## owner regimes
@@ -132,20 +133,43 @@ project <- function(rv, scale=1) {
   list(res=res, man=man, rem=rem)
 }
 
+## ---- climate band factors from Climate Site Index --------------------
+## Central projection is current-climate (FIA-anchored). The uncertainty
+## ribbon is the climate envelope: per state, CSI_2030->2090 implies a
+## productivity multiplier pm(year) = 1 + beta*(CSI(year)/CSI_2030 - 1).
+## lo/hi bracket current climate and the CSI-projected climate. Where CSI
+## is unavailable (outside its domain) a flat +/-FALLBACK_CLIM is used.
+csi_path <- file.path(cfg, "csi_states.csv")
+lo_fac <- rep(1-FALLBACK_CLIM, length(years))
+hi_fac <- rep(1+FALLBACK_CLIM, length(years))
+clim_src <- "fallback_flat"
+if (file.exists(csi_path)) {
+  csi <- read.csv(csi_path, stringsAsFactors=FALSE)
+  r <- csi[csi$state==ST, ]
+  if (nrow(r)==1 && is.finite(r$csi_2030) && r$csi_2030>0) {
+    cyr <- c(2030,2060,2090); cval <- c(r$csi_2030,r$csi_2060,r$csi_2090)
+    ci  <- approx(cyr, cval, xout=pmin(pmax(years,2030),2090), rule=2)$y
+    pm  <- 1 + CSI_BETA*(ci/r$csi_2030 - 1)
+    lo_fac <- pmin(1, pm); hi_fac <- pmax(1, pm)
+    clim_src <- sprintf("CSI(beta=%.2f, 2090 chg %+.1f%%)",
+                        CSI_BETA, 100*(r$csi_2090/r$csi_2030-1))
+  }
+}
+
 rows <- list(); flux <- list()
 for (mm in names(resp_metric)) {
   rv <- resp_metric[[mm]]$rv; conv <- resp_metric[[mm]]$conv
-  base <- project(rv,1); lo <- project(rv,1-CLIM); hi <- project(rv,1+CLIM)
+  base <- project(rv,1)                 # single current-climate projection
   for (sc in c("reserve (no harvest)","managed (harvest)")) {
     bm <- if (sc=="reserve (no harvest)") base$res else base$man
-    lm <- if (sc=="reserve (no harvest)") lo$res   else lo$man
-    hm <- if (sc=="reserve (no harvest)") hi$res   else hi$man
-    for (j in seq_along(years))
+    for (j in seq_along(years)) {
+      cen <- mean(bm[,j],na.rm=TRUE)*conv
       rows[[length(rows)+1]] <- data.frame(state=ST, metric=mm, mgmt=sc, year=years[j],
-        value=round(mean(bm[,j],na.rm=TRUE)*conv,5),
-        value_lo=round(mean(lm[,j],na.rm=TRUE)*conv,5),
-        value_hi=round(mean(hm[,j],na.rm=TRUE)*conv,5),
+        value=round(cen,5),
+        value_lo=round(cen*lo_fac[j],5),
+        value_hi=round(cen*hi_fac[j],5),
         n_plots=sum(!is.na(bm[,j])), stringsAsFactors=FALSE)
+    }
   }
   if (mm == "agc_live_total")
     for (j in seq_along(years))
@@ -153,6 +177,7 @@ for (mm in names(resp_metric)) {
         removed_density_per_yr=round(mean(base$rem[,j],na.rm=TRUE)*conv/STEP,6),
         stringsAsFactors=FALSE)
 }
+cat(sprintf("[ycx_02] climate band: %s\n", clim_src))
 ser <- do.call(rbind, rows)
 write.csv(ser, file.path(out, sprintf("ycx_%s_state_series.csv", ST)), row.names=FALSE)
 write.csv(do.call(rbind,flux), file.path(out, sprintf("ycx_%s_harvest_flux.csv", ST)), row.names=FALSE)
@@ -170,6 +195,6 @@ for (sc in names(cols)){ d<-sub[sub$mgmt==sc,]
   polygon(c(d$year,rev(d$year)),c(d$value_lo,rev(d$value_hi)),col=adjustcolor(cols[[sc]],0.18),border=NA)
   lines(d$year,d$value,col=cols[[sc]],lwd=2.4) }
 legend("topleft",legend=names(cols),col=cols,lwd=2.4,bty="n",cex=0.85)
-mtext("Industrial clearcut + NIPF/State/Public partial; ribbon +/-10% productivity",3,cex=0.66,line=0.2)
+mtext(sprintf("Industrial clearcut + NIPF/State/Public partial; band = %s", clim_src),3,cex=0.62,line=0.2)
 par(op); dev.off()
 cat(sprintf("[ycx_02] wrote figures/ycx_%s_validation.png\n", ST))
