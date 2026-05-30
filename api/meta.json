@@ -3,8 +3,8 @@
  "schema": "perseus_api_v1",
  "db_version": "v0.55",
  "stats": {
-  "states": 11,
-  "engines": 33,
+  "states": 48,
+  "engines": 34,
   "metrics": 70,
   "rows": 33163
  },
@@ -426,6 +426,12 @@
   "tree_c_total": {
    "label": "Total-tree carbon (Jenkins / NSVBE, all components)",
    "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "merch_bio_dry": {
+   "label": "Merchantable bole dry biomass",
+   "unit": "Tg dry biomass",
    "kind": "stock",
    "group": "carbon"
   }
