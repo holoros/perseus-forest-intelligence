@@ -99,3 +99,21 @@ productivity measure, the prior (~0.8-1.0) is tempered toward this evidence and
 **beta = 0.35** is used for the climate band - a deliberately conservative
 sensitivity. The band is therefore modest (a few percent for most states) and
 clearly a climate *sensitivity*, not a confident prediction.
+
+## Productivity-index comparison (CSI vs CSPI vs BGI)
+FIA carbon growth was regressed on each of three productivity indices
+(ycx_index_test.R; log(net annual AGC growth) ~ log(index) + stocking + age +
+forest-type FE):
+
+| index | beta | SE | R2 | n | coverage |
+|---|---|---|---|---|---|
+| CSPI (composite SPI) | +0.59 | 0.03 | 0.20 | 145,229 | national |
+| BGI (bioclimatic growth) | +0.31 | 0.07 | 0.11 | 8,973 | Maine |
+| CSI (height site index) | -0.05 | 0.02 | 0.10 | 140,407 | eastern |
+
+CSPI is by far the best predictor of observed carbon growth; BGI is positive
+too; the height-based CSI is uncoupled. Direction of the climate band still
+comes from CSI projections (the only forward layer), but its magnitude is set
+to beta=0.45 -- central between the empirical BGI (0.31) and CSPI (0.59)
+elasticities. A future CSPI projection is the recommended path to use the
+best-coupling index for both direction and magnitude.
