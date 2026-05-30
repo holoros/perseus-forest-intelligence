@@ -39,12 +39,15 @@ NR==1{ hdr="PLT_CN,STATECD,CONDID,CONDPROP_UNADJ,FORTYPCD,OWNCD,OWNGRPCD,STDAGE,
 echo "[split] COND done"
 
 echo "[split] TREE (STATECD col 5, 13 GB single pass)"
+# cols: PLT_CN 2, STATECD 5, STATUSCD 13, DIA 16, TPA_UNADJ 86, DRYBIO_AG 127,
+#       CARBON_AG 90, VOLCFNET 36 (net merch vol), VOLTSGRS 169 (total stem gross
+#       vol), DRYBIO_BOLE 87 (merch bole dry biomass)
 awk -F, -v OUT="$OUT" -v CONUS="$CONUS" '
-NR==1{ hdr="PLT_CN,STATECD,STATUSCD,DIA,TPA_UNADJ,DRYBIO_AG,CARBON_AG,VOLCFNET"; next }
+NR==1{ hdr="PLT_CN,STATECD,STATUSCD,DIA,TPA_UNADJ,DRYBIO_AG,CARBON_AG,VOLCFNET,VOLTSGRS,DRYBIO_BOLE"; next }
 { st=$5; if(index(CONUS,"|"st"|")==0) next;
   f=OUT"/"st"_TREE.csv";
   if(!(st in seen)){ print hdr > f; seen[st]=1 }
-  print $2","$5","$13","$16","$86","$127","$90","$36 >> f }
+  print $2","$5","$13","$16","$86","$127","$90","$36","$169","$87 >> f }
 ' "$D/ENTIRE_TREE.csv"
 echo "[split] TREE done"
 

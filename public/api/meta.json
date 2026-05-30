@@ -428,6 +428,12 @@
    "unit": "Tg C",
    "kind": "stock",
    "group": "carbon"
+  },
+  "merch_bio_dry": {
+   "label": "Merchantable bole dry biomass",
+   "unit": "Tg dry biomass",
+   "kind": "stock",
+   "group": "carbon"
   }
  },
  "buckets": [

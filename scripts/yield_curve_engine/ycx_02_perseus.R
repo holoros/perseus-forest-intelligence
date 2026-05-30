@@ -73,10 +73,18 @@ get_abc <- function(ft, prov, own, rv) {
     if (!is.null(L[[k]])) return(L[[k]]); NULL
 }
 
+## native densities; merge converts to state totals + calibrates units.
+##   agc_live_total : Mg C/ha   (AG carbon)         -> Tg, FIA-anchored
+##   agb_dry        : Mg/ha     (total AG biomass)  -> Tg
+##   merch_bio_dry  : Mg/ha     (merch bole bio)    -> Tg   [new metric]
+##   vol_stem       : m3/ha     (total stem gross)  -> Mm3  [VOLTSGRS]
+##   merch_vol_mcf  : cuft/ac   (net merch vol)     -> Mcf  [VOLCFNET, calibrated]
 resp_metric <- list(
-  agc_live_total = list(rv="carbon_lbac", conv=LBAC_TO_MGHA),
-  agb_dry        = list(rv="agb_tonac",   conv=TONAC_TO_MGHA),
-  vol_stem       = list(rv="vol_cuftac",  conv=CUFTAC_TO_M3HA))
+  agc_live_total = list(rv="carbon_lbac",    conv=LBAC_TO_MGHA),
+  agb_dry        = list(rv="agb_tonac",      conv=TONAC_TO_MGHA),
+  merch_bio_dry  = list(rv="merchbio_tonac", conv=TONAC_TO_MGHA),
+  vol_stem       = list(rv="voltot_cuftac",  conv=CUFTAC_TO_M3HA),
+  merch_vol_mcf  = list(rv="merchvol_cuftac",conv=1))
 need_rv <- unique(vapply(resp_metric, function(x) x$rv, ""))
 
 n <- nrow(mem); ages0 <- mem$STDAGE

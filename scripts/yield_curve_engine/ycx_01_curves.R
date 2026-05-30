@@ -38,7 +38,8 @@ mem <- mem[!duplicated(mem$PLT_CN), ]
 tf <- file.path(fia, sprintf("%s_TREE.csv", ST))
 hdr <- strsplit(readLines(tf, n = 1), ",")[[1]]
 hdr <- gsub('"', '', hdr)
-need <- c("PLT_CN","STATUSCD","DIA","TPA_UNADJ","DRYBIO_AG","CARBON_AG","VOLCFNET")
+need <- c("PLT_CN","STATUSCD","DIA","TPA_UNADJ","DRYBIO_AG","CARBON_AG",
+          "VOLCFNET","VOLTSGRS","DRYBIO_BOLE")
 idx <- match(need, hdr)
 if (any(is.na(idx))) stop("missing TREE cols: ",
                           paste(need[is.na(idx)], collapse=", "))
@@ -47,7 +48,8 @@ system(sprintf("cut -d, -f%s '%s' > '%s'",
                paste(idx, collapse=","), tf, slim))
 tree <- read.csv(slim, stringsAsFactors = FALSE)
 unlink(slim)
-for (c0 in c("DIA","TPA_UNADJ","DRYBIO_AG","CARBON_AG","VOLCFNET"))
+for (c0 in c("DIA","TPA_UNADJ","DRYBIO_AG","CARBON_AG","VOLCFNET",
+             "VOLTSGRS","DRYBIO_BOLE"))
   tree[[c0]] <- suppressWarnings(as.numeric(tree[[c0]]))
 tree$STATUSCD <- suppressWarnings(as.integer(tree$STATUSCD))
 tree <- tree[!is.na(tree$STATUSCD) & tree$STATUSCD == 1, ]
@@ -60,10 +62,13 @@ agb$agb_tonac <- agb$agb_tonac / 2000
 cb  <- A(I(CARBON_AG * TPA_UNADJ) ~ PLT_CN); names(cb)[2]  <- "carbon_lbac"
 ba  <- A(I(0.005454154 * DIA^2 * TPA_UNADJ) ~ PLT_CN); names(ba)[2] <- "ba_ft2ac"
 tpa <- A(TPA_UNADJ ~ PLT_CN); names(tpa)[2] <- "tpa_total"
-vol <- A(I(VOLCFNET * TPA_UNADJ) ~ PLT_CN); names(vol)[2] <- "vol_cuftac"
+vol <- A(I(VOLCFNET * TPA_UNADJ) ~ PLT_CN); names(vol)[2] <- "merchvol_cuftac"
+vtt <- A(I(VOLTSGRS * TPA_UNADJ) ~ PLT_CN); names(vtt)[2] <- "voltot_cuftac"
+mbo <- A(I(DRYBIO_BOLE * TPA_UNADJ) ~ PLT_CN); names(mbo)[2] <- "merchbio_tonac"
+mbo$merchbio_tonac <- mbo$merchbio_tonac / 2000
 
 pd <- Reduce(function(a,b) merge(a,b,by="PLT_CN",all=TRUE),
-             list(agb, cb, ba, tpa, vol))
+             list(agb, cb, ba, tpa, vol, vtt, mbo))
 pd <- merge(pd, mem[, c("PLT_CN","cell_key","ft_group","prov_code",
                         "owner4","STDAGE","treatment")], by = "PLT_CN")
 names(pd)[names(pd)=="STDAGE"] <- "stand_age"
@@ -85,7 +90,8 @@ fit1 <- function(age, y) {
       control=list(maxiter=300, warnOnly=TRUE)),
     error=function(e) NULL)
 }
-resp <- c("agb_tonac","carbon_lbac","ba_ft2ac","tpa_total","vol_cuftac")
+resp <- c("agb_tonac","carbon_lbac","ba_ft2ac","tpa_total",
+          "merchvol_cuftac","voltot_cuftac","merchbio_tonac")
 age_grid <- seq(5,150,by=5)
 
 emit_fit <- function(sub, scope, key, ft, prov, own, trt) {

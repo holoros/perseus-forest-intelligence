@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 """
-ycx_merge_perseus.py  (v2 — all CONUS states, 3 metrics, harvest removals)
+ycx_merge_perseus.py  (v3 — adds merch biomass + merch/total volume)
 
-Inject the empirical yield-curve engine (cls "YC") into the PERSEUS
-api/series JSON for every state with a ycx_<ST>_state_series.csv.
+Inject the empirical yield-curve engine (cls "YC") into PERSEUS api/series
+for every state with a ycx_<ST>_state_series.csv.
 
-Metrics: agc_live_total (Tg C), agb_dry (Tg dry biomass), vol_stem (Mm3).
-Scenarios: reserve (no harvest) and managed (harvest, owner-rotation
-clearcut with real removals). Climate +/-10% ribbon -> pts [yr,mean,lo,hi].
+Stock metrics & native densities (from ycx_02):
+  agc_live_total  Mg C/ha  -> Tg C   (FIA-anchored via A0)
+  agb_dry         Mg/ha    -> Tg     (physical, area model)
+  merch_bio_dry   Mg/ha    -> Tg     (physical; NEW metric, DRYBIO_BOLE)
+  vol_stem        m3/ha    -> Mm3    (total stem gross, VOLTSGRS; unit-calibrated)
+  merch_vol_mcf   cuft/ac  -> Mcf    (net merch, VOLCFNET; unit-calibrated)
+Flux: harvest_c_yr (Tg C/yr, managed bucket).
 
-State totals from per-hectare densities use the uniform-grid area model:
-  area_ha   = n_forest_plots * A0
-  total_Tg  = mean_density * area_ha / 1e6
-A0 (ha per current ground plot) is calibrated so AG-carbon totals
-reproduce the FIA anchors in fia.json (tg_agc) for the 11 states that
-have them; the median A0 is used for the remaining states.
+State totals use the uniform-grid area model area_ha = n_plots * A0, with A0
+calibrated so AG-carbon totals reproduce fia.json tg_agc (median A0 for the
+rest). vol_stem and merch_vol_mcf carry idiosyncratic upstream units, so a
+single global factor K_metric scales the physical YC total onto the existing
+engines' axis (median of existing_2025 / YC_physical_2025 across states that
+already have that metric). Carbon/biomass stay in physical units.
 
 Usage: python3 ycx_merge_perseus.py <repo_dir> <series_csv_dir>
 """
@@ -28,10 +32,16 @@ META = json.load(open(os.path.join(api, "meta.json")))
 stmeta = json.load(open(os.path.join(api, "states.json")))
 
 MODEL, CLS, START = "yc_fia_empirical_v1", "YC", 2025
-METRICS = ["agc_live_total", "agb_dry", "vol_stem"]   # Tg, Tg, Mm3
+AC_PER_HA = 2.4710538
 BUCKETS = ["reserve (no harvest)", "managed (harvest)"]
-
-# FIPS-abbr -> (name, [lon, lat]) for CONUS states we may add
+# metric -> ("tg"|"mm3"|"mcf"), calibrate_to_existing?
+MET = {
+ "agc_live_total": ("tg",  False),
+ "agb_dry":        ("tg",  False),
+ "merch_bio_dry":  ("tg",  False),
+ "vol_stem":       ("mm3", True),
+ "merch_vol_mcf":  ("mcf", True),
+}
 ST_INFO = {
  "AL":("Alabama",[-86.8,32.8]),"AZ":("Arizona",[-111.7,34.3]),"AR":("Arkansas",[-92.4,34.8]),
  "CA":("California",[-119.7,37.2]),"CO":("Colorado",[-105.5,39.0]),"CT":("Connecticut",[-72.7,41.6]),
@@ -60,14 +70,12 @@ def load_native(path):
     return d, npl
 
 def load_flux(path):
-    """ -> {year: removed_density_per_yr (Mg C/ha/yr)} """
     out = {}
     if os.path.exists(path):
         for r in csv.DictReader(open(path)):
             out[int(r["year"])] = float(r["removed_density_per_yr"])
     return out
 
-# ---- gather all state CSVs ----
 files = sorted(glob.glob(os.path.join(csvdir, "ycx_*_state_series.csv")))
 native, nplots, hflux = {}, {}, {}
 for f in files:
@@ -75,92 +83,133 @@ for f in files:
     native[st], nplots[st] = load_native(f)
     hflux[st] = load_flux(os.path.join(csvdir, f"ycx_{st}_harvest_flux.csv"))
 
-# ---- calibrate A0 (ha per plot) from FIA carbon anchors ----
+# ---- A0 (ha/plot) from FIA carbon anchors ----
 A0 = {}
 for st in native:
     tg = fia.get(st, {}).get("tg_agc")
     if tg is None: continue
-    d25 = native[st]["agc_live_total"]["reserve (no harvest)"][START][0]  # MgC/ha
-    npl = nplots[st]
-    if d25 > 0 and npl > 0:
-        A0[st] = tg * 1e6 / (d25 * npl)
+    d25 = native[st]["agc_live_total"]["reserve (no harvest)"][START][0]
+    if d25 > 0 and nplots[st] > 0:
+        A0[st] = tg * 1e6 / (d25 * nplots[st])
 A0_med = statistics.median(A0.values())
-print(f"A0 calibrated on {len(A0)} FIA-anchored states; "
-      f"median = {A0_med:.0f} ha/plot (range {min(A0.values()):.0f}-{max(A0.values()):.0f})")
+def area_ha(st): return nplots[st] * A0.get(st, A0_med)
+print(f"A0: {len(A0)} anchored states, median {A0_med:.0f} ha/plot")
 
-def area_ha(st):
-    return nplots[st] * A0.get(st, A0_med)
+def phys_total(metric, density, st):
+    kind = MET[metric][0]
+    if kind in ("tg","mm3"):           # Mg/ha->Tg or m3/ha->Mm3
+        return density * area_ha(st) / 1e6
+    if kind == "mcf":                  # cuft/ac -> cuft total /1e6
+        return density * (area_ha(st)*AC_PER_HA) / 1e6
+    return density
 
-# ---- build + inject ----
-added_states = []
+def existing_at_2025(node):
+    """median over non-YC engines of value interpolated to START."""
+    vals=[]
+    for s in node:
+        if s.get("cls")=="YC": continue
+        pts=sorted(s["pts"]);
+        if not pts: continue
+        xs=[p[0] for p in pts]; ys=[p[1] for p in pts]
+        if START<=xs[0]: v=ys[0]
+        elif START>=xs[-1]: v=ys[-1]
+        else:
+            for i in range(1,len(xs)):
+                if xs[i]>=START:
+                    t=(START-xs[i-1])/(xs[i]-xs[i-1]); v=ys[i-1]+t*(ys[i]-ys[i-1]); break
+        vals.append(v)
+    return statistics.median(vals) if vals else None
+
+# ---- calibration factor K for unit-ambiguous metrics ----
+K = {m:1.0 for m in MET}
+for metric,(kind,cal) in MET.items():
+    if not cal: continue
+    ratios=[]
+    for st in native:
+        if metric not in native[st]: continue
+        spath=os.path.join(api,"series",f"{st}.json")
+        if not os.path.exists(spath): continue
+        ex=json.load(open(spath)).get(metric,{}).get("managed (harvest)",[])
+        ev=existing_at_2025(ex)
+        if ev is None: continue
+        d25=native[st][metric]["reserve (no harvest)"][START][0]
+        phys=phys_total(metric,d25,st)
+        if phys>0: ratios.append(ev/phys)
+    if ratios: K[metric]=statistics.median(ratios)
+    print(f"K[{metric}] = {K[metric]:.4g}  (from {len(ratios)} existing-engine states)")
+
+# ---- inject ----
+added_states=[]; yc_globally_new=True
 for st in sorted(native):
-    spath = os.path.join(api, "series", f"{st}.json")
-    ser = json.load(open(spath)) if os.path.exists(spath) else {}
-    A = area_ha(st)
-    added_pts = 0
-    for metric in METRICS:
-        if metric not in native[st]:
-            continue
+    spath=os.path.join(api,"series",f"{st}.json")
+    ser=json.load(open(spath)) if os.path.exists(spath) else {}
+    had_yc=any(s.get("model")==MODEL for mt in ser for bk in ser[mt] for s in ser[mt][bk])
+    if had_yc: yc_globally_new=False
+    added=0; metrics_here=[]
+    for metric in MET:
+        if metric not in native[st]: continue
+        metrics_here.append(metric)
         for bucket in BUCKETS:
-            nb = native[st][metric][bucket]
-            pts = []
+            nb=native[st][metric][bucket]; pts=[]
             for y in sorted(nb):
-                v, lo, hi = nb[y]
-                pts.append([y, round(v*A/1e6, 3), round(lo*A/1e6, 3), round(hi*A/1e6, 3)])
-            node = ser.setdefault(metric, {}).setdefault(bucket, [])
-            node[:] = [s for s in node if s.get("model") != MODEL]
-            node.append({"model": MODEL, "cls": CLS,
-                "label": ("YC empirical yield curve (FIA chronosequence, "
-                          "EPA-L3 x ownership strata; owner-rotation harvest, "
-                          "FIA-anchored area, climate +/-10%)"),
-                "pts": pts})
-            added_pts += len(pts)
-
-    # harvest carbon flux (Tg C / yr), managed bucket only
-    metrics_here = list(METRICS)
+                v,lo,hi=nb[y]
+                f=K[metric]
+                pts.append([y, round(phys_total(metric,v,st)*f,3),
+                               round(phys_total(metric,lo,st)*f,3),
+                               round(phys_total(metric,hi,st)*f,3)])
+            node=ser.setdefault(metric,{}).setdefault(bucket,[])
+            node[:]=[s for s in node if s.get("model")!=MODEL]
+            node.append({"model":MODEL,"cls":CLS,
+                "label":("YC empirical yield curve (FIA chronosequence, EPA-L3 x "
+                         "ownership strata; owner-rotation harvest, FIA-anchored)"),
+                "pts":pts})
+            added+=len(pts)
+    # harvest flux
     if hflux.get(st):
-        fl = hflux[st]
-        pts = [[y, round(fl[y]*A/1e6, 4)] for y in sorted(fl)]
-        node = ser.setdefault("harvest_c_yr", {}).setdefault("managed (harvest)", [])
-        node[:] = [s for s in node if s.get("model") != MODEL]
-        node.append({"model": MODEL, "cls": CLS,
-            "label": "YC harvest carbon flux (owner-rotation removals, FIA-anchored area)",
-            "pts": pts})
-        added_pts += len(pts); metrics_here.append("harvest_c_yr")
+        fl=hflux[st]; A=area_ha(st)
+        pts=[[y, round(fl[y]*A/1e6,4)] for y in sorted(fl)]
+        node=ser.setdefault("harvest_c_yr",{}).setdefault("managed (harvest)",[])
+        node[:]=[s for s in node if s.get("model")!=MODEL]
+        node.append({"model":MODEL,"cls":CLS,
+            "label":"YC harvest carbon flux (owner-rotation removals)","pts":pts})
+        added+=len(pts); metrics_here.append("harvest_c_yr")
+    json.dump(ser, open(spath,"w"), separators=(",",":"))
 
-    json.dump(ser, open(spath, "w"), separators=(",", ":"))
-
-    sm = stmeta.get(st)
-    if sm:                              # existing state
-        sm["engines"] = sm.get("engines", 0) + 1
-        sm["rows"]    = sm.get("rows", 0) + added_pts
-        smk = set(sm.get("series_metrics", []))
-        sm["series_metrics"] = sorted(smk | set(metrics_here))
-        sm["has_series"] = True
-    else:                               # new state
-        name, cen = ST_INFO.get(st, (st, [-98.0, 39.0]))
-        stmeta[st] = {"engines": 1, "metrics": len(metrics_here), "rows": added_pts,
-                      "name": name, "centroid": cen, "has_series": True,
-                      "has_tier_b": False, "series_metrics": sorted(metrics_here)}
+    sm=stmeta.get(st)
+    if sm:
+        sm["series_metrics"]=sorted(set(sm.get("series_metrics",[]))|set(metrics_here))
+        sm["has_series"]=True
+        if not had_yc:                  # first time YC added -> count it once
+            sm["engines"]=sm.get("engines",0)+1
+            sm["rows"]=sm.get("rows",0)+added
+    else:
+        name,cen=ST_INFO.get(st,(st,[-98.0,39.0]))
+        stmeta[st]={"engines":1,"metrics":len(metrics_here),"rows":added,
+                    "name":name,"centroid":cen,"has_series":True,
+                    "has_tier_b":False,"series_metrics":sorted(metrics_here)}
         added_states.append(st)
 
-# US aggregate stays as-is; refresh meta stats
-json.dump(stmeta, open(os.path.join(api, "states.json"), "w"),
-          indent=1, ensure_ascii=False); open(os.path.join(api,"states.json"),"a").write("\n")
-real_states = [k for k in stmeta if k != "US"]
-META["stats"]["states"]  = len(real_states)
-META["stats"]["engines"] = META["stats"].get("engines", 0) + 1
-json.dump(META, open(os.path.join(api, "meta.json"), "w"),
-          indent=1, ensure_ascii=False); open(os.path.join(api,"meta.json"),"a").write("\n")
+# register new metric in meta
+META.setdefault("metrics",{})["merch_bio_dry"]={
+    "label":"Merchantable bole dry biomass","unit":"Tg dry biomass",
+    "kind":"stock","group":"carbon"}
+json.dump(stmeta, open(os.path.join(api,"states.json"),"w"), indent=1, ensure_ascii=False)
+open(os.path.join(api,"states.json"),"a").write("\n")
+# meta engines already counts YC (added in the first merge); refresh state count
+# and bump engines only if YC was globally new this run (no state had it before).
+META["stats"]["states"]=len([k for k in stmeta if k!="US"])
+if yc_globally_new:
+    META["stats"]["engines"]=META["stats"].get("engines",0)+1
+json.dump(META, open(os.path.join(api,"meta.json"),"w"), indent=1, ensure_ascii=False)
+open(os.path.join(api,"meta.json"),"a").write("\n")
 
-print(f"Injected YC into {len(native)} states ({len(added_states)} new: "
-      f"{', '.join(added_states)})")
-# print a few anchored checks
-for st in ["ME","IN","GA","CA","TX","MN"]:
-    if st in native:
-        A = area_ha(st)
-        r = native[st]["agc_live_total"]["reserve (no harvest)"]
-        m = native[st]["agc_live_total"]["managed (harvest)"]
-        print(f"  {st}: AGC reserve {round(r[2025][0]*A/1e6,1)}->{round(r[2075][0]*A/1e6,1)} Tg | "
-              f"managed {round(m[2025][0]*A/1e6,1)}->{round(m[2075][0]*A/1e6,1)} Tg "
-              f"| A0={A0.get(st,A0_med):.0f} npl={nplots[st]}")
+print(f"Injected YC into {len(native)} states ({len(added_states)} new).")
+for st in ["ME","GA","CA","TX","OR"]:
+    if st not in native: continue
+    line=[]
+    for metric in MET:
+        if metric not in native[st]: continue
+        r=native[st][metric]["reserve (no harvest)"]
+        line.append(f"{metric.split('_')[0]}:{round(phys_total(metric,r[2025][0],st)*K[metric],1)}->"
+                    f"{round(phys_total(metric,r[2075][0],st)*K[metric],1)}")
+    print(f"  {st} (reserve 2025->2075): " + "  ".join(line))
