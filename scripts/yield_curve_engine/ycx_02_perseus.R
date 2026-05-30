@@ -32,8 +32,7 @@ dir.create(figd, showWarnings = FALSE, recursive = TRUE)
 
 START <- 2025L; HORIZON <- 50L; STEP <- 5L
 years <- seq(START, START + HORIZON, by = STEP)
-FALLBACK_CLIM <- 0.08   # +/- band where Climate Site Index is unavailable
-CSI_BETA      <- 0.70   # biomass/volume sensitivity to site-index change
+FALLBACK_CLIM <- 0.08   # +/- band where no CSI signal (observed or modeled)
 REGEN_AGE <- 5
 
 ## owner regimes
@@ -139,20 +138,25 @@ project <- function(rv, scale=1) {
 ## productivity multiplier pm(year) = 1 + beta*(CSI(year)/CSI_2030 - 1).
 ## lo/hi bracket current climate and the CSI-projected climate. Where CSI
 ## is unavailable (outside its domain) a flat +/-FALLBACK_CLIM is used.
-csi_path <- file.path(cfg, "csi_states.csv")
+## beta calibrated in ycx_calibrate.R (productivity/growth sensitivity to CSI)
+beta_f <- file.path(cfg, "ycx_beta.txt")
+CSI_BETA <- if (file.exists(beta_f)) as.numeric(readLines(beta_f)[1]) else 0.80
+if (!is.finite(CSI_BETA)) CSI_BETA <- 0.80
+## CSI ratios per state (observed east; climate-transfer modeled west)
+csi_path <- file.path(cfg, "csi_states_ext.csv")
 lo_fac <- rep(1-FALLBACK_CLIM, length(years))
 hi_fac <- rep(1+FALLBACK_CLIM, length(years))
 clim_src <- "fallback_flat"
 if (file.exists(csi_path)) {
   csi <- read.csv(csi_path, stringsAsFactors=FALSE)
   r <- csi[csi$state==ST, ]
-  if (nrow(r)==1 && is.finite(r$csi_2030) && r$csi_2030>0) {
+  if (nrow(r)==1 && is.finite(r$csi_2090)) {
     cyr <- c(2030,2060,2090); cval <- c(r$csi_2030,r$csi_2060,r$csi_2090)
     ci  <- approx(cyr, cval, xout=pmin(pmax(years,2030),2090), rule=2)$y
     pm  <- 1 + CSI_BETA*(ci/r$csi_2030 - 1)
     lo_fac <- pmin(1, pm); hi_fac <- pmax(1, pm)
-    clim_src <- sprintf("CSI(beta=%.2f, 2090 chg %+.1f%%)",
-                        CSI_BETA, 100*(r$csi_2090/r$csi_2030-1))
+    clim_src <- sprintf("CSI %s (beta=%.2f, 2090 %+.1f%%)",
+                        r$domain, CSI_BETA, 100*(r$csi_2090/r$csi_2030-1))
   }
 }
 

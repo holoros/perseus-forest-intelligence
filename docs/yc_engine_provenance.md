@@ -68,3 +68,18 @@ band brackets current climate vs the CSI-projected climate. Northern states
 states (GA/AL -9%, MS -9%) skew it downward. The 18 western/plains states fall
 outside the CSI domain and use a flat +/-8% fallback. Replaces the earlier
 flat +/-10% band. Sampler: scripts/yield_curve_engine/ycx_csi_sample.R.
+
+## Calibrated beta + CONUS-wide climate coverage
+- **beta calibration** (ycx_calibrate.R): regressing log(carbon carrying
+  capacity) on log(CSI) with forest-type fixed effects gives a within-type
+  asymptote elasticity near zero (beta = -0.12, SE 0.05) - i.e. *max standing
+  biomass is set by forest type and stand dynamics, not site index*. Site
+  index drives growth rate, not the ceiling. beta is therefore retained at a
+  biometric default 0.80 (volume/biomass production ~ site index), applied to
+  the projected stock; the empirical finding is reported transparently. A
+  remeasurement-growth (T1->T2) calibration is the rigorous next step.
+- **western coverage**: the CSI rasters cover only the eastern domain
+  (lon -90..-52). The per-plot CSI 2060/2090 ratio is regressed on the national
+  climate-embedding PCs + latitude (transfer R2 ~0.3-0.4) and predicted for
+  western plots, giving every CONUS state a directional climate band. Western
+  states are flagged `domain=modeled` (vs `observed`) and clamped to +/-35%.
