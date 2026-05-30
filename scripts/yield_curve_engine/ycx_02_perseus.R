@@ -55,8 +55,8 @@ mem <- mem[order(mem$STATECD, mem$COUNTYCD, mem$PLOT, -mem$INVYR), ]
 mem <- mem[!duplicated(mem[, c("STATECD","COUNTYCD","PLOT")]), ]
 mem <- mem[!is.na(mem$STDAGE) & mem$STDAGE > 0, ]
 
-chap   <- function(age,a,b,c) a*(1-exp(-pmax(b*age,0)))^c
-invert <- function(S,a,b,c){ S<-min(max(S,1e-6),a*0.999); -log(1-(S/a)^(1/c))/b }
+## peak-and-decline yield form y = b1*age^b2*b3^age (a=b1,b=b2,c=b3).
+chap <- function(age,a,b,c) a * pmax(age,1e-6)^b * c^age
 
 ## untreated-curve fit lookup with fallback
 L <- list()
@@ -117,12 +117,15 @@ project <- function(rv, scale=1) {
         man[p,j] <- chap(age, a, b, cc)
       }
     } else {
+      ## uneven-aged partial: stock accrues the curve's increment each step
+      ## (negative past the peak -> senescence) and is knocked down at entries.
+      ## No inversion needed, so the peak-decline form works directly.
       S <- chap(ages0[p], a, b, cc)
       for (j in seq_len(ny)) {
         if (j > 1) {
-          g <- invert(S, a, b, cc); S <- chap(g + STEP, a, b, cc)   # grow 5 yr
           ra <- ages0[p] + (years[j]-START)
-          if (floor(ra/reg$E) > floor((ra-STEP)/reg$E)) {           # entry this step
+          S  <- max(S + (chap(ra,a,b,cc) - chap(ra-STEP,a,b,cc)), 0)  # grow 5 yr
+          if (floor(ra/reg$E) > floor((ra-STEP)/reg$E)) {            # entry this step
             pre <- S; S <- (1-reg$f)*S; rem[p,j] <- pre - S }
         }
         man[p,j] <- S

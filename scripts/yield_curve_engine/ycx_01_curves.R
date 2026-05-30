@@ -77,18 +77,29 @@ pd <- pd[!is.na(pd$stand_age) & pd$stand_age > 0 &
 pd$ft_owner <- paste(pd$ft_group, pd$owner4, sep="|")
 cat(sprintf("  plots with age+treatment: %d\n", nrow(pd)))
 
-## ---- bounded Chapman-Richards ---------------------------------------
-chap <- function(age,a,b,c) a*(1-exp(-b*age))^c
+## ---- peak-and-decline yield form: y = b1 * age^b2 * b3^age -----------
+## (Weiskittel's Maine AGB form.) Linear in log space:
+##   log(y) = log(b1) + b2*log(age) + log(b3)*age   -> robust OLS, no
+## convergence issues. With b3 < 1 the curve rises then PEAKS at
+## age* = b2 / -ln(b3) and declines, avoiding the unbounded accumulation
+## of purely-asymptotic forms (Chapman-Richards) over 100+ yr horizons.
+## Coefficient columns a,b,c hold b1,b2,b3 (names kept for downstream code).
+chap <- function(age,a,b,c) a * age^b * c^age
 fit1 <- function(age, y) {
-  ok <- !is.na(age) & !is.na(y) & y > 0; age<-age[ok]; y<-y[ok]
+  ok <- !is.na(age) & !is.na(y) & y > 0 & age > 0; age<-age[ok]; y<-y[ok]
   if (length(y) < MIN_FIT) return(NULL)
-  ymax <- max(y)
-  tryCatch(nls(y ~ chap(age,a,b,c),
-      data=data.frame(age=age,y=y),
-      start=list(a=ymax*1.2, b=0.04, c=1.5), algorithm="port",
-      lower=c(a=1,b=0.005,c=0.5), upper=c(a=ymax*3,b=0.20,c=5.0),
-      control=list(maxiter=300, warnOnly=TRUE)),
-    error=function(e) NULL)
+  m <- tryCatch(lm(log(y) ~ log(age) + age), error=function(e) NULL)
+  if (is.null(m)) return(NULL)
+  cf <- coef(m); if (any(!is.finite(cf))) return(NULL)
+  ## cap b3 <= 1: forbid exponential growth (c^age must not explode).
+  ## If the age term is positive, drop it -> b3 = 1 (pure power, saturates).
+  if (cf[3] > 0) { m <- tryCatch(lm(log(y) ~ log(age)), error=function(e) NULL)
+    if (is.null(m)) return(NULL); cf <- c(coef(m), 0) }
+  a <- exp(unname(cf[1])); b <- unname(cf[2]); c <- exp(unname(cf[3]))
+  ## reject implausible shapes so the fallback hierarchy supplies the curve
+  if (!is.finite(a) || a<=0 || b < 0.2 || b > 3.0) return(NULL)
+  pr <- chap(age, a, b, c)
+  list(a=a, b=b, c=c, rmse=sqrt(mean((y-pr)^2, na.rm=TRUE)))
 }
 resp <- c("agb_tonac","carbon_lbac","ba_ft2ac","tpa_total",
           "merchvol_cuftac","voltot_cuftac","merchbio_tonac")
@@ -98,13 +109,11 @@ emit_fit <- function(sub, scope, key, ft, prov, own, trt) {
   rows_f <- list(); rows_c <- list()
   for (rv in resp) {
     m <- fit1(sub$stand_age, sub[[rv]]); if (is.null(m)) next
-    co <- coef(m); pr <- chap(age_grid, co["a"], co["b"], co["c"])
+    pr <- chap(age_grid, m$a, m$b, m$c)
     rows_f[[rv]] <- data.frame(scope=scope, cell_key=key, ft_group=ft,
       prov_code=prov, owner=own, treatment=trt, response=rv,
-      a=round(unname(co["a"]),3), b=round(unname(co["b"]),5),
-      c=round(unname(co["c"]),3),
-      rmse=round(sqrt(mean(residuals(m)^2,na.rm=TRUE)),3),
-      n_plots=nrow(sub), stringsAsFactors=FALSE)
+      a=round(m$a,4), b=round(m$b,5), c=round(m$c,6),
+      rmse=round(m$rmse,3), n_plots=nrow(sub), stringsAsFactors=FALSE)
     rows_c[[rv]] <- data.frame(scope=scope, cell_key=key, ft_group=ft,
       prov_code=prov, owner=own, treatment=trt, response=rv,
       age=age_grid, predicted=round(pr,3), stringsAsFactors=FALSE)

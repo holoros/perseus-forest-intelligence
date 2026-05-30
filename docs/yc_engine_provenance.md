@@ -117,3 +117,20 @@ comes from CSI projections (the only forward layer), but its magnitude is set
 to beta=0.45 -- central between the empirical BGI (0.31) and CSPI (0.59)
 elasticities. A future CSPI projection is the recommended path to use the
 best-coupling index for both direction and magnitude.
+
+## Model form: peak-and-decline yield curves
+The yield curves use Weiskittel's Maine AGB form (ME.AGB.r) instead of the
+purely-asymptotic Chapman-Richards:
+
+  y = b1 * Age^b2 * b3^Age
+
+Linear in log space, fit by OLS per (stratum x treatment x response). With
+b3 < 1 the curve rises then PEAKS at Age* = b2 / -ln(b3) and declines,
+capturing stand senescence / breakup that asymptotic forms miss over long
+(100+ yr) horizons. Fitted Maine curves peak sensibly by type: spruce/fir
+~75-90 yr (early peak, sharp decline), northern hardwoods ~100-150 yr. b3 is
+capped at 1 (no exponential growth) and shapes with b2 outside [0.2,3] are
+rejected so the cell -> ft -> state fallback supplies a sane curve. The
+projection uses the curve directly for reserve/clearcut, and accrues the
+curve's (possibly negative, post-peak) increment for uneven-aged partial
+harvest -- no asymptote inversion needed.
