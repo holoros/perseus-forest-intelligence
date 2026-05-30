@@ -1,0 +1,437 @@
+{
+ "generated": "2026-05-29T11:35:12.106367+00:00",
+ "schema": "perseus_api_v1",
+ "db_version": "v0.55",
+ "stats": {
+  "states": 11,
+  "engines": 33,
+  "metrics": 70,
+  "rows": 33163
+ },
+ "metrics": {
+  "agc_live_total": {
+   "label": "Above-ground live tree carbon (AGC)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "agc_live_ag": {
+   "label": "Above-ground live carbon (secondary, engine-native)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "agb_dry": {
+   "label": "Above-ground dry biomass",
+   "unit": "Tg dry biomass",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "vol_stem": {
+   "label": "Stem volume (live)",
+   "unit": "Mm3",
+   "kind": "volume",
+   "group": "carbon"
+  },
+  "harvest_c_yr": {
+   "label": "Annual harvest carbon flux",
+   "unit": "Tg C / yr",
+   "kind": "flux",
+   "group": "carbon"
+  },
+  "nbp_yr": {
+   "label": "Net biome production",
+   "unit": "Tg C / yr",
+   "kind": "flux",
+   "group": "carbon"
+  },
+  "species_richness": {
+   "label": "Species richness",
+   "unit": "count",
+   "kind": "index",
+   "group": "biodiversity"
+  },
+  "shannon_diversity": {
+   "label": "Shannon diversity index (live biomass)",
+   "unit": "H'",
+   "kind": "index",
+   "group": "biodiversity"
+  },
+  "softwood_fraction": {
+   "label": "Softwood share of live biomass",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "biodiversity"
+  },
+  "dominant_species_share": {
+   "label": "Top species share of live biomass",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "biodiversity"
+  },
+  "basal_area_per_ha": {
+   "label": "Live basal area per hectare",
+   "unit": "m2 / ha",
+   "kind": "stock",
+   "group": "forest_structure"
+  },
+  "trees_per_ha": {
+   "label": "Live trees per hectare",
+   "unit": "trees / ha",
+   "kind": "stock",
+   "group": "forest_structure"
+  },
+  "mean_dbh_cm": {
+   "label": "Mean tree diameter (DBH)",
+   "unit": "cm",
+   "kind": "stock",
+   "group": "forest_structure"
+  },
+  "sawtimber_share": {
+   "label": "Sawtimber-size share of live biomass",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "timber"
+  },
+  "vcc_score_mean": {
+   "label": "Mean climate vulnerability score (biomass-weighted)",
+   "unit": "VCC 0-100",
+   "kind": "index",
+   "group": "climate_vulnerability"
+  },
+  "vcc_high_vuln_share": {
+   "label": "Live biomass share in high-vulnerability clusters (A+B)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "climate_vulnerability"
+  },
+  "vcc_potential_vuln_share": {
+   "label": "Live biomass share in potential future vulnerability (C+D)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "climate_vulnerability"
+  },
+  "vcc_resilient_share": {
+   "label": "Live biomass share in climate-resilient clusters (E1+E2+E4)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "climate_vulnerability"
+  },
+  "vcc_species_coverage": {
+   "label": "Species coverage by Potter VCC framework",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "climate_vulnerability"
+  },
+  "fire_sensitivity_50yr": {
+   "label": "Wildfire sensitivity (50yr carbon at risk per +25% fire activity)",
+   "unit": "Tg C / 50yr",
+   "kind": "stock",
+   "group": "forest_health_risk"
+  },
+  "insect_sensitivity_50yr": {
+   "label": "Insect outbreak sensitivity (50yr carbon at risk per +25% insect mortality)",
+   "unit": "Tg C / 50yr",
+   "kind": "stock",
+   "group": "forest_health_risk"
+  },
+  "climate_sensitivity_50yr": {
+   "label": "Climate sensitivity (50yr carbon response per +1 deg C warming)",
+   "unit": "Tg C / 50yr / degC",
+   "kind": "stock",
+   "group": "forest_health_risk"
+  },
+  "mgt_sensitivity_50yr": {
+   "label": "Management sensitivity (50yr carbon response per +25% management intensity)",
+   "unit": "Tg C / 50yr",
+   "kind": "stock",
+   "group": "forest_health_risk"
+  },
+  "disturbance_risk_index": {
+   "label": "Composite disturbance risk index",
+   "unit": "Tg C / 50yr (fire+insect+climate)",
+   "kind": "index",
+   "group": "forest_health_risk"
+  },
+  "fire_rate_state_pct": {
+   "label": "Fire disturbance rate (% forest conditions per state per inventory year)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "insect_rate_state_pct": {
+   "label": "Insect disturbance rate (% forest conditions per state per inventory year)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "disease_rate_state_pct": {
+   "label": "Disease disturbance rate (% forest conditions per state per inventory year)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "weather_rate_state_pct": {
+   "label": "Weather disturbance rate (% forest conditions per state per inventory year)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "animal_rate_state_pct": {
+   "label": "Animal disturbance rate (% forest conditions per state per inventory year)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "human_rate_state_pct": {
+   "label": "Human disturbance rate (% forest conditions per state per inventory year)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "any_disturbance_rate_pct": {
+   "label": "Any disturbance rate (% forest conditions per state per inventory year)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "cwd_drybio_per_ac": {
+   "label": "Coarse woody debris dry biomass per acre",
+   "unit": "lb / ac",
+   "kind": "stock",
+   "group": "wildlife_habitat"
+  },
+  "cwd_n_plots": {
+   "label": "Number of CWD-sampled plot-conditions",
+   "unit": "count",
+   "kind": "index",
+   "group": "wildlife_habitat"
+  },
+  "mean_stand_age": {
+   "label": "Mean stand age (forested conditions)",
+   "unit": "years",
+   "kind": "stock",
+   "group": "forest_structure"
+  },
+  "old_forest_share_120": {
+   "label": "Late-successional / old-growth share (STDAGE >= 120 yrs)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_structure"
+  },
+  "mature_forest_share_80": {
+   "label": "Mature forest share (STDAGE >= 80 yrs)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_structure"
+  },
+  "snag_biomass_per_ac": {
+   "label": "Snag biomass per acre (standing dead trees)",
+   "unit": "lb / ac",
+   "kind": "stock",
+   "group": "wildlife_habitat"
+  },
+  "snag_density_per_ac": {
+   "label": "Snag density per acre (standing dead trees per acre)",
+   "unit": "trees / ac",
+   "kind": "stock",
+   "group": "wildlife_habitat"
+  },
+  "fire_observed_pct": {
+   "label": "Fire-disturbed FIA conditions (annual %)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "insect_observed_pct": {
+   "label": "Insect-disturbed FIA conditions (annual %)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "disease_observed_pct": {
+   "label": "Disease-disturbed FIA conditions (annual %)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "weather_observed_pct": {
+   "label": "Weather-disturbed FIA conditions (annual %)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "animal_observed_pct": {
+   "label": "Animal-disturbed FIA conditions (annual %)",
+   "unit": "%",
+   "kind": "fraction",
+   "group": "forest_health_risk"
+  },
+  "lsog_trans_pct": {
+   "label": "Transitioning late-successional share (v5.1)",
+   "unit": "%",
+   "kind": "share",
+   "group": "forest_structure"
+  },
+  "lsog_ls_pct": {
+   "label": "Late-successional share (v5.1)",
+   "unit": "%",
+   "kind": "share",
+   "group": "forest_structure"
+  },
+  "lsog_og_pct": {
+   "label": "Old-growth share (v5.1)",
+   "unit": "%",
+   "kind": "share",
+   "group": "forest_structure"
+  },
+  "lsog_all_pct": {
+   "label": "All LSOG share (v5.1)",
+   "unit": "%",
+   "kind": "share",
+   "group": "forest_structure"
+  },
+  "lsog_all_acres_mha": {
+   "label": "All LSOG forest area (v5.1)",
+   "unit": "Mha",
+   "kind": "area",
+   "group": "forest_structure"
+  },
+  "merch_vol_mcf": {
+   "label": "Merchantable volume (Mcf)",
+   "unit": "Mcf",
+   "kind": "stock",
+   "group": "timber"
+  },
+  "rd_mean_wtd": {
+   "label": "Relative density (weighted mean)",
+   "unit": "RD",
+   "kind": "index",
+   "group": "forest_structure"
+  },
+  "sdi_mean_wtd": {
+   "label": "Stand Density Index (weighted mean)",
+   "unit": "SDI",
+   "kind": "index",
+   "group": "forest_structure"
+  },
+  "total_area_mha_cem": {
+   "label": "Total CEM forest area",
+   "unit": "Mha",
+   "kind": "area",
+   "group": "forest_structure"
+  },
+  "live_biomass_c_total": {
+   "label": "State-level live biomass carbon (LANDIS units)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "bgc_live_total": {
+   "label": "Below-ground live carbon (BGC)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "dead_wood_c": {
+   "label": "Dead wood carbon (standing + downed)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "litter_c": {
+   "label": "Litter carbon",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "soil_c": {
+   "label": "Soil organic carbon",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "understory_c": {
+   "label": "Understory carbon",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "total_ecosystem_c": {
+   "label": "Total ecosystem carbon (all pools)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "subtile_coverage_pct": {
+   "label": "LANDIS subtile_factorial coverage",
+   "unit": "%",
+   "kind": "share",
+   "group": "forest_structure"
+  },
+  "fire_prob_v5": {
+   "label": "Fire disturbance probability (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "insect_prob_v5": {
+   "label": "Insect disturbance probability (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "disease_prob_v5": {
+   "label": "Disease disturbance probability (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "weather_prob_v5": {
+   "label": "Weather disturbance probability (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "animal_prob_v5": {
+   "label": "Animal disturbance probability (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "vegetation_prob_v5": {
+   "label": "Vegetation disturbance probability (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "any_disturb_prob_v5": {
+   "label": "Any disturbance probability (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "mort_prop_v5": {
+   "label": "Expected mortality proportion (v5 CONUS)",
+   "unit": "probability",
+   "kind": "probability",
+   "group": "forest_health_risk"
+  },
+  "live_c_total": {
+   "label": "Total live carbon (AG + roots + foliage)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "tree_c_total": {
+   "label": "Total-tree carbon (Jenkins / NSVBE, all components)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  }
+ },
+ "buckets": [
+  "reserve (no harvest)",
+  "managed (harvest)"
+ ]
+}

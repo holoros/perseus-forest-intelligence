@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PERSEUS · Methods notes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a472a'/%3E%3Cpath d='M16 6 L22 14 L19 14 L24 22 L18 22 L18 26 L14 26 L14 22 L8 22 L13 14 L10 14 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+<style>
+:root {
+  --ink: #0b1015;
+  --mut: #6a7480;
+  --bg: #fafbfc;
+  --card: #ffffff;
+  --border: #e5e8eb;
+  --accent: #1a472a;
+  --accent-light: #d4e5d8;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+}
+.container { max-width: 920px; margin: 0 auto; padding: 32px 24px 80px; }
+header.top {
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  padding: 14px 0;
+  margin-bottom: 32px;
+}
+header.top .container {
+  padding-top: 0; padding-bottom: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; color: var(--ink); font-weight: 600; font-size: 15px;
+}
+.brand-icon {
+  width: 28px; height: 28px; background: var(--accent);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 14px;
+}
+nav a {
+  color: var(--mut); text-decoration: none; font-size: 14px;
+  margin-left: 18px; border-bottom: 1px solid transparent; padding-bottom: 2px;
+}
+nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+h1 { font-size: 32px; margin: 0 0 10px; letter-spacing: -0.01em; }
+.lede { font-size: 18px; color: var(--mut); margin: 0 0 36px; max-width: 720px; }
+.note-list { display: grid; gap: 16px; }
+.note {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px 24px;
+  text-decoration: none;
+  color: var(--ink);
+  display: block;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.note:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(26,71,42,0.08);
+}
+.note-date {
+  font-size: 12.5px; color: var(--mut); letter-spacing: 0.05em;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.note-title { font-size: 19px; font-weight: 600; margin: 0 0 8px; }
+.note-summary { font-size: 15px; color: var(--mut); line-height: 1.55; margin: 0; }
+.note-tag {
+  display: inline-block; font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent); background: var(--accent-light);
+  padding: 2px 8px; border-radius: 999px; margin-left: 6px;
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="container">
+    <a class="brand" href="../">
+      <div class="brand-icon">P</div>
+      <span>PERSEUS Forest Intelligence</span>
+    </a>
+    <nav>
+      <a href="../">Explorer</a>
+      <a href="./" class="active">Methods</a>
+      <a href="https://github.com/holoros/GCBM2hpc">Pipeline</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+<h1>Methods notes</h1>
+<p class="lede">
+Methodology pieces from the PERSEUS multi-model forest carbon
+intercomparison. Each note is a short methods finding from the five-state
+pilot or the CONUS extension plan, suitable for citing alongside the
+main framework paper.
+</p>
+
+<div class="note-list">
+  <a class="note" href="./inventory-stratification/">
+    <div class="note-date">2026-05-29 <span class="note-tag">Featured</span></div>
+    <div class="note-title">Inventory stratification dominates the libcbm-vs-GCBM engine gap</div>
+    <p class="note-summary">
+      The previously reported +24% engine gap across ME, MN, IN, WA, GA is
+      reproduced under uniform-FT stratification and flipped above parity
+      under pixel-weighted stratification. Boudewyn proportions and F3 Q10
+      tested independently shift the ratio by less than 0.003. The gap is
+      an inventory choice, not an engine artifact.
+    </p>
+  </a>
+</div>
+
+</div>
+</body>
+</html>
