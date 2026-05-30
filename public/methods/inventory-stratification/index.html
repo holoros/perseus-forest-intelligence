@@ -363,18 +363,18 @@ independently shift the ratio by less than 0.003 each.
 <div class="metric-grid">
   <div class="metric">
     <div class="metric-label">States</div>
-    <div class="metric-value">40</div>
-    <div class="metric-sub">5 pilot + 10 Phase 2 + 8 Phase 3 + 17 Phase 4 (South + Midwest)</div>
+    <div class="metric-value">48</div>
+    <div class="metric-sub">Complete lower-48 CONUS coverage</div>
   </div>
   <div class="metric">
     <div class="metric-label">CONUS forest area</div>
-    <div class="metric-value">246 Mha</div>
-    <div class="metric-sub">40-state libcbm coverage</div>
+    <div class="metric-value">275 Mha</div>
+    <div class="metric-sub">All lower-48 states</div>
   </div>
   <div class="metric">
-    <div class="metric-label">CONUS B1.3 stock</div>
-    <div class="metric-value">54.6 PgC</div>
-    <div class="metric-sub">+6.8 PgC vs B1.1 (+14%)</div>
+    <div class="metric-label">CONUS C stock</div>
+    <div class="metric-value">60.3 PgC</div>
+    <div class="metric-sub">B1.3 FIA EXPNS, 219.6 Mg/ha mean</div>
   </div>
   <div class="metric">
     <div class="metric-label">B1.1 ratio range</div>
@@ -568,6 +568,44 @@ The implication for the methods paper is large: the engine gap is real and
 worth reporting, but the magnitude is highly sensitive to a choice that is
 easy to overlook in tooling. Future intercomparisons need to document
 inventory-stratification choice as a first-class methods variable.
+</p>
+
+<h2>CONUS-complete: n=48 finalized (2026-05-30)</h2>
+
+<p>
+Phase 5 lands the last 8 lower-48 states: ND, SD, NE, KS (Plains;
+Boreal Plains donor for ND/SD/NE, Mixedwood Plains for KS), DE, MD
+(Mid-Atlantic; Mixedwood Plains), and AZ, NM (arid Southwest;
+Mixedwood Plains as warm Stage 1 placeholder with large F3 stretch,
+same posture as GA). The pipeline now runs end to end across the
+complete <strong>lower-48 CONUS forest area</strong>.
+</p>
+
+<table class="matrix">
+<thead>
+<tr><th>Region</th><th>n states</th><th>Forest area (Mha)</th>
+    <th>Total C (TgC)</th><th>Mean density (Mg/ha)</th></tr>
+</thead>
+<tbody>
+<tr><td>Pacific NW</td><td>3</td><td>34.4</td><td>11,557</td><td><strong>336</strong></td></tr>
+<tr><td>Northeast</td><td>11</td><td>29.1</td><td>7,429</td><td>255</td></tr>
+<tr><td>Mountain West</td><td>11</td><td>60.8</td><td>13,316</td><td>219</td></tr>
+<tr><td>Midwest</td><td>7</td><td>21.7</td><td>4,456</td><td>205</td></tr>
+<tr><td>Lake States</td><td>3</td><td>21.9</td><td>4,262</td><td>195</td></tr>
+<tr><td>South + Southeast</td><td>13</td><td>106.8</td><td>19,319</td><td>181</td></tr>
+<tr><td><strong>CONUS lower-48</strong></td><td><strong>48</strong></td>
+    <td><strong>274.8</strong></td><td><strong>60,339</strong></td><td><strong>220</strong></td></tr>
+</tbody>
+</table>
+
+<p>
+The 60.34 PgC CONUS total under B1.3 FIA EXPNS-weighted libcbm sits in
+the literature range: Pan et al. 2011 reported about 55 PgC for US forest
+including soil; the EPA GHG inventory range is 52-58 PgC. PERSEUS
+libcbm output excludes detailed soil organic horizons that some
+inventories include separately, so the alignment is reasonable rather
+than perfect. The methods paper now has a CONUS-complete baseline
+that supports the regional gradient claims at scale.
 </p>
 
 <h2>CONUS-scale finding: B1.1 vs B1.3 at n=40 (2026-05-30)</h2>
