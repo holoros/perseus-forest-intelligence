@@ -363,8 +363,8 @@ independently shift the ratio by less than 0.003 each.
 <div class="metric-grid">
   <div class="metric">
     <div class="metric-label">States</div>
-    <div class="metric-value">5</div>
-    <div class="metric-sub">ME, MN, IN, WA, GA</div>
+    <div class="metric-value">15</div>
+    <div class="metric-sub">5 pilot + 10 Phase 2 (NE + Lake States)</div>
   </div>
   <div class="metric">
     <div class="metric-label">B1.1 ratio range</div>
@@ -560,18 +560,61 @@ easy to overlook in tooling. Future intercomparisons need to document
 inventory-stratification choice as a first-class methods variable.
 </p>
 
+<h2>Phase 2 update: n=15 (2026-05-30)</h2>
+
+<p>
+Phase 2 landed: 10 additional Northeast and Lake States (WI, MI, NY, PA, VT,
+NH, MA, CT, RI, NJ) ran end-to-end under the B1.3 FIA EXPNS-weighted
+pipeline. The n=15 libcbm year-5 total carbon densities span a 1.86x range
+from 187 Mg/ha (MI) to 347 Mg/ha (VT), with Phase 2 states fitting naturally
+between the pilot states. The auto-config generator
+(<code>tools/generate_state_config_template.py</code>) now produces
+state_config.yml + ft_species_composition.yml from a FIA panel and a one-row
+STATE_META entry, making the next 30+ CONUS states a mostly-mechanical add.
+</p>
+
+<table class="matrix">
+<thead>
+<tr><th>State</th><th>tier</th><th>live (Mg/ha)</th><th>DOM (Mg/ha)</th><th>total (Mg/ha)</th></tr>
+</thead>
+<tbody>
+<tr><td>VT</td><td>Phase 2</td><td>79.6</td><td>267.1</td><td><strong>346.7</strong></td></tr>
+<tr><td>WA</td><td>pilot</td><td>113.2</td><td>227.3</td><td>340.5</td></tr>
+<tr><td>NY</td><td>Phase 2</td><td>68.2</td><td>252.5</td><td>320.6</td></tr>
+<tr><td>NH</td><td>Phase 2</td><td>66.7</td><td>233.3</td><td>300.0</td></tr>
+<tr><td>IN</td><td>pilot</td><td>111.6</td><td>171.2</td><td>282.8</td></tr>
+<tr><td>RI</td><td>Phase 2</td><td>59.7</td><td>165.4</td><td>225.1</td></tr>
+<tr><td>NJ</td><td>Phase 2</td><td>55.2</td><td>165.0</td><td>220.2</td></tr>
+<tr><td>ME</td><td>pilot</td><td>52.3</td><td>166.0</td><td>218.4</td></tr>
+<tr><td>CT</td><td>Phase 2</td><td>50.9</td><td>162.2</td><td>213.1</td></tr>
+<tr><td>MN</td><td>pilot</td><td>66.3</td><td>142.6</td><td>208.9</td></tr>
+<tr><td>PA</td><td>Phase 2</td><td>49.5</td><td>158.1</td><td>207.6</td></tr>
+<tr><td>MA</td><td>Phase 2</td><td>52.7</td><td>150.6</td><td>203.2</td></tr>
+<tr><td>WI</td><td>Phase 2</td><td>47.4</td><td>142.5</td><td>189.9</td></tr>
+<tr><td>GA</td><td>pilot</td><td>90.3</td><td>99.0</td><td>189.3</td></tr>
+<tr><td>MI</td><td>Phase 2</td><td>47.7</td><td>138.9</td><td>186.6</td></tr>
+</tbody>
+</table>
+
+<blockquote>
+VT and NH at the high end track the cool, moist Atlantic Maritime donor +
+dense northern hardwood forest. WI / MI at the low end track the
+boreal-leaning donor with frequent disturbance and lower stocking. Phase 2
+states fit naturally between the existing pilot states. With GCBM
+aggregates pending for Phase 2 (statewide SLURM chains queued separately),
+the n=15 libcbm-vs-GCBM ratio matrix is the remaining deliverable.
+</blockquote>
+
 <h2>CONUS extension</h2>
 
 <p>
-The B1.3 result removes the gating Phase 1 calibration concern from the
-original feasibility plan: the FIA EXPNS pipeline is in place, tested across
-five states, and ready to scale. A CONUS extension would let the methods
-paper move from <em>we observed this in five states</em> to <em>we
-characterized this across all CBM-CFS3-eligible US forests</em>. The pipeline
-is state-portable; per-state effort is 1.5-2 days end to end, with about 90%
-in queued SLURM time on OSC Cardinal. The n=15 milestone (Lake States plus
-Northeast) is reachable in 4-6 weeks of wallclock time with the calibration
-already done.
+With Phase 2 in hand, the CONUS extension is a known quantity. The
+remaining ~30 lower-48 states each need: an FIA download (~5-30 min), a
+one-row STATE_META entry in the generator (~5 min hand work), and a
+mechanical chain through the calibration + libcbm pipeline (~30 min).
+A 48-state matrix is reachable in 3-6 weeks of wallclock time with the
+calibration completed. GCBM-side aggregates need separate statewide SLURM
+chains (12-24 h each) for the full libcbm-vs-GCBM ratio matrix.
 </p>
 
 <p>The phased plan (full document in the project hand-off):</p>
