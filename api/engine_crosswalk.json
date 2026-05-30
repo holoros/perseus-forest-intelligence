@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "version": "v0.90",
+    "purpose": "Cross-engine scenario crosswalk so libcbm / CEM / LANDIS / yield curves can render on a single comparable (harvest_intensity x climate) axis.",
+    "axes": {
+      "harvest_intensity": ["reserve", "untreated", "baseline", "increased", "accelerated"],
+      "climate": ["historic", "baseline_2020", "rcp45", "rcp85"]
+    },
+    "join_strategy": "For each engine, list the native scenario codes that map to each axis cell. When ambiguous, prefer the closest-match label; flag axes that an engine does not natively resolve."
+  },
+  "engines": {
+    "libcbm_cross_state_v2": {
+      "harvest_intensity": {
+        "reserve":     ["reserve", "no_harvest", "policy_reserve"],
+        "untreated":   ["historic_no_harvest"],
+        "baseline":    ["historic", "managed", "bau"],
+        "increased":   ["increased_harvest", "policy_increased"],
+        "accelerated": ["accelerated", "max_harvest"]
+      },
+      "climate": {
+        "historic":      ["historic", "obs_climate"],
+        "baseline_2020": ["climate_2020", "constant_2020"],
+        "rcp45":         ["rcp45", "ssp245"],
+        "rcp85":         ["rcp85", "ssp585"]
+      },
+      "native_axes": ["state", "bucket", "policy", "climate"],
+      "notes": "libcbm sit_events drive the harvest axis; climate is separately keyed."
+    },
+    "cem_v5_cross_state": {
+      "harvest_intensity": {
+        "reserve":     ["policy_carbon_floor", "policy_reserve"],
+        "untreated":   ["wear_baseline_no_harvest"],
+        "baseline":    ["wear_baseline", "policy_baseline"],
+        "increased":   ["wear_increased", "policy_increased"],
+        "accelerated": ["wear_accelerated"]
+      },
+      "climate": {
+        "historic":      ["historic_climate"],
+        "baseline_2020": ["climate_constant"],
+        "rcp45":         ["rcp45"],
+        "rcp85":         ["rcp85"]
+      },
+      "native_axes": ["state", "ft_group", "wear_variant", "policy", "climate"],
+      "notes": "CEM has separate wear (harvest pressure) and policy (carbon floor) axes; collapse to harvest_intensity by taking wear OR policy whichever drives the diverging trajectory."
+    },
+    "landis_ii_perseus": {
+      "harvest_intensity": {
+        "reserve":     ["none"],
+        "untreated":   ["none"],
+        "baseline":    ["perseus", "baseline"],
+        "increased":   ["increased"],
+        "accelerated": []
+      },
+      "climate": {
+        "historic":      [],
+        "baseline_2020": ["baseline"],
+        "rcp45":         ["rcp45", "ssp245"],
+        "rcp85":         ["rcp85", "ssp585"]
+      },
+      "native_axes": ["state", "plot_id", "climate", "harvest", "owner_factorial"],
+      "notes": "LANDIS-II factorial supports {none, baseline, increased, perseus} harvest and {baseline, ssp245, ssp585} climate. Owner axis is the factorial dim (ind/nipf/public) when the factorial is fully populated; currently FIA OWNGRPCD is used as proxy."
+    },
+    "yield_curves_v4": {
+      "harvest_intensity": {
+        "reserve":     [],
+        "untreated":   ["untreated"],
+        "baseline":    [],
+        "increased":   [],
+        "accelerated": ["harvested"]
+      },
+      "climate": {
+        "historic":      ["untreated"],
+        "baseline_2020": [],
+        "rcp45":         [],
+        "rcp85":         []
+      },
+      "native_axes": ["state", "owner", "ft_group", "ecoregion", "treatment"],
+      "notes": "Chapman-Richards fits are climate-agnostic; only treatment axis varies. Use as historic baseline anchor for the climate dimension."
+    },
+    "fvs_recalibrated": {
+      "harvest_intensity": {
+        "reserve":     ["no_harvest"],
+        "untreated":   ["no_harvest"],
+        "baseline":    ["bau", "historic_thinning"],
+        "increased":   ["increased_thinning"],
+        "accelerated": ["clearcut_rotation"]
+      },
+      "climate": {
+        "historic":      ["historic"],
+        "baseline_2020": ["constant_2020"],
+        "rcp45":         ["rcp45"],
+        "rcp85":         ["rcp85"]
+      },
+      "native_axes": ["state", "ft_group", "policy", "climate"],
+      "notes": "FVS uses FIA-anchored re-calibration; native variant codes (ACD/NE/etc) collapsed in the v0.52 harmonization."
+    }
+  },
+  "unit_crosswalk": {
+    "ton_ac_to_Mg_ha": 2.2417,
+    "lb_C_ac_to_Mg_C_ha": 0.001121,
+    "cuft_ac_to_m3_ha": 0.069972,
+    "sqft_ac_to_m2_ha": 0.229568,
+    "AGB_to_AGC": 0.47,
+    "note": "Use AGB->AGC=0.47 only when engine does not natively report carbon; LANDIS biomass_Mg_ha is AGB live biomass."
+  },
+  "response_crosswalk": {
+    "biomass": {
+      "libcbm": "agc_live_Mg_ha (multiply by 1/0.47 for AGB)",
+      "cem": "agb_Mg_ha",
+      "landis_ii_perseus": "biomass_Mg_ha (native AGB)",
+      "yield_curves_v4": "agb_tonac (multiply by 2.2417 for Mg/ha)",
+      "fvs": "agb_tonac (multiply by 2.2417 for Mg/ha)"
+    }
+  }
+}
