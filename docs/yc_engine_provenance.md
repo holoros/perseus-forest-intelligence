@@ -21,10 +21,12 @@ climate-sensitivity ribbon.
 3. **Projection with harvest removals** (`ycx_02_perseus.R`): each *current
    ground plot* (latest visit) is advanced from its observed age.
    - `reserve (no harvest)` — untreated curve (passive succession).
-   - `managed (harvest)` — same growth, **clearcut on an owner-specific
-     rotation** (Industrial 45, NIPF 65, State 80, Public-Other 110 yr): at
-     each rotation the stand resets to regen age and removed stock is tracked
-     as a harvest flux. Staggered ages give a smooth aggregate below reserve.
+   - `managed (harvest)` — **owner-specific harvest regimes**: Industrial =
+     even-aged clearcut (45-yr rotation, reset to regen); NIPF/State/Public =
+     uneven-aged partial removals on 20/25/30-yr entry cycles removing
+     30/25/15% of standing stock (Chapman-Richards inversion resumes growth
+     from the reduced stock). Removed carbon is emitted as the `harvest_c_yr`
+     flux metric (Tg C/yr, managed bucket).
    - climate sensitivity — ±10% productivity ribbon (`pts=[year,mean,lo,hi]`).
 4. **State totals + FIA anchoring** (`ycx_merge_perseus.py`): per-hectare
    densities → state totals via the uniform-grid area model

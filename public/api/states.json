@@ -1,8 +1,8 @@
 {
  "GA": {
-  "engines": 8,
+  "engines": 7,
   "metrics": 42,
-  "rows": 826,
+  "rows": 815,
   "name": "Georgia",
   "centroid": [
    -83.4,
@@ -19,6 +19,7 @@
    "cwd_n_plots",
    "disease_rate_state_pct",
    "fire_rate_state_pct",
+   "harvest_c_yr",
    "human_rate_state_pct",
    "insect_rate_state_pct",
    "live_c_total",
@@ -34,7 +35,7 @@
  "ID": {
   "engines": 6,
   "metrics": 35,
-  "rows": 773,
+  "rows": 784,
   "name": "Idaho",
   "centroid": [
    -114.6,
@@ -50,6 +51,7 @@
    "cwd_n_plots",
    "disease_rate_state_pct",
    "fire_rate_state_pct",
+   "harvest_c_yr",
    "insect_rate_state_pct",
    "live_c_total",
    "mature_forest_share_80",
@@ -59,9 +61,9 @@
   ]
  },
  "IN": {
-  "engines": 7,
+  "engines": 6,
   "metrics": 35,
-  "rows": 807,
+  "rows": 796,
   "name": "Indiana",
   "centroid": [
    -86.3,
@@ -76,6 +78,7 @@
    "cwd_drybio_per_ac",
    "cwd_n_plots",
    "disease_rate_state_pct",
+   "harvest_c_yr",
    "human_rate_state_pct",
    "insect_rate_state_pct",
    "live_c_total",
@@ -87,9 +90,9 @@
   ]
  },
  "ME": {
-  "engines": 33,
+  "engines": 32,
   "metrics": 65,
-  "rows": 28545,
+  "rows": 28534,
   "name": "Maine",
   "centroid": [
    -69.2,
@@ -134,7 +137,7 @@
  "MN": {
   "engines": 7,
   "metrics": 42,
-  "rows": 804,
+  "rows": 815,
   "name": "Minnesota",
   "centroid": [
    -94.3,
@@ -151,6 +154,7 @@
    "cwd_n_plots",
    "disease_rate_state_pct",
    "fire_rate_state_pct",
+   "harvest_c_yr",
    "human_rate_state_pct",
    "insect_rate_state_pct",
    "live_c_total",
@@ -166,7 +170,7 @@
  "NH": {
   "engines": 2,
   "metrics": 5,
-  "rows": 96,
+  "rows": 107,
   "name": "New Hampshire",
   "centroid": [
    -71.6,
@@ -177,13 +181,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "NY": {
   "engines": 2,
   "metrics": 5,
-  "rows": 96,
+  "rows": 107,
   "name": "New York",
   "centroid": [
    -75.5,
@@ -194,13 +199,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "OR": {
   "engines": 5,
   "metrics": 29,
-  "rows": 763,
+  "rows": 774,
   "name": "Oregon",
   "centroid": [
    -120.5,
@@ -215,6 +221,7 @@
    "cwd_drybio_per_ac",
    "cwd_n_plots",
    "fire_rate_state_pct",
+   "harvest_c_yr",
    "insect_rate_state_pct",
    "live_c_total",
    "mature_forest_share_80",
@@ -248,7 +255,7 @@
  "VT": {
   "engines": 2,
   "metrics": 5,
-  "rows": 96,
+  "rows": 107,
   "name": "Vermont",
   "centroid": [
    -72.7,
@@ -259,13 +266,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "WA": {
   "engines": 8,
   "metrics": 43,
-  "rows": 1028,
+  "rows": 1039,
   "name": "Washington",
   "centroid": [
    -120.4,
@@ -280,6 +288,7 @@
    "cwd_drybio_per_ac",
    "cwd_n_plots",
    "fire_rate_state_pct",
+   "harvest_c_yr",
    "insect_rate_state_pct",
    "live_biomass_c_total",
    "live_c_total",
@@ -294,8 +303,8 @@
  },
  "AL": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Alabama",
   "centroid": [
    -86.8,
@@ -306,13 +315,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "AR": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Arkansas",
   "centroid": [
    -92.4,
@@ -323,13 +333,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "AZ": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Arizona",
   "centroid": [
    -111.7,
@@ -340,13 +351,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "CA": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "California",
   "centroid": [
    -119.7,
@@ -357,13 +369,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "CO": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Colorado",
   "centroid": [
    -105.5,
@@ -374,13 +387,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "CT": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Connecticut",
   "centroid": [
    -72.7,
@@ -391,13 +405,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "DE": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Delaware",
   "centroid": [
    -75.5,
@@ -408,13 +423,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "FL": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Florida",
   "centroid": [
    -81.7,
@@ -425,13 +441,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "IA": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Iowa",
   "centroid": [
    -93.5,
@@ -442,13 +459,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "IL": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Illinois",
   "centroid": [
    -89.2,
@@ -459,13 +477,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "KS": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Kansas",
   "centroid": [
    -98.3,
@@ -476,13 +495,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "KY": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Kentucky",
   "centroid": [
    -85.3,
@@ -493,13 +513,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "LA": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Louisiana",
   "centroid": [
    -92.0,
@@ -510,13 +531,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "MA": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Massachusetts",
   "centroid": [
    -71.8,
@@ -527,13 +549,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "MD": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Maryland",
   "centroid": [
    -76.8,
@@ -544,13 +567,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "MI": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Michigan",
   "centroid": [
    -85.0,
@@ -561,13 +585,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "MO": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Missouri",
   "centroid": [
    -92.5,
@@ -578,13 +603,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "MS": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Mississippi",
   "centroid": [
    -89.7,
@@ -595,13 +621,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "MT": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Montana",
   "centroid": [
    -109.6,
@@ -612,13 +639,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "NC": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "North Carolina",
   "centroid": [
    -79.4,
@@ -629,13 +657,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "ND": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "North Dakota",
   "centroid": [
    -100.5,
@@ -646,13 +675,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "NE": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Nebraska",
   "centroid": [
    -99.8,
@@ -663,13 +693,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "NJ": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "New Jersey",
   "centroid": [
    -74.7,
@@ -680,13 +711,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "NM": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "New Mexico",
   "centroid": [
    -106.1,
@@ -697,13 +729,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "NV": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Nevada",
   "centroid": [
    -116.9,
@@ -714,13 +747,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "OH": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Ohio",
   "centroid": [
    -82.8,
@@ -731,13 +765,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "OK": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Oklahoma",
   "centroid": [
    -97.5,
@@ -748,13 +783,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "PA": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Pennsylvania",
   "centroid": [
    -77.8,
@@ -765,13 +801,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "RI": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Rhode Island",
   "centroid": [
    -71.5,
@@ -782,13 +819,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "SC": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "South Carolina",
   "centroid": [
    -80.9,
@@ -799,13 +837,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "SD": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "South Dakota",
   "centroid": [
    -100.2,
@@ -816,13 +855,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "TN": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Tennessee",
   "centroid": [
    -86.4,
@@ -833,13 +873,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "TX": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Texas",
   "centroid": [
    -99.3,
@@ -850,13 +891,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "UT": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Utah",
   "centroid": [
    -111.7,
@@ -867,13 +909,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "VA": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Virginia",
   "centroid": [
    -78.8,
@@ -884,13 +927,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "WI": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Wisconsin",
   "centroid": [
    -89.9,
@@ -901,13 +945,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "WV": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "West Virginia",
   "centroid": [
    -80.6,
@@ -918,13 +963,14 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  },
  "WY": {
   "engines": 1,
-  "metrics": 3,
-  "rows": 66,
+  "metrics": 4,
+  "rows": 77,
   "name": "Wyoming",
   "centroid": [
    -107.5,
@@ -935,6 +981,7 @@
   "series_metrics": [
    "agb_dry",
    "agc_live_total",
+   "harvest_c_yr",
    "vol_stem"
   ]
  }

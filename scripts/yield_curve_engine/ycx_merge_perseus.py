@@ -59,12 +59,21 @@ def load_native(path):
         npl = max(npl, int(r["n_plots"]))
     return d, npl
 
+def load_flux(path):
+    """ -> {year: removed_density_per_yr (Mg C/ha/yr)} """
+    out = {}
+    if os.path.exists(path):
+        for r in csv.DictReader(open(path)):
+            out[int(r["year"])] = float(r["removed_density_per_yr"])
+    return out
+
 # ---- gather all state CSVs ----
 files = sorted(glob.glob(os.path.join(csvdir, "ycx_*_state_series.csv")))
-native, nplots = {}, {}
+native, nplots, hflux = {}, {}, {}
 for f in files:
     st = os.path.basename(f).split("_")[1]
     native[st], nplots[st] = load_native(f)
+    hflux[st] = load_flux(os.path.join(csvdir, f"ycx_{st}_harvest_flux.csv"))
 
 # ---- calibrate A0 (ha per plot) from FIA carbon anchors ----
 A0 = {}
@@ -106,6 +115,19 @@ for st in sorted(native):
                           "FIA-anchored area, climate +/-10%)"),
                 "pts": pts})
             added_pts += len(pts)
+
+    # harvest carbon flux (Tg C / yr), managed bucket only
+    metrics_here = list(METRICS)
+    if hflux.get(st):
+        fl = hflux[st]
+        pts = [[y, round(fl[y]*A/1e6, 4)] for y in sorted(fl)]
+        node = ser.setdefault("harvest_c_yr", {}).setdefault("managed (harvest)", [])
+        node[:] = [s for s in node if s.get("model") != MODEL]
+        node.append({"model": MODEL, "cls": CLS,
+            "label": "YC harvest carbon flux (owner-rotation removals, FIA-anchored area)",
+            "pts": pts})
+        added_pts += len(pts); metrics_here.append("harvest_c_yr")
+
     json.dump(ser, open(spath, "w"), separators=(",", ":"))
 
     sm = stmeta.get(st)
@@ -113,13 +135,13 @@ for st in sorted(native):
         sm["engines"] = sm.get("engines", 0) + 1
         sm["rows"]    = sm.get("rows", 0) + added_pts
         smk = set(sm.get("series_metrics", []))
-        sm["series_metrics"] = sorted(smk | set(METRICS))
+        sm["series_metrics"] = sorted(smk | set(metrics_here))
         sm["has_series"] = True
     else:                               # new state
         name, cen = ST_INFO.get(st, (st, [-98.0, 39.0]))
-        stmeta[st] = {"engines": 1, "metrics": len(METRICS), "rows": added_pts,
+        stmeta[st] = {"engines": 1, "metrics": len(metrics_here), "rows": added_pts,
                       "name": name, "centroid": cen, "has_series": True,
-                      "has_tier_b": False, "series_metrics": sorted(METRICS)}
+                      "has_tier_b": False, "series_metrics": sorted(metrics_here)}
         added_states.append(st)
 
 # US aggregate stays as-is; refresh meta stats
