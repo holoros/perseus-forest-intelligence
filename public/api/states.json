@@ -1,8 +1,8 @@
 {
  "GA": {
-  "engines": 6,
+  "engines": 7,
   "metrics": 42,
-  "rows": 738,
+  "rows": 760,
   "name": "Georgia",
   "centroid": [
    -83.4,
@@ -55,9 +55,9 @@
   ]
  },
  "IN": {
-  "engines": 5,
+  "engines": 6,
   "metrics": 35,
-  "rows": 719,
+  "rows": 741,
   "name": "Indiana",
   "centroid": [
    -86.3,
@@ -81,9 +81,9 @@
   ]
  },
  "ME": {
-  "engines": 31,
+  "engines": 32,
   "metrics": 65,
-  "rows": 28457,
+  "rows": 28479,
   "name": "Maine",
   "centroid": [
    -69.2,
