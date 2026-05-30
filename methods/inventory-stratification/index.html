@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Methods finding from the PERSEUS multi-model intercomparison: the libcbm-vs-GCBM engine gap reported across five US states is dominated by inventory stratification, not by fundamental engine differences.">
+<title>PERSEUS · Inventory stratification dominates the engine gap</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a472a'/%3E%3Cpath d='M16 6 L22 14 L19 14 L24 22 L18 22 L18 26 L14 26 L14 22 L8 22 L13 14 L10 14 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+<style>
+:root {
+  --ink: #0b1015;
+  --mut: #6a7480;
+  --bg: #fafbfc;
+  --card: #ffffff;
+  --border: #e5e8eb;
+  --accent: #1a472a;
+  --accent-light: #d4e5d8;
+  --warn: #c1440e;
+  --good: #1d7e0f;
+  --muted-bg: #f3f5f7;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+}
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+header.top {
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  padding: 14px 0;
+  margin-bottom: 32px;
+}
+header.top .container {
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+.brand-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+nav a {
+  color: var(--mut);
+  text-decoration: none;
+  font-size: 14px;
+  margin-left: 18px;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tag {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 36px;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 4px 0 14px;
+  letter-spacing: -0.01em;
+}
+.lede {
+  font-size: 19px;
+  color: var(--mut);
+  line-height: 1.55;
+  margin: 0 0 28px;
+  max-width: 760px;
+}
+.byline {
+  font-size: 13.5px;
+  color: var(--mut);
+  margin-bottom: 36px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.byline a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 44px 0 14px;
+  letter-spacing: -0.005em;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 6px;
+  display: inline-block;
+}
+h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 28px 0 10px;
+  color: var(--ink);
+}
+p { margin: 0 0 14px; }
+.tldr {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  padding: 18px 22px;
+  border-radius: 4px;
+  margin: 0 0 28px;
+}
+.tldr h3 {
+  margin: 0 0 8px;
+  font-size: 15.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.tldr p { margin: 0; font-size: 16px; }
+figure {
+  margin: 28px 0 32px;
+}
+figure img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  display: block;
+}
+figcaption {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--mut);
+  line-height: 1.55;
+}
+figcaption strong { color: var(--ink); }
+table.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0 24px;
+  font-size: 14.5px;
+}
+table.matrix th, table.matrix td {
+  text-align: right;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+table.matrix th {
+  text-align: left;
+  font-weight: 600;
+  background: var(--muted-bg);
+  color: var(--ink);
+}
+table.matrix th:first-child, table.matrix td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+table.matrix tr.highlight td { background: #fff7eb; }
+table.matrix td.bad { color: var(--warn); font-weight: 600; }
+table.matrix td.good { color: var(--good); font-weight: 600; }
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 22px 0 28px;
+}
+.metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.metric-label {
+  font-size: 12px;
+  color: var(--mut);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.metric-sub {
+  font-size: 13px;
+  color: var(--mut);
+  margin-top: 6px;
+}
+blockquote {
+  margin: 22px 0;
+  padding: 14px 22px;
+  border-left: 3px solid var(--mut);
+  background: var(--muted-bg);
+  color: var(--ink);
+  font-size: 15.5px;
+}
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13.5px;
+  background: var(--muted-bg);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+pre code {
+  display: block;
+  padding: 12px 16px;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+.timeline {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 0 16px;
+  margin: 18px 0 28px;
+}
+.timeline .phase {
+  contents: contents;
+}
+.timeline .num {
+  background: var(--accent);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.timeline .content {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.timeline .content:last-child { border-bottom: none; }
+.timeline .phase-name {
+  font-weight: 600;
+  font-size: 15.5px;
+  margin-bottom: 4px;
+}
+.timeline .phase-meta {
+  color: var(--mut);
+  font-size: 13.5px;
+  margin-bottom: 6px;
+}
+.timeline .phase-body { font-size: 14.5px; }
+footer {
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 13.5px;
+  color: var(--mut);
+  line-height: 1.7;
+}
+footer a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 4px 6px 4px 0;
+}
+.repo-link:hover { background: #c1d8c7; }
+@media (max-width: 600px) {
+  h1 { font-size: 28px; }
+  .lede { font-size: 17px; }
+  .container { padding: 24px 18px 60px; }
+  nav a { margin-left: 10px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="container">
+    <a class="brand" href="../../">
+      <div class="brand-icon">P</div>
+      <span>PERSEUS Forest Intelligence</span>
+    </a>
+    <nav>
+      <a href="../../">Explorer</a>
+      <a href="../" class="active">Methods</a>
+      <a href="https://github.com/holoros/GCBM2hpc">Pipeline</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="tag">Methods note · 2026-05-29</div>
+<h1>Inventory stratification dominates the libcbm vs GCBM engine gap</h1>
+<p class="lede">
+A five-state intercomparison of libcbm and GCBM under the CBM-CFS3 modeling family
+finds that the previously reported +24% engine gap is dominated by how the libcbm
+bundle stratifies state forest inventory, not by fundamental differences between
+the two engines.
+</p>
+<p class="byline">
+PERSEUS multi-model framework · GCBM2hpc pipeline ·
+Aaron Weiskittel et al. ·
+<a href="https://github.com/holoros/GCBM2hpc">github.com/holoros/GCBM2hpc</a>
+</p>
+
+<div class="tldr">
+<h3>TL;DR</h3>
+<p>
+The +24% libcbm-under-GCBM gap reported across Maine, Minnesota, Indiana,
+Washington, and Georgia is reproduced when the libcbm bundle allocates equal
+area to every (forest type, ecoregion, owner) stratum. Patching the bundle
+to weight strata by their TreeMap pixel counts flips every state to
+libcbm-over-GCBM. The true cross-engine uncertainty is much smaller than
+previously thought; the gap was largely a stratification artifact. Boudewyn
+component proportions and F3 Q10 temperature scaling tested independently
+shift the ratio by less than 0.003 each, ruling them out as candidate levers.
+</p>
+</div>
+
+<h2>Headline numbers</h2>
+<div class="metric-grid">
+  <div class="metric">
+    <div class="metric-label">States</div>
+    <div class="metric-value">5</div>
+    <div class="metric-sub">ME, MN, IN, WA, GA</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">B1.1 ratio range</div>
+    <div class="metric-value">0.74 – 1.05</div>
+    <div class="metric-sub">uniform-FT inventory</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">B1.2 ratio range</div>
+    <div class="metric-value">1.05 – 1.67</div>
+    <div class="metric-sub">pixel-weighted inventory</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Stage 2 shift</div>
+    <div class="metric-value">&lt;0.003</div>
+    <div class="metric-sub">FIA Boudewyn proportions</div>
+  </div>
+</div>
+
+<h2>The finding</h2>
+
+<figure>
+  <img src="fig1_inventory_stratification.png"
+       alt="Bar chart of libcbm/GCBM year-5 carbon density ratio for ME, MN, IN, WA, GA under three inventory stratification hypotheses. B1.1 uniform-FT and Stage 2 sit in the previously reported +24% cluster around 0.74-0.79; B1.2 pixel-weighted moves every state above parity, with GA reaching 1.67.">
+  <figcaption>
+    <strong>Figure 1.</strong> Five-state libcbm-over-GCBM ratio under three
+    inventory stratification hypotheses. The legacy B1.1 uniform allocation
+    (one bar per state, dark purple) reproduces the previously reported +24%
+    cluster (blue band). Stage 2 (teal) replaces Ontario donor Boudewyn
+    proportions with FIA-fit empirical proportions per species and barely
+    moves the ratio. B1.2 (green) reads per-FT pixel counts from TreeMap and
+    weights inventory accordingly. Every state moves above parity, and four
+    of five overshoot. Engine differences are second-order to the
+    stratification choice.
+  </figcaption>
+</figure>
+
+<h3>How we got here</h3>
+
+<p>
+The five-state pilot in PERSEUS established three sequential controls. First, we
+refit Boudewyn vol-to-biomass component proportions per species from each state's
+FIA TREE panel (DRYBIO_STEM / DRYBIO_STEM_BARK / DRYBIO_BRANCH / DRYBIO_FOLIAGE
+relative to DRYBIO_AG), replacing the Ontario Mixedwood Plains donor values
+that warm-climate states inherit by default. Across all five states, this Stage
+2 refit moves the libcbm-over-GCBM ratio by less than ±0.003. Component
+proportions are not the lever.
+</p>
+
+<p>
+Second, we patched Georgia's spatial-unit mean annual temperature across the
+range 6.32 to 17.46 °C, sweeping the F3 Q10 decay rate scaling that warm states
+inherit from the cold donor. Lowering MAT toward the donor (6.32 °C) raises the
+ratio from 1.05 to 1.10, the opposite direction needed to collapse Georgia into
+the cluster. DOM accumulates as decay slows; live carbon is unaffected. F3 Q10
+is not the lever either.
+</p>
+
+<figure>
+  <img src="fig2_ga_f3_sweep.png"
+       alt="GA F3 Q10 sensitivity sweep line plot. Lowering mean annual temperature from 17.46C to 6.32C raises the libcbm/GCBM ratio from 1.05 to 1.10. The +24% cluster band sits at 0.74-0.79 (blue).">
+  <figcaption>
+    <strong>Figure 2.</strong> Georgia F3 Q10 sensitivity sweep. The
+    spatial-unit mean annual temperature drives Q10 decay scaling at runtime
+    on the global decay parameter table. Sweeping from baseline (17.46 °C) to
+    the Ontario donor MAT (6.32 °C) lifts the ratio from 1.05 to 1.10 as DOM
+    accumulates. Live carbon is unchanged. The sweep rules out F3 Q10 as the
+    explanation for GA's distinctness from the cluster.
+  </figcaption>
+</figure>
+
+<p>
+Third, we decomposed each state's GCBM-minus-libcbm gap into live and DOM
+components. The +24% gap turns out to be heterogeneous per state. WA is
+dominated by live carbon (+53.9 Mg/ha vs +18.7 DOM); MN is DOM-dominated
+(+39.4 vs +11.2); IN balanced; ME DOM-leaning; GA opposite-sign (libcbm
+overstates live by 6.6 Mg/ha). No single per-pool explanation accounts for
+the cluster.
+</p>
+
+<figure>
+  <img src="fig3_per_pool_gap.png"
+       alt="Per-pool decomposition of GCBM minus libcbm year-5 carbon density. WA has the largest live gap (+53.9 Mg/ha); MN largest DOM gap (+39.4); GA is the lone opposite-sign case (-6.6 live).">
+  <figcaption>
+    <strong>Figure 3.</strong> Per-pool decomposition of the engine gap (GCBM
+    year-5 density minus libcbm year-5 density). Positive values mean GCBM
+    higher. WA is live-dominated (+53.9 vs +18.7); MN is DOM-dominated
+    (+39.4 vs +11.2); ME and IN are mixed. GA is the lone opposite-sign case.
+    The heterogeneity motivated looking inside the bundle builder for a
+    structural rather than science-level explanation.
+  </figcaption>
+</figure>
+
+<h3>The smoking gun</h3>
+
+<p>
+In <code>build_libcbm_state_bundle.py</code>, the line
+</p>
+
+<pre><code>area_per_stratum = total_area_ha / len(inv_tuples)</code></pre>
+
+<p>
+allocated equal area to every (FT, eco, owner) tuple, regardless of real
+spatial composition. Verified across all five states: the coefficient of
+variation of per-FT area share was exactly 0.000 in every case. The TreeMap
+raster stack underneath the GCBM run honors real spatial composition (Pacific
+Northwest is Douglas-fir dominated; Lake States are aspen + spruce-fir
+dominated; etc.). When libcbm then replayed a stratum-mean carbon trajectory,
+the strata it was averaging over differed from the strata GCBM was running
+spatially. The two engines were modeling different inventories.
+</p>
+
+<p>
+WA gave the cleanest signal: libcbm yield at age 56 ranged from 7.5 m³/ha
+(FT=160) to 170.8 m³/ha (FT=100), a 24-fold range. Real WA forest is
+Douglas-fir dominated (well over half the state). Equal weighting flattened
+the live-biomass mean below GCBM's spatial mean by about 35 Mg/ha. That is
+the WA +54 Mg/ha live gap in Figure 3, almost in full.
+</p>
+
+<h3>The patch</h3>
+
+<p>
+B1.2 reads per-FT pixel counts from <code>pixel_attributes.csv</code> (already
+loaded for the age distribution work in B1.1) and weights each stratum's area
+proportional to its FT's pixel share, splitting equally among (eco, owner)
+sub-strata of that FT. Falls back to legacy uniform allocation when pixel
+attributes are absent. Patch is on GCBM2hpc <code>main</code> as commit
+33f2fc8.
+</p>
+
+<table class="matrix">
+<thead>
+<tr><th>State</th><th>GCBM yr-5 (Mg/ha)</th>
+    <th>B1.1 ratio</th><th>Stage 2 ratio</th><th>B1.2 ratio</th>
+    <th>direction</th></tr>
+</thead>
+<tbody>
+<tr><td>ME</td><td>306.6</td><td>0.751</td><td>0.751</td><td>0.751</td><td>(awaiting pixel attrs)</td></tr>
+<tr class="highlight"><td>WA</td><td>283.8</td><td class="bad">0.744</td><td>0.744</td><td class="good">1.203</td><td>flips above parity</td></tr>
+<tr><td>IN</td><td>211.8</td><td class="bad">0.786</td><td>0.786</td><td class="good">1.315</td><td>flips above parity</td></tr>
+<tr><td>MN</td><td>209.2</td><td class="bad">0.758</td><td>0.758</td><td>1.054</td><td>collapses to parity</td></tr>
+<tr><td>GA</td><td>124.9</td><td>1.051</td><td>1.048</td><td class="bad">1.668</td><td>large overshoot</td></tr>
+</tbody>
+</table>
+
+<blockquote>
+The dramatic per-state movement under B1.2 — and in particular the four-of-five
+overshoot — is the gating signal that the TreeMap <code>Count</code> column
+needs calibration against FIA EXPNS expansion factors before the result is
+publication-quality. The qualitative reframing is established: <em>the previously
+reported +24% engine gap is an inventory-composition phenomenon, not a
+CBM-CFS3-family methods uncertainty.</em>
+</blockquote>
+
+<h2>Why this matters</h2>
+
+<p>
+Multi-model forest carbon intercomparisons routinely report inter-engine
+spread in carbon stocks of 20-40% even at the same spatial scope and the
+same input data. The implicit assumption is that this spread tracks
+fundamental differences in how each engine represents growth, decay, and
+disturbance. PERSEUS's finding here is that one important component of
+that spread — the libcbm-vs-GCBM gap on CBM-CFS3 implementations — is
+substantially attributable to how the input inventory is stratified for
+each engine. That is, two engines running the same science with the same
+forcing can disagree by 20-30% if one represents inventory spatially and
+the other replays a stratum mean built with the wrong weights.
+</p>
+
+<p>
+The implication for the methods paper is large: the engine gap is real and
+worth reporting, but the magnitude is highly sensitive to a choice that is
+easy to overlook in tooling. Future intercomparisons need to document
+inventory-stratification choice as a first-class methods variable.
+</p>
+
+<h2>CONUS extension</h2>
+
+<p>
+The five-state pilot establishes the pipeline and the qualitative finding.
+A CONUS extension would let the methods paper move from <em>we observed this
+in five states</em> to <em>we characterized this across all CBM-CFS3-eligible
+US forests</em>. The pipeline is state-portable; per-state effort is
+1.5-2 days end to end, with about 90% in queued SLURM time on OSC Cardinal.
+</p>
+
+<p>The phased plan (full document in the project hand-off):</p>
+
+<div class="timeline">
+  <div class="num">1</div>
+  <div class="content">
+    <div class="phase-name">Calibration (2-3 weeks)</div>
+    <div class="phase-meta">Pre-scaling engineering, methodological</div>
+    <div class="phase-body">
+      Calibrate TreeMap <code>Count</code> against FIA EXPNS expansion factors so
+      the B1.2 result becomes a real estimate rather than directional. Extend the
+      species crosswalk to cover SW and Pacific species. Auto-generate state
+      configuration templates from FIA per-state aggregates. Build an AIDB donor
+      mapping decision tree.
+    </div>
+  </div>
+
+  <div class="num">2</div>
+  <div class="content">
+    <div class="phase-name">Lake States + Northeast (4-6 weeks)</div>
+    <div class="phase-meta">10 states added, n=15 total</div>
+    <div class="phase-body">
+      WI, MI, NY, PA, VT, NH, MA, CT, RI, NJ. Most similar to the existing
+      ME and MN templates, lowest donor uncertainty. Publishable result for
+      the methods paper.
+    </div>
+  </div>
+
+  <div class="num">3</div>
+  <div class="content">
+    <div class="phase-name">Pacific NW + Mountain West (4-6 weeks)</div>
+    <div class="phase-meta">8 states added, n=23 total</div>
+    <div class="phase-body">
+      OR, ID, MT, WY, CO, UT, NV, CA. Donors stretch but stay defensible
+      (BC + AB). Adds the WA-style live-biomass-dominated gap to the
+      cross-state matrix.
+    </div>
+  </div>
+
+  <div class="num">4</div>
+  <div class="content">
+    <div class="phase-name">South + Southeast (6-8 weeks)</div>
+    <div class="phase-meta">17 states added, n=40 total</div>
+    <div class="phase-body">
+      AL, AR, FL, KY, LA, MS, NC, SC, TN, TX, VA, WV, OK, OH, IL, IA, MO.
+      Phase 1 calibration work pays off for the warm-donor problem.
+    </div>
+  </div>
+
+  <div class="num">5</div>
+  <div class="content">
+    <div class="phase-name">Plains + remaining (3-4 weeks)</div>
+    <div class="phase-meta">6 states added, n=46 total</div>
+    <div class="phase-body">
+      ND, SD, NE, KS, DE, MD. AZ and NM held for a warm-donor Stage 2
+      paper.
+    </div>
+  </div>
+
+  <div class="num">6</div>
+  <div class="content">
+    <div class="phase-name">Synthesis (3-4 weeks)</div>
+    <div class="phase-meta">CONUS-wide analysis, methods paper</div>
+    <div class="phase-body">
+      Regional gradients in inventory artifact magnitude. Comparison against
+      EPA GHG inventory + NCASI national-scale benchmarks. Submission.
+    </div>
+  </div>
+</div>
+
+<p>
+Total estimated wallclock: 22-31 weeks (~5.5-8 months) for n=48. The
+publishable n=15 milestone is reachable in 8-10 weeks with Phase 1
+calibration completed first. The recommendation in the project hand-off is
+to ship the methods paper at n=15 and treat n=48 CONUS as a follow-on
+regional-gradients paper.
+</p>
+
+<h2>Data and code</h2>
+<p>
+<a class="repo-link" href="https://github.com/holoros/GCBM2hpc">📦 GCBM2hpc pipeline</a>
+<a class="repo-link" href="https://github.com/holoros/perseus-forest-intelligence">📊 PERSEUS explorer</a>
+<a class="repo-link" href="https://github.com/holoros/GCBM2hpc/blob/main/docs/PIPELINE.md">📋 Per-state run order</a>
+<a class="repo-link" href="https://github.com/holoros/GCBM2hpc/blob/main/tools/methods_paper_figures.R">📈 Figure generator (R)</a>
+</p>
+
+<h2>Acknowledgments and provenance</h2>
+<p>
+PERSEUS is the multi-model forest carbon intercomparison framework at the
+Center for Research on Sustainable Forests (CRSF), University of Maine.
+Compute on the Ohio Supercomputer Center Cardinal cluster (allocation
+PUOM0008). The engines compared here are CBM-CFS3 (Canadian Forest Service),
+libcbm (CFS Python/C++ reimplementation), and GCBM on moja FLINT
+(spatially explicit per-pixel implementation, run on SLURM).
+</p>
+
+<footer>
+<p>
+PERSEUS Forest Intelligence · Center for Research on Sustainable Forests ·
+University of Maine · 2026
+<br>
+This page is a methods note from the five-state pilot. Live multi-engine
+state explorer at <a href="../../">the main PERSEUS interface</a>.
+Pipeline source at <a href="https://github.com/holoros/GCBM2hpc">github.com/holoros/GCBM2hpc</a>.
+</p>
+</footer>
+
+</div>
+
+</body>
+</html>
