@@ -1,0 +1,9 @@
+HYBRID model-form stress test (5-fold CV, AG carbon lb/ac)
+states: ME MN IN WA GA
+pooled CV RMSE:
+  CR = 21290
+  PD = 25965
+  HYB = 24917
+  PDA = 26466
+best form: CR
+per-cell A* breakpoints written: 269 cells
