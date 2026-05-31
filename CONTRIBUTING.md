@@ -17,14 +17,22 @@ v1.3 features in the deployed bundle that are not yet in main source:
 * ycx year-slider animation (managed-harvest and reserve modes; EPA L3 polygons animate in lockstep)
 * CSPI v3 canopy-height reference figure (OOB R^2 = 0.87, RMSE = 3.737 m, 58,475 training rows)
 
-The `.github/workflows/deploy-pages.yml` workflow is intentionally configured
-for `workflow_dispatch:` only (manual trigger from the Actions tab). It is NOT
-on push because building from main today would erase those v1.3 features when
-the resulting `dist/` overwrote gh-pages.
+The Pages site currently deploys via direct push to the `gh-pages` branch
+(repo Settings -> Pages -> Source: "Deploy from a branch", branch `gh-pages`).
+That branch is built outside this main-branch source tree (likely from
+Aaron's Fedora workstation) and pushed directly. The `.github/workflows/deploy-pages.yml`
+workflow ships in this repo but is intentionally configured for
+`workflow_dispatch:` only AND the Pages "Source" setting is intentionally NOT
+GitHub Actions. Both safeguards must stay in place until the v1.3 source is
+reconciled into main, otherwise running the workflow OR flipping the Pages
+source would build from v0.73 main and overwrite the v1.3 gh-pages bundle.
 
-If you change source in main, do not enable `push:` on the workflow. Reconcile
-the v1.3 features into main source first, then flip the trigger back to
-`push: branches: [main]`.
+Reconciliation procedure when ready (after all v1.3 features land in main):
+
+1. Verify `npm run build` from main produces a bundle matching the deployed v1.3 features.
+2. Flip Settings -> Pages -> Source to "GitHub Actions".
+3. Change `.github/workflows/deploy-pages.yml` trigger from `workflow_dispatch:` to `push: branches: [main]`.
+4. Tag a `v1.4-source` release matching the reconciled main.
 
 The release tags `v0.73-source` (on main) and `v1.3-deployed` (on gh-pages)
 anchor both states so they remain reachable as that reconciliation happens.

@@ -96,7 +96,7 @@ For each feature:
 3. Land just that feature's changes. Verify with `npm run dev` locally.
 4. Open a PR labeled `desync`. CI runs `npm ci` + `npm run build` via the existing `.github/workflows/build-check.yml` (the deploy workflow remains workflow_dispatch only).
 5. Merge.
-6. After all six v1.3 features are reconciled, flip `.github/workflows/deploy-pages.yml` trigger back to `push: branches: [main]` and tag a new `v1.4-source` release matching the new main.
+6. After all six v1.3 features are reconciled, three settings flip in order: (a) Settings -> Pages -> Source from "Deploy from a branch (gh-pages)" to "GitHub Actions"; (b) `.github/workflows/deploy-pages.yml` trigger from `workflow_dispatch:` to `push: branches: [main]`; (c) tag a new `v1.4-source` release matching the reconciled main.
 
 ## Reconciliation order
 

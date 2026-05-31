@@ -27,7 +27,12 @@ The `public/api/` JSON and the `public/raster/` overlays are exported from the u
 
 ## Deploy
 
-`.github/workflows/deploy-pages.yml` deploys on every push to `main`. One-time: Settings to Pages to Source: GitHub Actions.
+The Pages site currently deploys via direct push to the `gh-pages` branch
+(Settings to Pages to Source: "Deploy from a branch", branch `gh-pages`). The
+`.github/workflows/deploy-pages.yml` workflow exists but is gated to
+`workflow_dispatch:` only and the Pages Source is intentionally NOT "GitHub
+Actions" -- both must stay that way until the v1.3 features are reconciled
+into main source. See `CONTRIBUTING.md` and `docs/desync.md`.
 
 ## What's in here
 
@@ -56,7 +61,7 @@ The current export catalogues 34 engines across 48 states and 70+ metrics coveri
 ## Known limitations
 
 * **Release tagging lag:** the latest release tag is v0.56 while the deployed app on gh-pages reports v1.3 and the source under `main/` reports v0.73. Cut new release tags when promoting deployments.
-* **Source-deploy desync:** the `gh-pages` branch carries v1.3 features (AOI upload, point-inspector, ycx animation, CSPI v3) that are not yet reflected in the `main` source. Reconcile before any new contributor pushes to `main`, otherwise the auto-build workflow will publish a regression.
+* **Source-deploy desync:** the `gh-pages` branch carries v1.3 features (AOI upload, point-inspector, ycx animation, CSPI v3, divergence heatmap, AOI forward projection) that are not yet reflected in the `main` source. Until those features land in main, keep Pages Source = "Deploy from a branch: gh-pages" and keep the deploy workflow `on: workflow_dispatch:` only.
 * **Western climate band:** CSI rasters cover only the eastern domain (lon -90 to -52); 18 western and plains states use a modeled transfer from the national climate-embedding PCs plus latitude (R^2 about 0.3 to 0.4) and are flagged `domain=modeled`.
 * **YC managed scenarios** are owner-class default rotations, not explicit per-stand silvicultural prescriptions.
 
