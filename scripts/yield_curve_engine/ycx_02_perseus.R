@@ -30,18 +30,29 @@ out  <- if (length(args) >= 2) args[2] else file.path(Sys.getenv("HOME"), "yield
 cfg  <- file.path(out, "config"); figd <- file.path(out, "figures")
 dir.create(figd, showWarnings = FALSE, recursive = TRUE)
 
-START <- 2025L; HORIZON <- 50L; STEP <- 5L
+START <- 2025L; HORIZON <- 100L; STEP <- 5L     # 100-yr horizon -> 2125
 years <- seq(START, START + HORIZON, by = STEP)
 FALLBACK_CLIM <- 0.08   # +/- band where no CSI signal (observed or modeled)
 REGEN_AGE <- 5
 
-## owner regimes
+## owner-default harvest regime
 REG <- list(
   Industrial     = list(type="clearcut", R=45),
   NIPF           = list(type="partial",  E=20, f=0.30),
   State          = list(type="partial",  E=25, f=0.25),
   `Public-Other` = list(type="partial",  E=30, f=0.15))
 DEF_REG <- "NIPF"
+
+## management SCENARIOS (dashboard buckets): scale rotation/entry length (sr)
+## and removal fraction (sf) relative to the owner-default regime.
+scale_reg <- function(reg, sr, sf) lapply(reg, function(x){
+  if (x$type=="clearcut") list(type="clearcut", R=max(10, round(x$R*sr)))
+  else list(type="partial", E=max(5, round(x$E*sr)), f=min(0.9, x$f*sf)) })
+SCEN <- list(
+  `reserve (no harvest)`   = NULL,                    # no harvest
+  `managed (harvest)`      = REG,                     # owner-default (BAU)
+  `managed (intensive)`    = scale_reg(REG, 0.7, 1.3),# shorter rotation, heavier
+  `managed (conservation)` = scale_reg(REG, 1.6, 0.5))# longer rotation, lighter
 
 LBAC_TO_MGHA  <- 0.00045359237 * 2.4710538
 TONAC_TO_MGHA <- 2.2417
@@ -97,29 +108,30 @@ for (p in seq_len(n)) {
   abc_p[[p]] <- a
 }
 
-## per-plot projection: reserve stock, managed stock, removed (per step)
-project <- function(rv, scale=1) {
+## per-plot projection for one scenario. regset=NULL -> reserve (no harvest);
+## otherwise the owner->regime list. Returns stock + removed-per-step.
+project <- function(rv, regset, scale=1) {
   ny <- length(years)
-  res <- matrix(NA_real_, n, ny); man <- matrix(NA_real_, n, ny); rem <- matrix(0, n, ny)
+  stock <- matrix(NA_real_, n, ny); rem <- matrix(0, n, ny)
   for (p in seq_len(n)) {
     abc <- abc_p[[p]][[rv]]; if (is.null(abc)) next
     a <- abc[1]*scale; b <- abc[2]; cc <- abc[3]
-    reg <- REG[[owners[p]]]
-    ## reserve
-    for (j in seq_len(ny)) res[p,j] <- chap(ages0[p] + (years[j]-START), a, b, cc)
-    ## managed
+    if (is.null(regset)) {                              # reserve: no harvest
+      for (j in seq_len(ny)) stock[p,j] <- chap(ages0[p] + (years[j]-START), a, b, cc)
+      next
+    }
+    reg <- regset[[owners[p]]]
     if (reg$type == "clearcut") {
       age <- ages0[p]
       for (j in seq_len(ny)) {
         if (j > 1) { age <- age + STEP
           if (age >= reg$R) { pre <- chap(age,a,b,cc); age <- REGEN_AGE + (age - reg$R)
             rem[p,j] <- max(pre - chap(age,a,b,cc), 0) } }
-        man[p,j] <- chap(age, a, b, cc)
+        stock[p,j] <- chap(age, a, b, cc)
       }
     } else {
       ## uneven-aged partial: stock accrues the curve's increment each step
-      ## (negative past the peak -> senescence) and is knocked down at entries.
-      ## No inversion needed, so the peak-decline form works directly.
+      ## (negative past the peak -> senescence), knocked down at entries.
       S <- chap(ages0[p], a, b, cc)
       for (j in seq_len(ny)) {
         if (j > 1) {
@@ -128,11 +140,11 @@ project <- function(rv, scale=1) {
           if (floor(ra/reg$E) > floor((ra-STEP)/reg$E)) {            # entry this step
             pre <- S; S <- (1-reg$f)*S; rem[p,j] <- pre - S }
         }
-        man[p,j] <- S
+        stock[p,j] <- S
       }
     }
   }
-  list(res=res, man=man, rem=rem)
+  list(stock=stock, rem=rem)
 }
 
 ## ---- climate band factors from Climate Site Index --------------------
@@ -166,9 +178,9 @@ if (file.exists(csi_path)) {
 rows <- list(); flux <- list()
 for (mm in names(resp_metric)) {
   rv <- resp_metric[[mm]]$rv; conv <- resp_metric[[mm]]$conv
-  base <- project(rv,1)                 # single current-climate projection
-  for (sc in c("reserve (no harvest)","managed (harvest)")) {
-    bm <- if (sc=="reserve (no harvest)") base$res else base$man
+  for (sc in names(SCEN)) {
+    pj <- project(rv, SCEN[[sc]], 1)          # current-climate projection
+    bm <- pj$stock
     for (j in seq_along(years)) {
       cen <- mean(bm[,j],na.rm=TRUE)*conv
       rows[[length(rows)+1]] <- data.frame(state=ST, metric=mm, mgmt=sc, year=years[j],
@@ -177,12 +189,13 @@ for (mm in names(resp_metric)) {
         value_hi=round(cen*hi_fac[j],5),
         n_plots=sum(!is.na(bm[,j])), stringsAsFactors=FALSE)
     }
+    ## harvest carbon flux from the default managed scenario
+    if (mm == "agc_live_total" && sc == "managed (harvest)")
+      for (j in seq_along(years))
+        flux[[length(flux)+1]] <- data.frame(state=ST, year=years[j],
+          removed_density_per_yr=round(mean(pj$rem[,j],na.rm=TRUE)*conv/STEP,6),
+          stringsAsFactors=FALSE)
   }
-  if (mm == "agc_live_total")
-    for (j in seq_along(years))
-      flux[[length(flux)+1]] <- data.frame(state=ST, year=years[j],
-        removed_density_per_yr=round(mean(base$rem[,j],na.rm=TRUE)*conv/STEP,6),
-        stringsAsFactors=FALSE)
 }
 cat(sprintf("[ycx_02] climate band: %s\n", clim_src))
 ser <- do.call(rbind, rows)

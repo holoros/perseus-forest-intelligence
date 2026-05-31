@@ -149,7 +149,7 @@ for st in sorted(native):
     for metric in MET:
         if metric not in native[st]: continue
         metrics_here.append(metric)
-        for bucket in BUCKETS:
+        for bucket in native[st][metric]:        # all scenario buckets present
             nb=native[st][metric][bucket]; pts=[]
             for y in sorted(nb):
                 v,lo,hi=nb[y]
