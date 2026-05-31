@@ -1,0 +1,10 @@
+# Default code ownership for PERSEUS Forest Intelligence
+* @holoros
+
+# Calibration data and methods
+/public/api/        @holoros
+/public/methods/    @holoros
+/docs/              @holoros
+
+# CI and workflow changes get extra attention
+/.github/           @holoros
