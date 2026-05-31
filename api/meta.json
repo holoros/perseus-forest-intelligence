@@ -4,7 +4,7 @@
  "db_version": "v0.55",
  "stats": {
   "states": 48,
-  "engines": 34,
+  "engines": 35,
   "metrics": 70,
   "rows": 33163
  },
@@ -438,6 +438,8 @@
  },
  "buckets": [
   "reserve (no harvest)",
-  "managed (harvest)"
+  "managed (harvest)",
+  "managed (intensive)",
+  "managed (conservation)"
  ]
 }
