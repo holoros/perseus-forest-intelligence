@@ -54,3 +54,15 @@ The current export catalogues 34 engines across 48 states and 70+ metrics coveri
 ## Citation
 
 If you use PERSEUS Forest Intelligence in research, please cite the underlying `perseus_db` data product and the CRSF yield-curve pipeline. Contact: Aaron Weiskittel (aaron.weiskittel@maine.edu).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Important: do not enable
+`push:` on `.github/workflows/deploy-pages.yml` until the v1.3
+features in gh-pages are reconciled into main source. The
+`v0.73-source` and `v1.3-deployed` tags anchor both states.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the source (main) and deploy
+(gh-pages) timelines.
