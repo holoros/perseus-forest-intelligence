@@ -1,11 +1,15 @@
 name: Deploy Forest Intelligence (Pages)
 
-# Builds the app on every push to main and deploys dist/ to GitHub Pages.
-# One-time setup: in repo Settings -> Pages, set "Source" to "GitHub Actions".
+# IMPORTANT: auto-deploy on push is intentionally DISABLED right now because
+# the main branch source (v0.73) is behind the deployed gh-pages bundle (v1.3).
+# An auto-build from main would publish a regression and erase the AOI upload,
+# point inspector, ycx animation, and CSPI v3 features that live only in
+# gh-pages today. Reconcile the source first, then change `on:` back to
+# `push: branches: [main]` to re-enable continuous deployment.
+#
+# Until then, this workflow only runs on manual dispatch from the Actions tab.
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
