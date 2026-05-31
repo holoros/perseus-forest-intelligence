@@ -134,3 +134,22 @@ rejected so the cell -> ft -> state fallback supplies a sane curve. The
 projection uses the curve directly for reserve/clearcut, and accrues the
 curve's (possibly negative, post-peak) increment for uneven-aged partial
 harvest -- no asymptote inversion needed.
+
+## Finalized: hierarchical (partially-pooled) parameters by ft/eco/owner
+Curve parameters are estimated with a mixed model (lme4) per state per response:
+  log(y) ~ 0 + ft + ft:log(age) + ft:age + (1+log(age)|eco) + (1|own) + (1|eco:own)
+Shape (b2) and decline (b3) vary by forest type; scale (b1) and shape (b2)
+vary by ecoregion; scale also varies by owner and ecoregion x owner. lme4
+predicts a parameter set for EVERY populated cell, so sparse cells borrow
+strength (no degenerate fits). b3 is capped at 1.
+
+**Model-form stress test** (5-fold CV, 249k plots): peak-decline and power
+forms predict comparably in the observed age range; the Chapman-Richards edge
+on natural-scale RMSE is a loss-scale artifact (it is fit on the same metric).
+The forms diverge only in *extrapolation*, where peak-decline is required for
+realistic 100+ yr behaviour. **Variance decomposition**: ecoregion drives scale
+(SD 0.84) and shape (0.51) but barely decline (0.01); forest type drives all
+three; owner contributes a real scale effect. **Covariate**: CSPI on the scale
+is highly significant (log-CSPI +0.64, dAIC -1079), corroborating the growth
+elasticity (+0.59); forest type already captures most of it, so CSPI is
+available as an optional continuous productivity covariate.

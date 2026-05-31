@@ -121,70 +121,94 @@ emit_fit <- function(sub, scope, key, ft, prov, own, trt) {
   list(f=do.call(rbind,rows_f), c=do.call(rbind,rows_c))
 }
 
-FIT <- list(); CUR <- list()
-add <- function(x){ if(!is.null(x$f)){FIT[[length(FIT)+1]]<<-x$f; CUR[[length(CUR)+1]]<<-x$c} }
+## ===== hierarchical (partially-pooled) parameters ====================
+## Fit on UNTREATED plots only (reserve chronosequence; ycx_02 derives the
+## managed scenario by explicit harvest, so no harvested curve is needed).
+## Model (per response):
+##   log(y) ~ 0 + ft + ft:log(age) + ft:age            # shape & decline by
+##            + (1+log(age) | eco) + (1|own) + (1|eco:own)   forest type;
+## scale (b1) varies by ft, ecoregion, owner & eco:owner; shape (b2) by ft
+## and ecoregion; decline (b3) by ft. lmer predicts a parameter set for
+## EVERY populated cell, so sparse cells borrow strength (no degenerate
+## fits). OLS fallback per response if lmer is unavailable / fails.
+has_lme4 <- requireNamespace("lme4", quietly=TRUE)
+pdu <- pd[pd$treatment=="untreated" & pd$stand_age>0, ]
+pdu$la <- log(pdu$stand_age); pdu$ag <- pdu$stand_age
+## every cell present in the membership (incl. sparse) gets partial-pooled
+## parameters -- this is what shrinkage is for, and the TreeMap pixel-level
+## application needs a curve for every forest-type x ecoregion x owner combo.
+cellinfo <- unique(mem[, c("cell_key","ft_group","prov_code","owner4")])
+cellinfo <- cellinfo[!is.na(cellinfo$ft_group) & !is.na(cellinfo$prov_code) &
+                     !is.na(cellinfo$owner4), ]
 
-## 1) primary cells x treatment
-for (i in seq_len(nrow(strata))) {
-  s <- strata[i,]
-  for (trt in c("untreated","harvested")) {
-    sub <- pd[pd$cell_key==s$cell_key & pd$treatment==trt, ]
-    if (nrow(sub) < MIN_FIT) next
-    add(emit_fit(sub,"cell",s$cell_key,s$ft_group,s$prov_code,s$owner4,trt))
-  }
+cap_c <- function(lc) min(lc, 0)          # b3 <= 1 (no exponential growth)
+emit_cell <- function(ci, rv, a,b,c) {
+  if (!is.finite(a)||a<=0||b< -0.5||b>3.5) return(NULL)
+  c <- exp(cap_c(log(c)))
+  pr <- chap(age_grid, a, b, c)
+  list(
+    f=data.frame(scope="cell", cell_key=ci$cell_key, ft_group=ci$ft_group,
+       prov_code=ci$prov_code, owner=ci$owner4, treatment="untreated",
+       response=rv, a=round(a,4), b=round(b,5), c=round(c,6),
+       rmse=NA, n_plots=NA, stringsAsFactors=FALSE),
+    c=data.frame(scope="cell", cell_key=ci$cell_key, ft_group=ci$ft_group,
+       prov_code=ci$prov_code, owner=ci$owner4, treatment="untreated",
+       response=rv, age=age_grid, predicted=round(pr,3), stringsAsFactors=FALSE))
 }
-## 2) fallback ft_group x owner x treatment
-for (fo in unique(pd$ft_owner)) {
-  parts <- strsplit(fo,"\\|")[[1]]
-  for (trt in c("untreated","harvested")) {
-    sub <- pd[pd$ft_owner==fo & pd$treatment==trt, ]
-    if (nrow(sub) < MIN_FIT) next
-    add(emit_fit(sub,"ft_owner",fo,parts[1],NA,parts[2],trt))
+
+FIT <- list(); CUR <- list()
+add <- function(x){ if(!is.null(x)&&!is.null(x$f)){FIT[[length(FIT)+1]]<<-x$f; CUR[[length(CUR)+1]]<<-x$c} }
+
+for (rv in resp) {
+  d <- pdu[is.finite(pdu[[rv]]) & pdu[[rv]]>0, ]
+  if (nrow(d) < MIN_FIT) next
+  d$y <- log(d[[rv]])
+  d$ft <- factor(d$ft_group); d$eco <- factor(d$prov_code); d$own <- factor(d$owner4)
+  m <- NULL
+  if (has_lme4 && nlevels(d$ft)>=1 && nrow(d)>=80)
+    m <- tryCatch(lme4::lmer(y ~ 0 + ft + ft:la + ft:ag +
+            (1+la|eco) + (1|own) + (1|eco:own), data=d,
+            control=lme4::lmerControl(optimizer="bobyqa",
+              check.conv.singular=lme4::.makeCC("ignore",1e-4))),
+          error=function(e) NULL)
+  if (!is.null(m)) {
+    fe <- lme4::fixef(m); re <- lme4::ranef(m)
+    g <- function(tab,key,col){ if(!is.null(tab)&&key %in% rownames(tab)&&col %in% colnames(tab)) tab[key,col] else 0 }
+    for (i in seq_len(nrow(cellinfo))) {
+      ci <- cellinfo[i,]; ftn<-paste0("ft",ci$ft_group)
+      lb1 <- (if(ftn %in% names(fe)) fe[[ftn]] else NA)
+      b2  <- (if(paste0(ftn,":la") %in% names(fe)) fe[[paste0(ftn,":la")]] else NA)
+      lb3 <- (if(paste0(ftn,":ag") %in% names(fe)) fe[[paste0(ftn,":ag")]] else NA)
+      if (any(is.na(c(lb1,b2,lb3)))) next
+      lb1 <- lb1 + g(re$eco,ci$prov_code,"(Intercept)") + g(re$own,ci$owner4,"(Intercept)") +
+             g(re$`eco:own`, paste(ci$prov_code,ci$owner4,sep=":"), "(Intercept)")
+      b2  <- b2  + g(re$eco,ci$prov_code,"la")
+      add(emit_cell(ci, rv, exp(lb1), b2, exp(lb3)))
+    }
+  } else {
+    ## OLS fallback per cell (with parent fallback)
+    for (i in seq_len(nrow(cellinfo))) {
+      ci <- cellinfo[i,]
+      sub <- d[d$ft_group==ci$ft_group & d$prov_code==ci$prov_code & d$owner4==ci$owner4, ]
+      if (nrow(sub)<MIN_FIT) sub <- d[d$ft_group==ci$ft_group, ]
+      if (nrow(sub)<MIN_FIT) sub <- d
+      fo <- fit1(sub$stand_age, sub[[rv]]); if (is.null(fo)) next
+      add(emit_cell(ci, rv, fo$a, fo$b, fo$c))
+    }
   }
-}
-## 3) fallback ft_group x treatment
-for (ft in unique(pd$ft_group)) {
-  for (trt in c("untreated","harvested")) {
-    sub <- pd[pd$ft_group==ft & pd$treatment==trt, ]
-    if (nrow(sub) < MIN_FIT) next
-    add(emit_fit(sub,"ft",ft,ft,NA,NA,trt))
-  }
-}
-## 4) fallback state x treatment
-for (trt in c("untreated","harvested")) {
-  sub <- pd[pd$treatment==trt, ]
-  if (nrow(sub) < MIN_FIT) next
-  add(emit_fit(sub,"state",ST,NA,NA,NA,trt))
+  ## state-level safety fallback (untreated, this response)
+  fst <- fit1(d$stand_age, d[[rv]])
+  if (!is.null(fst)) add(list(
+    f=data.frame(scope="state", cell_key=ST, ft_group=NA, prov_code=NA, owner=NA,
+       treatment="untreated", response=rv, a=round(fst$a,4), b=round(fst$b,5),
+       c=round(fst$c,6), rmse=round(fst$rmse,3), n_plots=nrow(d), stringsAsFactors=FALSE),
+    c=data.frame(scope="state", cell_key=ST, ft_group=NA, prov_code=NA, owner=NA,
+       treatment="untreated", response=rv, age=age_grid,
+       predicted=round(chap(age_grid,fst$a,fst$b,fst$c),3), stringsAsFactors=FALSE)))
 }
 
 fits <- do.call(rbind, FIT); curves <- do.call(rbind, CUR)
-
-## ---- v4 anchoring on cell-scope fits --------------------------------
-fits$a_free <- fits$a; fits$anchor_source <- "free"
-cell_fits <- fits$scope == "cell"
-for (k in unique(fits$cell_key[cell_fits])) {
-  for (rv in resp) {
-    iu <- which(fits$scope=="cell" & fits$cell_key==k &
-                fits$response==rv & fits$treatment=="untreated")
-    ih <- which(fits$scope=="cell" & fits$cell_key==k &
-                fits$response==rv & fits$treatment=="harvested")
-    if (length(iu)==1 && length(ih)==1) {
-      if (fits$a[ih] > fits$a[iu]*1.20) {
-        fits$a[ih] <- fits$a[iu]; fits$anchor_source[ih] <- "anchored_untreated_a"
-      } else fits$anchor_source[ih] <- "kept_within_20pct"
-    } else if (length(ih)==1) fits$anchor_source[ih] <- "kept_no_pair"
-  }
-}
-## rebuild curves for any anchored rows
-for (i in which(fits$anchor_source=="anchored_untreated_a")) {
-  r <- fits[i,]
-  sel <- which(curves$scope=="cell" & curves$cell_key==r$cell_key &
-               curves$response==r$response & curves$treatment=="harvested")
-  curves$predicted[sel] <- round(chap(curves$age[sel], r$a, r$b, r$c), 3)
-}
-
 write.csv(fits,   file.path(out, sprintf("ycx_%s_fits.csv", ST)),       row.names=FALSE)
 write.csv(curves, file.path(out, sprintf("ycx_%s_curves_long.csv", ST)),row.names=FALSE)
-cat(sprintf("[ycx_01] %s: %d fits (%d cell-scope), %d anchored; %d curve rows\n",
-            ST, nrow(fits), sum(fits$scope=="cell"),
-            sum(fits$anchor_source=="anchored_untreated_a"), nrow(curves)))
+cat(sprintf("[ycx_01] %s: %d fits (%d cell-scope), %d curve rows | lme4=%s\n",
+            ST, nrow(fits), sum(fits$scope=="cell"), nrow(curves), has_lme4))
