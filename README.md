@@ -44,6 +44,15 @@ The `public/api/` JSON and the `public/raster/` overlays are exported from the u
 
 The current export catalogues 34 engines across 48 states and 70+ metrics covering carbon stocks, fluxes, volume, biodiversity, mortality, disturbance, and ownership. See `public/api/meta.json` for the canonical catalog.
 
+
+
+## Methods and data provenance
+
+* CONUS yield-curve methodology: `docs/yc_engine_provenance.md` and the in-app methods page at https://holoros.github.io/perseus-forest-intelligence/methods/.
+* Inventory stratification analysis (CONUS B1.1 vs B1.3 at n=48): `public/methods/inventory-stratification/`.
+* Per-state HTML reports: `public/reports/{GA,ID,IN,ME,MN,OR,WA}_report.html`.
+* All scientific outputs cite `perseus_db` schema `perseus_api_v1` (see `public/api/meta.json` for the current snapshot).
+
 ## Known limitations
 
 * **Release tagging lag:** the latest release tag is v0.56 while the deployed app on gh-pages reports v1.3 and the source under `main/` reports v0.73. Cut new release tags when promoting deployments.
