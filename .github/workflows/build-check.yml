@@ -1,0 +1,36 @@
+name: Build check (no deploy)
+
+# Verifies that main can be built locally with npm. Does NOT touch gh-pages.
+# This catches obvious breakage in the source tree without risking the
+# v1.3 deployed bundle (see CONTRIBUTING.md for the source/deploy desync).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci || npm install
+      - name: Build
+        run: npm run build
+      - name: Report dist size
+        run: |
+          if [ -d dist ]; then
+            echo "dist/ contents:"
+            du -sh dist
+            ls -lh dist | head -20
+          else
+            echo "dist/ not produced"
+            exit 1
+          fi
