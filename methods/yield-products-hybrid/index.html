@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="PERSEUS methods note: a hybrid Chapman-Richards-with-decline yield form, FIADB vs TreeMap area expansion, and product-resolved (sawtimber/pulpwood/residue) CONUS biomass yield.">
+<title>PERSEUS · Hybrid yield form, products, and FIADB vs TreeMap</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a472a'/%3E%3Cpath d='M16 6 L22 14 L19 14 L24 22 L18 22 L18 26 L14 26 L14 22 L8 22 L13 14 L10 14 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+<style>
+:root { --ink:#0b1015; --mut:#6a7480; --bg:#fafbfc; --card:#ffffff; --border:#e5e8eb; --accent:#1a472a; --accent-light:#d4e5d8; --warn:#c1440e; --good:#1d7e0f; --muted-bg:#f3f5f7; }
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; font-size:16px; line-height:1.55; color:var(--ink); background:var(--bg); }
+.container { max-width:920px; margin:0 auto; padding:32px 24px 80px; }
+header.top { border-bottom:1px solid var(--border); background:var(--card); padding:14px 0; margin-bottom:32px; }
+header.top .container { padding-top:0; padding-bottom:0; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); font-weight:600; font-size:15px; }
+.brand-icon { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:14px; }
+nav a { color:var(--mut); text-decoration:none; font-size:14px; margin-left:18px; border-bottom:1px solid transparent; padding-bottom:2px; }
+nav a:hover { color:var(--accent); border-bottom-color:var(--accent); }
+nav a.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tag { display:inline-block; font-size:11.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent); background:var(--accent-light); padding:3px 10px; border-radius:999px; margin-bottom:14px; }
+h1 { font-size:36px; line-height:1.2; font-weight:700; margin:4px 0 14px; letter-spacing:-0.01em; }
+.lede { font-size:19px; color:var(--mut); line-height:1.55; margin:0 0 28px; max-width:760px; }
+.byline { font-size:13.5px; color:var(--mut); margin-bottom:36px; padding-bottom:18px; border-bottom:1px solid var(--border); }
+h2 { font-size:24px; font-weight:700; margin:44px 0 14px; border-bottom:2px solid var(--accent); padding-bottom:6px; display:inline-block; }
+h3 { font-size:18px; font-weight:600; margin:28px 0 10px; }
+p { margin:0 0 14px; }
+.tldr { background:var(--accent-light); border-left:4px solid var(--accent); padding:18px 22px; border-radius:4px; margin:0 0 28px; }
+.tldr h3 { margin:0 0 8px; font-size:15.5px; letter-spacing:0.04em; text-transform:uppercase; color:var(--accent); }
+.tldr p { margin:0; font-size:16px; }
+figure { margin:28px 0 32px; }
+figure img { width:100%; height:auto; border:1px solid var(--border); border-radius:6px; background:white; display:block; }
+figcaption { margin-top:10px; font-size:14px; color:var(--mut); line-height:1.55; }
+figcaption strong { color:var(--ink); }
+table.matrix { width:100%; border-collapse:collapse; margin:18px 0 24px; font-size:14.5px; }
+table.matrix th, table.matrix td { text-align:right; padding:8px 12px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; }
+table.matrix th { text-align:left; font-weight:600; background:var(--muted-bg); }
+table.matrix th:first-child, table.matrix td:first-child { text-align:left; font-weight:600; }
+table.matrix td.good { color:var(--good); font-weight:600; }
+code { font-family:"SF Mono",Menlo,Consolas,monospace; font-size:13.5px; background:var(--muted-bg); padding:1px 6px; border-radius:3px; }
+blockquote { margin:22px 0; padding:14px 22px; border-left:3px solid var(--mut); background:var(--muted-bg); font-size:15.5px; }
+footer { margin-top:60px; padding-top:24px; border-top:1px solid var(--border); font-size:13.5px; color:var(--mut); line-height:1.7; }
+footer a, .byline a { color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent); }
+.repo-link { display:inline-flex; align-items:center; gap:6px; color:var(--accent); background:var(--accent-light); padding:4px 12px; border-radius:6px; text-decoration:none; font-size:14px; font-weight:600; margin:4px 6px 4px 0; }
+@media (max-width:600px){ h1{font-size:28px} .lede{font-size:17px} .container{padding:24px 18px 60px} nav a{margin-left:10px;font-size:13px} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="container">
+    <a class="brand" href="../../"><div class="brand-icon">P</div><span>PERSEUS Forest Intelligence</span></a>
+    <nav>
+      <a href="../../">Explorer</a>
+      <a href="../" class="active">Methods</a>
+      <a href="https://github.com/holoros/perseus-forest-intelligence">Pipeline</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="tag">Methods note · 2026-05-31</div>
+<h1>Hybrid yield form, products, and FIADB vs TreeMap</h1>
+<p class="lede">
+Three additions to the CONUS yield-curve engine: a hybrid growth form that is
+asymptotic up to a forest-type x ecoregion breakpoint and declines beyond it, a
+sawtimber / pulpwood / residue product allocation, and a comparison of FIADB
+versus TreeMap area expansion. All fit from FIA tree data (FIADB first), with
+TreeMap as the spatial expansion layer.
+</p>
+<p class="byline">
+PERSEUS multi-model framework · yield-curve engine (CONUS, 48 states) ·
+Aaron Weiskittel et al. ·
+scripts in <a href="https://github.com/holoros/perseus-forest-intelligence/tree/main/scripts/yield_curve_engine">scripts/yield_curve_engine</a>
+</p>
+
+<div class="tldr">
+<h3>TL;DR</h3>
+<p>
+Across all 48 states, Chapman-Richards fits the FIA chronosequence best
+(pooled 5-fold CV RMSE 23,420 vs the current peak-decline form 27,480). The
+recommended production form is the hybrid: Chapman-Richards up to an empirical
+culmination breakpoint A* (per forest type x ecoregion), then a decline tail.
+It equals CR where A* is beyond the data and adds senescence where forests
+culminate earlier (and beats CR outright in cases like Idaho, A* = 115). Yield
+is allocated into sawtimber / pulpwood / residue; the CONUS standing sawtimber
+share rises from 29% to 35% over a 100-year reserve as stands mature. FIADB
+and TreeMap expansion agree at the national scale (t0 ratio 0.94) but diverge
+sharply for states without an FIA carbon anchor, so TreeMap pixel-area
+expansion is the more defensible CONUS-wide basis.
+</p>
+</div>
+
+<h2>1. Hybrid yield form</h2>
+<p>
+The engine currently uses the peak-decline form <code>b1*age^b2*b3^age</code>.
+A 5-fold CV stress test of four candidate forms on the FIA chronosequence (AG
+carbon, lb/ac), pooled across all 48 states:
+</p>
+<table class="matrix">
+<thead><tr><th>Form</th><th>Pooled CV RMSE</th></tr></thead>
+<tbody>
+<tr><td>Chapman-Richards <code>A(1-exp(-k&middot;age))^p</code></td><td class="good">23,420</td></tr>
+<tr><td>Hybrid: CR x decline tail beyond A*</td><td>26,419</td></tr>
+<tr><td>Peak-decline (current engine)</td><td>27,480</td></tr>
+<tr><td>Re-anchored peak-decline (peak fixed at A*)</td><td>27,774</td></tr>
+</tbody>
+</table>
+<p>
+Chapman-Richards wins because, in the FIA chronosequence, AG carbon in most
+northern forests does not decline before roughly 200 years. The empirical
+culmination age A* hits that ceiling for ME and MN, where the hybrid reduces to
+CR; where forests culminate earlier the decline engages and can beat CR (GA
+A* = 125, IN 155, WA 175, ID 115). The hybrid is the right production form
+because it is CR-equivalent where the data show no decline and never worse by
+construction, while adding real senescence where the chronosequence supports
+it. Breakpoints are the empirical culmination per forest-type x ecoregion cell,
+with forest-type then state fallback (<code>ycx_hybrid_modelform.R</code>).
+</p>
+
+<h2>2. Product allocation and product-resolved yield</h2>
+<p>
+<code>ycx_products.R</code> splits standing volume and biomass into sawtimber,
+pulpwood, and residue (softwood and hardwood tracked separately) using FIA size
+thresholds (softwood sawtimber DBH >= 9 in, hardwood >= 11 in; poletimber 5 in
+to threshold) and FIA volume partitions (VOLCSNET sawlog, VOLCFNET merch,
+DRYBIO_SAWLOG / BOLE / AG). Fractions are computed per cell and per age class
+(&lt;40, 40-80, 80+ yr) so allocation tracks the sawtimber shift as stands
+mature. <code>ycx_treemap_products.R</code> then applies those fractions to the
+spatially explicit TreeMap AG-biomass projection.
+</p>
+
+<figure>
+  <img src="treemap_conus_products.png"
+       alt="CONUS standing aboveground dry biomass by product over a 100-year reserve projection. Sawtimber rises from 5,889 to 10,484 Tg, pulpwood 5,233 to 6,960, residue 9,286 to 12,945.">
+  <figcaption>
+    <strong>Figure 1.</strong> CONUS standing aboveground dry biomass split into
+    sawtimber, pulpwood, and residue over a 100-year reserve projection,
+    applying the per-cell x age-class product fractions to the TreeMap 2022
+    biomass projection.
+  </figcaption>
+</figure>
+
+<table class="matrix">
+<thead><tr><th>Product</th><th>2022 (Tg)</th><th>2122 (Tg)</th><th>share 2022</th><th>share 2122</th></tr></thead>
+<tbody>
+<tr><td>sawtimber</td><td>5,889</td><td>10,484</td><td>0.29</td><td>0.35</td></tr>
+<tr><td>pulpwood</td><td>5,233</td><td>6,960</td><td>0.26</td><td>0.23</td></tr>
+<tr><td>residue</td><td>9,286</td><td>12,945</td><td>0.46</td><td>0.43</td></tr>
+</tbody>
+</table>
+<p>
+The standing sawtimber share rises from 29% to 35% as forests age, the maturation
+signal the age-class fractions are designed to carry. This run uses the current
+production biomass curves (peak-decline) so it is consistent with the live
+<code>agb_dry</code> engine; rewiring to the hybrid form is a separate step.
+</p>
+
+<h2>3. FIADB vs TreeMap area expansion</h2>
+<p>
+The same curves expanded two ways for AG live carbon (reserve): the uniform-grid
+FIADB model (area = n_plots x A0, A0 anchored to FIA carbon totals) and the
+spatially explicit TreeMap pixel-area model. CONUS totals: FIADB 11,002 ->
+17,544 Tg C; TreeMap 10,352 -> 14,813 Tg C; national t0 ratio TreeMap/FIADB
+0.94. The two agree closely for FIA-anchored states but diverge sharply
+elsewhere (MI 0.39, WI 0.55), because the uniform-grid model falls back to a
+median area-per-plot where no anchor exists while TreeMap uses real pixel area
+everywhere.
+</p>
+<blockquote>
+TreeMap pixel-area expansion is the more defensible CONUS-wide basis; the FIADB
+uniform-grid line should be read as reliable only for the anchored states. This
+is also why the production data treats TreeMap as the spatial layer over the
+FIA-fit curves.
+</blockquote>
+
+<h2>Data and code</h2>
+<p>
+<a class="repo-link" href="https://github.com/holoros/perseus-forest-intelligence/tree/main/scripts/yield_curve_engine">🧮 yield_curve_engine scripts</a>
+<a class="repo-link" href="https://github.com/holoros/perseus-forest-intelligence/blob/main/docs/yield_hybrid_products_pilot.md">📋 results writeup</a>
+</p>
+
+<h2>Provenance</h2>
+<p>
+PERSEUS is the multi-model forest carbon intercomparison framework at the
+Center for Research on Sustainable Forests (CRSF), University of Maine.
+Computation on the Ohio Supercomputer Center Cardinal cluster (PUOM0008).
+Curves and product fractions are fit from FIA tree data; TreeMap 2022 is
+USFS RDS-2025-0032.
+</p>
+
+<footer>
+<p>
+PERSEUS Forest Intelligence · CRSF · University of Maine · 2026
+<br>
+Methods note on the hybrid yield form, product allocation, and area-expansion
+comparison. Live explorer at <a href="../../">the main PERSEUS interface</a>.
+</p>
+</footer>
+
+</div>
+</body>
+</html>
