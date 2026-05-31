@@ -1,7 +1,10 @@
 # Hybrid yield form, product allocation, and FIADB vs TreeMap expansion (pilot)
 
-Pilot over ME, MN, IN, WA, GA. Cardinal job `ycx_hybpilot`. Full 48-state run
-queued as `ycx_hybconus`. Scripts in `scripts/yield_curve_engine/`.
+CONUS-complete: all 48 contiguous states (Cardinal pilot `ycx_hybpilot`, then
+the full run `ycx_hyb48`). Scripts in `scripts/yield_curve_engine/`. Idaho's
+home FIA file was a truncated 12-column partial, so the loaders now auto-fall
+back to the full FIADB copy on scratch (`/fs/scratch/PUOM0008/crsfaaron/FIA/`)
+whenever a home TREE file is missing required columns.
 
 ## 1. Hybrid yield form: Chapman-Richards with a decline tail
 
@@ -10,19 +13,25 @@ to avoid unbounded accumulation over a 100 year horizon. A 5-fold CV stress
 test of four candidate forms on the FIA chronosequence (AG carbon, lb/ac) shows
 that choice carries a real fit penalty:
 
+Pooled CV RMSE across all 48 states (plot-weighted; lb/ac AG carbon):
+
 | Form | Pooled CV RMSE | Notes |
 |---|---|---|
-| Chapman-Richards `A(1-exp(-k*age))^p` | 21,290 | asymptotic, best fit |
-| Hybrid: CR x decline tail beyond A* | 24,917 | CR where A* is past the data; decline where it is not |
-| Peak-decline `b1*age^b2*b3^age` (current) | 25,965 | current engine form |
-| Re-anchored peak-decline (peak fixed at A*) | 26,466 | worst |
+| Chapman-Richards `A(1-exp(-k*age))^p` | 23,420 | asymptotic, best fit |
+| Hybrid: CR x decline tail beyond A* | 26,419 | CR where A* is past the data; decline where it is not |
+| Peak-decline `b1*age^b2*b3^age` (current) | 27,480 | current engine form |
+| Re-anchored peak-decline (peak fixed at A*) | 27,774 | worst |
 
 Chapman-Richards fits best because, in the FIA chronosequence, AG carbon in most
 northern forests does not decline before roughly 200 years. The empirical
 culmination age A* hits the 200 yr ceiling for ME and MN, so the hybrid there
-reduces exactly to CR (RMSE 20,213 vs CR 20,211). Where forests genuinely
-culminate earlier the breakpoint is real and the decline engages: GA A* = 125,
-IN 155, WA 175.
+reduces exactly to CR. Where forests genuinely culminate earlier the breakpoint
+is real and the decline engages and can beat CR: GA A* = 125, IN 155, WA 175,
+and Idaho (A* = 115) where the hybrid edges CR outright (CV 35,720 vs 35,907).
+Pooled, CR stays ahead because the decline only helps the minority of cells that
+culminate within the chronosequence; the hybrid is the right production form
+precisely because it is CR-equivalent elsewhere and never worse by construction
+where A* is beyond the data.
 
 ### Recommendation
 
@@ -43,21 +52,23 @@ FIA's own volume partitions (VOLCSNET sawlog, VOLCFNET merch, DRYBIO_SAWLOG /
 BOLE / AG). Fractions are computed per cell and per age class (<40, 40-80, 80+)
 so allocation tracks the sawtimber shift as stands mature.
 
-Pilot state product mix (fraction of merch volume in sawtimber vs pulpwood;
-fraction of AG biomass in residue):
+Computed for all 48 states (full table in `docs/results/product_summary_by_state.csv`);
+representative mix (fraction of merch volume in sawtimber vs pulpwood; fraction
+of AG biomass in residue):
 
 | State | sawtimber vol | pulpwood vol | residue (of AG bio) |
 |---|---|---|---|
 | WA | 0.87 | 0.13 | 0.32 |
+| ID | 0.80 | 0.20 | 0.39 |
 | IN | 0.65 | 0.35 | 0.43 |
 | GA | 0.56 | 0.44 | 0.47 |
 | ME | 0.47 | 0.53 | 0.60 |
 | MN | 0.37 | 0.63 | 0.56 |
 
-Pacific Northwest Douglas-fir (WA) is overwhelmingly sawtimber; northern
-aspen-birch and spruce-fir (ME, MN) carry more pulpwood and a larger non-merch
-residue share. These fractions multiply the projected yield to give
-product-specific yield trajectories.
+Pacific Northwest and Mountain West conifer (WA, ID) is overwhelmingly
+sawtimber; northern aspen-birch and spruce-fir (ME, MN) carry more pulpwood and
+a larger non-merch residue share. These fractions multiply the projected yield
+to give product-specific yield trajectories.
 
 ## 3. FIADB vs TreeMap area expansion
 

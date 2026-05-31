@@ -27,14 +27,29 @@ set.seed(20260531); MIN_PLOTS_CELL <- 40L; AGE_BIN <- 10L
 ASTAR_MIN <- 30; ASTAR_MAX <- 200
 cat(sprintf("[hyb] states: %s\n", paste(STATES, collapse=" ")))
 
+## resolve a TREE file that actually has the needed columns: prefer the home
+## fia_data copy, else fall back to the full FIADB copy on scratch. Guards
+## against silently truncated home downloads (e.g. the 12-col ID partial).
+SCRATCH_FIA <- "/fs/scratch/PUOM0008/crsfaaron/FIA"
+resolve_tree <- function(ST, need){
+  cand <- c(file.path(fia, sprintf("%s_TREE.csv", ST)),
+            file.path(SCRATCH_FIA, sprintf("%s_TREE.csv", ST)))
+  for (i in seq_along(cand)){
+    tf <- cand[i]; if (!file.exists(tf)) next
+    hdr <- gsub('"','',strsplit(readLines(tf,n=1),",")[[1]])
+    if (all(need %in% hdr)){ if (i>1) cat(sprintf("  [fallback] %s using scratch FIADB copy\n",ST)); return(tf) }
+  }
+  stop("no TREE file with all required cols for ", ST)
+}
+
 ## ---- plot-level carbon (lb/ac) vs stand age, per state (mirrors ycx_01) ----
 load_state <- function(ST) {
   mem <- read.csv(file.path(cfg, sprintf("ycx_membership_%s.csv", ST)), stringsAsFactors=FALSE)
   mem <- mem[order(mem$PLT_CN, -mem$INVYR), ]; mem <- mem[!duplicated(mem$PLT_CN), ]
-  tf <- file.path(fia, sprintf("%s_TREE.csv", ST))
-  hdr <- gsub('"','',strsplit(readLines(tf,n=1),",")[[1]])
   need <- c("PLT_CN","STATUSCD","CARBON_AG","TPA_UNADJ")
-  idx <- match(need, hdr); if (any(is.na(idx))) stop("missing cols in ",ST)
+  tf <- resolve_tree(ST, need)
+  hdr <- gsub('"','',strsplit(readLines(tf,n=1),",")[[1]])
+  idx <- match(need, hdr)
   slim <- file.path(sdir, sprintf(".tmp_%s.csv", ST))
   system(sprintf("cut -d, -f%s '%s' > '%s'", paste(idx,collapse=","), tf, slim))
   tr <- read.csv(slim, stringsAsFactors=FALSE); unlink(slim)

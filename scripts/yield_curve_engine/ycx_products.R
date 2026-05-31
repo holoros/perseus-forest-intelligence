@@ -32,14 +32,27 @@ AGE_BRK <- c(-Inf,40,80,Inf); AGE_LAB <- c("young<40","mature40-80","old80+")
 TONAC_TO_MGHA <- 2.2417 / 2.4710538 * 2.4710538   # keep lb->ton handled below
 cat(sprintf("[prod] states: %s\n", paste(STATES, collapse=" ")))
 
+## prefer home fia_data TREE file, else fall back to full FIADB copy on scratch
+SCRATCH_FIA <- "/fs/scratch/PUOM0008/crsfaaron/FIA"
+resolve_tree <- function(ST, need){
+  cand <- c(file.path(fia, sprintf("%s_TREE.csv", ST)),
+            file.path(SCRATCH_FIA, sprintf("%s_TREE.csv", ST)))
+  for (i in seq_along(cand)){
+    tf <- cand[i]; if (!file.exists(tf)) next
+    hdr <- gsub('"','',strsplit(readLines(tf,n=1),",")[[1]])
+    if (all(need %in% hdr)){ if (i>1) cat(sprintf("  [fallback] %s using scratch FIADB copy\n",ST)); return(tf) }
+  }
+  stop("no TREE file with all required cols for ", ST)
+}
+
 alloc_state <- function(ST){
   mem <- read.csv(file.path(cfg, sprintf("ycx_membership_%s.csv", ST)), stringsAsFactors=FALSE)
   mem <- mem[order(mem$PLT_CN,-mem$INVYR),]; mem <- mem[!duplicated(mem$PLT_CN),]
-  tf <- file.path(fia, sprintf("%s_TREE.csv", ST))
-  hdr <- gsub('"','',strsplit(readLines(tf,n=1),",")[[1]])
   need <- c("PLT_CN","STATUSCD","SPGRPCD","DIA","TPA_UNADJ",
             "VOLCFNET","VOLCSNET","DRYBIO_SAWLOG","DRYBIO_BOLE","DRYBIO_AG")
-  idx <- match(need,hdr); if(any(is.na(idx))) stop("missing cols ",ST,": ",paste(need[is.na(idx)],collapse=","))
+  tf <- resolve_tree(ST, need)
+  hdr <- gsub('"','',strsplit(readLines(tf,n=1),",")[[1]])
+  idx <- match(need,hdr)
   slim <- file.path(pdir, sprintf(".tmp_%s.csv",ST))
   system(sprintf("cut -d, -f%s '%s' > '%s'", paste(idx,collapse=","), tf, slim))
   t <- read.csv(slim, stringsAsFactors=FALSE); unlink(slim)
