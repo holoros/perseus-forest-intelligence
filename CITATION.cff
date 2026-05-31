@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: PERSEUS Forest Intelligence
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - given-names: Aaron
+    family-names: Weiskittel
+    email: aaron.weiskittel@maine.edu
+    affiliation: "Center for Research on Sustainable Forests, University of Maine"
+    orcid: "https://orcid.org/0000-0002-2972-0298"
+abstract: >-
+  CONUS multi-model forest-carbon explorer covering all 48 conterminous states
+  with deep focal coverage for Maine, Indiana, and Georgia (plus multi-engine
+  series for Minnesota, Oregon, Washington, and Idaho). Built on the perseus_db
+  carbon-pool-harmonized database. Static React + Vite + MapLibre application
+  deployed via GitHub Pages.
+repository-code: "https://github.com/holoros/perseus-forest-intelligence"
+url: "https://holoros.github.io/perseus-forest-intelligence/"
+keywords:
+  - forestry
+  - forest-carbon
+  - FIA
+  - multi-model
+  - CONUS
+  - carbon-accounting
+  - LANDIS
+  - FVS
+  - yield-curve
+license: MIT
+version: "1.3"
+date-released: 2026-05-31
