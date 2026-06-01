@@ -131,9 +131,34 @@ exponentially. Net system carbon = standing live + HWP in-use.
 </table>
 <p>
 HWP materially narrows the gap: the managed scenarios still lose system carbon
-relative to reserve, but far less than standing stock alone implies. This is a
-forest + in-use-products accounting; it does not yet include landfill carbon or
-product substitution benefits, which would narrow the gap further.
+relative to reserve, but far less than standing stock alone implies.
+</p>
+
+<h3>Refinement: landfill pool and substitution</h3>
+<p>
+Adding a solid-waste-disposal-site (landfill) pool (30% of retired products,
+100-year half-life) extends product carbon retention; a substitution
+sensitivity (0.45 tC avoided per tC of harvested product, mid Sathre &amp;
+O'Connor) is reported separately as an emissions credit, not a carbon stock.
+Net carbon stock = standing live + HWP in-use + landfill:
+</p>
+<table class="matrix">
+<thead><tr><th>Scenario</th><th>standing 100-yr</th><th>net stock 100-yr (forest+HWP+landfill)</th><th>+ substitution sensitivity</th></tr></thead>
+<tbody>
+<tr><td>reserve (no harvest)</td><td class="good">+4,811</td><td class="good">+4,811</td><td class="good">+4,811</td></tr>
+<tr><td>managed (conservation)</td><td>+469</td><td class="good">+3,123</td><td class="good">+5,669</td></tr>
+<tr><td>managed (harvest)</td><td class="bad">-4,268</td><td class="good">+687</td><td class="good">+5,673</td></tr>
+<tr><td>managed (intensive)</td><td class="bad">-6,753</td><td>-772</td><td class="good">+5,566</td></tr>
+</tbody>
+</table>
+<p>
+With in-use plus landfill, business-as-usual harvest turns net-positive over 100
+years (+687 Tg C) and intensive is near-neutral; adding the substitution credit
+makes all managed scenarios strongly positive. Published as the live metric
+<code>net_forest_hwp_c</code> (carbon stock only; substitution excluded). The
+substitution displacement factor and landfill parameters are uncertain and bound
+the result, so substitution is kept as a sensitivity rather than folded into the
+stock metric.
 </p>
 
 <h2>Data and code</h2>
