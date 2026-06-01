@@ -114,6 +114,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
   const rafRef = useRef(null);
   const svgRef = useRef(null);
   const dragRef = useRef(null);
+  const movedRef = useRef(false);   // true once a press has dragged (suppresses click)
+  const animRef = useRef(null);     // active zoom animation id
   const [isDragging, setIsDragging] = useState(false);
   const sync = () => {
     if(rafRef.current) return;
@@ -155,12 +157,15 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
   }, []);
   const onMouseDown = (e) => {
     if(e.button !== 0) return;
+    movedRef.current = false;
     dragRef.current = { x: e.clientX, y: e.clientY,
                          tx: viewRef.current.tx, ty: viewRef.current.ty };
     setIsDragging(true);
   };
   const onMouseMove = (e) => {
     if(!dragRef.current) return;
+    if(Math.abs(e.clientX - dragRef.current.x) + Math.abs(e.clientY - dragRef.current.y) > 4)
+      movedRef.current = true;
     const rect = svgRef.current.getBoundingClientRect();
     const dx = (e.clientX - dragRef.current.x) / rect.width * W;
     const dy = (e.clientY - dragRef.current.y) / rect.height * H;
@@ -196,6 +201,41 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     const ty2 = H/2 - (H/2 - v.ty) * (k2 / v.k);
     viewRef.current = clampView({ k: k2, tx: tx2, ty: ty2 });
     sync();
+  };
+  // animate the view to a target {k,tx,ty} with easeInOutQuad
+  const animateTo = (target) => {
+    if(animRef.current) cancelAnimationFrame(animRef.current);
+    const start = { ...viewRef.current }, t0 = performance.now(), dur = 450;
+    const tick = (now) => {
+      const e = Math.min(1, (now - t0) / dur);
+      const f = e < 0.5 ? 2*e*e : 1 - Math.pow(-2*e + 2, 2) / 2;
+      viewRef.current = {
+        k:  start.k  + (target.k  - start.k)  * f,
+        tx: start.tx + (target.tx - start.tx) * f,
+        ty: start.ty + (target.ty - start.ty) * f,
+      };
+      sync();
+      if(e < 1) animRef.current = requestAnimationFrame(tick);
+    };
+    animRef.current = requestAnimationFrame(tick);
+  };
+  // click-to-zoom: fit a (Multi)Polygon feature into the viewport
+  const fitFeature = (geom) => {
+    if(!geom) return;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const scan = ring => ring.forEach(([lon, lat]) => {
+      const [sx, sy] = projPath(lon, lat);
+      if(sx < x0) x0 = sx; if(sx > x1) x1 = sx;
+      if(sy < y0) y0 = sy; if(sy > y1) y1 = sy;
+    });
+    const polys = geom.type === "Polygon" ? [geom.coordinates] : geom.coordinates;
+    polys.forEach(p => p.forEach(scan));
+    const bw = x1 - x0, bh = y1 - y0;
+    if(!(bw > 0 && bh > 0)) return;
+    const pad = 48;
+    const k = Math.max(0.5, Math.min(8, Math.min((W - pad) / bw, (H - pad) / bh)));
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    animateTo(clampView({ k, tx: W/2 - cx * k, ty: H/2 - cy * k }));
   };
   const view = viewRef.current;
 
@@ -308,7 +348,11 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           <path key={st} d={d} fill={fill} fillOpacity={opacity}
                 stroke={stroke} strokeWidth={sw}
                 style={{cursor: hasSeries ? "pointer" : "default"}}
-                onClick={()=> !inspectMode && hasSeries && onPick && onPick(st)}>
+                onClick={()=>{
+                  if(inspectMode || movedRef.current) return;
+                  fitFeature(ft.geometry);                 // click-to-zoom (#1)
+                  if(hasSeries && onPick) onPick(st);
+                }}>
             <title>{title}</title>
           </path>
         );
