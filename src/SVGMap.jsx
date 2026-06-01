@@ -2,6 +2,7 @@
 // Renders the CONUS states as an SVG so the coverage/carbon map always works,
 // regardless of maplibre / WebGL availability.
 import { useEffect, useRef, useState } from "react";
+import { projectInverse } from "./geo.js";
 
 const W = 640, H = 400;
 const PAD = 8;
@@ -103,7 +104,9 @@ function rgbHex(rgb){ return "#" + rgb.map(v=> v.toString(16).padStart(2, "0")).
 export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   timeline, mapYear, mapScenario, selected, onPick,
                                   conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7,
-                                  stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7 }){
+                                  stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7,
+                                  ecoData, ecoFill, ecoOpacity = 0.75,
+                                  inspectMode = false, onInspect }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -111,6 +114,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
   const rafRef = useRef(null);
   const svgRef = useRef(null);
   const dragRef = useRef(null);
+  const movedRef = useRef(false);   // true once a press has dragged (suppresses click)
+  const animRef = useRef(null);     // active zoom animation id
   const [isDragging, setIsDragging] = useState(false);
   const sync = () => {
     if(rafRef.current) return;
@@ -152,12 +157,15 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
   }, []);
   const onMouseDown = (e) => {
     if(e.button !== 0) return;
+    movedRef.current = false;
     dragRef.current = { x: e.clientX, y: e.clientY,
                          tx: viewRef.current.tx, ty: viewRef.current.ty };
     setIsDragging(true);
   };
   const onMouseMove = (e) => {
     if(!dragRef.current) return;
+    if(Math.abs(e.clientX - dragRef.current.x) + Math.abs(e.clientY - dragRef.current.y) > 4)
+      movedRef.current = true;
     const rect = svgRef.current.getBoundingClientRect();
     const dx = (e.clientX - dragRef.current.x) / rect.width * W;
     const dy = (e.clientY - dragRef.current.y) / rect.height * H;
@@ -165,9 +173,24 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
       tx: dragRef.current.tx + dx, ty: dragRef.current.ty + dy });
     sync();
   };
-  const onMouseUp = () => {
+  const onMouseUp = (e) => {
+    const dr = dragRef.current;
     dragRef.current = null;
     setIsDragging(false);
+    // crosshair inspect: a click (no meaningful drag) reports lon/lat
+    if(inspectMode && dr && e && svgRef.current && e.type === "mouseup"){
+      const moved = Math.abs(e.clientX - dr.x) + Math.abs(e.clientY - dr.y);
+      if(moved < 5){
+        const rect = svgRef.current.getBoundingClientRect();
+        const cx = (e.clientX - rect.left) / rect.width * W;
+        const cy = (e.clientY - rect.top) / rect.height * H;
+        const v = viewRef.current;
+        const gx = (cx - v.tx) / v.k, gy = (cy - v.ty) / v.k;
+        const x = (gx - TX) / SCALE, y = -(gy - TY) / SCALE;
+        const [lon, lat] = projectInverse(x, y);
+        onInspect && onInspect(lon, lat);
+      }
+    }
   };
   const resetView = () => { viewRef.current = { k: 1, tx: 0, ty: 0 }; sync(); };
   const zoomBy = (dk) => {
@@ -178,6 +201,41 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     const ty2 = H/2 - (H/2 - v.ty) * (k2 / v.k);
     viewRef.current = clampView({ k: k2, tx: tx2, ty: ty2 });
     sync();
+  };
+  // animate the view to a target {k,tx,ty} with easeInOutQuad
+  const animateTo = (target) => {
+    if(animRef.current) cancelAnimationFrame(animRef.current);
+    const start = { ...viewRef.current }, t0 = performance.now(), dur = 450;
+    const tick = (now) => {
+      const e = Math.min(1, (now - t0) / dur);
+      const f = e < 0.5 ? 2*e*e : 1 - Math.pow(-2*e + 2, 2) / 2;
+      viewRef.current = {
+        k:  start.k  + (target.k  - start.k)  * f,
+        tx: start.tx + (target.tx - start.tx) * f,
+        ty: start.ty + (target.ty - start.ty) * f,
+      };
+      sync();
+      if(e < 1) animRef.current = requestAnimationFrame(tick);
+    };
+    animRef.current = requestAnimationFrame(tick);
+  };
+  // click-to-zoom: fit a (Multi)Polygon feature into the viewport
+  const fitFeature = (geom) => {
+    if(!geom) return;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const scan = ring => ring.forEach(([lon, lat]) => {
+      const [sx, sy] = projPath(lon, lat);
+      if(sx < x0) x0 = sx; if(sx > x1) x1 = sx;
+      if(sy < y0) y0 = sy; if(sy > y1) y1 = sy;
+    });
+    const polys = geom.type === "Polygon" ? [geom.coordinates] : geom.coordinates;
+    polys.forEach(p => p.forEach(scan));
+    const bw = x1 - x0, bh = y1 - y0;
+    if(!(bw > 0 && bh > 0)) return;
+    const pad = 48;
+    const k = Math.max(0.5, Math.min(8, Math.min((W - pad) / bw, (H - pad) / bh)));
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    animateTo(clampView({ k, tx: W/2 - cx * k, ty: H/2 - cy * k }));
   };
   const view = viewRef.current;
 
@@ -234,7 +292,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
   return (
     <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
          style={{width:"100%",height:"100%",display:"block",
-                 cursor: isDragging ? "grabbing" : "grab",
+                 cursor: inspectMode ? "crosshair" : (isDragging ? "grabbing" : "grab"),
                  touchAction: "none"}}
          preserveAspectRatio="xMidYMid meet"
          onMouseDown={onMouseDown} onMouseMove={onMouseMove}
@@ -252,6 +310,14 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                width={conusBox.width} height={conusBox.height}
                opacity={conusOverlayOpacity} preserveAspectRatio="none"/>
       )}
+      {ecoData && ecoData.features && ecoData.features.map((ft,i)=>{
+        const code = ft.properties && ft.properties.NA_L3CODE;
+        const fill = ecoFill ? ecoFill(code) : null;
+        return <path key={"eco"+i} d={geomToD(ft.geometry)}
+                 fill={fill || "#2a3a47"} fillOpacity={fill ? ecoOpacity : 0.12}
+                 stroke="#0b1015" strokeWidth={0.15}
+                 style={{pointerEvents:"none"}}/>;
+      })}
       {features.map(ft=>{
         const st = ft.properties.state;
         const cov = states[st] || {};
@@ -282,7 +348,11 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           <path key={st} d={d} fill={fill} fillOpacity={opacity}
                 stroke={stroke} strokeWidth={sw}
                 style={{cursor: hasSeries ? "pointer" : "default"}}
-                onClick={()=> hasSeries && onPick && onPick(st)}>
+                onClick={()=>{
+                  if(inspectMode || movedRef.current) return;
+                  fitFeature(ft.geometry);                 // click-to-zoom (#1)
+                  if(hasSeries && onPick) onPick(st);
+                }}>
             <title>{title}</title>
           </path>
         );

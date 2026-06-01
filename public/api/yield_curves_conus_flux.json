@@ -1,0 +1,1 @@
+{"meta":{"engine":"ycx_perseus_conus","label":"Per-state per-year harvest removal density (managed scenario)","metrics":[],"year_min":null,"year_max":null,"n_rows":0,"units":"Mg C/ha/yr for agc_live_total; Mg/ha/yr for agb_dry; m3/ha/yr for vol_stem","source":"ycx_<ST>_harvest_flux.csv via 65_yield_curves_conus_ingest.py"}}

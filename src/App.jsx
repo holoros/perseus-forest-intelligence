@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import GrowthChart from "./GrowthChart.jsx";
 import SVGMap from "./SVGMap.jsx";
+import DivergenceHeatmap from "./DivergenceHeatmap.jsx";
+import StumpagePanel from "./StumpagePanel.jsx";
+import LandisStratified from "./LandisStratified.jsx";
+import LandownerYields from "./LandownerYields.jsx";
+import FaustmannRotation from "./FaustmannRotation.jsx";
+import AOIReport from "./AOIReport.jsx";
+import { findFeature, agbAtAge, polygonCentroid } from "./geo.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -199,6 +206,21 @@ export default function App(){
   const [conusBounds,setConusBounds] = useState({}); // layer -> {x0,x1,y0,y1}
   // v0.70 chart interactions
   const [isolatedEngine,setIsolatedEngine] = useState(null);
+  // v1.3 reconstruction: detail-panel tabs + their datasets
+  const [tab,setTab] = useState("engines"); // engines | rd | divergence | stumpage
+  const [divergence,setDivergence] = useState(null);
+  const [stumpage,setStumpage] = useState(null);
+  const [landis,setLandis] = useState(null);
+  const [landowner,setLandowner] = useState(null);
+  const [faustmann,setFaustmann] = useState(null);
+  // v1.3 map/AOI tools
+  const [ecoOn,setEcoOn] = useState(false);
+  const [ecoGeo,setEcoGeo] = useState(null);
+  const [l3yields,setL3yields] = useState(null);
+  const [inspectMode,setInspectMode] = useState(false);
+  const [inspectInfo,setInspectInfo] = useState(null);
+  const [aoi,setAoi] = useState(null);
+  const [playing,setPlaying] = useState(false);
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -206,6 +228,12 @@ export default function App(){
       j("api/meta.json"), j("api/states.json"), j("geo/us-states.geojson"), j("api/fia.json"),
       j("api/timeline.json").catch(()=>({}))]);
     setMeta(m); setStates(s); setFia(f); setTimeline(tl);
+    // v1.3 tab datasets (non-blocking; tabs disable until loaded)
+    j("api/engine_divergence.json").then(setDivergence).catch(()=>{});
+    j("api/stumpage.json").then(setStumpage).catch(()=>{});
+    j("api/landis_stratified.json").then(setLandis).catch(()=>{});
+    j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
+    j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -366,6 +394,35 @@ export default function App(){
     window.history.replaceState(null, "", `#${p.toString()}`);
   }},[sel,metric,bucket]);
 
+  // ---- RD tab pins the relative-density metric on entry ----
+  useEffect(()=>{ if(tab==="rd" && series && series.rd_mean_wtd) setMetric("rd_mean_wtd"); },[tab,series]);
+
+  // ---- fall back to Engine compare if the active tab has no data here ----
+  useEffect(()=>{
+    const ok = {
+      engines: !!series, rd: !!series, divergence: !!divergence,
+      stumpage: !!(stumpage && stumpage.series && stumpage.series[sel]),
+      landis: !!(landis && landis[sel]),
+      landowner: !!(landowner && landowner[sel]),
+      faustmann: !!(faustmann && faustmann[sel]),
+    };
+    if(!ok[tab]) setTab("engines");
+  },[sel,series,divergence,stumpage,landis,landowner,faustmann]);
+
+  // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
+  useEffect(()=>{
+    if(!(ecoOn || inspectMode || aoi)) return;
+    if(!ecoGeo) j("geo/us_eco_l3_features.geojson").then(setEcoGeo).catch(()=>{});
+    if(!l3yields) j("api/yield_curves_by_l3.json").then(setL3yields).catch(()=>{});
+  },[ecoOn,inspectMode,aoi,ecoGeo,l3yields]);
+
+  // ---- carbon-map year animation (play/pause) ----
+  useEffect(()=>{
+    if(!(playing && mapMode==="carbon")) return;
+    const id = setInterval(()=> setMapYear(y => y>=2074 ? 2024 : y+5), 700);
+    return ()=> clearInterval(id);
+  },[playing,mapMode]);
+
   // ---- lazy-load CONUS overlay bounds.json ----
   useEffect(()=>{
     if(conusLayer === "none" || conusBounds[conusLayer]) return;
@@ -432,6 +489,60 @@ export default function App(){
   };
   const seriesStates = states ? Object.keys(states).filter(st => states[st].has_series).sort() : [];
 
+  // ecoregion fill by AGB at 50 yr (untreated), green ramp 0..150 ton/ac
+  const ecoFill = l3yields ? (code)=>{
+    const e = l3yields.l3 && l3yields.l3[code];
+    const v = agbAtAge(e, 50, "untreated");
+    if(v == null) return null;
+    const t = Math.max(0, Math.min(1, v/150));
+    const stops = [[237,248,233],[116,196,118],[0,90,50]];
+    const [a,b,f] = t<0.5 ? [stops[0],stops[1],t/0.5] : [stops[1],stops[2],(t-0.5)/0.5];
+    const rgb = [0,1,2].map(k=>Math.round(a[k]+f*(b[k]-a[k])));
+    return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+  } : null;
+
+  const handleInspect = (lon,lat)=>{
+    const sf = geoData && findFeature(geoData.features, lon, lat);
+    const ef = ecoGeo && findFeature(ecoGeo.features, lon, lat);
+    const code = ef && ef.properties && ef.properties.NA_L3CODE;
+    const l3e = (l3yields && l3yields.l3 && code) ? l3yields.l3[code] : null;
+    setInspectInfo({ lon, lat,
+      state: sf && sf.properties && sf.properties.state,
+      l3code: code, l3name: ef && ef.properties && ef.properties.NA_L3NAME,
+      l1: ef && ef.properties && ef.properties.NA_L1NAME,
+      agb50: agbAtAge(l3e, 50, "untreated"),
+      curves: l3e && l3e.curves && l3e.curves.agb_tonac });
+  };
+
+  const handleAoiFile = async (file)=>{
+    if(!file) return;
+    try{
+      let gj;
+      if(/\.zip$/i.test(file.name)){
+        const shp = (await import("shpjs")).default;
+        gj = await shp(await file.arrayBuffer());
+      } else {
+        gj = JSON.parse(await file.text());
+      }
+      const feats = gj.features || (gj.type === "Feature" ? [gj] : []);
+      const poly = feats.find(f=>f.geometry && /Polygon/.test(f.geometry.type));
+      if(!poly){ alert("No polygon found in that file."); return; }
+      const c = polygonCentroid(poly.geometry);
+      let eg = ecoGeo, ly = l3yields;
+      if(!eg){ eg = await j("geo/us_eco_l3_features.geojson"); setEcoGeo(eg); }
+      if(!ly){ ly = await j("api/yield_curves_by_l3.json"); setL3yields(ly); }
+      const ef = findFeature(eg.features, c[0], c[1]);
+      const code = ef && ef.properties.NA_L3CODE;
+      const l3e = (ly.l3 && code) ? ly.l3[code] : null;
+      const nVerts = poly.geometry.type === "Polygon"
+        ? poly.geometry.coordinates[0].length
+        : poly.geometry.coordinates[0][0].length;
+      setAoi({ name:file.name, centroid:c, nVerts, l3code:code,
+        l3name: ef && ef.properties.NA_L3NAME, l1: ef && ef.properties.NA_L1NAME,
+        curves: l3e && l3e.curves && l3e.curves.agb_tonac });
+    }catch(err){ console.error("AOI parse failed", err); alert("Could not read AOI file: "+err.message); }
+  };
+
   return (
     <div className="app">
       <header className="top">
@@ -477,7 +588,11 @@ export default function App(){
                           conusOverlayOpacity={conusOpacity}
                           stateOverlay={stOverlayUrl}
                           stateOverlayBounds={stOverlayB}
-                          stateOverlayOpacity={gcbmOpacity}/>
+                          stateOverlayOpacity={gcbmOpacity}
+                          ecoData={ecoOn ? ecoGeo : null}
+                          ecoFill={ecoFill}
+                          inspectMode={inspectMode}
+                          onInspect={handleInspect}/>
                 </div>);
               })()}
           <div className="map-ctrl">
@@ -514,6 +629,17 @@ export default function App(){
                 onChange={e=>setConusOpacity(+e.target.value)}
                 title={`CONUS overlay opacity: ${conusOpacity}`} style={{width:80}}/>
             )}
+            <label className="mc-tog" title="EPA L3 ecoregion overlay, colored by AGB at 50 yr">
+              <input type="checkbox" checked={ecoOn} onChange={e=>setEcoOn(e.target.checked)}/> ecoregions
+            </label>
+            <label className="mc-tog" title="click the map to inspect a point (state, L3 ecoregion, AGB at 50 yr)">
+              <input type="checkbox" checked={inspectMode}
+                onChange={e=>{ setInspectMode(e.target.checked); if(!e.target.checked) setInspectInfo(null); }}/> inspect
+            </label>
+            <label className="mc-tog" title="upload an AOI: GeoJSON or zipped shapefile">
+              AOI ↑<input type="file" accept=".zip,.json,.geojson" style={{display:"none"}}
+                onChange={e=>handleAoiFile(e.target.files[0])}/>
+            </label>
             {mapMode === "carbon" && timeline && (<>
               <select value={mapScenario} onChange={e=>setMapScenario(e.target.value)} title="Scenario">
                 <option value="harvest_baseline">BAU (baseline harvest)</option>
@@ -523,12 +649,40 @@ export default function App(){
                 <option value="harvest_rcp45">BAU + RCP 4.5</option>
                 <option value="noharvest_rcp45">reserve + RCP 4.5</option>
               </select>
+              <button onClick={()=>setPlaying(p=>!p)} title={playing?"pause":"play animation"}
+                style={{background:"var(--panel)",color:"var(--ink)",border:"1px solid var(--line)",
+                  borderRadius:5,padding:"2px 8px",fontSize:12,cursor:"pointer"}}>
+                {playing ? "❚❚" : "▶"}</button>
               <input type="range" min={2024} max={2074} step={5}
                 value={mapYear} onChange={e=>setMapYear(+e.target.value)}
                 title={`Year: ${mapYear}`} style={{width:140}}/>
               <span style={{color:"var(--mut)",fontSize:11,fontVariantNumeric:"tabular-nums"}}>{mapYear}</span>
             </>)}
           </div>
+          {inspectInfo && (
+            <div className="inspect-pop">
+              <button className="aoi-x" onClick={()=>setInspectInfo(null)} title="close">×</button>
+              <div><b>{inspectInfo.lat.toFixed(3)}°, {inspectInfo.lon.toFixed(3)}°</b></div>
+              <div>State: <b>{inspectInfo.state || "—"}</b></div>
+              <div>EPA L3: {inspectInfo.l3code || "—"} {inspectInfo.l3name || ""}</div>
+              {inspectInfo.l1 && <div style={{color:"var(--mut)",fontSize:10.5}}>{inspectInfo.l1}</div>}
+              <div>AGB @50yr: <b>{inspectInfo.agb50 != null ? `${inspectInfo.agb50.toFixed(0)} ton/ac` : "n/a"}</b></div>
+              {inspectInfo.curves && (
+                <button className="mini-btn" onClick={()=> setAoi({
+                  name:`point ${inspectInfo.lat.toFixed(2)}, ${inspectInfo.lon.toFixed(2)}`,
+                  centroid:[inspectInfo.lon,inspectInfo.lat], l3code:inspectInfo.l3code,
+                  l3name:inspectInfo.l3name, l1:inspectInfo.l1, curves:inspectInfo.curves })}>
+                  project this point →</button>)}
+            </div>)}
+          {ecoOn && (
+            <div className="legend" style={{left:"auto",right:12,bottom:44}}>
+              <div style={{marginBottom:4}}>EPA L3 · AGB at 50 yr (ton/ac)</div>
+              <div style={{height:10,width:150,borderRadius:2,
+                background:"linear-gradient(90deg,#edf8e9,#74c476,#005a32)"}}></div>
+              <div style={{display:"flex",justifyContent:"space-between",width:150,fontSize:10.5}}>
+                <span>0</span><span>75</span><span>150+</span>
+              </div>
+            </div>)}
           {mapMode === "coverage" && (
             <div className="legend">
               <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
@@ -589,8 +743,29 @@ export default function App(){
             </div>);})()}
         </div>
         <div className="detail">
-          <h2>Detail — growth curves</h2>
+          <div className="tabs">
+            {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
+              ["stumpage","Stumpage"],["landis","LANDIS stratified"],
+              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]].map(([k,lbl])=>{
+              const disabled = (k==="divergence" && !divergence)
+                || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
+                || (k==="landis" && !(landis && landis[sel]))
+                || (k==="landowner" && !(landowner && landowner[sel]))
+                || (k==="faustmann" && !(faustmann && faustmann[sel]))
+                || ((k==="engines"||k==="rd") && !series);
+              return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
+                onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
+            })}
+          </div>
           <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>
+          {aoi && <AOIReport aoi={aoi} onClose={()=>setAoi(null)}/>}
+          {tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
+            onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
+          {tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}
+          {tab==="landis" && <LandisStratified data={landis} state={sel}/>}
+          {tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
+          {tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
+          {(tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
               <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
@@ -728,6 +903,7 @@ export default function App(){
               {" "}Class buttons hide whole model families; the per-engine drawer hides individual engines.
               Y-axis "zoom to median" hides outliers. Hover a line for the engine. Data: perseus_db v0.66.
             </div>
+          </>)}
           </>)}
         </div>
       </div>
