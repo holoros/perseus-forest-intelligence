@@ -452,6 +452,12 @@
    "unit": "Tg dry biomass",
    "kind": "stock",
    "group": "timber"
+  },
+  "net_forest_hwp_c": {
+   "label": "Net carbon: forest + wood products + landfill",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
   }
  },
  "buckets": [
