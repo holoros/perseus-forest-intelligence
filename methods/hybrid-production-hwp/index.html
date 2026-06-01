@@ -60,21 +60,20 @@ standing stock alone.
 </p>
 <p class="byline">
 PERSEUS yield-curve engine · scripts <code>ycx_hybrid_fit.R</code>,
-<code>ycx_treemap_hybrid.R</code>, <code>ycx_hwp.R</code> ·
-served as model <code>yc_hybrid_v1</code> (experimental)
+<code>ycx_treemap_hybrid.R</code>, <code>ycx_hybrid_anchor.R</code>,
+<code>ycx_hwp.R</code> · served as model <code>yc_hybrid_v1</code> (FIA-anchored)
 </p>
 
 <div class="tldr"><h3>TL;DR</h3><p>
 The hybrid (Chapman-Richards growth + an exponential decline tail beyond the
-per-cell empirical culmination) is now a fitted production engine. Spatially it
-runs higher than the peak-decline engine through mid-century (CR fits the growth
-phase better) and lower late as senescence engages, crossing around 2102
-(CONUS reserve 11,607 -> 13,701 Tg C). It is published as an experimental,
-un-anchored comparison line: its 2022 standing total is ~16% above the
-FIA-anchored engine, so production adoption needs the same FIA anchoring. The
-HWP layer adds the carbon held in wood products: it does not change reserve, but
-turns the managed 100-year change from standing-only -43% / -68% (harvest /
-intensive) into net -1,155 / -3,145 Tg C, and conservation from +469 to +2,196.
+per-cell empirical culmination) is now a fitted, FIA-anchored production engine.
+Anchored to the same 2022 standing carbon as the peak-decline engine
+(10,002 Tg C), its senescence tail yields a steadily more conservative
+trajectory: by 2122 CONUS reserve is 11,794 Tg C, about 20% below
+peak-decline's 14,813. The HWP layer adds the carbon held in wood products: it
+does not change reserve, but turns the managed 100-year change from
+standing-only -43% / -68% (harvest / intensive) into net -1,155 / -3,145 Tg C,
+and conservation from +469 to +2,196.
 </p></div>
 
 <h2>Hybrid fit in production</h2>
@@ -82,26 +81,30 @@ intensive) into net -1,155 / -3,145 Tg C, and conservation from +469 to +2,196.
 <code>ycx_hybrid_fit.R</code> fits y = A&middot;(1-exp(-k&middot;age))^p &middot;
 exp(-d&middot;max(0, age - A*)) per cell (fallback cell -> forest-type ->
 state), with A* the empirical culmination age. <code>ycx_treemap_hybrid.R</code>
-applies it to TreeMap 2022 pixels (reserve). Versus the current peak-decline
-projection:
+applies it to TreeMap 2022 pixels (reserve), and <code>ycx_hybrid_anchor.R</code>
+scales each state so its 2022 total matches the FIA-anchored production baseline
+(median scalar 0.86), preserving the trajectory shape. Anchored versus the
+current peak-decline projection:
 </p>
 <table class="matrix">
-<thead><tr><th>Year</th><th>peak-decline (Tg C)</th><th>hybrid (Tg C)</th><th>diff</th></tr></thead>
+<thead><tr><th>Year</th><th>peak-decline (Tg C)</th><th>hybrid, anchored (Tg C)</th><th>diff</th></tr></thead>
 <tbody>
-<tr><td>2022</td><td>10,002</td><td>11,607</td><td class="bad">+16%</td></tr>
-<tr><td>2052</td><td>12,858</td><td>14,494</td><td>+13%</td></tr>
-<tr><td>2082</td><td>14,170</td><td>15,046</td><td>+6%</td></tr>
-<tr><td>2102</td><td>14,585</td><td>14,512</td><td>-0.5%</td></tr>
-<tr><td>2122</td><td>14,813</td><td>13,701</td><td class="good">-7.5%</td></tr>
+<tr><td>2022</td><td>10,002</td><td>10,002</td><td>0%</td></tr>
+<tr><td>2052</td><td>12,858</td><td>12,511</td><td>-2.7%</td></tr>
+<tr><td>2082</td><td>14,170</td><td>12,987</td><td class="bad">-8.4%</td></tr>
+<tr><td>2102</td><td>14,585</td><td>12,513</td><td class="bad">-14.2%</td></tr>
+<tr><td>2122</td><td>14,813</td><td>11,794</td><td class="bad">-20.4%</td></tr>
 </tbody>
 </table>
 <blockquote>
-Caveat: the hybrid as fit here is not FIA-anchored, so its 2022 standing total
-sits ~16% above the anchored engine. The shape (better growth-phase fit, real
-senescence late) is the improvement; the level needs the A0 / FIA-EXPNS
-anchoring used by <code>yc_fia_empirical_v1</code> before it replaces the
-production line. It is therefore exposed as <code>yc_hybrid_v1</code>, an
-experimental comparison line, not a swap.
+Anchored to the same 2022 standing carbon, the hybrid diverges progressively
+below peak-decline, reaching about 20% lower by 2122. That gap is the senescence
+the decline tail introduces beyond each cell's empirical culmination:
+peak-decline keeps accumulating old-stand carbon, while the hybrid (the better
+CV-fitting form) turns it over. The anchored hybrid is served as
+<code>yc_hybrid_v1</code> and is a production-ready candidate to replace
+peak-decline pending team sign-off, since the choice materially changes the
+100-year old-forest carbon projection.
 </blockquote>
 
 <h2>Harvested wood products (net flux)</h2>
