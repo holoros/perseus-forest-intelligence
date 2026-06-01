@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "description": "Curated SFI / major pulp + sawtimber mills in PERSEUS focal states. Selection intended for partner walkthroughs — not exhaustive. Lat/lon are mill addresses; supply-shed = 50 km circular buffer (default).",
+    "buffer_km_default": 50,
+    "source": "Public SFI Certified Sourcing directories + state mill registries"
+  },
+  "mills": [
+    { "name": "Sappi Somerset Mill",       "company": "Sappi North America",   "state": "ME", "lat": 44.7833, "lon": -69.8500, "products": "coated paper, kraft pulp" },
+    { "name": "ND Paper Rumford",          "company": "ND Paper",              "state": "ME", "lat": 44.5481, "lon": -70.5497, "products": "kraft pulp, coated paper" },
+    { "name": "Twin Rivers Madawaska",     "company": "Twin Rivers Paper",     "state": "ME", "lat": 47.3499, "lon": -68.3361, "products": "specialty paper" },
+    { "name": "Pixelle Androscoggin",      "company": "Pixelle Specialty",     "state": "ME", "lat": 44.2698, "lon": -70.1786, "products": "specialty paper, pulp" },
+    { "name": "International Paper Augusta GA","company":"International Paper", "state":"GA", "lat": 33.4734, "lon": -82.0105, "products": "kraft linerboard, pulp" },
+    { "name": "Georgia-Pacific Brunswick", "company": "Georgia-Pacific",       "state": "GA", "lat": 31.1499, "lon": -81.4915, "products": "fluff pulp, kraft" },
+    { "name": "WestRock Mahrt (Cottonton)", "company": "WestRock",             "state": "GA", "lat": 32.2287, "lon": -85.0985, "products": "linerboard" },
+    { "name": "International Paper Savannah","company":"International Paper",  "state": "GA", "lat": 32.1338, "lon": -81.1495, "products": "containerboard" },
+    { "name": "WestRock Stevenson",        "company": "WestRock",              "state": "WA", "lat": 45.6919, "lon": -121.8836,"products": "linerboard" },
+    { "name": "Boise Cascade Wallula",     "company": "Packaging Corp",        "state": "WA", "lat": 46.0719, "lon": -118.9136,"products": "kraft, plywood" },
+    { "name": "Weyerhaeuser Longview",     "company": "Weyerhaeuser",          "state": "WA", "lat": 46.0993, "lon": -122.9417,"products": "lumber, plywood" },
+    { "name": "Sappi Cloquet Mill",        "company": "Sappi North America",   "state": "MN", "lat": 46.7222, "lon": -92.4593, "products": "dissolving pulp, paper" },
+    { "name": "UPM Blandin (Grand Rapids)", "company": "UPM",                  "state": "MN", "lat": 47.2376, "lon": -93.5181, "products": "coated paper" },
+    { "name": "Boise Inc International Falls","company":"Packaging Corp",      "state": "MN", "lat": 48.6019, "lon": -93.4108, "products": "kraft, freesheet" },
+    { "name": "WestRock Indianapolis",     "company": "WestRock",              "state": "IN", "lat": 39.7684, "lon": -86.1581, "products": "consumer packaging" },
+    { "name": "Roseburg Forest Products Dillard","company":"Roseburg",         "state": "OR", "lat": 43.0810, "lon": -123.3650,"products": "lumber, particleboard" },
+    { "name": "Boise White Paper Wallula", "company": "Packaging Corp",        "state": "OR", "lat": 45.5946, "lon": -122.5965,"products": "uncoated freesheet" }
+  ]
+}
