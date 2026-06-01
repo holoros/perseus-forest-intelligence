@@ -1,0 +1,45 @@
+"scenario","year","standing_Tg","in_use_Tg","landfill_Tg","net_stock_Tg","substitution_Tg","net_plus_subst_Tg"
+"managed (conservation)",2022,10002,0,0,10002,0,10002
+"managed (conservation)",2032,10412,780,0,11191,351,11542
+"managed (conservation)",2042,10881,929,116,11926,592,12518
+"managed (conservation)",2052,11175,1102,212,12489,825,13314
+"managed (conservation)",2062,11321,1239,308,12868,1052,13920
+"managed (conservation)",2072,11256,1456,403,13115,1324,14440
+"managed (conservation)",2082,11069,1663,514,13245,1623,14869
+"managed (conservation)",2092,10951,1717,634,13302,1880,15182
+"managed (conservation)",2102,10835,1734,740,13309,2110,15420
+"managed (conservation)",2112,10632,1786,835,13253,2350,15602
+"managed (conservation)",2122,10471,1727,927,13125,2546,15671
+"managed (harvest)",2022,10002,0,0,10002,0,10002
+"managed (harvest)",2032,9524,1672,0,11197,752,11949
+"managed (harvest)",2042,9169,2236,249,11654,1380,13034
+"managed (harvest)",2052,8761,2659,490,11910,1957,13867
+"managed (harvest)",2062,8290,2980,727,11997,2506,14503
+"managed (harvest)",2072,7897,3075,959,11931,2969,14900
+"managed (harvest)",2082,7377,3235,1162,11774,3442,15217
+"managed (harvest)",2092,6880,3278,1361,11520,3878,15398
+"managed (harvest)",2102,6392,3311,1542,11245,4300,15545
+"managed (harvest)",2112,6074,3173,1709,10956,4644,15600
+"managed (harvest)",2122,5734,3113,1841,10689,4987,15675
+"managed (intensive)",2022,10002,0,0,10002,0,10002
+"managed (intensive)",2032,8635,2563,0,11198,1153,12351
+"managed (intensive)",2042,7499,3492,382,11372,2144,13515
+"managed (intensive)",2052,6627,3927,761,11315,2947,14262
+"managed (intensive)",2062,5905,4128,1098,11131,3620,14751
+"managed (intensive)",2072,5251,4210,1395,10856,4211,15067
+"managed (intensive)",2082,4700,4166,1658,10524,4726,15250
+"managed (intensive)",2092,4227,4074,1884,10185,5191,15376
+"managed (intensive)",2102,3866,3910,2079,9855,5599,15454
+"managed (intensive)",2112,3561,3740,2240,9541,5972,15513
+"managed (intensive)",2122,3249,3608,2373,9230,6338,15568
+"reserve (no harvest)",2022,10002,0,0,10002,0,10002
+"reserve (no harvest)",2032,11168,0,0,11168,0,11168
+"reserve (no harvest)",2042,12117,0,0,12117,0,12117
+"reserve (no harvest)",2052,12858,0,0,12858,0,12858
+"reserve (no harvest)",2062,13424,0,0,13424,0,13424
+"reserve (no harvest)",2072,13851,0,0,13851,0,13851
+"reserve (no harvest)",2082,14170,0,0,14170,0,14170
+"reserve (no harvest)",2092,14408,0,0,14408,0,14408
+"reserve (no harvest)",2102,14585,0,0,14585,0,14585
+"reserve (no harvest)",2112,14716,0,0,14716,0,14716
+"reserve (no harvest)",2122,14813,0,0,14813,0,14813
