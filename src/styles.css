@@ -46,3 +46,9 @@ select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
 .maplibregl-popup-content{background:var(--panel);color:var(--ink);border:1px solid var(--line);
   border-radius:7px;font-size:12px;padding:6px 9px}
 .maplibregl-popup-tip{display:none}
+.tabs{display:flex;gap:4px;margin:4px 4px 8px;flex-wrap:wrap}
+.tab{background:transparent;color:var(--mut);border:1px solid var(--line);
+  border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer}
+.tab:hover:not(:disabled){border-color:var(--accent);color:var(--ink)}
+.tab.on{background:var(--accent);color:#0b1015;border-color:var(--accent);font-weight:600}
+.tab:disabled{opacity:.4;cursor:not-allowed}

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import GrowthChart from "./GrowthChart.jsx";
 import SVGMap from "./SVGMap.jsx";
+import DivergenceHeatmap from "./DivergenceHeatmap.jsx";
+import StumpagePanel from "./StumpagePanel.jsx";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -199,6 +201,10 @@ export default function App(){
   const [conusBounds,setConusBounds] = useState({}); // layer -> {x0,x1,y0,y1}
   // v0.70 chart interactions
   const [isolatedEngine,setIsolatedEngine] = useState(null);
+  // v1.3 reconstruction: detail-panel tabs + their datasets
+  const [tab,setTab] = useState("engines"); // engines | rd | divergence | stumpage
+  const [divergence,setDivergence] = useState(null);
+  const [stumpage,setStumpage] = useState(null);
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -206,6 +212,9 @@ export default function App(){
       j("api/meta.json"), j("api/states.json"), j("geo/us-states.geojson"), j("api/fia.json"),
       j("api/timeline.json").catch(()=>({}))]);
     setMeta(m); setStates(s); setFia(f); setTimeline(tl);
+    // v1.3 tab datasets (non-blocking; tabs disable until loaded)
+    j("api/engine_divergence.json").then(setDivergence).catch(()=>{});
+    j("api/stumpage.json").then(setStumpage).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -365,6 +374,9 @@ export default function App(){
     const p = new URLSearchParams({state:sel, metric, mgmt:bucket});
     window.history.replaceState(null, "", `#${p.toString()}`);
   }},[sel,metric,bucket]);
+
+  // ---- RD tab pins the relative-density metric on entry ----
+  useEffect(()=>{ if(tab==="rd" && series && series.rd_mean_wtd) setMetric("rd_mean_wtd"); },[tab,series]);
 
   // ---- lazy-load CONUS overlay bounds.json ----
   useEffect(()=>{
@@ -589,8 +601,20 @@ export default function App(){
             </div>);})()}
         </div>
         <div className="detail">
-          <h2>Detail — growth curves</h2>
+          <div className="tabs">
+            {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],["stumpage","Stumpage"]].map(([k,lbl])=>{
+              const disabled = (k==="divergence" && !divergence)
+                || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
+                || ((k==="engines"||k==="rd") && !series);
+              return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
+                onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
+            })}
+          </div>
           <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>
+          {tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
+            onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
+          {tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}
+          {(tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
               <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
@@ -728,6 +752,7 @@ export default function App(){
               {" "}Class buttons hide whole model families; the per-engine drawer hides individual engines.
               Y-axis "zoom to median" hides outliers. Hover a line for the engine. Data: perseus_db v0.66.
             </div>
+          </>)}
           </>)}
         </div>
       </div>
