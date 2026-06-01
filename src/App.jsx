@@ -4,6 +4,9 @@ import GrowthChart from "./GrowthChart.jsx";
 import SVGMap from "./SVGMap.jsx";
 import DivergenceHeatmap from "./DivergenceHeatmap.jsx";
 import StumpagePanel from "./StumpagePanel.jsx";
+import LandisStratified from "./LandisStratified.jsx";
+import LandownerYields from "./LandownerYields.jsx";
+import FaustmannRotation from "./FaustmannRotation.jsx";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -205,6 +208,9 @@ export default function App(){
   const [tab,setTab] = useState("engines"); // engines | rd | divergence | stumpage
   const [divergence,setDivergence] = useState(null);
   const [stumpage,setStumpage] = useState(null);
+  const [landis,setLandis] = useState(null);
+  const [landowner,setLandowner] = useState(null);
+  const [faustmann,setFaustmann] = useState(null);
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -215,6 +221,9 @@ export default function App(){
     // v1.3 tab datasets (non-blocking; tabs disable until loaded)
     j("api/engine_divergence.json").then(setDivergence).catch(()=>{});
     j("api/stumpage.json").then(setStumpage).catch(()=>{});
+    j("api/landis_stratified.json").then(setLandis).catch(()=>{});
+    j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
+    j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -377,6 +386,18 @@ export default function App(){
 
   // ---- RD tab pins the relative-density metric on entry ----
   useEffect(()=>{ if(tab==="rd" && series && series.rd_mean_wtd) setMetric("rd_mean_wtd"); },[tab,series]);
+
+  // ---- fall back to Engine compare if the active tab has no data here ----
+  useEffect(()=>{
+    const ok = {
+      engines: !!series, rd: !!series, divergence: !!divergence,
+      stumpage: !!(stumpage && stumpage.series && stumpage.series[sel]),
+      landis: !!(landis && landis[sel]),
+      landowner: !!(landowner && landowner[sel]),
+      faustmann: !!(faustmann && faustmann[sel]),
+    };
+    if(!ok[tab]) setTab("engines");
+  },[sel,series,divergence,stumpage,landis,landowner,faustmann]);
 
   // ---- lazy-load CONUS overlay bounds.json ----
   useEffect(()=>{
@@ -602,9 +623,14 @@ export default function App(){
         </div>
         <div className="detail">
           <div className="tabs">
-            {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],["stumpage","Stumpage"]].map(([k,lbl])=>{
+            {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
+              ["stumpage","Stumpage"],["landis","LANDIS stratified"],
+              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]].map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
+                || (k==="landis" && !(landis && landis[sel]))
+                || (k==="landowner" && !(landowner && landowner[sel]))
+                || (k==="faustmann" && !(faustmann && faustmann[sel]))
                 || ((k==="engines"||k==="rd") && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
@@ -614,6 +640,9 @@ export default function App(){
           {tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
             onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
           {tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}
+          {tab==="landis" && <LandisStratified data={landis} state={sel}/>}
+          {tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
+          {tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
           {(tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
