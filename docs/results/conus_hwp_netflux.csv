@@ -1,0 +1,45 @@
+"scenario","year","standing_Tg","hwp_Tg","net_Tg"
+"managed (conservation)",2022,10002,0,10002
+"managed (conservation)",2032,10412,780,11191
+"managed (conservation)",2042,10881,929,11810
+"managed (conservation)",2052,11175,1102,12277
+"managed (conservation)",2062,11321,1239,12560
+"managed (conservation)",2072,11256,1456,12712
+"managed (conservation)",2082,11069,1663,12731
+"managed (conservation)",2092,10951,1717,12668
+"managed (conservation)",2102,10835,1734,12569
+"managed (conservation)",2112,10632,1786,12418
+"managed (conservation)",2122,10471,1727,12198
+"managed (harvest)",2022,10002,0,10002
+"managed (harvest)",2032,9524,1672,11197
+"managed (harvest)",2042,9169,2236,11405
+"managed (harvest)",2052,8761,2659,11420
+"managed (harvest)",2062,8290,2980,11271
+"managed (harvest)",2072,7897,3075,10972
+"managed (harvest)",2082,7377,3235,10613
+"managed (harvest)",2092,6880,3278,10158
+"managed (harvest)",2102,6392,3311,9703
+"managed (harvest)",2112,6074,3173,9247
+"managed (harvest)",2122,5734,3113,8847
+"managed (intensive)",2022,10002,0,10002
+"managed (intensive)",2032,8635,2563,11198
+"managed (intensive)",2042,7499,3492,10990
+"managed (intensive)",2052,6627,3927,10554
+"managed (intensive)",2062,5905,4128,10033
+"managed (intensive)",2072,5251,4210,9461
+"managed (intensive)",2082,4700,4166,8866
+"managed (intensive)",2092,4227,4074,8301
+"managed (intensive)",2102,3866,3910,7776
+"managed (intensive)",2112,3561,3740,7301
+"managed (intensive)",2122,3249,3608,6857
+"reserve (no harvest)",2022,10002,0,10002
+"reserve (no harvest)",2032,11168,0,11168
+"reserve (no harvest)",2042,12117,0,12117
+"reserve (no harvest)",2052,12858,0,12858
+"reserve (no harvest)",2062,13424,0,13424
+"reserve (no harvest)",2072,13851,0,13851
+"reserve (no harvest)",2082,14170,0,14170
+"reserve (no harvest)",2092,14408,0,14408
+"reserve (no harvest)",2102,14585,0,14585
+"reserve (no harvest)",2112,14716,0,14716
+"reserve (no harvest)",2122,14813,0,14813
