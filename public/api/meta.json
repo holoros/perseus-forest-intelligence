@@ -434,6 +434,24 @@
    "unit": "Tg dry biomass",
    "kind": "stock",
    "group": "carbon"
+  },
+  "sawtimber_bio_dry": {
+   "label": "Sawtimber standing biomass",
+   "unit": "Tg dry biomass",
+   "kind": "stock",
+   "group": "timber"
+  },
+  "pulpwood_bio_dry": {
+   "label": "Pulpwood standing biomass",
+   "unit": "Tg dry biomass",
+   "kind": "stock",
+   "group": "timber"
+  },
+  "residue_bio_dry": {
+   "label": "Residue / non-merch standing biomass",
+   "unit": "Tg dry biomass",
+   "kind": "stock",
+   "group": "timber"
   }
  },
  "buckets": [

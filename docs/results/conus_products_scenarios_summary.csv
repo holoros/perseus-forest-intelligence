@@ -1,0 +1,13 @@
+"scenario","product","bio_t0_Tg","bio_t100_Tg","share_t100"
+"reserve (no harvest)","sawtimber",5889,10484,0.345
+"reserve (no harvest)","pulpwood",5233,6960,0.229
+"reserve (no harvest)","residue",9286,12945,0.426
+"managed (harvest)","sawtimber",5889,3993,0.341
+"managed (harvest)","pulpwood",5233,2626,0.224
+"managed (harvest)","residue",9286,5107,0.436
+"managed (intensive)","sawtimber",5889,2244,0.338
+"managed (intensive)","pulpwood",5233,1469,0.221
+"managed (intensive)","residue",9286,2927,0.441
+"managed (conservation)","sawtimber",5889,7332,0.342
+"managed (conservation)","pulpwood",5233,4921,0.229
+"managed (conservation)","residue",9286,9199,0.429
