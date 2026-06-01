@@ -2,6 +2,7 @@
 // Renders the CONUS states as an SVG so the coverage/carbon map always works,
 // regardless of maplibre / WebGL availability.
 import { useEffect, useRef, useState } from "react";
+import { projectInverse } from "./geo.js";
 
 const W = 640, H = 400;
 const PAD = 8;
@@ -103,7 +104,9 @@ function rgbHex(rgb){ return "#" + rgb.map(v=> v.toString(16).padStart(2, "0")).
 export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   timeline, mapYear, mapScenario, selected, onPick,
                                   conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7,
-                                  stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7 }){
+                                  stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7,
+                                  ecoData, ecoFill, ecoOpacity = 0.75,
+                                  inspectMode = false, onInspect }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -165,9 +168,24 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
       tx: dragRef.current.tx + dx, ty: dragRef.current.ty + dy });
     sync();
   };
-  const onMouseUp = () => {
+  const onMouseUp = (e) => {
+    const dr = dragRef.current;
     dragRef.current = null;
     setIsDragging(false);
+    // crosshair inspect: a click (no meaningful drag) reports lon/lat
+    if(inspectMode && dr && e && svgRef.current && e.type === "mouseup"){
+      const moved = Math.abs(e.clientX - dr.x) + Math.abs(e.clientY - dr.y);
+      if(moved < 5){
+        const rect = svgRef.current.getBoundingClientRect();
+        const cx = (e.clientX - rect.left) / rect.width * W;
+        const cy = (e.clientY - rect.top) / rect.height * H;
+        const v = viewRef.current;
+        const gx = (cx - v.tx) / v.k, gy = (cy - v.ty) / v.k;
+        const x = (gx - TX) / SCALE, y = -(gy - TY) / SCALE;
+        const [lon, lat] = projectInverse(x, y);
+        onInspect && onInspect(lon, lat);
+      }
+    }
   };
   const resetView = () => { viewRef.current = { k: 1, tx: 0, ty: 0 }; sync(); };
   const zoomBy = (dk) => {
@@ -234,7 +252,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
   return (
     <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
          style={{width:"100%",height:"100%",display:"block",
-                 cursor: isDragging ? "grabbing" : "grab",
+                 cursor: inspectMode ? "crosshair" : (isDragging ? "grabbing" : "grab"),
                  touchAction: "none"}}
          preserveAspectRatio="xMidYMid meet"
          onMouseDown={onMouseDown} onMouseMove={onMouseMove}
@@ -252,6 +270,14 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                width={conusBox.width} height={conusBox.height}
                opacity={conusOverlayOpacity} preserveAspectRatio="none"/>
       )}
+      {ecoData && ecoData.features && ecoData.features.map((ft,i)=>{
+        const code = ft.properties && ft.properties.NA_L3CODE;
+        const fill = ecoFill ? ecoFill(code) : null;
+        return <path key={"eco"+i} d={geomToD(ft.geometry)}
+                 fill={fill || "#2a3a47"} fillOpacity={fill ? ecoOpacity : 0.12}
+                 stroke="#0b1015" strokeWidth={0.15}
+                 style={{pointerEvents:"none"}}/>;
+      })}
       {features.map(ft=>{
         const st = ft.properties.state;
         const cov = states[st] || {};
@@ -282,7 +308,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           <path key={st} d={d} fill={fill} fillOpacity={opacity}
                 stroke={stroke} strokeWidth={sw}
                 style={{cursor: hasSeries ? "pointer" : "default"}}
-                onClick={()=> hasSeries && onPick && onPick(st)}>
+                onClick={()=> !inspectMode && hasSeries && onPick && onPick(st)}>
             <title>{title}</title>
           </path>
         );
