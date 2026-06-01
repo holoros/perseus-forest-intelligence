@@ -13,7 +13,7 @@ import csv, json, os, sys
 from collections import defaultdict
 csvpath, api = sys.argv[1], sys.argv[2]
 MODEL, CLS = "yc_hybrid_v1", "YC"
-LABEL = "YC hybrid Chapman-Richards + decline tail (experimental, un-anchored)"
+LABEL = "YC hybrid Chapman-Richards + decline tail (FIA-anchored to production t0)"
 METRIC, BUCKET = "agc_live_total", "reserve (no harvest)"
 
 by_state = defaultdict(dict); us = defaultdict(float)
