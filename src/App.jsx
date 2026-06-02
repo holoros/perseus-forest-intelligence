@@ -8,6 +8,7 @@ import LandisStratified from "./LandisStratified.jsx";
 import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
+import HWPStorage from "./HWPStorage.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
@@ -263,6 +264,7 @@ export default function App(){
   const [landis,setLandis] = useState(null);
   const [landowner,setLandowner] = useState(null);
   const [faustmann,setFaustmann] = useState(null);
+  const [hwp,setHwp] = useState(null); // experimental HWP storage layer
   // v1.3 map/AOI tools
   const [ecoOn,setEcoOn] = useState(false);
   const [ecoGeo,setEcoGeo] = useState(null);
@@ -285,6 +287,7 @@ export default function App(){
     j("api/landis_stratified.json").then(setLandis).catch(()=>{});
     j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
+    j("api/hwp_storage.json").then(setHwp).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -837,12 +840,14 @@ export default function App(){
           <div className="tabs">
             {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["stumpage","Stumpage"],["landis","LANDIS stratified"],
-              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]].map(([k,lbl])=>{
+              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],
+              ["hwp","Wood products C"]].map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
                 || (k==="landis" && !(landis && landis[sel]))
                 || (k==="landowner" && !(landowner && landowner[sel]))
                 || (k==="faustmann" && !(faustmann && faustmann[sel]))
+                || (k==="hwp" && !(hwp && hwp.states && hwp.states[sel]))
                 || ((k==="engines"||k==="rd") && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
@@ -856,6 +861,7 @@ export default function App(){
           {tab==="landis" && <LandisStratified data={landis} state={sel}/>}
           {tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
+          {tab==="hwp" && <HWPStorage data={hwp} state={sel}/>}
           {(tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
