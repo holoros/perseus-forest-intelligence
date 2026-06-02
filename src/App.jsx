@@ -155,6 +155,13 @@ const CONUS_LEGENDS = {
     lo: "low", mid: "mid", hi: "high",
     note: "Future climate site index",
   },
+  standing_value: {
+    title: "Standing timber value ($/ac, 2020 USD)",
+    type: "ramp",
+    ramp: ["#f7fcf5","#74c476","#238b45","#00441b"],
+    lo: "0", mid: "mid", hi: "high",
+    note: "TreeMap2022 volume x stumpage price; federal/private composite",
+  },
 };
 
 // Tier B layer B: gcbm_rasters_2022 stack (per-state, 30 m) for all 6 non-ME
@@ -703,6 +710,9 @@ export default function App(){
                 <option value="csi_2030">CSI · 2030</option>
                 <option value="csi_2060">CSI · 2060</option>
                 <option value="csi_2090">CSI · 2090</option>
+              </optgroup>
+              <optgroup label="Economic value (TreeMap 2022)">
+                <option value="standing_value">Standing timber value ($/ac)</option>
               </optgroup>
             </select>
             {conusLayer !== "none" && (
