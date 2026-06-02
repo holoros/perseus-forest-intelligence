@@ -68,6 +68,46 @@ so it is largest where there is the most live carbon to lose.
   decline endogenously). A future arm can swap the exogenous hazard for that
   density-dependent mortality.
 
+## Mechanistic corroboration — FIA GRM density-dependent mortality
+
+The exogenous arms above impose a disturbance hazard. An independent, fully observed
+check comes from the FIA GRM (growth-removal-mortality) record on 532,406 unharvested
+plots (`ycx_endog_mortality.R`): fit gross carbon growth `g(C)` and carbon mortality
+`m(C)` against standing carbon, then run the reserve as `dC/dt = g(C) − MULT·m(C)`.
+
+![mechanisms](decline_mechanisms.png)
+
+Gross growth peaks near 2.2 Mg C/ha/yr around 175 Mg C/ha and then falls, while
+mortality climbs steadily (0.05 → 1.05 Mg C/ha/yr from young to high-carbon stands —
+a 20× rise). At **observed** mortality the two never cross within the data range
+(equilibrium > 400 Mg C/ha), so a stand keeps slowly accumulating — the same message
+as the "recent" disturbance arm. Double the mortality (climate-amplified drought,
+insect, and fire) and **m(C) overtakes g(C) near 250 Mg C/ha**: 19,262 of 59,136
+pixels end below their current carbon. This confirms, from a completely separate data
+stream, that unmanaged decline is a function of *elevated* loss rates, not the
+historical baseline.
+
+Caveat: this carbon-space integration lacks the age/senescence brake the hybrid form
+carries, so its absolute baseline total runs high (+188%) and is **not** used as a
+projection — only as a mechanism and as the `m(C)` curve that a future dashboard arm
+could substitute for the imposed hazard. A fitted per-species gompit survival model
+(`conus_mort`, AUC 0.74) corroborates the same crowding→mortality mechanism at the
+tree scale.
+
+## Production wiring (staged, not deployed)
+
+`ycx_apply_recal_disturb.R` wires both ADR-0002 changes onto the live per-state
+dashboard series (`ycx_<ST>_state_series.csv`) without touching them — output goes to
+`recal_staging/`:
+1. a per-state, per-year growth uplift `recal_Tg/hybrid_Tg` (mean 1.44× by 2125,
+   capped at 2.0 to guard sparse tiny states) applied to every metric/scenario, and
+2. a new `reserve (no harvest, disturbance-exposed)` scenario for every metric, with
+   the moderate arm as the central line and severe / historical as the band.
+
+48 states stage cleanly (`recal_disturb_wiring_summary.csv`). The merge is **not** run
+and nothing is deployed; on sign-off the existing
+`ycx_merge_perseus.py <repo> recal_staging` publishes it.
+
 ## Proposed dashboard use
 
 Add a fourth reserve sub-scenario, "reserve (no harvest, disturbance-exposed),"
