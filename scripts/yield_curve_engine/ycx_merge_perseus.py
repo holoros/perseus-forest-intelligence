@@ -193,6 +193,17 @@ for st in sorted(native):
 META.setdefault("metrics",{})["merch_bio_dry"]={
     "label":"Merchantable bole dry biomass","unit":"Tg dry biomass",
     "kind":"stock","group":"carbon"}
+# register any scenario buckets the YC engine introduced (e.g. the
+# disturbance-exposed reserve) into meta.buckets[], preserving existing order.
+_existing = META.get("buckets", [])
+_seen = set(_existing); _newb = []
+for _st in native:
+    for _m in native[_st]:
+        for _bk in native[_st][_m]:
+            if _bk not in _seen:
+                _seen.add(_bk); _newb.append(_bk)
+if _newb:
+    META["buckets"] = _existing + _newb
 json.dump(stmeta, open(os.path.join(api,"states.json"),"w"), indent=1, ensure_ascii=False)
 open(os.path.join(api,"states.json"),"a").write("\n")
 # meta engines already counts YC (added in the first merge); refresh state count

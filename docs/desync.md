@@ -1,5 +1,10 @@
 # Source / deploy desync inventory
 
+> **RESOLVED (2026-06-02).** The source/deploy divergence is closed: `main`
+> auto-builds and deploys to `gh-pages` via the Pages Action and the build
+> reproduces the deployed bundle (issue #15). As of v1.4 the live site is built
+> from `main`. This document is retained as a historical record only.
+
 State as of 2026-05-31:
 
 * `main/src` is at app version v0.73 (anchored as tag `v0.73-source`).

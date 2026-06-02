@@ -1,17 +1,25 @@
 # Changelog
 
-This project ships in two places that have temporarily diverged:
+The source under `main` and the deployed bundle under `gh-pages` are
+**reconciled** (issue #15): every push to `main` auto-builds and deploys to
+https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
+and the build reproduces the deployed bundle. Entries are most recent first.
 
-* The React + Vite + MapLibre **source** under `main` is at app version v0.73.
-  The latest tag on main is `v0.73` (and the new `v0.73-source` anchor at the
-  current main head).
-* The **deployed bundle** under `gh-pages`, served at
-  https://holoros.github.io/perseus-forest-intelligence/, is at app version
-  v1.3. The new `v1.3-deployed` tag anchors that bundle.
-
-Until those two states are reconciled (see `CONTRIBUTING.md`), this changelog
-documents both timelines separately. Entries are most recent first within
-each timeline.
+### v1.4 — 2026-06-02 (deployed)
+* **Chronosequence growth recalibration** (ADR 0002). The YC empirical engine's
+  near-term growth is recalibrated to the FIA longitudinal remeasurement record
+  (agedist + physical-ceiling variant): mean growth uplift ~1.44x by 2125
+  (capped 2.0 for sparse states), near-term bias −0.68 → −0.41 %/yr, spatial
+  r 0.78 → 0.84, t0 anchoring preserved. Diagnosed the prior low bias as a
+  space-for-time (chronosequence) slope deficit.
+* **Disturbance-exposed reserve scenario.** New `reserve (no harvest,
+  disturbance-exposed)` bucket across carbon/biomass/volume metrics, with a band
+  spanning historical / 2x / 3x disturbance frequency (FIA COND + GRM grounded).
+  Shows passive carbon storage is conditional: under climate-elevated
+  disturbance the no-harvest reserve can plateau or become a net source.
+* Pipeline: `ycx_apply_recal_disturb.R` → `ycx_merge_perseus.py` (now registers
+  new scenario buckets into `meta.buckets`). See `docs/decisions/0002-*` and
+  `docs/results/disturbance_decline_scenario.md`.
 
 ## Deployed timeline (`gh-pages`)
 
