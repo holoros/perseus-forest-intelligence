@@ -1,0 +1,5 @@
+"scenario","net_stock_min","net_stock_max","net_subst_min","net_subst_max"
+"managed (conservation)",2279,4151,2279,9243
+"managed (harvest)",-1006,2766,-1006,12739
+"managed (intensive)",-2969,1958,-2969,14634
+"reserve (no harvest)",4811,4811,4811,4811
