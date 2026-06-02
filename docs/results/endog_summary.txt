@@ -1,0 +1,18 @@
+Endogenous density-dependent mortality reserve (FIA GRM, unharvested plots)
+
+plots 532406; carbon mortality = 21% of gross growth nationally
+national equilibrium carbon C* (g=m): >400 Mg C/ha (baseline mortality)
+CONUS reserve by mortality arm (Tg C):
+  baseline   t0=11607 t100=33490 (+188.5%)
+  mort_1p5x  t0=11607 t100=28582 (+146.3%)
+  mort_2x    t0=11607 t100=24207 (+108.6%)
+
+under 2x mortality, 19262 of 59136 pixels end below current carbon
+
+g(C), m(C) at selected standing carbon (Mg C/ha):
+  C= 20  gross 0.240  mort 0.051  net@1x +0.190  net@2x +0.139
+  C= 50  gross 0.714  mort 0.133  net@1x +0.582  net@2x +0.449
+  C=100  gross 1.461  mort 0.307  net@1x +1.154  net@2x +0.847
+  C=150  gross 2.095  mort 0.504  net@1x +1.590  net@2x +1.086
+  C=200  gross 2.203  mort 0.808  net@1x +1.395  net@2x +0.587
+  C=250  gross 2.088  mort 1.047  net@1x +1.041  net@2x -0.006
