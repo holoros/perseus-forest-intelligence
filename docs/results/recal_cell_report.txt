@@ -1,0 +1,11 @@
+ADR-0002 cell-level recalibration — stress-test report
+increments: 272356 plots; g_obs models: 548 cell / 27 ft / 46 state / national
+[A] held-out increment RMSE: g_obs 2.200 vs hybrid 2.367 (7% lower)
+[B/C] CONUS reserve by variant:
+  agedist          t0=11607 t100=18752 gain=+61.6% bias=-0.39 r=0.84
+  agedist_capped   t0=11607 t100=17722 gain=+52.7% bias=-0.41 r=0.84
+  time20           t0=11607 t100=17869 gain=+54.0% bias=-0.18 r=0.81
+  full             t0=11607 t100=22062 gain=+90.1% bias=-0.05 r=0.78
+  hybrid           t0=11607 t100=13701 gain=+18.0% bias=-0.68 r=0.78
+[D] senescence preserved: 834/2313 (bad=1479)
+[E] bootstrap t100 median 18770 CI [18729, 18836] Tg

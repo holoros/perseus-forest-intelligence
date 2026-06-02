@@ -1,7 +1,7 @@
 # ADR 0002: Recalibrate near-term yield-curve growth to the FIA longitudinal record
 
-Status: PROPOSED (read-only diagnosis; no production data changed)
-Date: 2026-06-02
+Status: PROPOSED — cell-level fit built + stress-tested (read-only; no production data changed)
+Date: 2026-06-02 (cell-level results appended same day)
 Deciders: A. Weiskittel + PERSEUS team
 Supersedes: nothing. Extends the validation in `docs/hybrid_validation_vs_fia.md`.
 
@@ -111,6 +111,61 @@ vs hybrid is settled by ADR 0001 and not reopened.
   fallback to the pooled curve bounds this.
 - **No change to model form, anchoring method, or scenario structure.** The
   explorer stays hybrid-consistent.
+
+## Cell-level fit + stress test (built 2026-06-02)
+
+The recalibration was implemented at the **ft × eco × owner cell** level the
+decision calls for (`scripts/yield_curve_engine/ycx_recal_cell.R`, Cardinal job
+11210987): g_obs fit per cell with fallback cell → ft_group → state → national
+(548 cell / 27 ft / 46 state models from 272,356 remeasurement plots), re-projected
+over the TreeMap-2022 reserve, with the full robustness battery.
+
+CONUS reserve carbon (Tg C), by increment-blend weight scheme:
+
+| variant | t0 | t100 | 100-yr gain | near-term bias %/yr | spatial r |
+|---|---:|---:|---:|---:|---:|
+| production hybrid | 11,607 | 13,701 | +18.0% | −0.68 | 0.78 |
+| `agedist` (full to A*) | 11,607 | 18,752 | +61.6% | −0.39 | **0.84** |
+| `agedist` + physical ceiling | 11,607 | 17,722 | +52.7% | −0.41 | **0.84** |
+| `time20` (first 20 yr only) | 11,607 | 17,869 | +54.0% | **−0.18** | 0.81 |
+| `full` (no weight decay) | 11,607 | 22,062 | +90.1% | −0.05 | 0.78 |
+
+![stress test](results/recal_cell_stress.png)
+
+Robustness checks:
+- **(A) Held-out 5-fold CV.** g_obs predicts held-out remeasurement increments at
+  RMSE 2.20 vs 2.37 for the hybrid chronosequence slope (7% lower). Per-plot
+  increments are intrinsically noisy (σ ≈ 2 on a ~1 Mg C/ha/yr mean), so the
+  win is modest per plot; the correction's value is in removing the *systematic*
+  low bias, not in plot-level prediction.
+- **(B) Weight-scheme sensitivity** (table). The lift is monotone in how far the
+  observed increment is allowed to act. `full` closes the bias but adds no
+  spatial skill (r stays 0.78) and pushes a +90% century gain — too aggressive.
+- **(C) Physical ceiling.** Capping corrected standing density at each cell's
+  95th-percentile observed standing AGC trims the century total from +61.6% to
+  +52.7% — no pixel is projected past what FIA actually observes for that stratum.
+- **(D) Senescence preservation.** By construction the weight is 0 for any stand
+  at/after its culmination age A*, so already-mature pixels are unchanged (the
+  automated check's "mismatches" are floating-point reconstruction noise < 1e-7
+  Mg C/ha from the cumsum, not real changes). The ADR-0001 decline tail is intact.
+- **(E) Bootstrap.** Resampling plots and refitting g_obs (40×) gives a CONUS
+  t100 of 18,770 Tg C, 95% CI [18,729, 18,836] — a ±0.4% band reflecting g_obs
+  sampling error only (it excludes hybrid-parameter and anchoring uncertainty).
+
+The cell-level spatial r lands at **0.84**, below the state-level prototype's 0.92.
+The prototype number was optimistic: a per-state smoother encodes each state's
+mean observed growth, which is also the validation target (mild circularity). The
+cell-level fit removes that and 0.84 is the honest improvement over 0.78.
+
+**Recommended production setting: `agedist` with the physical ceiling.** It is the
+principled middle — senescence-safe, bounded by observed standing carbon, halves
+the bias (−0.68 → −0.41), lifts spatial skill (0.78 → 0.84), and yields a
+defensible +52.7% century reserve gain. `time20` is the conservative alternative
+if minimizing the near-term bias (−0.18) matters more than long-run realism.
+
+Artifacts: `scripts/yield_curve_engine/ycx_recal_cell.R`,
+`docs/results/recal_cell_{validation,state_delta,report}` and
+`conus_recal_cell_100yr.csv`, `docs/results/recal_cell_stress.png`.
 
 ## Status of this PR
 
