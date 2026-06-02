@@ -129,23 +129,22 @@ const CONUS_LEGENDS = {
   p_harvest_any: {
     title: "P(harvest · any), TM2016",
     type: "ramp",
-    // GSEA-style hot diverging
-    ramp: ["#ffe9e9","#ffc0e5","#ff7080","#d60c00","#7a0500"],
-    lo: "0.0", mid: "0.5", hi: "1.0",
+    ramp: ["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
+    lo: "0.6", mid: "0.8", hi: "1.0",
     note: "Probability per pixel (conus_hcs v1)",
   },
   p_harvest_clearcut: {
     title: "P(stand replacement), TM2016",
     type: "ramp",
-    ramp: ["#ffe9e9","#ffc0e5","#ff7080","#d60c00","#7a0500"],
-    lo: "0.0", mid: "0.5", hi: "1.0",
+    ramp: ["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
+    lo: "0.6", mid: "0.8", hi: "1.0",
     note: "Forest-to-non-forest transition over the FIA cycle (stand replacement / forest loss), not silvicultural clearcut. conus_hcs v4.",
   },
   p_harvest_partial: {
     title: "P(harvest · partial), TM2016",
     type: "ramp",
-    ramp: ["#ffe9e9","#ffc0e5","#ff7080","#d60c00","#7a0500"],
-    lo: "0.0", mid: "0.5", hi: "1.0",
+    ramp: ["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
+    lo: "0.6", mid: "0.8", hi: "1.0",
     note: "Probability per pixel (conus_hcs v1)",
   },
   climate_stress: {
