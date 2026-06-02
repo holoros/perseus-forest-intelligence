@@ -25,9 +25,36 @@ const LANDIS_LAYERS = [
   { file:"me_RM",   label:"Red maple",   abs:false },
   { file:"me_PINE", label:"Pine",        abs:false },
 ];
+// Four core thematic bins for the CONUS map. Each bin maps to a set of CONUS
+// rasters (full 48-state coverage); the first layer is the bin default.
+const MAP_BINS = [
+  { id:"structure", label:"Forest structure",
+    layers:[["fortype_2022","Forest type"],["rd_treemap","Relative density"],["sdimax_treemap","SDI max (Reineke)"]] },
+  { id:"landowner", label:"Landowner",
+    layers:[["ownership","Ownership group"]] },
+  { id:"products", label:"Stumpage / products",
+    layers:[["standing_value","Standing value ($/ac)"],["standing_value_cv","Value uncertainty ($/ac s.d.)"],
+            ["sawtimber_share","Sawtimber share (%)"],["expected_removal","Expected removal"],
+            ["hybrid_agc2022","AG carbon 2022 (Mg C/ha)"],["hybrid_dagc100","100-yr AG carbon change"]] },
+  { id:"risk", label:"Future risk",
+    layers:[["gfc_lossyear","Forest loss year (Hansen)"],["lcms_2022","Disturbance cause (LCMS)"],
+            ["p_harvest_clearcut","P(stand replacement)"],["p_harvest_any","P(harvest · any)"],
+            ["p_harvest_partial","P(harvest · partial)"],["climate_stress","Climate site stress (CSPI v4)"],
+            ["csi","CSI · Climate Site Index"],["csi_2030","CSI · 2030"],["csi_2060","CSI · 2060"],
+            ["csi_2090","CSI · 2090"],["bgi","BGI · Bioclimatic Growth Index"]] },
+];
+const binForLayer = (layer) => (MAP_BINS.find(b => b.layers.some(([k])=>k===layer)) || {}).id;
+
 // CONUS overlay legends — colorbar stops + units + axis labels.
 // v0.73 palettes inspired by ggsci R package (Nature, Lancet, GSEA, NPG).
 const CONUS_LEGENDS = {
+  gfc_lossyear: {
+    title: "Forest loss year (Hansen GFC)",
+    type: "ramp",
+    ramp: ["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
+    lo: "2001", mid: "2012", hi: "2023",
+    note: "Hansen Global Forest Change, year of stand-replacing loss",
+  },
   hybrid_agc2022: {
     title: "Hybrid AG carbon, 2022 (Mg C/ha)",
     type: "ramp",
@@ -718,39 +745,20 @@ export default function App(){
               <option value="coverage">map: engine coverage</option>
               <option value="carbon">map: carbon trajectory (libcbm)</option>
             </select>
-            <select value={conusLayer} onChange={e=>setConusLayer(e.target.value)} title="CONUS overlay">
-              <option value="none">CONUS layer: off</option>
-              <optgroup label="Hybrid yield engine (PERSEUS)">
-                <option value="hybrid_agc2022">AG carbon 2022 (Mg C/ha)</option>
-                <option value="hybrid_dagc100">100-yr AG carbon change</option>
-                <option value="sawtimber_share">Sawtimber share (%)</option>
-              </optgroup>
-              <optgroup label="Disturbance / Harvest (TM2016)">
-                <option value="lcms_2022">LCMS disturbance cause 2022</option>
-                <option value="p_harvest_any">P(harvest · any)</option>
-                <option value="p_harvest_clearcut">P(stand replacement · forest loss)</option>
-                <option value="p_harvest_partial">P(harvest · partial)</option>
-              </optgroup>
-              <optgroup label="Forest structure (TreeMap 2022)">
-                <option value="fortype_2022">Forest type</option>
-                <option value="rd_treemap">Relative density · Chivehgenge</option>
-                <option value="sdimax_treemap">SDI max · Reineke</option>
-              </optgroup>
-              <optgroup label="Site productivity / Climate">
-                <option value="bgi">BGI · Bioclimatic Growth Index</option>
-                <option value="csi">CSI · Climate Site Index</option>
-                <option value="climate_stress">CSPI · Composite SPI (v4)</option>
-              </optgroup>
-              <optgroup label="CSI future projections">
-                <option value="csi_2030">CSI · 2030</option>
-                <option value="csi_2060">CSI · 2060</option>
-                <option value="csi_2090">CSI · 2090</option>
-              </optgroup>
-              <optgroup label="Economic value (TreeMap 2022)">
-                <option value="standing_value">Standing timber value ($/ac)</option>
-                <option value="standing_value_cv">Value uncertainty ($/ac s.d.)</option>
-              </optgroup>
-            </select>
+            <div className="bin-row" style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}>
+              {MAP_BINS.map(b => {
+                const active = binForLayer(conusLayer) === b.id;
+                return <button key={b.id} className={"tab"+(active?" on":"")}
+                  onClick={()=> setConusLayer(active ? "none" : b.layers[0][0])}
+                  title={`CONUS layer: ${b.label}`}>{b.label}</button>;
+              })}
+              {conusLayer !== "none" && (
+                <select value={conusLayer} onChange={e=>setConusLayer(e.target.value)} title="Layer within bin">
+                  {(MAP_BINS.find(b=>b.id===binForLayer(conusLayer)) || {layers:[]}).layers
+                    .map(([k,lbl]) => <option key={k} value={k}>{lbl}</option>)}
+                </select>
+              )}
+            </div>
             {conusLayer !== "none" && (
               <input type="range" min="0.2" max="1" step="0.05" value={conusOpacity}
                 onChange={e=>setConusOpacity(+e.target.value)}
