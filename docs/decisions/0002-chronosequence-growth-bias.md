@@ -1,9 +1,16 @@
 # ADR 0002: Recalibrate near-term yield-curve growth to the FIA longitudinal record
 
-Status: PROPOSED — cell-level fit built + stress-tested (read-only; no production data changed)
-Date: 2026-06-02 (cell-level results appended same day)
+Status: ACCEPTED and IMPLEMENTED (deployed v1.4, 2026-06-02)
+Date: 2026-06-02
 Deciders: A. Weiskittel + PERSEUS team
 Supersedes: nothing. Extends the validation in `docs/hybrid_validation_vs_fia.md`.
+
+> Implemented in v1.4 (`release/recal-disturb-v1.4`, deployed to gh-pages): the
+> approved **agedist + physical-ceiling** recalibration is applied to the YC
+> empirical engine via `ycx_apply_recal_disturb.R` -> `ycx_merge_perseus.py`
+> (mean growth uplift 1.44x by 2125, capped 2.0 for sparse states; t0 anchoring
+> preserved). A new `reserve (no harvest, disturbance-exposed)` scenario ships
+> alongside (see `docs/results/disturbance_decline_scenario.md`).
 
 ## Context
 
