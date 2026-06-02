@@ -1049,6 +1049,12 @@ export default function App(){
                     Switch to "all engines" to see the full multi-model spread under managed/reserve buckets.</>}
               {" "}Class buttons hide whole model families; the per-engine drawer hides individual engines.
               Y-axis "zoom to median" hides outliers. Hover a line for the engine. Data: perseus_db v0.66.
+              {bucket === "reserve (no harvest, disturbance-exposed)" && <>
+                {" "}<b>Disturbance-exposed reserve:</b> the YC line is the no-harvest trajectory with an
+                explicit FIA-based disturbance drag. Central line = ~2× historical disturbance frequency;
+                turn on <b>uncertainty</b> to see the band from historical rates (upper) to ~3× /
+                stand-replacing severity (lower). It shows that passive carbon storage is conditional —
+                under climate-elevated fire/insect/wind it can plateau or turn into a net source.</>}
             </div>
           </>)}
           </>)}
