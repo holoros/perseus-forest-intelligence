@@ -465,5 +465,8 @@
   "managed (harvest)",
   "managed (intensive)",
   "managed (conservation)"
- ]
+ ],
+ "default_models": {
+  "agc_live_total": "yc_hybrid_v1"
+ }
 }
