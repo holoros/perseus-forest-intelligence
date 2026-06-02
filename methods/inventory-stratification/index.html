@@ -359,6 +359,46 @@ independently shift the ratio by less than 0.003 each.
 </p>
 </div>
 
+<h2>2026-06-02 update: OR joins the +24% cluster (6-state libcbm vs GCBM)</h2>
+
+<p>
+The Oregon statewide GCBM chain landed, and OR now joins the original +24%
+engine-gap cluster at libcbm/GCBM ratio <strong>0.7952</strong> (gap 20.5%).
+Five of six states with full GCBM aggregates now sit at gaps of 20.5 to
+25.6 percent — Maine, Minnesota, Washington, Indiana, and Oregon — under
+the canonical B1.1 v6 (uniform-FT inventory + Boudewyn + LCMS events)
+parity that the v1.3 manuscript uses. Georgia remains the lone outlier
+at ratio 1.0509 (-5.1%), consistent with its warm-donor Stage 1 placeholder.
+</p>
+
+<table class="matrix">
+<thead>
+<tr><th>State</th>
+    <th>GCBM yr-5 (Mg/ha)</th>
+    <th>libcbm yr-5 (Mg/ha)</th>
+    <th>gap (%)</th>
+    <th>libcbm/GCBM</th>
+    <th>verdict</th></tr>
+</thead>
+<tbody>
+<tr><td>WA</td><td>283.8</td><td>211.2</td><td>25.6</td><td>0.7443</td><td>cluster</td></tr>
+<tr><td>MN</td><td>209.2</td><td>158.5</td><td>24.3</td><td>0.7575</td><td>cluster</td></tr>
+<tr><td>IN</td><td>211.8</td><td>166.5</td><td>21.4</td><td>0.7863</td><td>cluster</td></tr>
+<tr><td>ME</td><td>306.6</td><td>240.9</td><td>21.4</td><td>0.7858</td><td>cluster</td></tr>
+<tr><td>OR</td><td>279.9</td><td>222.6</td><td>20.5</td><td><strong>0.7952</strong></td><td><strong>cluster (new)</strong></td></tr>
+<tr class="highlight"><td>GA</td><td>124.9</td><td>131.3</td><td>-5.1</td><td>1.0509</td><td>warm-donor outlier</td></tr>
+</tbody>
+</table>
+
+<p>
+This strengthens the v1.3 manuscript: under the canonical inventory
+parity, 5 of 6 states cluster tightly between 0.74 and 0.80, confirming
+the engine-gap finding is structural and reproducible. The remaining 42
+states have libcbm pools built and FIA EXPNS areas computed; their GCBM
+aggregates are queued (Cardinal SLURM ga_state running; remaining 41
+states pending compute).
+</p>
+
 <h2>Headline numbers</h2>
 <div class="metric-grid">
   <div class="metric">
@@ -375,6 +415,11 @@ independently shift the ratio by less than 0.003 each.
     <div class="metric-label">CONUS C stock</div>
     <div class="metric-value">60.3 PgC</div>
     <div class="metric-sub">B1.3 FIA EXPNS, 219.6 Mg/ha mean</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">+24% cluster</div>
+    <div class="metric-value">5 of 6</div>
+    <div class="metric-sub">ME, MN, IN, WA, OR — GA the lone outlier</div>
   </div>
   <div class="metric">
     <div class="metric-label">B1.1 ratio range</div>
