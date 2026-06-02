@@ -55,6 +55,16 @@ const CONUS_LEGENDS = {
     lo: "2001", mid: "2012", hi: "2023",
     note: "Hansen Global Forest Change, year of stand-replacing loss",
   },
+  ownership: {
+    title: "Forest ownership (CONUS)",
+    type: "categorical",
+    stops: [
+      ["#3fb68b", "Family forest (NIPF)"], ["#e6ab02", "Corporate / other private"],
+      ["#3C5488", "Federal"], ["#6baed6", "State"],
+      ["#8c510a", "Tribal"], ["#80cdc1", "Local"],
+    ],
+    note: "Harris et al. 2025 collapsed US forest ownership; non-forest transparent",
+  },
   hybrid_agc2022: {
     title: "Hybrid AG carbon, 2022 (Mg C/ha)",
     type: "ramp",
