@@ -948,6 +948,37 @@ regional-gradients paper.
 <a class="repo-link" href="https://doi.org/10.5281/zenodo.20516950">🗄 Zenodo dataset DOI 10.5281/zenodo.20516950</a>
 </p>
 
+<h2>Scientific finding</h2>
+<p>
+When two implementations of the CBM-CFS3 forest carbon model family
+(libcbm and GCBM on moja FLINT) are compared across six US states under
+matched parameter conventions, the year-five carbon density gap is
+approximately +24% (libcbm under GCBM at libcbm/GCBM ratios of 0.74 to
+0.80 in five of six states, with Georgia the lone outlier at 1.05).
+Replacing the uniform-FT inventory stratification used in legacy
+parity runs with a stratification anchored on FIA EXPNS expansion
+factors, the canonical FIA Total Area Estimator, adds +6,760 TgC to
+the CONUS-wide year-five carbon stock at n=39 states — a +14% shift on
+246.5 Mha. <strong>Inventory stratification, not engine
+implementation, dominates the cross-model uncertainty</strong> for
+this generation of CBM-CFS3 carbon models.
+</p>
+
+<p>
+The deposit also documents a regional dead organic matter pool
+fingerprint that distinguishes cool-moist climates. Mean libcbm slow
+soil carbon under B1.3 FIA EXPNS is 184 Mg/ha in the Pacific
+Northwest, 143 in the Atlantic Maritime Northeast, and 105 to 119
+Mg/ha across the South, Lake States, and Mountain West. A Q10 mean
+annual temperature sensitivity sweep on Oregon (MAT 4 to 13 °C) shows
+the slow-soil overshoot is fixed during spinup rather than emerging
+from runtime Q10 scaling: libcbm/GCBM stays at 1.35 even at MAT
+13 °C. Spinup climate is therefore a high-leverage source of regional
+bias in CBM-CFS3 family soil carbon estimates and a candidate for
+recalibration in any future EPA GHG inventory or NCASI national-scale
+benchmark that adopts libcbm as a Tier 3 implementation.
+</p>
+
 <h2>Citation</h2>
 <p>
 If you use these results, please cite both the Zenodo deposit and the
