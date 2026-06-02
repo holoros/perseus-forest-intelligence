@@ -276,6 +276,7 @@ export default function App(){
   const [l3yields,setL3yields] = useState(null);
   const [inspectMode,setInspectMode] = useState(false);
   const [inspectInfo,setInspectInfo] = useState(null);
+  const [aoiRadiusKm,setAoiRadiusKm] = useState(10); // small-AOI summary radius
   const [aoi,setAoi] = useState(null);
   const [playing,setPlaying] = useState(false);
   const [fiaPlots,setFiaPlots] = useState({}); // state -> fia_plots json (cache)
@@ -633,6 +634,33 @@ export default function App(){
     return { n, meanAge, meanBA, ownership, forestTypes, invYears: fp.meta.inv_years };
   };
 
+  // Build a small square AOI (side = 2*radiusKm) around an inspected point and
+  // summarize it: current conditions + landowner composition (FIA plots inside)
+  // and the ycx future projection for the encompassing ecoregion.
+  const summarizeArea = async (lon, lat, radiusKm) => {
+    const dLat = radiusKm / 111.0;
+    const dLon = radiusKm / (111.0 * Math.max(0.1, Math.cos(lat * Math.PI / 180)));
+    const ring = [[lon-dLon,lat-dLat],[lon+dLon,lat-dLat],[lon+dLon,lat+dLat],
+                  [lon-dLon,lat+dLat],[lon-dLon,lat-dLat]];
+    const geom = { type:"Polygon", coordinates:[ring] };
+    let eg = ecoGeo, ly = l3yields;
+    if(!eg){ try{ eg = await j("geo/us_eco_l3_features.geojson"); setEcoGeo(eg); }catch(e){} }
+    if(!ly){ try{ ly = await j("api/yield_curves_by_l3.json"); setL3yields(ly); }catch(e){} }
+    const ef = eg && findFeature(eg.features, lon, lat);
+    const code = ef && ef.properties && ef.properties.NA_L3CODE;
+    const l3e = (ly && ly.l3 && code) ? ly.l3[code] : null;
+    const stCode = geoData && (findFeature(geoData.features, lon, lat) || {properties:{}}).properties.state;
+    let area_m2; try{ area_m2 = polygonAreaM2(geom); }catch(e){ area_m2 = null; }
+    const plotStats = await aggregatePlots(geom, stCode);
+    setAoi({
+      name: `area ~${radiusKm} km · ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+      centroid: [lon,lat], radiusKm, area_m2, state: stCode,
+      l3code: code, l3name: ef && ef.properties && ef.properties.NA_L3NAME,
+      l1: ef && ef.properties && ef.properties.NA_L1NAME,
+      curves: l3e && l3e.curves && l3e.curves.agb_tonac, plotStats });
+    setInspectInfo(null);
+  };
+
   return (
     <div className="app">
       <header className="top">
@@ -766,12 +794,24 @@ export default function App(){
               <div>EPA L3: {inspectInfo.l3code || "—"} {inspectInfo.l3name || ""}</div>
               {inspectInfo.l1 && <div style={{color:"var(--mut)",fontSize:10.5}}>{inspectInfo.l1}</div>}
               <div>AGB @50yr: <b>{inspectInfo.agb50 != null ? `${inspectInfo.agb50.toFixed(0)} ton/ac` : "n/a"}</b></div>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginTop:6}}>
+                <span style={{fontSize:10.5,color:"var(--mut)"}}>radius</span>
+                <select value={aoiRadiusKm} onChange={e=>setAoiRadiusKm(+e.target.value)}
+                  title="AOI radius" style={{fontSize:11,padding:"1px 4px"}}>
+                  <option value={5}>5 km</option><option value={10}>10 km</option>
+                  <option value={25}>25 km</option><option value={50}>50 km</option>
+                </select>
+                <button className="mini-btn" style={{marginTop:0}}
+                  onClick={()=> summarizeArea(inspectInfo.lon, inspectInfo.lat, aoiRadiusKm)}
+                  title="Summarize current conditions, landowner composition, and projections for a small area around this point">
+                  summarize this area →</button>
+              </div>
               {inspectInfo.curves && (
-                <button className="mini-btn" onClick={()=> setAoi({
+                <button className="mini-btn" style={{marginTop:4}} onClick={()=> setAoi({
                   name:`point ${inspectInfo.lat.toFixed(2)}, ${inspectInfo.lon.toFixed(2)}`,
                   centroid:[inspectInfo.lon,inspectInfo.lat], l3code:inspectInfo.l3code,
                   l3name:inspectInfo.l3name, l1:inspectInfo.l1, curves:inspectInfo.curves })}>
-                  project this point →</button>)}
+                  project this point only →</button>)}
             </div>)}
           {ecoOn && (
             <div className="legend" style={{left:"auto",right:12,bottom:44}}>

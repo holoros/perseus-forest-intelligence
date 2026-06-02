@@ -302,8 +302,18 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         {selPathD && (
           <clipPath id="clip-selected-state"><path d={selPathD}/></clipPath>
         )}
+        <linearGradient id="ocean-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#10212e"/>
+          <stop offset="55%" stopColor="#0c1722"/>
+          <stop offset="100%" stopColor="#070d13"/>
+        </linearGradient>
+        <radialGradient id="ocean-vignette" cx="50%" cy="42%" r="70%">
+          <stop offset="0%" stopColor="#16344a" stopOpacity="0.45"/>
+          <stop offset="60%" stopColor="#0c1722" stopOpacity="0"/>
+        </radialGradient>
       </defs>
-      <rect x="0" y="0" width={W} height={H} fill="#0b1015"/>
+      <rect x="0" y="0" width={W} height={H} fill="url(#ocean-bg)"/>
+      <rect x="0" y="0" width={W} height={H} fill="url(#ocean-vignette)"/>
       <g transform={`translate(${view.tx},${view.ty}) scale(${view.k})`}>
       {conusOverlay && conusBox && (
         <image href={conusOverlay} x={conusBox.x} y={conusBox.y}
