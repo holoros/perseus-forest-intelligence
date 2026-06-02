@@ -1,0 +1,23 @@
+Reserve-with-disturbance decline scenario (TreeMap-2022, CONUS)
+
+CONUS reserve carbon (Tg C):
+  gross              t0=11607 t100=18961 (+63.4%)
+  recent             t0=11607 t100=18781 (+61.8%)
+  moderate           t0=11607 t100=11439 (-1.4%)
+  severe             t0=11607 t100=9112 (-21.5%)
+
+Under severe (3x freq, type severity), 34201 of 59136 CONUS forest pixels-strata end below t0.
+states with most net-carbon-loss area under severe disturbance:
+ state pct_netneg recent_t100 severe_t100
+    DE      100.0        42.4         1.6
+    MD       98.5        69.2        18.5
+    MO       97.0       509.4        72.9
+    NE       94.1        21.3         3.8
+    FL       93.5       415.9        56.9
+    SC       92.6       415.5        68.4
+    GA       92.2       616.9       100.7
+    KS       90.5        18.8         3.2
+    NC       90.0       668.1       115.4
+    IA       89.0        58.4        21.7
+    SD       89.0        25.2         7.1
+    CA       88.8       972.7       172.4
