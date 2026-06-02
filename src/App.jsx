@@ -190,7 +190,7 @@ const GCBM_LAYERS = [
 const CLASS_COL = { CBM:"#66c2a5", FVS:"#fc8d62", LANDIS:"#8da0cb", OSM:"#e78ac3",
   HCM:"#a6d854", YC:"#ffd92f", CEM:"#e5c494", FIA:"#b3b3b3", VCC:"#7570b3", "?":"#cccccc" };
 const METRIC_ORDER = ["agc_live_total","live_c_total","tree_c_total","agb_dry","vol_stem",
-  "total_ecosystem_c","mean_stand_age","old_forest_share_120"];
+  "total_ecosystem_c","mean_stand_age","old_forest_share_120","standing_value_musd"];
 
 // FIA forest-type GROUP codes -> names (REF_FOREST_TYPE_GROUP). A detailed
 // FORTYPCD belongs to the largest group code <= it. Lets us show forest-type
