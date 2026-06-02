@@ -12,7 +12,7 @@ import csv, json, os, sys
 from collections import defaultdict
 csvpath, api = sys.argv[1], sys.argv[2]
 MODEL, CLS = "yc_hwp_v1", "YC"
-LABEL = "Forest + wood products + landfill net carbon (HWP first-order decay)"
+LABEL = "Forest + wood products + landfill net carbon (HWP first-order decay, hybrid engine)"
 METRIC = "net_forest_hwp_c"
 MDEF = {"label":"Net carbon: forest + wood products + landfill","unit":"Tg C","kind":"stock","group":"carbon"}
 

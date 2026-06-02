@@ -1,0 +1,2113 @@
+"state","scenario","year_offset","net_stock_Tg"
+"AL","reserve (no harvest)",0,353.408
+"AL","reserve (no harvest)",10,438.356
+"AL","reserve (no harvest)",20,501.652
+"AL","reserve (no harvest)",30,546.083
+"AL","reserve (no harvest)",40,572.751
+"AL","reserve (no harvest)",50,585.613
+"AL","reserve (no harvest)",60,586.706
+"AL","reserve (no harvest)",70,579.307
+"AL","reserve (no harvest)",80,564.651
+"AL","reserve (no harvest)",90,542.715
+"AL","reserve (no harvest)",100,517.056
+"AR","reserve (no harvest)",0,333.03
+"AR","reserve (no harvest)",10,384.115
+"AR","reserve (no harvest)",20,423.148
+"AR","reserve (no harvest)",30,446.615
+"AR","reserve (no harvest)",40,452.595
+"AR","reserve (no harvest)",50,444.627
+"AR","reserve (no harvest)",60,429.575
+"AR","reserve (no harvest)",70,413.634
+"AR","reserve (no harvest)",80,395.76
+"AR","reserve (no harvest)",90,373.237
+"AR","reserve (no harvest)",100,354.559
+"AZ","reserve (no harvest)",0,100.782
+"AZ","reserve (no harvest)",10,105.713
+"AZ","reserve (no harvest)",20,109.718
+"AZ","reserve (no harvest)",30,112.806
+"AZ","reserve (no harvest)",40,115.138
+"AZ","reserve (no harvest)",50,116.84
+"AZ","reserve (no harvest)",60,118
+"AZ","reserve (no harvest)",70,118.752
+"AZ","reserve (no harvest)",80,119.178
+"AZ","reserve (no harvest)",90,119.321
+"AZ","reserve (no harvest)",100,119.251
+"CA","reserve (no harvest)",0,525.415
+"CA","reserve (no harvest)",10,557.295
+"CA","reserve (no harvest)",20,583.576
+"CA","reserve (no harvest)",30,604.772
+"CA","reserve (no harvest)",40,621.793
+"CA","reserve (no harvest)",50,635.333
+"CA","reserve (no harvest)",60,646.596
+"CA","reserve (no harvest)",70,655.704
+"CA","reserve (no harvest)",80,663.035
+"CA","reserve (no harvest)",90,668.94
+"CA","reserve (no harvest)",100,673.169
+"CO","reserve (no harvest)",0,241.696
+"CO","reserve (no harvest)",10,256.708
+"CO","reserve (no harvest)",20,269.842
+"CO","reserve (no harvest)",30,280.406
+"CO","reserve (no harvest)",40,287.492
+"CO","reserve (no harvest)",50,290.833
+"CO","reserve (no harvest)",60,291.735
+"CO","reserve (no harvest)",70,290.136
+"CO","reserve (no harvest)",80,287.39
+"CO","reserve (no harvest)",90,283.972
+"CO","reserve (no harvest)",100,280.034
+"CT","reserve (no harvest)",0,27.85
+"CT","reserve (no harvest)",10,28.81
+"CT","reserve (no harvest)",20,29.354
+"CT","reserve (no harvest)",30,29.542
+"CT","reserve (no harvest)",40,29.44
+"CT","reserve (no harvest)",50,29.26
+"CT","reserve (no harvest)",60,29.017
+"CT","reserve (no harvest)",70,28.753
+"CT","reserve (no harvest)",80,28.481
+"CT","reserve (no harvest)",90,28.209
+"CT","reserve (no harvest)",100,27.944
+"DE","reserve (no harvest)",0,13.337
+"DE","reserve (no harvest)",10,14.367
+"DE","reserve (no harvest)",20,15.283
+"DE","reserve (no harvest)",30,16.127
+"DE","reserve (no harvest)",40,16.898
+"DE","reserve (no harvest)",50,17.607
+"DE","reserve (no harvest)",60,18.267
+"DE","reserve (no harvest)",70,18.881
+"DE","reserve (no harvest)",80,19.428
+"DE","reserve (no harvest)",90,19.943
+"DE","reserve (no harvest)",100,20.428
+"FL","reserve (no harvest)",0,165.378
+"FL","reserve (no harvest)",10,190.846
+"FL","reserve (no harvest)",20,206.142
+"FL","reserve (no harvest)",30,209.354
+"FL","reserve (no harvest)",40,208.817
+"FL","reserve (no harvest)",50,205.457
+"FL","reserve (no harvest)",60,195.735
+"FL","reserve (no harvest)",70,179.231
+"FL","reserve (no harvest)",80,165.104
+"FL","reserve (no harvest)",90,155.142
+"FL","reserve (no harvest)",100,147.647
+"GA","reserve (no harvest)",0,266.527
+"GA","reserve (no harvest)",10,330.298
+"GA","reserve (no harvest)",20,380.944
+"GA","reserve (no harvest)",30,417.569
+"GA","reserve (no harvest)",40,440.833
+"GA","reserve (no harvest)",50,447.82
+"GA","reserve (no harvest)",60,434.739
+"GA","reserve (no harvest)",70,408.842
+"GA","reserve (no harvest)",80,375.455
+"GA","reserve (no harvest)",90,342.997
+"GA","reserve (no harvest)",100,315.71
+"IA","reserve (no harvest)",0,39.798
+"IA","reserve (no harvest)",10,43.031
+"IA","reserve (no harvest)",20,44.989
+"IA","reserve (no harvest)",30,45.544
+"IA","reserve (no harvest)",40,44.766
+"IA","reserve (no harvest)",50,43.046
+"IA","reserve (no harvest)",60,40.742
+"IA","reserve (no harvest)",70,37.97
+"IA","reserve (no harvest)",80,35.067
+"IA","reserve (no harvest)",90,32.184
+"IA","reserve (no harvest)",100,29.613
+"ID","reserve (no harvest)",0,299.187
+"ID","reserve (no harvest)",10,325.053
+"ID","reserve (no harvest)",20,347.651
+"ID","reserve (no harvest)",30,365.776
+"ID","reserve (no harvest)",40,378.389
+"ID","reserve (no harvest)",50,385.737
+"ID","reserve (no harvest)",60,388.764
+"ID","reserve (no harvest)",70,386.85
+"ID","reserve (no harvest)",80,381.993
+"ID","reserve (no harvest)",90,374.191
+"ID","reserve (no harvest)",100,363.294
+"IL","reserve (no harvest)",0,82.199
+"IL","reserve (no harvest)",10,88.727
+"IL","reserve (no harvest)",20,92.166
+"IL","reserve (no harvest)",30,92.066
+"IL","reserve (no harvest)",40,88.383
+"IL","reserve (no harvest)",50,84.078
+"IL","reserve (no harvest)",60,79.487
+"IL","reserve (no harvest)",70,74.97
+"IL","reserve (no harvest)",80,70.447
+"IL","reserve (no harvest)",90,66.286
+"IL","reserve (no harvest)",100,62.5
+"IN","reserve (no harvest)",0,110.811
+"IN","reserve (no harvest)",10,119.858
+"IN","reserve (no harvest)",20,126.615
+"IN","reserve (no harvest)",30,131.823
+"IN","reserve (no harvest)",40,134.489
+"IN","reserve (no harvest)",50,133.518
+"IN","reserve (no harvest)",60,129.119
+"IN","reserve (no harvest)",70,122.931
+"IN","reserve (no harvest)",80,116.092
+"IN","reserve (no harvest)",90,108.963
+"IN","reserve (no harvest)",100,102.105
+"KS","reserve (no harvest)",0,10.974
+"KS","reserve (no harvest)",10,11.519
+"KS","reserve (no harvest)",20,11.847
+"KS","reserve (no harvest)",30,12.059
+"KS","reserve (no harvest)",40,12.164
+"KS","reserve (no harvest)",50,12.159
+"KS","reserve (no harvest)",60,11.875
+"KS","reserve (no harvest)",70,11.079
+"KS","reserve (no harvest)",80,10.249
+"KS","reserve (no harvest)",90,9.306
+"KS","reserve (no harvest)",100,8.365
+"KY","reserve (no harvest)",0,265.042
+"KY","reserve (no harvest)",10,291.657
+"KY","reserve (no harvest)",20,307.777
+"KY","reserve (no harvest)",30,311.195
+"KY","reserve (no harvest)",40,303.402
+"KY","reserve (no harvest)",50,290.017
+"KY","reserve (no harvest)",60,274.477
+"KY","reserve (no harvest)",70,258.499
+"KY","reserve (no harvest)",80,243.231
+"KY","reserve (no harvest)",90,229.138
+"KY","reserve (no harvest)",100,216.219
+"LA","reserve (no harvest)",0,217.564
+"LA","reserve (no harvest)",10,262.873
+"LA","reserve (no harvest)",20,300.525
+"LA","reserve (no harvest)",30,329.71
+"LA","reserve (no harvest)",40,350.064
+"LA","reserve (no harvest)",50,361.096
+"LA","reserve (no harvest)",60,362.413
+"LA","reserve (no harvest)",70,356.406
+"LA","reserve (no harvest)",80,343.615
+"LA","reserve (no harvest)",90,322.28
+"LA","reserve (no harvest)",100,300.593
+"MA","reserve (no harvest)",0,52.864
+"MA","reserve (no harvest)",10,56.684
+"MA","reserve (no harvest)",20,59.436
+"MA","reserve (no harvest)",30,61.121
+"MA","reserve (no harvest)",40,62.118
+"MA","reserve (no harvest)",50,62.636
+"MA","reserve (no harvest)",60,62.834
+"MA","reserve (no harvest)",70,62.609
+"MA","reserve (no harvest)",80,62
+"MA","reserve (no harvest)",90,61.125
+"MA","reserve (no harvest)",100,59.935
+"MD","reserve (no harvest)",0,44.108
+"MD","reserve (no harvest)",10,47.109
+"MD","reserve (no harvest)",20,48.918
+"MD","reserve (no harvest)",30,49.837
+"MD","reserve (no harvest)",40,50.027
+"MD","reserve (no harvest)",50,49.239
+"MD","reserve (no harvest)",60,46.843
+"MD","reserve (no harvest)",70,42.784
+"MD","reserve (no harvest)",80,39.505
+"MD","reserve (no harvest)",90,36.773
+"MD","reserve (no harvest)",100,34.467
+"ME","reserve (no harvest)",0,271.884
+"ME","reserve (no harvest)",10,296.959
+"ME","reserve (no harvest)",20,314.829
+"ME","reserve (no harvest)",30,328.334
+"ME","reserve (no harvest)",40,338.579
+"ME","reserve (no harvest)",50,345.742
+"ME","reserve (no harvest)",60,350.234
+"ME","reserve (no harvest)",70,353.564
+"ME","reserve (no harvest)",80,355.681
+"ME","reserve (no harvest)",90,356.99
+"ME","reserve (no harvest)",100,357.349
+"MI","reserve (no harvest)",0,327.261
+"MI","reserve (no harvest)",10,357.964
+"MI","reserve (no harvest)",20,381.343
+"MI","reserve (no harvest)",30,397.485
+"MI","reserve (no harvest)",40,407.106
+"MI","reserve (no harvest)",50,411.073
+"MI","reserve (no harvest)",60,410.778
+"MI","reserve (no harvest)",70,406.611
+"MI","reserve (no harvest)",80,398.229
+"MI","reserve (no harvest)",90,387.337
+"MI","reserve (no harvest)",100,374.265
+"MN","reserve (no harvest)",0,220.244
+"MN","reserve (no harvest)",10,242.769
+"MN","reserve (no harvest)",20,261.188
+"MN","reserve (no harvest)",30,273.649
+"MN","reserve (no harvest)",40,281.57
+"MN","reserve (no harvest)",50,285.639
+"MN","reserve (no harvest)",60,285.819
+"MN","reserve (no harvest)",70,283.242
+"MN","reserve (no harvest)",80,278.711
+"MN","reserve (no harvest)",90,272.455
+"MN","reserve (no harvest)",100,264.319
+"MO","reserve (no harvest)",0,350.802
+"MO","reserve (no harvest)",10,372.634
+"MO","reserve (no harvest)",20,388.818
+"MO","reserve (no harvest)",30,399.751
+"MO","reserve (no harvest)",40,406.066
+"MO","reserve (no harvest)",50,408.289
+"MO","reserve (no harvest)",60,407.126
+"MO","reserve (no harvest)",70,403.302
+"MO","reserve (no harvest)",80,398.003
+"MO","reserve (no harvest)",90,391.724
+"MO","reserve (no harvest)",100,384.83
+"MS","reserve (no harvest)",0,285.933
+"MS","reserve (no harvest)",10,360.553
+"MS","reserve (no harvest)",20,417.615
+"MS","reserve (no harvest)",30,459.115
+"MS","reserve (no harvest)",40,488.564
+"MS","reserve (no harvest)",50,505.241
+"MS","reserve (no harvest)",60,509.029
+"MS","reserve (no harvest)",70,501.851
+"MS","reserve (no harvest)",80,487.783
+"MS","reserve (no harvest)",90,471.184
+"MS","reserve (no harvest)",100,454.431
+"MT","reserve (no harvest)",0,343.303
+"MT","reserve (no harvest)",10,363.158
+"MT","reserve (no harvest)",20,379.996
+"MT","reserve (no harvest)",30,393.69
+"MT","reserve (no harvest)",40,404.516
+"MT","reserve (no harvest)",50,412.57
+"MT","reserve (no harvest)",60,417.684
+"MT","reserve (no harvest)",70,420.11
+"MT","reserve (no harvest)",80,420.397
+"MT","reserve (no harvest)",90,418.653
+"MT","reserve (no harvest)",100,415.494
+"NC","reserve (no harvest)",0,288.446
+"NC","reserve (no harvest)",10,342.953
+"NC","reserve (no harvest)",20,388.272
+"NC","reserve (no harvest)",30,422.949
+"NC","reserve (no harvest)",40,448.227
+"NC","reserve (no harvest)",50,465.317
+"NC","reserve (no harvest)",60,472.736
+"NC","reserve (no harvest)",70,471.975
+"NC","reserve (no harvest)",80,464.207
+"NC","reserve (no harvest)",90,449.728
+"NC","reserve (no harvest)",100,429.141
+"ND","reserve (no harvest)",0,5.624
+"ND","reserve (no harvest)",10,6.204
+"ND","reserve (no harvest)",20,6.721
+"ND","reserve (no harvest)",30,7.182
+"ND","reserve (no harvest)",40,7.589
+"ND","reserve (no harvest)",50,7.921
+"ND","reserve (no harvest)",60,8.115
+"ND","reserve (no harvest)",70,8.118
+"ND","reserve (no harvest)",80,8.001
+"ND","reserve (no harvest)",90,7.851
+"ND","reserve (no harvest)",100,7.682
+"NE","reserve (no harvest)",0,10.24
+"NE","reserve (no harvest)",10,10.755
+"NE","reserve (no harvest)",20,10.968
+"NE","reserve (no harvest)",30,11.013
+"NE","reserve (no harvest)",40,10.738
+"NE","reserve (no harvest)",50,10.533
+"NE","reserve (no harvest)",60,10.38
+"NE","reserve (no harvest)",70,10.079
+"NE","reserve (no harvest)",80,9.87
+"NE","reserve (no harvest)",90,9.713
+"NE","reserve (no harvest)",100,9.605
+"NH","reserve (no harvest)",0,111.713
+"NH","reserve (no harvest)",10,121.196
+"NH","reserve (no harvest)",20,128.516
+"NH","reserve (no harvest)",30,133.696
+"NH","reserve (no harvest)",40,136.201
+"NH","reserve (no harvest)",50,136.511
+"NH","reserve (no harvest)",60,134.312
+"NH","reserve (no harvest)",70,130.593
+"NH","reserve (no harvest)",80,125.931
+"NH","reserve (no harvest)",90,120.797
+"NH","reserve (no harvest)",100,115.656
+"NJ","reserve (no harvest)",0,41.424
+"NJ","reserve (no harvest)",10,44.109
+"NJ","reserve (no harvest)",20,45.957
+"NJ","reserve (no harvest)",30,46.738
+"NJ","reserve (no harvest)",40,47.177
+"NJ","reserve (no harvest)",50,46.503
+"NJ","reserve (no harvest)",60,45.623
+"NJ","reserve (no harvest)",70,44.444
+"NJ","reserve (no harvest)",80,42.825
+"NJ","reserve (no harvest)",90,40.938
+"NJ","reserve (no harvest)",100,38.985
+"NM","reserve (no harvest)",0,117.08
+"NM","reserve (no harvest)",10,123.295
+"NM","reserve (no harvest)",20,128.504
+"NM","reserve (no harvest)",30,132.457
+"NM","reserve (no harvest)",40,135.734
+"NM","reserve (no harvest)",50,138.14
+"NM","reserve (no harvest)",60,139.707
+"NM","reserve (no harvest)",70,140.603
+"NM","reserve (no harvest)",80,140.614
+"NM","reserve (no harvest)",90,139.646
+"NM","reserve (no harvest)",100,138.387
+"NV","reserve (no harvest)",0,35.75
+"NV","reserve (no harvest)",10,37.436
+"NV","reserve (no harvest)",20,38.951
+"NV","reserve (no harvest)",30,40.284
+"NV","reserve (no harvest)",40,41.437
+"NV","reserve (no harvest)",50,42.4
+"NV","reserve (no harvest)",60,43.095
+"NV","reserve (no harvest)",70,43.6
+"NV","reserve (no harvest)",80,43.949
+"NV","reserve (no harvest)",90,44.2
+"NV","reserve (no harvest)",100,44.372
+"NY","reserve (no harvest)",0,340.826
+"NY","reserve (no harvest)",10,369.905
+"NY","reserve (no harvest)",20,391.753
+"NY","reserve (no harvest)",30,406.459
+"NY","reserve (no harvest)",40,416.313
+"NY","reserve (no harvest)",50,422.039
+"NY","reserve (no harvest)",60,424.089
+"NY","reserve (no harvest)",70,423.317
+"NY","reserve (no harvest)",80,420.861
+"NY","reserve (no harvest)",90,417.144
+"NY","reserve (no harvest)",100,412.811
+"OH","reserve (no harvest)",0,159.121
+"OH","reserve (no harvest)",10,181.476
+"OH","reserve (no harvest)",20,201.14
+"OH","reserve (no harvest)",30,216.79
+"OH","reserve (no harvest)",40,229.55
+"OH","reserve (no harvest)",50,237.085
+"OH","reserve (no harvest)",60,241.749
+"OH","reserve (no harvest)",70,241.46
+"OH","reserve (no harvest)",80,233.403
+"OH","reserve (no harvest)",90,221.312
+"OH","reserve (no harvest)",100,211.032
+"OK","reserve (no harvest)",0,108.113
+"OK","reserve (no harvest)",10,121.099
+"OK","reserve (no harvest)",20,129.739
+"OK","reserve (no harvest)",30,132.978
+"OK","reserve (no harvest)",40,132.051
+"OK","reserve (no harvest)",50,128.81
+"OK","reserve (no harvest)",60,124.971
+"OK","reserve (no harvest)",70,120.463
+"OK","reserve (no harvest)",80,115.941
+"OK","reserve (no harvest)",90,111.385
+"OK","reserve (no harvest)",100,106.973
+"OR","reserve (no harvest)",0,836.686
+"OR","reserve (no harvest)",10,888.59
+"OR","reserve (no harvest)",20,932.322
+"OR","reserve (no harvest)",30,968.466
+"OR","reserve (no harvest)",40,998.36
+"OR","reserve (no harvest)",50,1022.711
+"OR","reserve (no harvest)",60,1042.155
+"OR","reserve (no harvest)",70,1057.785
+"OR","reserve (no harvest)",80,1069.731
+"OR","reserve (no harvest)",90,1078.526
+"OR","reserve (no harvest)",100,1084.325
+"PA","reserve (no harvest)",0,432.458
+"PA","reserve (no harvest)",10,464.806
+"PA","reserve (no harvest)",20,488.092
+"PA","reserve (no harvest)",30,501.394
+"PA","reserve (no harvest)",40,507.706
+"PA","reserve (no harvest)",50,504.755
+"PA","reserve (no harvest)",60,497.257
+"PA","reserve (no harvest)",70,486.333
+"PA","reserve (no harvest)",80,473.869
+"PA","reserve (no harvest)",90,460.391
+"PA","reserve (no harvest)",100,448.891
+"RI","reserve (no harvest)",0,12.255
+"RI","reserve (no harvest)",10,13.372
+"RI","reserve (no harvest)",20,13.796
+"RI","reserve (no harvest)",30,13.835
+"RI","reserve (no harvest)",40,13.014
+"RI","reserve (no harvest)",50,11.782
+"RI","reserve (no harvest)",60,10.56
+"RI","reserve (no harvest)",70,9.163
+"RI","reserve (no harvest)",80,7.902
+"RI","reserve (no harvest)",90,6.782
+"RI","reserve (no harvest)",100,5.798
+"SC","reserve (no harvest)",0,183.401
+"SC","reserve (no harvest)",10,213.452
+"SC","reserve (no harvest)",20,228.515
+"SC","reserve (no harvest)",30,233.494
+"SC","reserve (no harvest)",40,232.441
+"SC","reserve (no harvest)",50,226.594
+"SC","reserve (no harvest)",60,216.293
+"SC","reserve (no harvest)",70,205.211
+"SC","reserve (no harvest)",80,195.119
+"SC","reserve (no harvest)",90,186.442
+"SC","reserve (no harvest)",100,178.942
+"SD","reserve (no harvest)",0,13.156
+"SD","reserve (no harvest)",10,13.873
+"SD","reserve (no harvest)",20,14.388
+"SD","reserve (no harvest)",30,14.779
+"SD","reserve (no harvest)",40,15.06
+"SD","reserve (no harvest)",50,15.294
+"SD","reserve (no harvest)",60,15.472
+"SD","reserve (no harvest)",70,15.575
+"SD","reserve (no harvest)",80,15.643
+"SD","reserve (no harvest)",90,15.695
+"SD","reserve (no harvest)",100,15.752
+"TN","reserve (no harvest)",0,273.878
+"TN","reserve (no harvest)",10,307.931
+"TN","reserve (no harvest)",20,335.935
+"TN","reserve (no harvest)",30,358.685
+"TN","reserve (no harvest)",40,375.711
+"TN","reserve (no harvest)",50,384.575
+"TN","reserve (no harvest)",60,382.323
+"TN","reserve (no harvest)",70,363.899
+"TN","reserve (no harvest)",80,324.947
+"TN","reserve (no harvest)",90,277.321
+"TN","reserve (no harvest)",100,239.496
+"TX","reserve (no harvest)",0,247.43
+"TX","reserve (no harvest)",10,290.138
+"TX","reserve (no harvest)",20,323.328
+"TX","reserve (no harvest)",30,346.906
+"TX","reserve (no harvest)",40,360.968
+"TX","reserve (no harvest)",50,365.449
+"TX","reserve (no harvest)",60,361.209
+"TX","reserve (no harvest)",70,347.127
+"TX","reserve (no harvest)",80,328.212
+"TX","reserve (no harvest)",90,307.348
+"TX","reserve (no harvest)",100,287.083
+"UT","reserve (no harvest)",0,89.586
+"UT","reserve (no harvest)",10,94.465
+"UT","reserve (no harvest)",20,98.629
+"UT","reserve (no harvest)",30,101.941
+"UT","reserve (no harvest)",40,104.317
+"UT","reserve (no harvest)",50,105.723
+"UT","reserve (no harvest)",60,106.436
+"UT","reserve (no harvest)",70,106.454
+"UT","reserve (no harvest)",80,106.043
+"UT","reserve (no harvest)",90,105.199
+"UT","reserve (no harvest)",100,104.009
+"VA","reserve (no harvest)",0,305.074
+"VA","reserve (no harvest)",10,343.337
+"VA","reserve (no harvest)",20,374.397
+"VA","reserve (no harvest)",30,398.296
+"VA","reserve (no harvest)",40,414.928
+"VA","reserve (no harvest)",50,425.366
+"VA","reserve (no harvest)",60,429.711
+"VA","reserve (no harvest)",70,429.586
+"VA","reserve (no harvest)",80,424.805
+"VA","reserve (no harvest)",90,415.907
+"VA","reserve (no harvest)",100,404.5
+"VT","reserve (no harvest)",0,124.82
+"VT","reserve (no harvest)",10,138.328
+"VT","reserve (no harvest)",20,149.496
+"VT","reserve (no harvest)",30,156.601
+"VT","reserve (no harvest)",40,159.171
+"VT","reserve (no harvest)",50,158.781
+"VT","reserve (no harvest)",60,155.567
+"VT","reserve (no harvest)",70,150.47
+"VT","reserve (no harvest)",80,143.889
+"VT","reserve (no harvest)",90,136.711
+"VT","reserve (no harvest)",100,129.658
+"WA","reserve (no harvest)",0,631.334
+"WA","reserve (no harvest)",10,679.045
+"WA","reserve (no harvest)",20,718.61
+"WA","reserve (no harvest)",30,748.738
+"WA","reserve (no harvest)",40,770.388
+"WA","reserve (no harvest)",50,784.168
+"WA","reserve (no harvest)",60,789.677
+"WA","reserve (no harvest)",70,789.985
+"WA","reserve (no harvest)",80,788.183
+"WA","reserve (no harvest)",90,785.689
+"WA","reserve (no harvest)",100,782.814
+"WI","reserve (no harvest)",0,322.69
+"WI","reserve (no harvest)",10,353.549
+"WI","reserve (no harvest)",20,377.239
+"WI","reserve (no harvest)",30,391.575
+"WI","reserve (no harvest)",40,398.292
+"WI","reserve (no harvest)",50,398.323
+"WI","reserve (no harvest)",60,390.926
+"WI","reserve (no harvest)",70,379.281
+"WI","reserve (no harvest)",80,364.888
+"WI","reserve (no harvest)",90,348.842
+"WI","reserve (no harvest)",100,332.121
+"WV","reserve (no harvest)",0,236.073
+"WV","reserve (no harvest)",10,249.963
+"WV","reserve (no harvest)",20,259.72
+"WV","reserve (no harvest)",30,265.576
+"WV","reserve (no harvest)",40,267.282
+"WV","reserve (no harvest)",50,264.406
+"WV","reserve (no harvest)",60,258.506
+"WV","reserve (no harvest)",70,250.567
+"WV","reserve (no harvest)",80,241.131
+"WV","reserve (no harvest)",90,229.631
+"WV","reserve (no harvest)",100,216.159
+"WY","reserve (no harvest)",0,125.612
+"WY","reserve (no harvest)",10,133.644
+"WY","reserve (no harvest)",20,140.481
+"WY","reserve (no harvest)",30,146.237
+"WY","reserve (no harvest)",40,151.116
+"WY","reserve (no harvest)",50,155.202
+"WY","reserve (no harvest)",60,158.623
+"WY","reserve (no harvest)",70,161.467
+"WY","reserve (no harvest)",80,163.751
+"WY","reserve (no harvest)",90,165.45
+"WY","reserve (no harvest)",100,166.493
+"AL","managed (harvest)",0,353.408
+"AL","managed (harvest)",10,394.47
+"AL","managed (harvest)",20,418.5
+"AL","managed (harvest)",30,419.324
+"AL","managed (harvest)",40,407.923
+"AL","managed (harvest)",50,398.078
+"AL","managed (harvest)",60,377.221
+"AL","managed (harvest)",70,345.109
+"AL","managed (harvest)",80,314.877
+"AL","managed (harvest)",90,291.584
+"AL","managed (harvest)",100,268.046
+"AR","managed (harvest)",0,333.03
+"AR","managed (harvest)",10,348.151
+"AR","managed (harvest)",20,353.322
+"AR","managed (harvest)",30,343.993
+"AR","managed (harvest)",40,318.54
+"AR","managed (harvest)",50,297.587
+"AR","managed (harvest)",60,272.211
+"AR","managed (harvest)",70,246.064
+"AR","managed (harvest)",80,219.386
+"AR","managed (harvest)",90,201.54
+"AR","managed (harvest)",100,191.446
+"AZ","managed (harvest)",0,100.782
+"AZ","managed (harvest)",10,102.021
+"AZ","managed (harvest)",20,101.657
+"AZ","managed (harvest)",30,100.061
+"AZ","managed (harvest)",40,97.683
+"AZ","managed (harvest)",50,95.022
+"AZ","managed (harvest)",60,91.751
+"AZ","managed (harvest)",70,88.123
+"AZ","managed (harvest)",80,84.497
+"AZ","managed (harvest)",90,80.61
+"AZ","managed (harvest)",100,76.64
+"CA","managed (harvest)",0,525.415
+"CA","managed (harvest)",10,527.085
+"CA","managed (harvest)",20,525.919
+"CA","managed (harvest)",30,527.256
+"CA","managed (harvest)",40,520.908
+"CA","managed (harvest)",50,509.65
+"CA","managed (harvest)",60,498.346
+"CA","managed (harvest)",70,489.1
+"CA","managed (harvest)",80,471.525
+"CA","managed (harvest)",90,455.085
+"CA","managed (harvest)",100,444.362
+"CO","managed (harvest)",0,241.696
+"CO","managed (harvest)",10,244.062
+"CO","managed (harvest)",20,244.178
+"CO","managed (harvest)",30,242.924
+"CO","managed (harvest)",40,239.233
+"CO","managed (harvest)",50,231.617
+"CO","managed (harvest)",60,222.567
+"CO","managed (harvest)",70,211.394
+"CO","managed (harvest)",80,199.541
+"CO","managed (harvest)",90,187.685
+"CO","managed (harvest)",100,176.621
+"CT","managed (harvest)",0,27.85
+"CT","managed (harvest)",10,27.655
+"CT","managed (harvest)",20,24.441
+"CT","managed (harvest)",30,23.064
+"CT","managed (harvest)",40,19.922
+"CT","managed (harvest)",50,18.251
+"CT","managed (harvest)",60,15.64
+"CT","managed (harvest)",70,14.232
+"CT","managed (harvest)",80,12.172
+"CT","managed (harvest)",90,11.206
+"CT","managed (harvest)",100,9.782
+"DE","managed (harvest)",0,13.337
+"DE","managed (harvest)",10,12.607
+"DE","managed (harvest)",20,11.501
+"DE","managed (harvest)",30,11.145
+"DE","managed (harvest)",40,11.32
+"DE","managed (harvest)",50,11.44
+"DE","managed (harvest)",60,10.216
+"DE","managed (harvest)",70,9.797
+"DE","managed (harvest)",80,9.997
+"DE","managed (harvest)",90,10.129
+"DE","managed (harvest)",100,8.91
+"FL","managed (harvest)",0,165.378
+"FL","managed (harvest)",10,177.178
+"FL","managed (harvest)",20,180.506
+"FL","managed (harvest)",30,171.41
+"FL","managed (harvest)",40,162.035
+"FL","managed (harvest)",50,152.588
+"FL","managed (harvest)",60,140.239
+"FL","managed (harvest)",70,123.359
+"FL","managed (harvest)",80,111.178
+"FL","managed (harvest)",90,105.037
+"FL","managed (harvest)",100,101.416
+"GA","managed (harvest)",0,266.527
+"GA","managed (harvest)",10,305.126
+"GA","managed (harvest)",20,321.408
+"GA","managed (harvest)",30,322.774
+"GA","managed (harvest)",40,317.798
+"GA","managed (harvest)",50,309.929
+"GA","managed (harvest)",60,280.288
+"GA","managed (harvest)",70,241.236
+"GA","managed (harvest)",80,205.669
+"GA","managed (harvest)",90,187.09
+"GA","managed (harvest)",100,167.678
+"IA","managed (harvest)",0,39.798
+"IA","managed (harvest)",10,38.083
+"IA","managed (harvest)",20,36.801
+"IA","managed (harvest)",30,32.402
+"IA","managed (harvest)",40,29.316
+"IA","managed (harvest)",50,25.934
+"IA","managed (harvest)",60,22.268
+"IA","managed (harvest)",70,17.679
+"IA","managed (harvest)",80,15.488
+"IA","managed (harvest)",90,13.879
+"IA","managed (harvest)",100,12.421
+"ID","managed (harvest)",0,299.187
+"ID","managed (harvest)",10,313.454
+"ID","managed (harvest)",20,317.568
+"ID","managed (harvest)",30,321.566
+"ID","managed (harvest)",40,317.731
+"ID","managed (harvest)",50,309.955
+"ID","managed (harvest)",60,298.413
+"ID","managed (harvest)",70,283.397
+"ID","managed (harvest)",80,263.127
+"ID","managed (harvest)",90,245.233
+"ID","managed (harvest)",100,226.346
+"IL","managed (harvest)",0,82.199
+"IL","managed (harvest)",10,83.234
+"IL","managed (harvest)",20,77.387
+"IL","managed (harvest)",30,71.839
+"IL","managed (harvest)",40,62.62
+"IL","managed (harvest)",50,54.063
+"IL","managed (harvest)",60,45.064
+"IL","managed (harvest)",70,38.097
+"IL","managed (harvest)",80,31.95
+"IL","managed (harvest)",90,27.124
+"IL","managed (harvest)",100,23.803
+"IN","managed (harvest)",0,110.811
+"IN","managed (harvest)",10,109.368
+"IN","managed (harvest)",20,104.146
+"IN","managed (harvest)",30,100.731
+"IN","managed (harvest)",40,93.354
+"IN","managed (harvest)",50,86.247
+"IN","managed (harvest)",60,74.243
+"IN","managed (harvest)",70,64.14
+"IN","managed (harvest)",80,53.194
+"IN","managed (harvest)",90,45.281
+"IN","managed (harvest)",100,38.674
+"KS","managed (harvest)",0,10.974
+"KS","managed (harvest)",10,9.931
+"KS","managed (harvest)",20,9.271
+"KS","managed (harvest)",30,8.372
+"KS","managed (harvest)",40,7.41
+"KS","managed (harvest)",50,6.657
+"KS","managed (harvest)",60,5.798
+"KS","managed (harvest)",70,4.483
+"KS","managed (harvest)",80,3.306
+"KS","managed (harvest)",90,2.554
+"KS","managed (harvest)",100,2.237
+"KY","managed (harvest)",0,265.042
+"KY","managed (harvest)",10,259.563
+"KY","managed (harvest)",20,250.737
+"KY","managed (harvest)",30,232.571
+"KY","managed (harvest)",40,201.163
+"KY","managed (harvest)",50,176.115
+"KY","managed (harvest)",60,150.321
+"KY","managed (harvest)",70,127.395
+"KY","managed (harvest)",80,104.215
+"KY","managed (harvest)",90,92.769
+"KY","managed (harvest)",100,82.942
+"LA","managed (harvest)",0,217.564
+"LA","managed (harvest)",10,230.08
+"LA","managed (harvest)",20,245.796
+"LA","managed (harvest)",30,251.706
+"LA","managed (harvest)",40,248.39
+"LA","managed (harvest)",50,246.688
+"LA","managed (harvest)",60,239.061
+"LA","managed (harvest)",70,224.355
+"LA","managed (harvest)",80,203.83
+"LA","managed (harvest)",90,188.547
+"LA","managed (harvest)",100,176.23
+"MA","managed (harvest)",0,52.864
+"MA","managed (harvest)",10,52.187
+"MA","managed (harvest)",20,48.537
+"MA","managed (harvest)",30,46.653
+"MA","managed (harvest)",40,42.449
+"MA","managed (harvest)",50,39.7
+"MA","managed (harvest)",60,35.939
+"MA","managed (harvest)",70,33.402
+"MA","managed (harvest)",80,30.415
+"MA","managed (harvest)",90,27.421
+"MA","managed (harvest)",100,24.322
+"MD","managed (harvest)",0,44.108
+"MD","managed (harvest)",10,42.559
+"MD","managed (harvest)",20,39.709
+"MD","managed (harvest)",30,38.874
+"MD","managed (harvest)",40,34.577
+"MD","managed (harvest)",50,31.915
+"MD","managed (harvest)",60,27.59
+"MD","managed (harvest)",70,25.195
+"MD","managed (harvest)",80,22.413
+"MD","managed (harvest)",90,20.342
+"MD","managed (harvest)",100,18.775
+"ME","managed (harvest)",0,271.884
+"ME","managed (harvest)",10,268.416
+"ME","managed (harvest)",20,257.508
+"ME","managed (harvest)",30,249.006
+"ME","managed (harvest)",40,238.621
+"ME","managed (harvest)",50,225.433
+"ME","managed (harvest)",60,211.262
+"ME","managed (harvest)",70,200.689
+"ME","managed (harvest)",80,188.985
+"ME","managed (harvest)",90,177.046
+"ME","managed (harvest)",100,165.31
+"MI","managed (harvest)",0,327.261
+"MI","managed (harvest)",10,329.284
+"MI","managed (harvest)",20,322.702
+"MI","managed (harvest)",30,314.6
+"MI","managed (harvest)",40,299.498
+"MI","managed (harvest)",50,283.987
+"MI","managed (harvest)",60,263.436
+"MI","managed (harvest)",70,243.849
+"MI","managed (harvest)",80,222.307
+"MI","managed (harvest)",90,201.546
+"MI","managed (harvest)",100,182.09
+"MN","managed (harvest)",0,220.244
+"MN","managed (harvest)",10,227.069
+"MN","managed (harvest)",20,222.507
+"MN","managed (harvest)",30,217.009
+"MN","managed (harvest)",40,208.056
+"MN","managed (harvest)",50,199.199
+"MN","managed (harvest)",60,182.165
+"MN","managed (harvest)",70,168.79
+"MN","managed (harvest)",80,155.705
+"MN","managed (harvest)",90,145.701
+"MN","managed (harvest)",100,132.033
+"MO","managed (harvest)",0,350.802
+"MO","managed (harvest)",10,339.955
+"MO","managed (harvest)",20,325.267
+"MO","managed (harvest)",30,306.593
+"MO","managed (harvest)",40,286.454
+"MO","managed (harvest)",50,264.56
+"MO","managed (harvest)",60,242.567
+"MO","managed (harvest)",70,222.026
+"MO","managed (harvest)",80,199.296
+"MO","managed (harvest)",90,180.922
+"MO","managed (harvest)",100,164.374
+"MS","managed (harvest)",0,285.933
+"MS","managed (harvest)",10,331.702
+"MS","managed (harvest)",20,358.307
+"MS","managed (harvest)",30,366.877
+"MS","managed (harvest)",40,367.225
+"MS","managed (harvest)",50,366.673
+"MS","managed (harvest)",60,346.605
+"MS","managed (harvest)",70,318.494
+"MS","managed (harvest)",80,289.024
+"MS","managed (harvest)",90,267.612
+"MS","managed (harvest)",100,245.673
+"MT","managed (harvest)",0,343.303
+"MT","managed (harvest)",10,348.532
+"MT","managed (harvest)",20,348.724
+"MT","managed (harvest)",30,346.178
+"MT","managed (harvest)",40,342.204
+"MT","managed (harvest)",50,334.938
+"MT","managed (harvest)",60,324.782
+"MT","managed (harvest)",70,313.882
+"MT","managed (harvest)",80,300.745
+"MT","managed (harvest)",90,285.917
+"MT","managed (harvest)",100,271.846
+"NC","managed (harvest)",0,288.446
+"NC","managed (harvest)",10,312.954
+"NC","managed (harvest)",20,330.53
+"NC","managed (harvest)",30,331.421
+"NC","managed (harvest)",40,324.64
+"NC","managed (harvest)",50,315.64
+"NC","managed (harvest)",60,302.085
+"NC","managed (harvest)",70,278.563
+"NC","managed (harvest)",80,248.762
+"NC","managed (harvest)",90,223.977
+"NC","managed (harvest)",100,202.919
+"ND","managed (harvest)",0,5.624
+"ND","managed (harvest)",10,5.768
+"ND","managed (harvest)",20,5.838
+"ND","managed (harvest)",30,5.807
+"ND","managed (harvest)",40,5.888
+"ND","managed (harvest)",50,5.531
+"ND","managed (harvest)",60,5.529
+"ND","managed (harvest)",70,5.076
+"ND","managed (harvest)",80,4.56
+"ND","managed (harvest)",90,4.088
+"ND","managed (harvest)",100,3.733
+"NE","managed (harvest)",0,10.24
+"NE","managed (harvest)",10,9.456
+"NE","managed (harvest)",20,8.652
+"NE","managed (harvest)",30,7.59
+"NE","managed (harvest)",40,6.624
+"NE","managed (harvest)",50,5.577
+"NE","managed (harvest)",60,5.109
+"NE","managed (harvest)",70,4.243
+"NE","managed (harvest)",80,3.852
+"NE","managed (harvest)",90,3.347
+"NE","managed (harvest)",100,3.205
+"NH","managed (harvest)",0,111.713
+"NH","managed (harvest)",10,112.152
+"NH","managed (harvest)",20,109.037
+"NH","managed (harvest)",30,106.296
+"NH","managed (harvest)",40,99.497
+"NH","managed (harvest)",50,91.873
+"NH","managed (harvest)",60,83.504
+"NH","managed (harvest)",70,74.227
+"NH","managed (harvest)",80,65.032
+"NH","managed (harvest)",90,56.9
+"NH","managed (harvest)",100,49.831
+"NJ","managed (harvest)",0,41.424
+"NJ","managed (harvest)",10,41.274
+"NJ","managed (harvest)",20,39.45
+"NJ","managed (harvest)",30,37.237
+"NJ","managed (harvest)",40,35.316
+"NJ","managed (harvest)",50,32.647
+"NJ","managed (harvest)",60,29.513
+"NJ","managed (harvest)",70,26.82
+"NJ","managed (harvest)",80,23.468
+"NJ","managed (harvest)",90,21.174
+"NJ","managed (harvest)",100,19.186
+"NM","managed (harvest)",0,117.08
+"NM","managed (harvest)",10,116.127
+"NM","managed (harvest)",20,113.653
+"NM","managed (harvest)",30,111.671
+"NM","managed (harvest)",40,108.401
+"NM","managed (harvest)",50,105.117
+"NM","managed (harvest)",60,102.069
+"NM","managed (harvest)",70,98.011
+"NM","managed (harvest)",80,92.941
+"NM","managed (harvest)",90,87.292
+"NM","managed (harvest)",100,82.872
+"NV","managed (harvest)",0,35.75
+"NV","managed (harvest)",10,36.46
+"NV","managed (harvest)",20,36.389
+"NV","managed (harvest)",30,36.505
+"NV","managed (harvest)",40,36.409
+"NV","managed (harvest)",50,35.63
+"NV","managed (harvest)",60,35.039
+"NV","managed (harvest)",70,34.194
+"NV","managed (harvest)",80,32.909
+"NV","managed (harvest)",90,31.876
+"NV","managed (harvest)",100,30.752
+"NY","managed (harvest)",0,340.826
+"NY","managed (harvest)",10,332.199
+"NY","managed (harvest)",20,323.334
+"NY","managed (harvest)",30,312.524
+"NY","managed (harvest)",40,298.593
+"NY","managed (harvest)",50,283.476
+"NY","managed (harvest)",60,264.598
+"NY","managed (harvest)",70,247.355
+"NY","managed (harvest)",80,228.045
+"NY","managed (harvest)",90,213.312
+"NY","managed (harvest)",100,197.862
+"OH","managed (harvest)",0,159.121
+"OH","managed (harvest)",10,161.361
+"OH","managed (harvest)",20,167.349
+"OH","managed (harvest)",30,165.842
+"OH","managed (harvest)",40,165.115
+"OH","managed (harvest)",50,155.19
+"OH","managed (harvest)",60,150.571
+"OH","managed (harvest)",70,138.083
+"OH","managed (harvest)",80,122.967
+"OH","managed (harvest)",90,105.836
+"OH","managed (harvest)",100,95.007
+"OK","managed (harvest)",0,108.113
+"OK","managed (harvest)",10,107.366
+"OK","managed (harvest)",20,105.868
+"OK","managed (harvest)",30,98.802
+"OK","managed (harvest)",40,90.155
+"OK","managed (harvest)",50,80.267
+"OK","managed (harvest)",60,71.891
+"OK","managed (harvest)",70,64.257
+"OK","managed (harvest)",80,56.98
+"OK","managed (harvest)",90,51.438
+"OK","managed (harvest)",100,47.029
+"OR","managed (harvest)",0,836.686
+"OR","managed (harvest)",10,858.246
+"OR","managed (harvest)",20,859.637
+"OR","managed (harvest)",30,866.139
+"OR","managed (harvest)",40,854.019
+"OR","managed (harvest)",50,849.954
+"OR","managed (harvest)",60,827.778
+"OR","managed (harvest)",70,813.566
+"OR","managed (harvest)",80,787.212
+"OR","managed (harvest)",90,762.434
+"OR","managed (harvest)",100,736.919
+"PA","managed (harvest)",0,432.458
+"PA","managed (harvest)",10,419.628
+"PA","managed (harvest)",20,399.899
+"PA","managed (harvest)",30,380.475
+"PA","managed (harvest)",40,353.353
+"PA","managed (harvest)",50,326.849
+"PA","managed (harvest)",60,290.767
+"PA","managed (harvest)",70,262.19
+"PA","managed (harvest)",80,234.655
+"PA","managed (harvest)",90,213.235
+"PA","managed (harvest)",100,193.311
+"RI","managed (harvest)",0,12.255
+"RI","managed (harvest)",10,12.754
+"RI","managed (harvest)",20,11.278
+"RI","managed (harvest)",30,10.351
+"RI","managed (harvest)",40,8.364
+"RI","managed (harvest)",50,6.139
+"RI","managed (harvest)",60,4.345
+"RI","managed (harvest)",70,2.564
+"RI","managed (harvest)",80,1.829
+"RI","managed (harvest)",90,1.343
+"RI","managed (harvest)",100,1.181
+"SC","managed (harvest)",0,183.401
+"SC","managed (harvest)",10,196.268
+"SC","managed (harvest)",20,194.113
+"SC","managed (harvest)",30,183.314
+"SC","managed (harvest)",40,165.941
+"SC","managed (harvest)",50,158.021
+"SC","managed (harvest)",60,145.696
+"SC","managed (harvest)",70,131.405
+"SC","managed (harvest)",80,117.966
+"SC","managed (harvest)",90,115.907
+"SC","managed (harvest)",100,110.646
+"SD","managed (harvest)",0,13.156
+"SD","managed (harvest)",10,13.207
+"SD","managed (harvest)",20,13.147
+"SD","managed (harvest)",30,12.899
+"SD","managed (harvest)",40,12.645
+"SD","managed (harvest)",50,12.249
+"SD","managed (harvest)",60,11.85
+"SD","managed (harvest)",70,11.459
+"SD","managed (harvest)",80,11.127
+"SD","managed (harvest)",90,10.6
+"SD","managed (harvest)",100,10.317
+"TN","managed (harvest)",0,273.878
+"TN","managed (harvest)",10,274.862
+"TN","managed (harvest)",20,276.299
+"TN","managed (harvest)",30,275.009
+"TN","managed (harvest)",40,266.23
+"TN","managed (harvest)",50,250.067
+"TN","managed (harvest)",60,231.018
+"TN","managed (harvest)",70,206.15
+"TN","managed (harvest)",80,169.318
+"TN","managed (harvest)",90,141.193
+"TN","managed (harvest)",100,125.325
+"TX","managed (harvest)",0,247.43
+"TX","managed (harvest)",10,262.865
+"TX","managed (harvest)",20,268.567
+"TX","managed (harvest)",30,269.277
+"TX","managed (harvest)",40,252.639
+"TX","managed (harvest)",50,245.825
+"TX","managed (harvest)",60,224.51
+"TX","managed (harvest)",70,205.937
+"TX","managed (harvest)",80,177.786
+"TX","managed (harvest)",90,165.239
+"TX","managed (harvest)",100,149.068
+"UT","managed (harvest)",0,89.586
+"UT","managed (harvest)",10,90.103
+"UT","managed (harvest)",20,89.462
+"UT","managed (harvest)",30,88.398
+"UT","managed (harvest)",40,86.789
+"UT","managed (harvest)",50,84.365
+"UT","managed (harvest)",60,81.009
+"UT","managed (harvest)",70,77.423
+"UT","managed (harvest)",80,73.952
+"UT","managed (harvest)",90,69.67
+"UT","managed (harvest)",100,65.528
+"VA","managed (harvest)",0,305.074
+"VA","managed (harvest)",10,316.018
+"VA","managed (harvest)",20,315.111
+"VA","managed (harvest)",30,310.466
+"VA","managed (harvest)",40,293.812
+"VA","managed (harvest)",50,285.277
+"VA","managed (harvest)",60,266.07
+"VA","managed (harvest)",70,246.551
+"VA","managed (harvest)",80,219.903
+"VA","managed (harvest)",90,204.326
+"VA","managed (harvest)",100,187.126
+"VT","managed (harvest)",0,124.82
+"VT","managed (harvest)",10,124.466
+"VT","managed (harvest)",20,122.409
+"VT","managed (harvest)",30,118.779
+"VT","managed (harvest)",40,111.241
+"VT","managed (harvest)",50,102.446
+"VT","managed (harvest)",60,91.566
+"VT","managed (harvest)",70,79.591
+"VT","managed (harvest)",80,68.41
+"VT","managed (harvest)",90,57.993
+"VT","managed (harvest)",100,48.367
+"WA","managed (harvest)",0,631.334
+"WA","managed (harvest)",10,646.679
+"WA","managed (harvest)",20,647.32
+"WA","managed (harvest)",30,651.319
+"WA","managed (harvest)",40,650.764
+"WA","managed (harvest)",50,635.029
+"WA","managed (harvest)",60,605.902
+"WA","managed (harvest)",70,581.481
+"WA","managed (harvest)",80,558.964
+"WA","managed (harvest)",90,538.481
+"WA","managed (harvest)",100,507.637
+"WI","managed (harvest)",0,322.69
+"WI","managed (harvest)",10,324.954
+"WI","managed (harvest)",20,317.346
+"WI","managed (harvest)",30,304.396
+"WI","managed (harvest)",40,286.565
+"WI","managed (harvest)",50,263.503
+"WI","managed (harvest)",60,236.463
+"WI","managed (harvest)",70,209.595
+"WI","managed (harvest)",80,187.251
+"WI","managed (harvest)",90,166.866
+"WI","managed (harvest)",100,150.606
+"WV","managed (harvest)",0,236.073
+"WV","managed (harvest)",10,225.144
+"WV","managed (harvest)",20,214.742
+"WV","managed (harvest)",30,205.626
+"WV","managed (harvest)",40,189.854
+"WV","managed (harvest)",50,174.967
+"WV","managed (harvest)",60,159.422
+"WV","managed (harvest)",70,143.699
+"WV","managed (harvest)",80,127.719
+"WV","managed (harvest)",90,111.982
+"WV","managed (harvest)",100,98.489
+"WY","managed (harvest)",0,125.612
+"WY","managed (harvest)",10,129.413
+"WY","managed (harvest)",20,131.205
+"WY","managed (harvest)",30,131.364
+"WY","managed (harvest)",40,130.637
+"WY","managed (harvest)",50,129.513
+"WY","managed (harvest)",60,127.363
+"WY","managed (harvest)",70,124.615
+"WY","managed (harvest)",80,121.435
+"WY","managed (harvest)",90,117.813
+"WY","managed (harvest)",100,113.926
+"AL","managed (intensive)",0,353.408
+"AL","managed (intensive)",10,373.994
+"AL","managed (intensive)",20,361.036
+"AL","managed (intensive)",30,352.315
+"AL","managed (intensive)",40,328.969
+"AL","managed (intensive)",50,305.706
+"AL","managed (intensive)",60,285.467
+"AL","managed (intensive)",70,262.886
+"AL","managed (intensive)",80,238.987
+"AL","managed (intensive)",90,217.273
+"AL","managed (intensive)",100,200.978
+"AR","managed (intensive)",0,333.03
+"AR","managed (intensive)",10,329.637
+"AR","managed (intensive)",20,309.171
+"AR","managed (intensive)",30,284.717
+"AR","managed (intensive)",40,259.68
+"AR","managed (intensive)",50,233.438
+"AR","managed (intensive)",60,209.353
+"AR","managed (intensive)",70,191.15
+"AR","managed (intensive)",80,170.617
+"AR","managed (intensive)",90,160.218
+"AR","managed (intensive)",100,156.638
+"AZ","managed (intensive)",0,100.782
+"AZ","managed (intensive)",10,100.106
+"AZ","managed (intensive)",20,96.154
+"AZ","managed (intensive)",30,91.977
+"AZ","managed (intensive)",40,87.072
+"AZ","managed (intensive)",50,82.479
+"AZ","managed (intensive)",60,77.135
+"AZ","managed (intensive)",70,72.197
+"AZ","managed (intensive)",80,67.097
+"AZ","managed (intensive)",90,62.22
+"AZ","managed (intensive)",100,57.48
+"CA","managed (intensive)",0,525.415
+"CA","managed (intensive)",10,512.023
+"CA","managed (intensive)",20,492.104
+"CA","managed (intensive)",30,469.872
+"CA","managed (intensive)",40,455.697
+"CA","managed (intensive)",50,432.133
+"CA","managed (intensive)",60,411.875
+"CA","managed (intensive)",70,393.254
+"CA","managed (intensive)",80,374.514
+"CA","managed (intensive)",90,358.581
+"CA","managed (intensive)",100,342.712
+"CO","managed (intensive)",0,241.696
+"CO","managed (intensive)",10,240.132
+"CO","managed (intensive)",20,230.751
+"CO","managed (intensive)",30,221.594
+"CO","managed (intensive)",40,211.989
+"CO","managed (intensive)",50,199.756
+"CO","managed (intensive)",60,186.124
+"CO","managed (intensive)",70,171.219
+"CO","managed (intensive)",80,157.2
+"CO","managed (intensive)",90,144.081
+"CO","managed (intensive)",100,132.479
+"CT","managed (intensive)",0,27.85
+"CT","managed (intensive)",10,24.887
+"CT","managed (intensive)",20,21.198
+"CT","managed (intensive)",30,18.109
+"CT","managed (intensive)",40,14.8
+"CT","managed (intensive)",50,12.654
+"CT","managed (intensive)",60,10.802
+"CT","managed (intensive)",70,9.148
+"CT","managed (intensive)",80,8.13
+"CT","managed (intensive)",90,7.432
+"CT","managed (intensive)",100,6.728
+"DE","managed (intensive)",0,13.337
+"DE","managed (intensive)",10,12.659
+"DE","managed (intensive)",20,10.547
+"DE","managed (intensive)",30,9.873
+"DE","managed (intensive)",40,9.486
+"DE","managed (intensive)",50,9.071
+"DE","managed (intensive)",60,8.593
+"DE","managed (intensive)",70,7.313
+"DE","managed (intensive)",80,7.592
+"DE","managed (intensive)",90,7.777
+"DE","managed (intensive)",100,7.74
+"FL","managed (intensive)",0,165.378
+"FL","managed (intensive)",10,174.274
+"FL","managed (intensive)",20,156.364
+"FL","managed (intensive)",30,144.529
+"FL","managed (intensive)",40,133.264
+"FL","managed (intensive)",50,120.903
+"FL","managed (intensive)",60,105.178
+"FL","managed (intensive)",70,93.22
+"FL","managed (intensive)",80,86.819
+"FL","managed (intensive)",90,82.868
+"FL","managed (intensive)",100,77.207
+"GA","managed (intensive)",0,266.527
+"GA","managed (intensive)",10,286.084
+"GA","managed (intensive)",20,282.384
+"GA","managed (intensive)",30,276.55
+"GA","managed (intensive)",40,264.58
+"GA","managed (intensive)",50,246.038
+"GA","managed (intensive)",60,219.42
+"GA","managed (intensive)",70,192.116
+"GA","managed (intensive)",80,169.699
+"GA","managed (intensive)",90,157.92
+"GA","managed (intensive)",100,153.493
+"IA","managed (intensive)",0,39.798
+"IA","managed (intensive)",10,37.067
+"IA","managed (intensive)",20,31.62
+"IA","managed (intensive)",30,27.073
+"IA","managed (intensive)",40,22.462
+"IA","managed (intensive)",50,19.209
+"IA","managed (intensive)",60,16.582
+"IA","managed (intensive)",70,14.574
+"IA","managed (intensive)",80,12.148
+"IA","managed (intensive)",90,11.189
+"IA","managed (intensive)",100,10.734
+"ID","managed (intensive)",0,299.187
+"ID","managed (intensive)",10,304.971
+"ID","managed (intensive)",20,300.143
+"ID","managed (intensive)",30,294.44
+"ID","managed (intensive)",40,285.491
+"ID","managed (intensive)",50,268.113
+"ID","managed (intensive)",60,251.968
+"ID","managed (intensive)",70,231.806
+"ID","managed (intensive)",80,211.429
+"ID","managed (intensive)",90,189.981
+"ID","managed (intensive)",100,169.067
+"IL","managed (intensive)",0,82.199
+"IL","managed (intensive)",10,79.712
+"IL","managed (intensive)",20,68.362
+"IL","managed (intensive)",30,59.42
+"IL","managed (intensive)",40,49.114
+"IL","managed (intensive)",50,40.695
+"IL","managed (intensive)",60,32.076
+"IL","managed (intensive)",70,26.684
+"IL","managed (intensive)",80,24.237
+"IL","managed (intensive)",90,21.649
+"IL","managed (intensive)",100,20.258
+"IN","managed (intensive)",0,110.811
+"IN","managed (intensive)",10,98.517
+"IN","managed (intensive)",20,88.261
+"IN","managed (intensive)",30,80.79
+"IN","managed (intensive)",40,71.326
+"IN","managed (intensive)",50,61.238
+"IN","managed (intensive)",60,51.315
+"IN","managed (intensive)",70,43.906
+"IN","managed (intensive)",80,37.386
+"IN","managed (intensive)",90,33.393
+"IN","managed (intensive)",100,31.101
+"KS","managed (intensive)",0,10.974
+"KS","managed (intensive)",10,10.335
+"KS","managed (intensive)",20,8.245
+"KS","managed (intensive)",30,7.219
+"KS","managed (intensive)",40,6.282
+"KS","managed (intensive)",50,5.283
+"KS","managed (intensive)",60,4.455
+"KS","managed (intensive)",70,3.526
+"KS","managed (intensive)",80,3.022
+"KS","managed (intensive)",90,2.531
+"KS","managed (intensive)",100,2.338
+"KY","managed (intensive)",0,265.042
+"KY","managed (intensive)",10,245.361
+"KY","managed (intensive)",20,214.584
+"KY","managed (intensive)",30,186.08
+"KY","managed (intensive)",40,152.62
+"KY","managed (intensive)",50,123.989
+"KY","managed (intensive)",60,105.673
+"KY","managed (intensive)",70,90.036
+"KY","managed (intensive)",80,79.453
+"KY","managed (intensive)",90,68.512
+"KY","managed (intensive)",100,64.517
+"LA","managed (intensive)",0,217.564
+"LA","managed (intensive)",10,222.955
+"LA","managed (intensive)",20,216.277
+"LA","managed (intensive)",30,212.087
+"LA","managed (intensive)",40,211.009
+"LA","managed (intensive)",50,202.304
+"LA","managed (intensive)",60,189.342
+"LA","managed (intensive)",70,179.645
+"LA","managed (intensive)",80,168.719
+"LA","managed (intensive)",90,153.326
+"LA","managed (intensive)",100,145.101
+"MA","managed (intensive)",0,52.864
+"MA","managed (intensive)",10,52.185
+"MA","managed (intensive)",20,44.493
+"MA","managed (intensive)",30,38.945
+"MA","managed (intensive)",40,33.418
+"MA","managed (intensive)",50,30.416
+"MA","managed (intensive)",60,26.511
+"MA","managed (intensive)",70,24.103
+"MA","managed (intensive)",80,21.81
+"MA","managed (intensive)",90,19.796
+"MA","managed (intensive)",100,17.22
+"MD","managed (intensive)",0,44.108
+"MD","managed (intensive)",10,39.25
+"MD","managed (intensive)",20,33.821
+"MD","managed (intensive)",30,29.864
+"MD","managed (intensive)",40,25.8
+"MD","managed (intensive)",50,23.056
+"MD","managed (intensive)",60,17.948
+"MD","managed (intensive)",70,16.074
+"MD","managed (intensive)",80,14.715
+"MD","managed (intensive)",90,13.79
+"MD","managed (intensive)",100,13.762
+"ME","managed (intensive)",0,271.884
+"ME","managed (intensive)",10,254.223
+"ME","managed (intensive)",20,223.633
+"ME","managed (intensive)",30,196.532
+"ME","managed (intensive)",40,181.579
+"ME","managed (intensive)",50,166.072
+"ME","managed (intensive)",60,151.735
+"ME","managed (intensive)",70,139.786
+"ME","managed (intensive)",80,129.088
+"ME","managed (intensive)",90,121.975
+"ME","managed (intensive)",100,114.85
+"MI","managed (intensive)",0,327.261
+"MI","managed (intensive)",10,319.729
+"MI","managed (intensive)",20,287.892
+"MI","managed (intensive)",30,268.287
+"MI","managed (intensive)",40,244.352
+"MI","managed (intensive)",50,220.685
+"MI","managed (intensive)",60,199.69
+"MI","managed (intensive)",70,180.149
+"MI","managed (intensive)",80,162.55
+"MI","managed (intensive)",90,146.536
+"MI","managed (intensive)",100,132.405
+"MN","managed (intensive)",0,220.244
+"MN","managed (intensive)",10,216.584
+"MN","managed (intensive)",20,196.859
+"MN","managed (intensive)",30,182.118
+"MN","managed (intensive)",40,165.7
+"MN","managed (intensive)",50,151.983
+"MN","managed (intensive)",60,136.238
+"MN","managed (intensive)",70,125.317
+"MN","managed (intensive)",80,113.512
+"MN","managed (intensive)",90,104.908
+"MN","managed (intensive)",100,96.033
+"MO","managed (intensive)",0,350.802
+"MO","managed (intensive)",10,328.443
+"MO","managed (intensive)",20,284.798
+"MO","managed (intensive)",30,252.801
+"MO","managed (intensive)",40,225.486
+"MO","managed (intensive)",50,199.929
+"MO","managed (intensive)",60,175.787
+"MO","managed (intensive)",70,156.154
+"MO","managed (intensive)",80,139.233
+"MO","managed (intensive)",90,121.891
+"MO","managed (intensive)",100,110.148
+"MS","managed (intensive)",0,285.933
+"MS","managed (intensive)",10,317.665
+"MS","managed (intensive)",20,317.595
+"MS","managed (intensive)",30,314.975
+"MS","managed (intensive)",40,308.673
+"MS","managed (intensive)",50,293.229
+"MS","managed (intensive)",60,276.899
+"MS","managed (intensive)",70,247.342
+"MS","managed (intensive)",80,225.855
+"MS","managed (intensive)",90,205.702
+"MS","managed (intensive)",100,187.121
+"MT","managed (intensive)",0,343.303
+"MT","managed (intensive)",10,342.292
+"MT","managed (intensive)",20,327.909
+"MT","managed (intensive)",30,314.92
+"MT","managed (intensive)",40,302.072
+"MT","managed (intensive)",50,286.553
+"MT","managed (intensive)",60,270.958
+"MT","managed (intensive)",70,253.536
+"MT","managed (intensive)",80,237.072
+"MT","managed (intensive)",90,219.397
+"MT","managed (intensive)",100,203.083
+"NC","managed (intensive)",0,288.446
+"NC","managed (intensive)",10,300.264
+"NC","managed (intensive)",20,285.931
+"NC","managed (intensive)",30,275.192
+"NC","managed (intensive)",40,265.59
+"NC","managed (intensive)",50,245.169
+"NC","managed (intensive)",60,221.459
+"NC","managed (intensive)",70,200.913
+"NC","managed (intensive)",80,182.856
+"NC","managed (intensive)",90,165.479
+"NC","managed (intensive)",100,146.612
+"ND","managed (intensive)",0,5.624
+"ND","managed (intensive)",10,5.762
+"ND","managed (intensive)",20,5.274
+"ND","managed (intensive)",30,5.227
+"ND","managed (intensive)",40,4.965
+"ND","managed (intensive)",50,4.757
+"ND","managed (intensive)",60,4.33
+"ND","managed (intensive)",70,3.931
+"ND","managed (intensive)",80,3.402
+"ND","managed (intensive)",90,2.957
+"ND","managed (intensive)",100,2.571
+"NE","managed (intensive)",0,10.24
+"NE","managed (intensive)",10,9.001
+"NE","managed (intensive)",20,7.262
+"NE","managed (intensive)",30,6.088
+"NE","managed (intensive)",40,4.972
+"NE","managed (intensive)",50,4.012
+"NE","managed (intensive)",60,3.744
+"NE","managed (intensive)",70,3.266
+"NE","managed (intensive)",80,2.793
+"NE","managed (intensive)",90,2.535
+"NE","managed (intensive)",100,2.395
+"NH","managed (intensive)",0,111.713
+"NH","managed (intensive)",10,108.578
+"NH","managed (intensive)",20,96.06
+"NH","managed (intensive)",30,88.448
+"NH","managed (intensive)",40,80.889
+"NH","managed (intensive)",50,71.783
+"NH","managed (intensive)",60,62.175
+"NH","managed (intensive)",70,54.518
+"NH","managed (intensive)",80,47.706
+"NH","managed (intensive)",90,40.759
+"NH","managed (intensive)",100,36.064
+"NJ","managed (intensive)",0,41.424
+"NJ","managed (intensive)",10,39.374
+"NJ","managed (intensive)",20,34.513
+"NJ","managed (intensive)",30,31.769
+"NJ","managed (intensive)",40,27.56
+"NJ","managed (intensive)",50,24.827
+"NJ","managed (intensive)",60,21.704
+"NJ","managed (intensive)",70,19.104
+"NJ","managed (intensive)",80,17.058
+"NJ","managed (intensive)",90,15.117
+"NJ","managed (intensive)",100,14.2
+"NM","managed (intensive)",0,117.08
+"NM","managed (intensive)",10,113.691
+"NM","managed (intensive)",20,106.238
+"NM","managed (intensive)",30,100.155
+"NM","managed (intensive)",40,94.648
+"NM","managed (intensive)",50,88.618
+"NM","managed (intensive)",60,83.559
+"NM","managed (intensive)",70,78.517
+"NM","managed (intensive)",80,72.428
+"NM","managed (intensive)",90,66.874
+"NM","managed (intensive)",100,61.923
+"NV","managed (intensive)",0,35.75
+"NV","managed (intensive)",10,35.567
+"NV","managed (intensive)",20,34.706
+"NV","managed (intensive)",30,33.464
+"NV","managed (intensive)",40,32.29
+"NV","managed (intensive)",50,30.941
+"NV","managed (intensive)",60,29.573
+"NV","managed (intensive)",70,27.937
+"NV","managed (intensive)",80,26.437
+"NV","managed (intensive)",90,24.793
+"NV","managed (intensive)",100,23.138
+"NY","managed (intensive)",0,340.826
+"NY","managed (intensive)",10,328.7
+"NY","managed (intensive)",20,281.867
+"NY","managed (intensive)",30,259.116
+"NY","managed (intensive)",40,237.218
+"NY","managed (intensive)",50,217.242
+"NY","managed (intensive)",60,194.514
+"NY","managed (intensive)",70,180.555
+"NY","managed (intensive)",80,166.719
+"NY","managed (intensive)",90,151.496
+"NY","managed (intensive)",100,141.044
+"OH","managed (intensive)",0,159.121
+"OH","managed (intensive)",10,157.157
+"OH","managed (intensive)",20,139.974
+"OH","managed (intensive)",30,135.621
+"OH","managed (intensive)",40,130.265
+"OH","managed (intensive)",50,118.575
+"OH","managed (intensive)",60,107.212
+"OH","managed (intensive)",70,99.226
+"OH","managed (intensive)",80,84.79
+"OH","managed (intensive)",90,72.902
+"OH","managed (intensive)",100,64.348
+"OK","managed (intensive)",0,108.113
+"OK","managed (intensive)",10,106.577
+"OK","managed (intensive)",20,92.815
+"OK","managed (intensive)",30,82.183
+"OK","managed (intensive)",40,72.168
+"OK","managed (intensive)",50,60.644
+"OK","managed (intensive)",60,52.394
+"OK","managed (intensive)",70,47.362
+"OK","managed (intensive)",80,42.601
+"OK","managed (intensive)",90,39.983
+"OK","managed (intensive)",100,36.826
+"OR","managed (intensive)",0,836.686
+"OR","managed (intensive)",10,834.495
+"OR","managed (intensive)",20,812.816
+"OR","managed (intensive)",30,785.008
+"OR","managed (intensive)",40,758.226
+"OR","managed (intensive)",50,730.584
+"OR","managed (intensive)",60,698.276
+"OR","managed (intensive)",70,671.831
+"OR","managed (intensive)",80,631.266
+"OR","managed (intensive)",90,598.086
+"OR","managed (intensive)",100,555.044
+"PA","managed (intensive)",0,432.458
+"PA","managed (intensive)",10,406.357
+"PA","managed (intensive)",20,353.931
+"PA","managed (intensive)",30,316.572
+"PA","managed (intensive)",40,283.532
+"PA","managed (intensive)",50,250.248
+"PA","managed (intensive)",60,216.606
+"PA","managed (intensive)",70,191.402
+"PA","managed (intensive)",80,177.139
+"PA","managed (intensive)",90,162.566
+"PA","managed (intensive)",100,149.399
+"RI","managed (intensive)",0,12.255
+"RI","managed (intensive)",10,11.934
+"RI","managed (intensive)",20,9.655
+"RI","managed (intensive)",30,7.906
+"RI","managed (intensive)",40,5.984
+"RI","managed (intensive)",50,4.156
+"RI","managed (intensive)",60,3.077
+"RI","managed (intensive)",70,2.442
+"RI","managed (intensive)",80,2.092
+"RI","managed (intensive)",90,1.877
+"RI","managed (intensive)",100,1.718
+"SC","managed (intensive)",0,183.401
+"SC","managed (intensive)",10,186.604
+"SC","managed (intensive)",20,173.768
+"SC","managed (intensive)",30,157.389
+"SC","managed (intensive)",40,141.644
+"SC","managed (intensive)",50,128.502
+"SC","managed (intensive)",60,117.36
+"SC","managed (intensive)",70,110.839
+"SC","managed (intensive)",80,103.623
+"SC","managed (intensive)",90,97.963
+"SC","managed (intensive)",100,96.032
+"SD","managed (intensive)",0,13.156
+"SD","managed (intensive)",10,12.922
+"SD","managed (intensive)",20,12.08
+"SD","managed (intensive)",30,11.176
+"SD","managed (intensive)",40,10.485
+"SD","managed (intensive)",50,10.04
+"SD","managed (intensive)",60,9.342
+"SD","managed (intensive)",70,8.942
+"SD","managed (intensive)",80,8.493
+"SD","managed (intensive)",90,7.919
+"SD","managed (intensive)",100,7.5
+"TN","managed (intensive)",0,273.878
+"TN","managed (intensive)",10,264.597
+"TN","managed (intensive)",20,236.743
+"TN","managed (intensive)",30,220.888
+"TN","managed (intensive)",40,204.346
+"TN","managed (intensive)",50,181.134
+"TN","managed (intensive)",60,164.835
+"TN","managed (intensive)",70,147.102
+"TN","managed (intensive)",80,124.888
+"TN","managed (intensive)",90,108.7
+"TN","managed (intensive)",100,94.297
+"TX","managed (intensive)",0,247.43
+"TX","managed (intensive)",10,248.634
+"TX","managed (intensive)",20,234.749
+"TX","managed (intensive)",30,224.183
+"TX","managed (intensive)",40,209.445
+"TX","managed (intensive)",50,191.473
+"TX","managed (intensive)",60,176.626
+"TX","managed (intensive)",70,159.941
+"TX","managed (intensive)",80,144.493
+"TX","managed (intensive)",90,132.924
+"TX","managed (intensive)",100,123.906
+"UT","managed (intensive)",0,89.586
+"UT","managed (intensive)",10,88.611
+"UT","managed (intensive)",20,84.564
+"UT","managed (intensive)",30,81.053
+"UT","managed (intensive)",40,77.133
+"UT","managed (intensive)",50,72.385
+"UT","managed (intensive)",60,67.462
+"UT","managed (intensive)",70,62.444
+"UT","managed (intensive)",80,57.752
+"UT","managed (intensive)",90,53.14
+"UT","managed (intensive)",100,48.622
+"VA","managed (intensive)",0,305.074
+"VA","managed (intensive)",10,306.338
+"VA","managed (intensive)",20,284.07
+"VA","managed (intensive)",30,264.629
+"VA","managed (intensive)",40,242.788
+"VA","managed (intensive)",50,222.115
+"VA","managed (intensive)",60,205.696
+"VA","managed (intensive)",70,187.262
+"VA","managed (intensive)",80,171.786
+"VA","managed (intensive)",90,161.177
+"VA","managed (intensive)",100,144.783
+"VT","managed (intensive)",0,124.82
+"VT","managed (intensive)",10,122.864
+"VT","managed (intensive)",20,110.015
+"VT","managed (intensive)",30,98.568
+"VT","managed (intensive)",40,88.087
+"VT","managed (intensive)",50,77.209
+"VT","managed (intensive)",60,65.253
+"VT","managed (intensive)",70,54.669
+"VT","managed (intensive)",80,45.951
+"VT","managed (intensive)",90,38.834
+"VT","managed (intensive)",100,35.014
+"WA","managed (intensive)",0,631.334
+"WA","managed (intensive)",10,629.021
+"WA","managed (intensive)",20,605.928
+"WA","managed (intensive)",30,594.838
+"WA","managed (intensive)",40,564.332
+"WA","managed (intensive)",50,534.312
+"WA","managed (intensive)",60,502.976
+"WA","managed (intensive)",70,466.872
+"WA","managed (intensive)",80,441
+"WA","managed (intensive)",90,414.741
+"WA","managed (intensive)",100,393.062
+"WI","managed (intensive)",0,322.69
+"WI","managed (intensive)",10,315.578
+"WI","managed (intensive)",20,281.166
+"WI","managed (intensive)",30,253.652
+"WI","managed (intensive)",40,227.858
+"WI","managed (intensive)",50,202.087
+"WI","managed (intensive)",60,175.484
+"WI","managed (intensive)",70,157.399
+"WI","managed (intensive)",80,142.116
+"WI","managed (intensive)",90,129.154
+"WI","managed (intensive)",100,118.311
+"WV","managed (intensive)",0,236.073
+"WV","managed (intensive)",10,218.213
+"WV","managed (intensive)",20,187.731
+"WV","managed (intensive)",30,168.734
+"WV","managed (intensive)",40,151.473
+"WV","managed (intensive)",50,133.818
+"WV","managed (intensive)",60,117.475
+"WV","managed (intensive)",70,103.502
+"WV","managed (intensive)",80,92.846
+"WV","managed (intensive)",90,81.752
+"WV","managed (intensive)",100,74.119
+"WY","managed (intensive)",0,125.612
+"WY","managed (intensive)",10,127.498
+"WY","managed (intensive)",20,123.792
+"WY","managed (intensive)",30,121.075
+"WY","managed (intensive)",40,116.369
+"WY","managed (intensive)",50,112.295
+"WY","managed (intensive)",60,106.908
+"WY","managed (intensive)",70,101.997
+"WY","managed (intensive)",80,96.771
+"WY","managed (intensive)",90,91.561
+"WY","managed (intensive)",100,85.866
+"AL","managed (conservation)",0,353.408
+"AL","managed (conservation)",10,420.984
+"AL","managed (conservation)",20,466.014
+"AL","managed (conservation)",30,490.397
+"AL","managed (conservation)",40,502.731
+"AL","managed (conservation)",50,499.484
+"AL","managed (conservation)",60,487.309
+"AL","managed (conservation)",70,474.126
+"AL","managed (conservation)",80,459.961
+"AL","managed (conservation)",90,434.95
+"AL","managed (conservation)",100,408.599
+"AR","managed (conservation)",0,333.03
+"AR","managed (conservation)",10,368.175
+"AR","managed (conservation)",20,392.019
+"AR","managed (conservation)",30,406.774
+"AR","managed (conservation)",40,407.634
+"AR","managed (conservation)",50,394.704
+"AR","managed (conservation)",60,367.341
+"AR","managed (conservation)",70,330.376
+"AR","managed (conservation)",80,314.929
+"AR","managed (conservation)",90,294.397
+"AR","managed (conservation)",100,282.676
+"AZ","managed (conservation)",0,100.782
+"AZ","managed (conservation)",10,104.678
+"AZ","managed (conservation)",20,107.239
+"AZ","managed (conservation)",30,108.343
+"AZ","managed (conservation)",40,109.146
+"AZ","managed (conservation)",50,109.165
+"AZ","managed (conservation)",60,108.891
+"AZ","managed (conservation)",70,107.99
+"AZ","managed (conservation)",80,106.438
+"AZ","managed (conservation)",90,105.04
+"AZ","managed (conservation)",100,103.384
+"CA","managed (conservation)",0,525.415
+"CA","managed (conservation)",10,540.345
+"CA","managed (conservation)",20,558.736
+"CA","managed (conservation)",30,572.777
+"CA","managed (conservation)",40,579.705
+"CA","managed (conservation)",50,587.15
+"CA","managed (conservation)",60,590.621
+"CA","managed (conservation)",70,593.062
+"CA","managed (conservation)",80,589.619
+"CA","managed (conservation)",90,584.968
+"CA","managed (conservation)",100,577.062
+"CO","managed (conservation)",0,241.696
+"CO","managed (conservation)",10,247.281
+"CO","managed (conservation)",20,256.701
+"CO","managed (conservation)",30,264.141
+"CO","managed (conservation)",40,267.626
+"CO","managed (conservation)",50,266.671
+"CO","managed (conservation)",60,263.858
+"CO","managed (conservation)",70,258.751
+"CO","managed (conservation)",80,252.735
+"CO","managed (conservation)",90,245.427
+"CO","managed (conservation)",100,238.626
+"CT","managed (conservation)",0,27.85
+"CT","managed (conservation)",10,28.541
+"CT","managed (conservation)",20,28.195
+"CT","managed (conservation)",30,27.488
+"CT","managed (conservation)",40,26.291
+"CT","managed (conservation)",50,25.397
+"CT","managed (conservation)",60,24.204
+"CT","managed (conservation)",70,22.692
+"CT","managed (conservation)",80,21.616
+"CT","managed (conservation)",90,20.833
+"CT","managed (conservation)",100,19.371
+"DE","managed (conservation)",0,13.337
+"DE","managed (conservation)",10,12.177
+"DE","managed (conservation)",20,13.167
+"DE","managed (conservation)",30,13.724
+"DE","managed (conservation)",40,13.569
+"DE","managed (conservation)",50,14.201
+"DE","managed (conservation)",60,14.5
+"DE","managed (conservation)",70,14.936
+"DE","managed (conservation)",80,14.852
+"DE","managed (conservation)",90,14.471
+"DE","managed (conservation)",100,14.785
+"FL","managed (conservation)",0,165.378
+"FL","managed (conservation)",10,184.188
+"FL","managed (conservation)",20,196.839
+"FL","managed (conservation)",30,196.667
+"FL","managed (conservation)",40,191.629
+"FL","managed (conservation)",50,187.986
+"FL","managed (conservation)",60,177.238
+"FL","managed (conservation)",70,159.208
+"FL","managed (conservation)",80,149.246
+"FL","managed (conservation)",90,141.925
+"FL","managed (conservation)",100,133.48
+"GA","managed (conservation)",0,266.527
+"GA","managed (conservation)",10,319.886
+"GA","managed (conservation)",20,359.122
+"GA","managed (conservation)",30,388.667
+"GA","managed (conservation)",40,404.123
+"GA","managed (conservation)",50,394.509
+"GA","managed (conservation)",60,372.158
+"GA","managed (conservation)",70,344.073
+"GA","managed (conservation)",80,316.509
+"GA","managed (conservation)",90,286.981
+"GA","managed (conservation)",100,264.632
+"IA","managed (conservation)",0,39.798
+"IA","managed (conservation)",10,41.071
+"IA","managed (conservation)",20,40.503
+"IA","managed (conservation)",30,40.359
+"IA","managed (conservation)",40,38.19
+"IA","managed (conservation)",50,36.227
+"IA","managed (conservation)",60,33.577
+"IA","managed (conservation)",70,30.128
+"IA","managed (conservation)",80,26.628
+"IA","managed (conservation)",90,22.904
+"IA","managed (conservation)",100,20.401
+"ID","managed (conservation)",0,299.187
+"ID","managed (conservation)",10,316.862
+"ID","managed (conservation)",20,335.018
+"ID","managed (conservation)",30,346.833
+"ID","managed (conservation)",40,355.287
+"ID","managed (conservation)",50,357.454
+"ID","managed (conservation)",60,354.577
+"ID","managed (conservation)",70,346.097
+"ID","managed (conservation)",80,335.266
+"ID","managed (conservation)",90,321.936
+"ID","managed (conservation)",100,306.706
+"IL","managed (conservation)",0,82.199
+"IL","managed (conservation)",10,84.855
+"IL","managed (conservation)",20,85.473
+"IL","managed (conservation)",30,83.168
+"IL","managed (conservation)",40,78.043
+"IL","managed (conservation)",50,71.365
+"IL","managed (conservation)",60,65.589
+"IL","managed (conservation)",70,60.015
+"IL","managed (conservation)",80,54.157
+"IL","managed (conservation)",90,48.082
+"IL","managed (conservation)",100,43.667
+"IN","managed (conservation)",0,110.811
+"IN","managed (conservation)",10,115.117
+"IN","managed (conservation)",20,118.995
+"IN","managed (conservation)",30,119.5
+"IN","managed (conservation)",40,118.504
+"IN","managed (conservation)",50,115.46
+"IN","managed (conservation)",60,108.571
+"IN","managed (conservation)",70,99.361
+"IN","managed (conservation)",80,90.819
+"IN","managed (conservation)",90,80.614
+"IN","managed (conservation)",100,71.229
+"KS","managed (conservation)",0,10.974
+"KS","managed (conservation)",10,11.469
+"KS","managed (conservation)",20,11.353
+"KS","managed (conservation)",30,10.904
+"KS","managed (conservation)",40,10.913
+"KS","managed (conservation)",50,10.393
+"KS","managed (conservation)",60,9.814
+"KS","managed (conservation)",70,8.789
+"KS","managed (conservation)",80,7.475
+"KS","managed (conservation)",90,6.487
+"KS","managed (conservation)",100,5.449
+"KY","managed (conservation)",0,265.042
+"KY","managed (conservation)",10,278.113
+"KY","managed (conservation)",20,284.188
+"KY","managed (conservation)",30,276.013
+"KY","managed (conservation)",40,265.038
+"KY","managed (conservation)",50,249.742
+"KY","managed (conservation)",60,231.651
+"KY","managed (conservation)",70,209.178
+"KY","managed (conservation)",80,188.068
+"KY","managed (conservation)",90,168.229
+"KY","managed (conservation)",100,150.361
+"LA","managed (conservation)",0,217.564
+"LA","managed (conservation)",10,250.675
+"LA","managed (conservation)",20,276.757
+"LA","managed (conservation)",30,294.629
+"LA","managed (conservation)",40,308.889
+"LA","managed (conservation)",50,310.077
+"LA","managed (conservation)",60,304.277
+"LA","managed (conservation)",70,297.37
+"LA","managed (conservation)",80,289.568
+"LA","managed (conservation)",90,266.643
+"LA","managed (conservation)",100,248.788
+"MA","managed (conservation)",0,52.864
+"MA","managed (conservation)",10,53.045
+"MA","managed (conservation)",20,54.645
+"MA","managed (conservation)",30,54.526
+"MA","managed (conservation)",40,54.714
+"MA","managed (conservation)",50,53.755
+"MA","managed (conservation)",60,51.778
+"MA","managed (conservation)",70,50.408
+"MA","managed (conservation)",80,47.989
+"MA","managed (conservation)",90,46.17
+"MA","managed (conservation)",100,44.002
+"MD","managed (conservation)",0,44.108
+"MD","managed (conservation)",10,44.464
+"MD","managed (conservation)",20,45.362
+"MD","managed (conservation)",30,44.26
+"MD","managed (conservation)",40,44.259
+"MD","managed (conservation)",50,42.388
+"MD","managed (conservation)",60,37.891
+"MD","managed (conservation)",70,35.261
+"MD","managed (conservation)",80,33.02
+"MD","managed (conservation)",90,27.228
+"MD","managed (conservation)",100,26.391
+"ME","managed (conservation)",0,271.884
+"ME","managed (conservation)",10,283.801
+"ME","managed (conservation)",20,294.943
+"ME","managed (conservation)",30,296.17
+"ME","managed (conservation)",40,294.811
+"ME","managed (conservation)",50,292.371
+"ME","managed (conservation)",60,290.441
+"ME","managed (conservation)",70,286.274
+"ME","managed (conservation)",80,281.261
+"ME","managed (conservation)",90,275.973
+"ME","managed (conservation)",100,264.03
+"MI","managed (conservation)",0,327.261
+"MI","managed (conservation)",10,343.814
+"MI","managed (conservation)",20,358.591
+"MI","managed (conservation)",30,365.065
+"MI","managed (conservation)",40,367.23
+"MI","managed (conservation)",50,364.386
+"MI","managed (conservation)",60,355.772
+"MI","managed (conservation)",70,344.228
+"MI","managed (conservation)",80,325.731
+"MI","managed (conservation)",90,307.058
+"MI","managed (conservation)",100,288.651
+"MN","managed (conservation)",0,220.244
+"MN","managed (conservation)",10,232.482
+"MN","managed (conservation)",20,245.161
+"MN","managed (conservation)",30,251.736
+"MN","managed (conservation)",40,253.597
+"MN","managed (conservation)",50,250.109
+"MN","managed (conservation)",60,243.601
+"MN","managed (conservation)",70,234.224
+"MN","managed (conservation)",80,225.629
+"MN","managed (conservation)",90,216.227
+"MN","managed (conservation)",100,206.02
+"MO","managed (conservation)",0,350.802
+"MO","managed (conservation)",10,357.499
+"MO","managed (conservation)",20,361.141
+"MO","managed (conservation)",30,360.45
+"MO","managed (conservation)",40,357.276
+"MO","managed (conservation)",50,350.911
+"MO","managed (conservation)",60,340.368
+"MO","managed (conservation)",70,325.813
+"MO","managed (conservation)",80,312.069
+"MO","managed (conservation)",90,296.149
+"MO","managed (conservation)",100,282.161
+"MS","managed (conservation)",0,285.933
+"MS","managed (conservation)",10,348.097
+"MS","managed (conservation)",20,391.538
+"MS","managed (conservation)",30,420.031
+"MS","managed (conservation)",40,440.989
+"MS","managed (conservation)",50,449.777
+"MS","managed (conservation)",60,439.168
+"MS","managed (conservation)",70,433.124
+"MS","managed (conservation)",80,416.594
+"MS","managed (conservation)",90,394.188
+"MS","managed (conservation)",100,375.024
+"MT","managed (conservation)",0,343.303
+"MT","managed (conservation)",10,353.364
+"MT","managed (conservation)",20,364.505
+"MT","managed (conservation)",30,372.313
+"MT","managed (conservation)",40,378.615
+"MT","managed (conservation)",50,380.291
+"MT","managed (conservation)",60,379.27
+"MT","managed (conservation)",70,376.533
+"MT","managed (conservation)",80,371.541
+"MT","managed (conservation)",90,364.477
+"MT","managed (conservation)",100,355.092
+"NC","managed (conservation)",0,288.446
+"NC","managed (conservation)",10,318.455
+"NC","managed (conservation)",20,357.259
+"NC","managed (conservation)",30,382.631
+"NC","managed (conservation)",40,400.327
+"NC","managed (conservation)",50,402.972
+"NC","managed (conservation)",60,386.923
+"NC","managed (conservation)",70,372.45
+"NC","managed (conservation)",80,360.919
+"NC","managed (conservation)",90,347.351
+"NC","managed (conservation)",100,329.824
+"ND","managed (conservation)",0,5.624
+"ND","managed (conservation)",10,6.008
+"ND","managed (conservation)",20,6.392
+"ND","managed (conservation)",30,6.607
+"ND","managed (conservation)",40,6.806
+"ND","managed (conservation)",50,6.989
+"ND","managed (conservation)",60,7.133
+"ND","managed (conservation)",70,7.029
+"ND","managed (conservation)",80,6.521
+"ND","managed (conservation)",90,6.296
+"ND","managed (conservation)",100,6.059
+"NE","managed (conservation)",0,10.24
+"NE","managed (conservation)",10,10.552
+"NE","managed (conservation)",20,10.456
+"NE","managed (conservation)",30,10.262
+"NE","managed (conservation)",40,9.577
+"NE","managed (conservation)",50,8.969
+"NE","managed (conservation)",60,8.653
+"NE","managed (conservation)",70,7.907
+"NE","managed (conservation)",80,7.331
+"NE","managed (conservation)",90,7.054
+"NE","managed (conservation)",100,6.584
+"NH","managed (conservation)",0,111.713
+"NH","managed (conservation)",10,116.219
+"NH","managed (conservation)",20,120.669
+"NH","managed (conservation)",30,123.191
+"NH","managed (conservation)",40,123.087
+"NH","managed (conservation)",50,120.629
+"NH","managed (conservation)",60,114.994
+"NH","managed (conservation)",70,108.997
+"NH","managed (conservation)",80,101.787
+"NH","managed (conservation)",90,93.858
+"NH","managed (conservation)",100,87.055
+"NJ","managed (conservation)",0,41.424
+"NJ","managed (conservation)",10,40.856
+"NJ","managed (conservation)",20,42.462
+"NJ","managed (conservation)",30,43.206
+"NJ","managed (conservation)",40,42.577
+"NJ","managed (conservation)",50,40.599
+"NJ","managed (conservation)",60,39.371
+"NJ","managed (conservation)",70,35.621
+"NJ","managed (conservation)",80,33.405
+"NJ","managed (conservation)",90,31.031
+"NJ","managed (conservation)",100,29.12
+"NM","managed (conservation)",0,117.08
+"NM","managed (conservation)",10,116.946
+"NM","managed (conservation)",20,118.948
+"NM","managed (conservation)",30,121.708
+"NM","managed (conservation)",40,122.513
+"NM","managed (conservation)",50,122.059
+"NM","managed (conservation)",60,121.486
+"NM","managed (conservation)",70,120.813
+"NM","managed (conservation)",80,117.129
+"NM","managed (conservation)",90,114.698
+"NM","managed (conservation)",100,112.301
+"NV","managed (conservation)",0,35.75
+"NV","managed (conservation)",10,37.088
+"NV","managed (conservation)",20,38.058
+"NV","managed (conservation)",30,39.025
+"NV","managed (conservation)",40,39.687
+"NV","managed (conservation)",50,40.235
+"NV","managed (conservation)",60,40.485
+"NV","managed (conservation)",70,40.465
+"NV","managed (conservation)",80,40.291
+"NV","managed (conservation)",90,39.914
+"NV","managed (conservation)",100,39.512
+"NY","managed (conservation)",0,340.826
+"NY","managed (conservation)",10,337.405
+"NY","managed (conservation)",20,356.051
+"NY","managed (conservation)",30,364.92
+"NY","managed (conservation)",40,368.598
+"NY","managed (conservation)",50,368.478
+"NY","managed (conservation)",60,364.599
+"NY","managed (conservation)",70,354.286
+"NY","managed (conservation)",80,343.159
+"NY","managed (conservation)",90,329.992
+"NY","managed (conservation)",100,321.062
+"OH","managed (conservation)",0,159.121
+"OH","managed (conservation)",10,175.182
+"OH","managed (conservation)",20,189.757
+"OH","managed (conservation)",30,198.108
+"OH","managed (conservation)",40,206.782
+"OH","managed (conservation)",50,205.483
+"OH","managed (conservation)",60,204.225
+"OH","managed (conservation)",70,199.04
+"OH","managed (conservation)",80,183.372
+"OH","managed (conservation)",90,164.903
+"OH","managed (conservation)",100,152.342
+"OK","managed (conservation)",0,108.113
+"OK","managed (conservation)",10,115.246
+"OK","managed (conservation)",20,121.025
+"OK","managed (conservation)",30,119.482
+"OK","managed (conservation)",40,114.765
+"OK","managed (conservation)",50,108.548
+"OK","managed (conservation)",60,102.433
+"OK","managed (conservation)",70,95.971
+"OK","managed (conservation)",80,88.094
+"OK","managed (conservation)",90,81.746
+"OK","managed (conservation)",100,77.385
+"OR","managed (conservation)",0,836.686
+"OR","managed (conservation)",10,871.289
+"OR","managed (conservation)",20,898.285
+"OR","managed (conservation)",30,922.01
+"OR","managed (conservation)",40,938.826
+"OR","managed (conservation)",50,951.132
+"OR","managed (conservation)",60,954.781
+"OR","managed (conservation)",70,952.578
+"OR","managed (conservation)",80,951.425
+"OR","managed (conservation)",90,943.746
+"OR","managed (conservation)",100,936.285
+"PA","managed (conservation)",0,432.458
+"PA","managed (conservation)",10,432.575
+"PA","managed (conservation)",20,444.211
+"PA","managed (conservation)",30,446.744
+"PA","managed (conservation)",40,440.323
+"PA","managed (conservation)",50,424.487
+"PA","managed (conservation)",60,406.458
+"PA","managed (conservation)",70,386.809
+"PA","managed (conservation)",80,366.449
+"PA","managed (conservation)",90,344.214
+"PA","managed (conservation)",100,326.573
+"RI","managed (conservation)",0,12.255
+"RI","managed (conservation)",10,12.931
+"RI","managed (conservation)",20,13.137
+"RI","managed (conservation)",30,13.157
+"RI","managed (conservation)",40,11.927
+"RI","managed (conservation)",50,10.395
+"RI","managed (conservation)",60,9.002
+"RI","managed (conservation)",70,7.018
+"RI","managed (conservation)",80,5.513
+"RI","managed (conservation)",90,4.269
+"RI","managed (conservation)",100,3.042
+"SC","managed (conservation)",0,183.401
+"SC","managed (conservation)",10,209.767
+"SC","managed (conservation)",20,217.803
+"SC","managed (conservation)",30,219.243
+"SC","managed (conservation)",40,215.826
+"SC","managed (conservation)",50,205.838
+"SC","managed (conservation)",60,194.232
+"SC","managed (conservation)",70,183.48
+"SC","managed (conservation)",80,177.211
+"SC","managed (conservation)",90,170.311
+"SC","managed (conservation)",100,165.44
+"SD","managed (conservation)",0,13.156
+"SD","managed (conservation)",10,13.349
+"SD","managed (conservation)",20,13.695
+"SD","managed (conservation)",30,13.878
+"SD","managed (conservation)",40,13.877
+"SD","managed (conservation)",50,13.775
+"SD","managed (conservation)",60,13.84
+"SD","managed (conservation)",70,13.447
+"SD","managed (conservation)",80,13.364
+"SD","managed (conservation)",90,13.071
+"SD","managed (conservation)",100,12.958
+"TN","managed (conservation)",0,273.878
+"TN","managed (conservation)",10,287.206
+"TN","managed (conservation)",20,307.512
+"TN","managed (conservation)",30,318.533
+"TN","managed (conservation)",40,322.983
+"TN","managed (conservation)",50,325.307
+"TN","managed (conservation)",60,313.313
+"TN","managed (conservation)",70,283.884
+"TN","managed (conservation)",80,242.946
+"TN","managed (conservation)",90,201.352
+"TN","managed (conservation)",100,171.833
+"TX","managed (conservation)",0,247.43
+"TX","managed (conservation)",10,279.606
+"TX","managed (conservation)",20,302.379
+"TX","managed (conservation)",30,314.734
+"TX","managed (conservation)",40,322.701
+"TX","managed (conservation)",50,317.703
+"TX","managed (conservation)",60,301.45
+"TX","managed (conservation)",70,285.106
+"TX","managed (conservation)",80,269.867
+"TX","managed (conservation)",90,252.082
+"TX","managed (conservation)",100,236.512
+"UT","managed (conservation)",0,89.586
+"UT","managed (conservation)",10,91.44
+"UT","managed (conservation)",20,94.14
+"UT","managed (conservation)",30,96.005
+"UT","managed (conservation)",40,97.001
+"UT","managed (conservation)",50,96.804
+"UT","managed (conservation)",60,96.52
+"UT","managed (conservation)",70,95.443
+"UT","managed (conservation)",80,93.636
+"UT","managed (conservation)",90,91.671
+"UT","managed (conservation)",100,89.422
+"VA","managed (conservation)",0,305.074
+"VA","managed (conservation)",10,320.718
+"VA","managed (conservation)",20,345.547
+"VA","managed (conservation)",30,360.847
+"VA","managed (conservation)",40,363.73
+"VA","managed (conservation)",50,364.002
+"VA","managed (conservation)",60,351.525
+"VA","managed (conservation)",70,346.454
+"VA","managed (conservation)",80,335.251
+"VA","managed (conservation)",90,322.117
+"VA","managed (conservation)",100,306.21
+"VT","managed (conservation)",0,124.82
+"VT","managed (conservation)",10,128.071
+"VT","managed (conservation)",20,134.924
+"VT","managed (conservation)",30,137.43
+"VT","managed (conservation)",40,137.122
+"VT","managed (conservation)",50,133.137
+"VT","managed (conservation)",60,126.03
+"VT","managed (conservation)",70,117.145
+"VT","managed (conservation)",80,108.672
+"VT","managed (conservation)",90,99.236
+"VT","managed (conservation)",100,90.976
+"WA","managed (conservation)",0,631.334
+"WA","managed (conservation)",10,652.381
+"WA","managed (conservation)",20,686.545
+"WA","managed (conservation)",30,708.036
+"WA","managed (conservation)",40,722.391
+"WA","managed (conservation)",50,724.422
+"WA","managed (conservation)",60,721.875
+"WA","managed (conservation)",70,696.758
+"WA","managed (conservation)",80,679.405
+"WA","managed (conservation)",90,668.792
+"WA","managed (conservation)",100,663.354
+"WI","managed (conservation)",0,322.69
+"WI","managed (conservation)",10,336.334
+"WI","managed (conservation)",20,350.53
+"WI","managed (conservation)",30,355.944
+"WI","managed (conservation)",40,354.032
+"WI","managed (conservation)",50,345.193
+"WI","managed (conservation)",60,326.691
+"WI","managed (conservation)",70,306.892
+"WI","managed (conservation)",80,286.086
+"WI","managed (conservation)",90,263.77
+"WI","managed (conservation)",100,243.25
+"WV","managed (conservation)",0,236.073
+"WV","managed (conservation)",10,230.082
+"WV","managed (conservation)",20,234.825
+"WV","managed (conservation)",30,234.811
+"WV","managed (conservation)",40,231.626
+"WV","managed (conservation)",50,225.065
+"WV","managed (conservation)",60,214.532
+"WV","managed (conservation)",70,202.762
+"WV","managed (conservation)",80,189.618
+"WV","managed (conservation)",90,177.249
+"WV","managed (conservation)",100,163.736
+"WY","managed (conservation)",0,125.612
+"WY","managed (conservation)",10,131.23
+"WY","managed (conservation)",20,136.54
+"WY","managed (conservation)",30,140.568
+"WY","managed (conservation)",40,143.534
+"WY","managed (conservation)",50,145.832
+"WY","managed (conservation)",60,146.41
+"WY","managed (conservation)",70,147.36
+"WY","managed (conservation)",80,147.342
+"WY","managed (conservation)",90,146.864
+"WY","managed (conservation)",100,145.983
