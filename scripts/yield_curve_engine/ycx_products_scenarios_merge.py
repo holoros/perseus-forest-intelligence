@@ -13,7 +13,7 @@ from collections import defaultdict
 
 csvpath, api = sys.argv[1], sys.argv[2]
 MODEL, CLS = "yc_treemap_spatial_v1", "YC"
-LABEL = "YC TreeMap-2022 product-resolved standing biomass"
+LABEL = "YC TreeMap-2022 product-resolved standing biomass (hybrid engine)"
 TM_BASE = 2022
 PROD2METRIC = {"sawtimber":"sawtimber_bio_dry","pulpwood":"pulpwood_bio_dry","residue":"residue_bio_dry"}
 METRIC_DEFS = {
