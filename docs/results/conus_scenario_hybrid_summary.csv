@@ -1,0 +1,5 @@
+"scenario","t0","t100","pct"
+"reserve (no harvest)",10002,11794,17.9
+"managed (harvest)",10002,4242,-57.6
+"managed (intensive)",10002,2351,-76.5
+"managed (conservation)",10002,8249,-17.5

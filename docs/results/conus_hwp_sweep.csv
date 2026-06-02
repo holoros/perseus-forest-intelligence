@@ -1,0 +1,1081 @@
+"scenario","HL_saw","HL_pulp","LF_FRAC","HL_lf","DF","net_stock_d","net_subst_d"
+"managed (conservation)",25,2,0.15,50,0,2279,2279
+"managed (conservation)",35,2,0.15,50,0,2571,2571
+"managed (conservation)",50,2,0.15,50,0,2887,2887
+"managed (conservation)",25,4,0.15,50,0,2316,2316
+"managed (conservation)",35,4,0.15,50,0,2608,2608
+"managed (conservation)",50,4,0.15,50,0,2924,2924
+"managed (conservation)",25,2,0.3,50,0,2683,2683
+"managed (conservation)",35,2,0.3,50,0,2947,2947
+"managed (conservation)",50,2,0.3,50,0,3229,3229
+"managed (conservation)",25,4,0.3,50,0,2719,2719
+"managed (conservation)",35,4,0.3,50,0,2982,2982
+"managed (conservation)",50,4,0.3,50,0,3265,3265
+"managed (conservation)",25,2,0.5,50,0,3222,3222
+"managed (conservation)",35,2,0.5,50,0,3447,3447
+"managed (conservation)",50,2,0.5,50,0,3685,3685
+"managed (conservation)",25,4,0.5,50,0,3256,3256
+"managed (conservation)",35,4,0.5,50,0,3481,3481
+"managed (conservation)",50,4,0.5,50,0,3719,3719
+"managed (conservation)",25,2,0.15,100,0,2375,2375
+"managed (conservation)",35,2,0.15,100,0,2659,2659
+"managed (conservation)",50,2,0.15,100,0,2967,2967
+"managed (conservation)",25,4,0.15,100,0,2410,2410
+"managed (conservation)",35,4,0.15,100,0,2695,2695
+"managed (conservation)",50,4,0.15,100,0,3003,3003
+"managed (conservation)",25,2,0.3,100,0,2875,2875
+"managed (conservation)",35,2,0.3,100,0,3123,3123
+"managed (conservation)",50,2,0.3,100,0,3389,3389
+"managed (conservation)",25,4,0.3,100,0,2908,2908
+"managed (conservation)",35,4,0.3,100,0,3155,3155
+"managed (conservation)",50,4,0.3,100,0,3422,3422
+"managed (conservation)",25,2,0.5,100,0,3542,3542
+"managed (conservation)",35,2,0.5,100,0,3741,3741
+"managed (conservation)",50,2,0.5,100,0,3953,3953
+"managed (conservation)",25,4,0.5,100,0,3571,3571
+"managed (conservation)",35,4,0.5,100,0,3769,3769
+"managed (conservation)",50,4,0.5,100,0,3981,3981
+"managed (conservation)",25,2,0.15,200,0,2437,2437
+"managed (conservation)",35,2,0.15,200,0,2717,2717
+"managed (conservation)",50,2,0.15,200,0,3019,3019
+"managed (conservation)",25,4,0.15,200,0,2471,2471
+"managed (conservation)",35,4,0.15,200,0,2751,2751
+"managed (conservation)",50,4,0.15,200,0,3054,3054
+"managed (conservation)",25,2,0.3,200,0,3000,3000
+"managed (conservation)",35,2,0.3,200,0,3237,3237
+"managed (conservation)",50,2,0.3,200,0,3494,3494
+"managed (conservation)",25,4,0.3,200,0,3030,3030
+"managed (conservation)",35,4,0.3,200,0,3268,3268
+"managed (conservation)",50,4,0.3,200,0,3524,3524
+"managed (conservation)",25,2,0.5,200,0,3750,3750
+"managed (conservation)",35,2,0.5,200,0,3932,3932
+"managed (conservation)",50,2,0.5,200,0,4126,4126
+"managed (conservation)",25,4,0.5,200,0,3775,3775
+"managed (conservation)",35,4,0.5,200,0,3956,3956
+"managed (conservation)",50,4,0.5,200,0,4151,4151
+"managed (conservation)",25,2,0.15,50,0.3,2279,3976
+"managed (conservation)",35,2,0.15,50,0.3,2571,4269
+"managed (conservation)",50,2,0.15,50,0.3,2887,4584
+"managed (conservation)",25,4,0.15,50,0.3,2316,4013
+"managed (conservation)",35,4,0.15,50,0.3,2608,4306
+"managed (conservation)",50,4,0.15,50,0.3,2924,4621
+"managed (conservation)",25,2,0.3,50,0.3,2683,4380
+"managed (conservation)",35,2,0.3,50,0.3,2947,4644
+"managed (conservation)",50,2,0.3,50,0.3,3229,4926
+"managed (conservation)",25,4,0.3,50,0.3,2719,4416
+"managed (conservation)",35,4,0.3,50,0.3,2982,4680
+"managed (conservation)",50,4,0.3,50,0.3,3265,4962
+"managed (conservation)",25,2,0.5,50,0.3,3222,4919
+"managed (conservation)",35,2,0.5,50,0.3,3447,5145
+"managed (conservation)",50,2,0.5,50,0.3,3685,5383
+"managed (conservation)",25,4,0.5,50,0.3,3256,4953
+"managed (conservation)",35,4,0.5,50,0.3,3481,5178
+"managed (conservation)",50,4,0.5,50,0.3,3719,5416
+"managed (conservation)",25,2,0.15,100,0.3,2375,4072
+"managed (conservation)",35,2,0.15,100,0.3,2659,4357
+"managed (conservation)",50,2,0.15,100,0.3,2967,4664
+"managed (conservation)",25,4,0.15,100,0.3,2410,4108
+"managed (conservation)",35,4,0.15,100,0.3,2695,4392
+"managed (conservation)",50,4,0.15,100,0.3,3003,4700
+"managed (conservation)",25,2,0.3,100,0.3,2875,4572
+"managed (conservation)",35,2,0.3,100,0.3,3123,4820
+"managed (conservation)",50,2,0.3,100,0.3,3389,5087
+"managed (conservation)",25,4,0.3,100,0.3,2908,4605
+"managed (conservation)",35,4,0.3,100,0.3,3155,4853
+"managed (conservation)",50,4,0.3,100,0.3,3422,5119
+"managed (conservation)",25,2,0.5,100,0.3,3542,5239
+"managed (conservation)",35,2,0.5,100,0.3,3741,5438
+"managed (conservation)",50,2,0.5,100,0.3,3953,5650
+"managed (conservation)",25,4,0.5,100,0.3,3571,5268
+"managed (conservation)",35,4,0.5,100,0.3,3769,5467
+"managed (conservation)",50,4,0.5,100,0.3,3981,5678
+"managed (conservation)",25,2,0.15,200,0.3,2437,4134
+"managed (conservation)",35,2,0.15,200,0.3,2717,4414
+"managed (conservation)",50,2,0.15,200,0.3,3019,4716
+"managed (conservation)",25,4,0.15,200,0.3,2471,4169
+"managed (conservation)",35,4,0.15,200,0.3,2751,4448
+"managed (conservation)",50,4,0.15,200,0.3,3054,4751
+"managed (conservation)",25,2,0.3,200,0.3,3000,4697
+"managed (conservation)",35,2,0.3,200,0.3,3237,4935
+"managed (conservation)",50,2,0.3,200,0.3,3494,5191
+"managed (conservation)",25,4,0.3,200,0.3,3030,4727
+"managed (conservation)",35,4,0.3,200,0.3,3268,4965
+"managed (conservation)",50,4,0.3,200,0.3,3524,5221
+"managed (conservation)",25,2,0.5,200,0.3,3750,5447
+"managed (conservation)",35,2,0.5,200,0.3,3932,5629
+"managed (conservation)",50,2,0.5,200,0.3,4126,5824
+"managed (conservation)",25,4,0.5,200,0.3,3775,5472
+"managed (conservation)",35,4,0.5,200,0.3,3956,5653
+"managed (conservation)",50,4,0.5,200,0.3,4151,5848
+"managed (conservation)",25,2,0.15,50,0.45,2279,4824
+"managed (conservation)",35,2,0.15,50,0.45,2571,5117
+"managed (conservation)",50,2,0.15,50,0.45,2887,5433
+"managed (conservation)",25,4,0.15,50,0.45,2316,4862
+"managed (conservation)",35,4,0.15,50,0.45,2608,5154
+"managed (conservation)",50,4,0.15,50,0.45,2924,5470
+"managed (conservation)",25,2,0.3,50,0.45,2683,5229
+"managed (conservation)",35,2,0.3,50,0.45,2947,5493
+"managed (conservation)",50,2,0.3,50,0.45,3229,5775
+"managed (conservation)",25,4,0.3,50,0.45,2719,5264
+"managed (conservation)",35,4,0.3,50,0.45,2982,5528
+"managed (conservation)",50,4,0.3,50,0.45,3265,5810
+"managed (conservation)",25,2,0.5,50,0.45,3222,5768
+"managed (conservation)",35,2,0.5,50,0.45,3447,5993
+"managed (conservation)",50,2,0.5,50,0.45,3685,6231
+"managed (conservation)",25,4,0.5,50,0.45,3256,5801
+"managed (conservation)",35,4,0.5,50,0.45,3481,6027
+"managed (conservation)",50,4,0.5,50,0.45,3719,6265
+"managed (conservation)",25,2,0.15,100,0.45,2375,4920
+"managed (conservation)",35,2,0.15,100,0.45,2659,5205
+"managed (conservation)",50,2,0.15,100,0.45,2967,5513
+"managed (conservation)",25,4,0.15,100,0.45,2410,4956
+"managed (conservation)",35,4,0.15,100,0.45,2695,5241
+"managed (conservation)",50,4,0.15,100,0.45,3003,5548
+"managed (conservation)",25,2,0.3,100,0.45,2875,5421
+"managed (conservation)",35,2,0.3,100,0.45,3123,5669
+"managed (conservation)",50,2,0.3,100,0.45,3389,5935
+"managed (conservation)",25,4,0.3,100,0.45,2908,5453
+"managed (conservation)",35,4,0.3,100,0.45,3155,5701
+"managed (conservation)",50,4,0.3,100,0.45,3422,5968
+"managed (conservation)",25,2,0.5,100,0.45,3542,6088
+"managed (conservation)",35,2,0.5,100,0.45,3741,6287
+"managed (conservation)",50,2,0.5,100,0.45,3953,6499
+"managed (conservation)",25,4,0.5,100,0.45,3571,6116
+"managed (conservation)",35,4,0.5,100,0.45,3769,6315
+"managed (conservation)",50,4,0.5,100,0.45,3981,6527
+"managed (conservation)",25,2,0.15,200,0.45,2437,4983
+"managed (conservation)",35,2,0.15,200,0.45,2717,5262
+"managed (conservation)",50,2,0.15,200,0.45,3019,5565
+"managed (conservation)",25,4,0.15,200,0.45,2471,5017
+"managed (conservation)",35,4,0.15,200,0.45,2751,5297
+"managed (conservation)",50,4,0.15,200,0.45,3054,5599
+"managed (conservation)",25,2,0.3,200,0.45,3000,5546
+"managed (conservation)",35,2,0.3,200,0.45,3237,5783
+"managed (conservation)",50,2,0.3,200,0.45,3494,6039
+"managed (conservation)",25,4,0.3,200,0.45,3030,5576
+"managed (conservation)",35,4,0.3,200,0.45,3268,5813
+"managed (conservation)",50,4,0.3,200,0.45,3524,6070
+"managed (conservation)",25,2,0.5,200,0.45,3750,6296
+"managed (conservation)",35,2,0.5,200,0.45,3932,6478
+"managed (conservation)",50,2,0.5,200,0.45,4126,6672
+"managed (conservation)",25,4,0.5,200,0.45,3775,6321
+"managed (conservation)",35,4,0.5,200,0.45,3956,6502
+"managed (conservation)",50,4,0.5,200,0.45,4151,6697
+"managed (conservation)",25,2,0.15,50,0.6,2279,5673
+"managed (conservation)",35,2,0.15,50,0.6,2571,5966
+"managed (conservation)",50,2,0.15,50,0.6,2887,6281
+"managed (conservation)",25,4,0.15,50,0.6,2316,5710
+"managed (conservation)",35,4,0.15,50,0.6,2608,6003
+"managed (conservation)",50,4,0.15,50,0.6,2924,6318
+"managed (conservation)",25,2,0.3,50,0.6,2683,6077
+"managed (conservation)",35,2,0.3,50,0.6,2947,6341
+"managed (conservation)",50,2,0.3,50,0.6,3229,6624
+"managed (conservation)",25,4,0.3,50,0.6,2719,6113
+"managed (conservation)",35,4,0.3,50,0.6,2982,6377
+"managed (conservation)",50,4,0.3,50,0.6,3265,6659
+"managed (conservation)",25,2,0.5,50,0.6,3222,6617
+"managed (conservation)",35,2,0.5,50,0.6,3447,6842
+"managed (conservation)",50,2,0.5,50,0.6,3685,7080
+"managed (conservation)",25,4,0.5,50,0.6,3256,6650
+"managed (conservation)",35,4,0.5,50,0.6,3481,6875
+"managed (conservation)",50,4,0.5,50,0.6,3719,7113
+"managed (conservation)",25,2,0.15,100,0.6,2375,5769
+"managed (conservation)",35,2,0.15,100,0.6,2659,6054
+"managed (conservation)",50,2,0.15,100,0.6,2967,6361
+"managed (conservation)",25,4,0.15,100,0.6,2410,5805
+"managed (conservation)",35,4,0.15,100,0.6,2695,6090
+"managed (conservation)",50,4,0.15,100,0.6,3003,6397
+"managed (conservation)",25,2,0.3,100,0.6,2875,6270
+"managed (conservation)",35,2,0.3,100,0.6,3123,6517
+"managed (conservation)",50,2,0.3,100,0.6,3389,6784
+"managed (conservation)",25,4,0.3,100,0.6,2908,6302
+"managed (conservation)",35,4,0.3,100,0.6,3155,6550
+"managed (conservation)",50,4,0.3,100,0.6,3422,6816
+"managed (conservation)",25,2,0.5,100,0.6,3542,6937
+"managed (conservation)",35,2,0.5,100,0.6,3741,7136
+"managed (conservation)",50,2,0.5,100,0.6,3953,7347
+"managed (conservation)",25,4,0.5,100,0.6,3571,6965
+"managed (conservation)",35,4,0.5,100,0.6,3769,7164
+"managed (conservation)",50,4,0.5,100,0.6,3981,7376
+"managed (conservation)",25,2,0.15,200,0.6,2437,5831
+"managed (conservation)",35,2,0.15,200,0.6,2717,6111
+"managed (conservation)",50,2,0.15,200,0.6,3019,6414
+"managed (conservation)",25,4,0.15,200,0.6,2471,5866
+"managed (conservation)",35,4,0.15,200,0.6,2751,6146
+"managed (conservation)",50,4,0.15,200,0.6,3054,6448
+"managed (conservation)",25,2,0.3,200,0.6,3000,6394
+"managed (conservation)",35,2,0.3,200,0.6,3237,6632
+"managed (conservation)",50,2,0.3,200,0.6,3494,6888
+"managed (conservation)",25,4,0.3,200,0.6,3030,6425
+"managed (conservation)",35,4,0.3,200,0.6,3268,6662
+"managed (conservation)",50,4,0.3,200,0.6,3524,6918
+"managed (conservation)",25,2,0.5,200,0.6,3750,7145
+"managed (conservation)",35,2,0.5,200,0.6,3932,7326
+"managed (conservation)",50,2,0.5,200,0.6,4126,7521
+"managed (conservation)",25,4,0.5,200,0.6,3775,7169
+"managed (conservation)",35,4,0.5,200,0.6,3956,7351
+"managed (conservation)",50,4,0.5,200,0.6,4151,7545
+"managed (conservation)",25,2,0.15,50,0.9,2279,7370
+"managed (conservation)",35,2,0.15,50,0.9,2571,7663
+"managed (conservation)",50,2,0.15,50,0.9,2887,7978
+"managed (conservation)",25,4,0.15,50,0.9,2316,7408
+"managed (conservation)",35,4,0.15,50,0.9,2608,7700
+"managed (conservation)",50,4,0.15,50,0.9,2924,8016
+"managed (conservation)",25,2,0.3,50,0.9,2683,7775
+"managed (conservation)",35,2,0.3,50,0.9,2947,8038
+"managed (conservation)",50,2,0.3,50,0.9,3229,8321
+"managed (conservation)",25,4,0.3,50,0.9,2719,7810
+"managed (conservation)",35,4,0.3,50,0.9,2982,8074
+"managed (conservation)",50,4,0.3,50,0.9,3265,8356
+"managed (conservation)",25,2,0.5,50,0.9,3222,8314
+"managed (conservation)",35,2,0.5,50,0.9,3447,8539
+"managed (conservation)",50,2,0.5,50,0.9,3685,8777
+"managed (conservation)",25,4,0.5,50,0.9,3256,8347
+"managed (conservation)",35,4,0.5,50,0.9,3481,8572
+"managed (conservation)",50,4,0.5,50,0.9,3719,8811
+"managed (conservation)",25,2,0.15,100,0.9,2375,7466
+"managed (conservation)",35,2,0.15,100,0.9,2659,7751
+"managed (conservation)",50,2,0.15,100,0.9,2967,8059
+"managed (conservation)",25,4,0.15,100,0.9,2410,7502
+"managed (conservation)",35,4,0.15,100,0.9,2695,7787
+"managed (conservation)",50,4,0.15,100,0.9,3003,8094
+"managed (conservation)",25,2,0.3,100,0.9,2875,7967
+"managed (conservation)",35,2,0.3,100,0.9,3123,8215
+"managed (conservation)",50,2,0.3,100,0.9,3389,8481
+"managed (conservation)",25,4,0.3,100,0.9,2908,7999
+"managed (conservation)",35,4,0.3,100,0.9,3155,8247
+"managed (conservation)",50,4,0.3,100,0.9,3422,8514
+"managed (conservation)",25,2,0.5,100,0.9,3542,8634
+"managed (conservation)",35,2,0.5,100,0.9,3741,8833
+"managed (conservation)",50,2,0.5,100,0.9,3953,9044
+"managed (conservation)",25,4,0.5,100,0.9,3571,8662
+"managed (conservation)",35,4,0.5,100,0.9,3769,8861
+"managed (conservation)",50,4,0.5,100,0.9,3981,9073
+"managed (conservation)",25,2,0.15,200,0.9,2437,7529
+"managed (conservation)",35,2,0.15,200,0.9,2717,7808
+"managed (conservation)",50,2,0.15,200,0.9,3019,8111
+"managed (conservation)",25,4,0.15,200,0.9,2471,7563
+"managed (conservation)",35,4,0.15,200,0.9,2751,7843
+"managed (conservation)",50,4,0.15,200,0.9,3054,8145
+"managed (conservation)",25,2,0.3,200,0.9,3000,8092
+"managed (conservation)",35,2,0.3,200,0.9,3237,8329
+"managed (conservation)",50,2,0.3,200,0.9,3494,8585
+"managed (conservation)",25,4,0.3,200,0.9,3030,8122
+"managed (conservation)",35,4,0.3,200,0.9,3268,8359
+"managed (conservation)",50,4,0.3,200,0.9,3524,8616
+"managed (conservation)",25,2,0.5,200,0.9,3750,8842
+"managed (conservation)",35,2,0.5,200,0.9,3932,9024
+"managed (conservation)",50,2,0.5,200,0.9,4126,9218
+"managed (conservation)",25,4,0.5,200,0.9,3775,8866
+"managed (conservation)",35,4,0.5,200,0.9,3956,9048
+"managed (conservation)",50,4,0.5,200,0.9,4151,9243
+"managed (harvest)",25,2,0.15,50,0,-1006,-1006
+"managed (harvest)",35,2,0.15,50,0,-424,-424
+"managed (harvest)",50,2,0.15,50,0,218,218
+"managed (harvest)",25,4,0.15,50,0,-948,-948
+"managed (harvest)",35,4,0.15,50,0,-366,-366
+"managed (harvest)",50,4,0.15,50,0,276,276
+"managed (harvest)",25,2,0.3,50,0,-222,-222
+"managed (harvest)",35,2,0.3,50,0,307,307
+"managed (harvest)",50,2,0.3,50,0,885,885
+"managed (harvest)",25,4,0.3,50,0,-164,-164
+"managed (harvest)",35,4,0.3,50,0,365,365
+"managed (harvest)",50,4,0.3,50,0,942,942
+"managed (harvest)",25,2,0.5,50,0,824,824
+"managed (harvest)",35,2,0.5,50,0,1282,1282
+"managed (harvest)",50,2,0.5,50,0,1774,1774
+"managed (harvest)",25,4,0.5,50,0,881,881
+"managed (harvest)",35,4,0.5,50,0,1338,1338
+"managed (harvest)",50,4,0.5,50,0,1831,1831
+"managed (harvest)",25,2,0.15,100,0,-800,-800
+"managed (harvest)",35,2,0.15,100,0,-234,-234
+"managed (harvest)",50,2,0.15,100,0,391,391
+"managed (harvest)",25,4,0.15,100,0,-745,-745
+"managed (harvest)",35,4,0.15,100,0,-179,-179
+"managed (harvest)",50,4,0.15,100,0,446,446
+"managed (harvest)",25,2,0.3,100,0,192,192
+"managed (harvest)",35,2,0.3,100,0,686,686
+"managed (harvest)",50,2,0.3,100,0,1230,1230
+"managed (harvest)",25,4,0.3,100,0,243,243
+"managed (harvest)",35,4,0.3,100,0,738,738
+"managed (harvest)",50,4,0.3,100,0,1282,1282
+"managed (harvest)",25,2,0.5,100,0,1513,1513
+"managed (harvest)",35,2,0.5,100,0,1914,1914
+"managed (harvest)",50,2,0.5,100,0,2349,2349
+"managed (harvest)",25,4,0.5,100,0,1560,1560
+"managed (harvest)",35,4,0.5,100,0,1961,1961
+"managed (harvest)",50,4,0.5,100,0,2396,2396
+"managed (harvest)",25,2,0.15,200,0,-664,-664
+"managed (harvest)",35,2,0.15,200,0,-110,-110
+"managed (harvest)",50,2,0.15,200,0,504,504
+"managed (harvest)",25,4,0.15,200,0,-611,-611
+"managed (harvest)",35,4,0.15,200,0,-57,-57
+"managed (harvest)",50,4,0.15,200,0,557,557
+"managed (harvest)",25,2,0.3,200,0,463,463
+"managed (harvest)",35,2,0.3,200,0,935,935
+"managed (harvest)",50,2,0.3,200,0,1456,1456
+"managed (harvest)",25,4,0.3,200,0,510,510
+"managed (harvest)",35,4,0.3,200,0,982,982
+"managed (harvest)",50,4,0.3,200,0,1503,1503
+"managed (harvest)",25,2,0.5,200,0,1965,1965
+"managed (harvest)",35,2,0.5,200,0,2328,2328
+"managed (harvest)",50,2,0.5,200,0,2726,2726
+"managed (harvest)",25,4,0.5,200,0,2005,2005
+"managed (harvest)",35,4,0.5,200,0,2368,2368
+"managed (harvest)",50,4,0.5,200,0,2766,2766
+"managed (harvest)",25,2,0.15,50,0.3,-1006,2318
+"managed (harvest)",35,2,0.15,50,0.3,-424,2901
+"managed (harvest)",50,2,0.15,50,0.3,218,3543
+"managed (harvest)",25,4,0.15,50,0.3,-948,2376
+"managed (harvest)",35,4,0.15,50,0.3,-366,2959
+"managed (harvest)",50,4,0.15,50,0.3,276,3601
+"managed (harvest)",25,2,0.3,50,0.3,-222,3103
+"managed (harvest)",35,2,0.3,50,0.3,307,3632
+"managed (harvest)",50,2,0.3,50,0.3,885,4210
+"managed (harvest)",25,4,0.3,50,0.3,-164,3160
+"managed (harvest)",35,4,0.3,50,0.3,365,3689
+"managed (harvest)",50,4,0.3,50,0.3,942,4267
+"managed (harvest)",25,2,0.5,50,0.3,824,4149
+"managed (harvest)",35,2,0.5,50,0.3,1282,4606
+"managed (harvest)",50,2,0.5,50,0.3,1774,5099
+"managed (harvest)",25,4,0.5,50,0.3,881,4206
+"managed (harvest)",35,4,0.5,50,0.3,1338,4663
+"managed (harvest)",50,4,0.5,50,0.3,1831,5155
+"managed (harvest)",25,2,0.15,100,0.3,-800,2525
+"managed (harvest)",35,2,0.15,100,0.3,-234,3090
+"managed (harvest)",50,2,0.15,100,0.3,391,3715
+"managed (harvest)",25,4,0.15,100,0.3,-745,2580
+"managed (harvest)",35,4,0.15,100,0.3,-179,3145
+"managed (harvest)",50,4,0.15,100,0.3,446,3770
+"managed (harvest)",25,2,0.3,100,0.3,192,3516
+"managed (harvest)",35,2,0.3,100,0.3,686,4011
+"managed (harvest)",50,2,0.3,100,0.3,1230,4555
+"managed (harvest)",25,4,0.3,100,0.3,243,3568
+"managed (harvest)",35,4,0.3,100,0.3,738,4063
+"managed (harvest)",50,4,0.3,100,0.3,1282,4606
+"managed (harvest)",25,2,0.5,100,0.3,1513,4838
+"managed (harvest)",35,2,0.5,100,0.3,1914,5239
+"managed (harvest)",50,2,0.5,100,0.3,2349,5674
+"managed (harvest)",25,4,0.5,100,0.3,1560,4885
+"managed (harvest)",35,4,0.5,100,0.3,1961,5286
+"managed (harvest)",50,4,0.5,100,0.3,2396,5721
+"managed (harvest)",25,2,0.15,200,0.3,-664,2660
+"managed (harvest)",35,2,0.15,200,0.3,-110,3215
+"managed (harvest)",50,2,0.15,200,0.3,504,3828
+"managed (harvest)",25,4,0.15,200,0.3,-611,2713
+"managed (harvest)",35,4,0.15,200,0.3,-57,3267
+"managed (harvest)",50,4,0.15,200,0.3,557,3881
+"managed (harvest)",25,2,0.3,200,0.3,463,3787
+"managed (harvest)",35,2,0.3,200,0.3,935,4260
+"managed (harvest)",50,2,0.3,200,0.3,1456,4781
+"managed (harvest)",25,4,0.3,200,0.3,510,3834
+"managed (harvest)",35,4,0.3,200,0.3,982,4307
+"managed (harvest)",50,4,0.3,200,0.3,1503,4828
+"managed (harvest)",25,2,0.5,200,0.3,1965,5290
+"managed (harvest)",35,2,0.5,200,0.3,2328,5653
+"managed (harvest)",50,2,0.5,200,0.3,2726,6051
+"managed (harvest)",25,4,0.5,200,0.3,2005,5329
+"managed (harvest)",35,4,0.5,200,0.3,2368,5693
+"managed (harvest)",50,4,0.5,200,0.3,2766,6090
+"managed (harvest)",25,2,0.15,50,0.45,-1006,3980
+"managed (harvest)",35,2,0.15,50,0.45,-424,4563
+"managed (harvest)",50,2,0.15,50,0.45,218,5205
+"managed (harvest)",25,4,0.15,50,0.45,-948,4038
+"managed (harvest)",35,4,0.15,50,0.45,-366,4621
+"managed (harvest)",50,4,0.15,50,0.45,276,5263
+"managed (harvest)",25,2,0.3,50,0.45,-222,4765
+"managed (harvest)",35,2,0.3,50,0.45,307,5294
+"managed (harvest)",50,2,0.3,50,0.45,885,5872
+"managed (harvest)",25,4,0.3,50,0.45,-164,4823
+"managed (harvest)",35,4,0.3,50,0.45,365,5351
+"managed (harvest)",50,4,0.3,50,0.45,942,5929
+"managed (harvest)",25,2,0.5,50,0.45,824,5811
+"managed (harvest)",35,2,0.5,50,0.45,1282,6269
+"managed (harvest)",50,2,0.5,50,0.45,1774,6761
+"managed (harvest)",25,4,0.5,50,0.45,881,5868
+"managed (harvest)",35,4,0.5,50,0.45,1338,6325
+"managed (harvest)",50,4,0.5,50,0.45,1831,6818
+"managed (harvest)",25,2,0.15,100,0.45,-800,4187
+"managed (harvest)",35,2,0.15,100,0.45,-234,4753
+"managed (harvest)",50,2,0.15,100,0.45,391,5377
+"managed (harvest)",25,4,0.15,100,0.45,-745,4242
+"managed (harvest)",35,4,0.15,100,0.45,-179,4808
+"managed (harvest)",50,4,0.15,100,0.45,446,5433
+"managed (harvest)",25,2,0.3,100,0.45,192,5178
+"managed (harvest)",35,2,0.3,100,0.45,686,5673
+"managed (harvest)",50,2,0.3,100,0.45,1230,6217
+"managed (harvest)",25,4,0.3,100,0.45,243,5230
+"managed (harvest)",35,4,0.3,100,0.45,738,5725
+"managed (harvest)",50,4,0.3,100,0.45,1282,6269
+"managed (harvest)",25,2,0.5,100,0.45,1513,6500
+"managed (harvest)",35,2,0.5,100,0.45,1914,6901
+"managed (harvest)",50,2,0.5,100,0.45,2349,7336
+"managed (harvest)",25,4,0.5,100,0.45,1560,6547
+"managed (harvest)",35,4,0.5,100,0.45,1961,6948
+"managed (harvest)",50,4,0.5,100,0.45,2396,7383
+"managed (harvest)",25,2,0.15,200,0.45,-664,4323
+"managed (harvest)",35,2,0.15,200,0.45,-110,4877
+"managed (harvest)",50,2,0.15,200,0.45,504,5491
+"managed (harvest)",25,4,0.15,200,0.45,-611,4376
+"managed (harvest)",35,4,0.15,200,0.45,-57,4930
+"managed (harvest)",50,4,0.15,200,0.45,557,5543
+"managed (harvest)",25,2,0.3,200,0.45,463,5449
+"managed (harvest)",35,2,0.3,200,0.45,935,5922
+"managed (harvest)",50,2,0.3,200,0.45,1456,6443
+"managed (harvest)",25,4,0.3,200,0.45,510,5497
+"managed (harvest)",35,4,0.3,200,0.45,982,5969
+"managed (harvest)",50,4,0.3,200,0.45,1503,6490
+"managed (harvest)",25,2,0.5,200,0.45,1965,6952
+"managed (harvest)",35,2,0.5,200,0.45,2328,7315
+"managed (harvest)",50,2,0.5,200,0.45,2726,7713
+"managed (harvest)",25,4,0.5,200,0.45,2005,6991
+"managed (harvest)",35,4,0.5,200,0.45,2368,7355
+"managed (harvest)",50,4,0.5,200,0.45,2766,7753
+"managed (harvest)",25,2,0.15,50,0.6,-1006,5643
+"managed (harvest)",35,2,0.15,50,0.6,-424,6225
+"managed (harvest)",50,2,0.15,50,0.6,218,6867
+"managed (harvest)",25,4,0.15,50,0.6,-948,5701
+"managed (harvest)",35,4,0.15,50,0.6,-366,6283
+"managed (harvest)",50,4,0.15,50,0.6,276,6925
+"managed (harvest)",25,2,0.3,50,0.6,-222,6427
+"managed (harvest)",35,2,0.3,50,0.6,307,6956
+"managed (harvest)",50,2,0.3,50,0.6,885,7534
+"managed (harvest)",25,4,0.3,50,0.6,-164,6485
+"managed (harvest)",35,4,0.3,50,0.6,365,7014
+"managed (harvest)",50,4,0.3,50,0.6,942,7592
+"managed (harvest)",25,2,0.5,50,0.6,824,7473
+"managed (harvest)",35,2,0.5,50,0.6,1282,7931
+"managed (harvest)",50,2,0.5,50,0.6,1774,8423
+"managed (harvest)",25,4,0.5,50,0.6,881,7530
+"managed (harvest)",35,4,0.5,50,0.6,1338,7988
+"managed (harvest)",50,4,0.5,50,0.6,1831,8480
+"managed (harvest)",25,2,0.15,100,0.6,-800,5849
+"managed (harvest)",35,2,0.15,100,0.6,-234,6415
+"managed (harvest)",50,2,0.15,100,0.6,391,7040
+"managed (harvest)",25,4,0.15,100,0.6,-745,5905
+"managed (harvest)",35,4,0.15,100,0.6,-179,6470
+"managed (harvest)",50,4,0.15,100,0.6,446,7095
+"managed (harvest)",25,2,0.3,100,0.6,192,6841
+"managed (harvest)",35,2,0.3,100,0.6,686,7336
+"managed (harvest)",50,2,0.3,100,0.6,1230,7879
+"managed (harvest)",25,4,0.3,100,0.6,243,6892
+"managed (harvest)",35,4,0.3,100,0.6,738,7387
+"managed (harvest)",50,4,0.3,100,0.6,1282,7931
+"managed (harvest)",25,2,0.5,100,0.6,1513,8162
+"managed (harvest)",35,2,0.5,100,0.6,1914,8563
+"managed (harvest)",50,2,0.5,100,0.6,2349,8998
+"managed (harvest)",25,4,0.5,100,0.6,1560,8210
+"managed (harvest)",35,4,0.5,100,0.6,1961,8610
+"managed (harvest)",50,4,0.5,100,0.6,2396,9045
+"managed (harvest)",25,2,0.15,200,0.6,-664,5985
+"managed (harvest)",35,2,0.15,200,0.6,-110,6539
+"managed (harvest)",50,2,0.15,200,0.6,504,7153
+"managed (harvest)",25,4,0.15,200,0.6,-611,6038
+"managed (harvest)",35,4,0.15,200,0.6,-57,6592
+"managed (harvest)",50,4,0.15,200,0.6,557,7206
+"managed (harvest)",25,2,0.3,200,0.6,463,7112
+"managed (harvest)",35,2,0.3,200,0.6,935,7584
+"managed (harvest)",50,2,0.3,200,0.6,1456,8105
+"managed (harvest)",25,4,0.3,200,0.6,510,7159
+"managed (harvest)",35,4,0.3,200,0.6,982,7631
+"managed (harvest)",50,4,0.3,200,0.6,1503,8153
+"managed (harvest)",25,2,0.5,200,0.6,1965,8614
+"managed (harvest)",35,2,0.5,200,0.6,2328,8978
+"managed (harvest)",50,2,0.5,200,0.6,2726,9375
+"managed (harvest)",25,4,0.5,200,0.6,2005,8654
+"managed (harvest)",35,4,0.5,200,0.6,2368,9017
+"managed (harvest)",50,4,0.5,200,0.6,2766,9415
+"managed (harvest)",25,2,0.15,50,0.9,-1006,8967
+"managed (harvest)",35,2,0.15,50,0.9,-424,9550
+"managed (harvest)",50,2,0.15,50,0.9,218,10192
+"managed (harvest)",25,4,0.15,50,0.9,-948,9025
+"managed (harvest)",35,4,0.15,50,0.9,-366,9608
+"managed (harvest)",50,4,0.15,50,0.9,276,10250
+"managed (harvest)",25,2,0.3,50,0.9,-222,9752
+"managed (harvest)",35,2,0.3,50,0.9,307,10281
+"managed (harvest)",50,2,0.3,50,0.9,885,10859
+"managed (harvest)",25,4,0.3,50,0.9,-164,9809
+"managed (harvest)",35,4,0.3,50,0.9,365,10338
+"managed (harvest)",50,4,0.3,50,0.9,942,10916
+"managed (harvest)",25,2,0.5,50,0.9,824,10798
+"managed (harvest)",35,2,0.5,50,0.9,1282,11255
+"managed (harvest)",50,2,0.5,50,0.9,1774,11748
+"managed (harvest)",25,4,0.5,50,0.9,881,10855
+"managed (harvest)",35,4,0.5,50,0.9,1338,11312
+"managed (harvest)",50,4,0.5,50,0.9,1831,11805
+"managed (harvest)",25,2,0.15,100,0.9,-800,9174
+"managed (harvest)",35,2,0.15,100,0.9,-234,9739
+"managed (harvest)",50,2,0.15,100,0.9,391,10364
+"managed (harvest)",25,4,0.15,100,0.9,-745,9229
+"managed (harvest)",35,4,0.15,100,0.9,-179,9795
+"managed (harvest)",50,4,0.15,100,0.9,446,10419
+"managed (harvest)",25,2,0.3,100,0.9,192,10165
+"managed (harvest)",35,2,0.3,100,0.9,686,10660
+"managed (harvest)",50,2,0.3,100,0.9,1230,11204
+"managed (harvest)",25,4,0.3,100,0.9,243,10217
+"managed (harvest)",35,4,0.3,100,0.9,738,10712
+"managed (harvest)",50,4,0.3,100,0.9,1282,11255
+"managed (harvest)",25,2,0.5,100,0.9,1513,11487
+"managed (harvest)",35,2,0.5,100,0.9,1914,11888
+"managed (harvest)",50,2,0.5,100,0.9,2349,12323
+"managed (harvest)",25,4,0.5,100,0.9,1560,11534
+"managed (harvest)",35,4,0.5,100,0.9,1961,11935
+"managed (harvest)",50,4,0.5,100,0.9,2396,12370
+"managed (harvest)",25,2,0.15,200,0.9,-664,9309
+"managed (harvest)",35,2,0.15,200,0.9,-110,9864
+"managed (harvest)",50,2,0.15,200,0.9,504,10477
+"managed (harvest)",25,4,0.15,200,0.9,-611,9362
+"managed (harvest)",35,4,0.15,200,0.9,-57,9917
+"managed (harvest)",50,4,0.15,200,0.9,557,10530
+"managed (harvest)",25,2,0.3,200,0.9,463,10436
+"managed (harvest)",35,2,0.3,200,0.9,935,10909
+"managed (harvest)",50,2,0.3,200,0.9,1456,11430
+"managed (harvest)",25,4,0.3,200,0.9,510,10483
+"managed (harvest)",35,4,0.3,200,0.9,982,10956
+"managed (harvest)",50,4,0.3,200,0.9,1503,11477
+"managed (harvest)",25,2,0.5,200,0.9,1965,11939
+"managed (harvest)",35,2,0.5,200,0.9,2328,12302
+"managed (harvest)",50,2,0.5,200,0.9,2726,12700
+"managed (harvest)",25,4,0.5,200,0.9,2005,11978
+"managed (harvest)",35,4,0.5,200,0.9,2368,12342
+"managed (harvest)",50,4,0.5,200,0.9,2766,12739
+"managed (intensive)",25,2,0.15,50,0,-2969,-2969
+"managed (intensive)",35,2,0.15,50,0,-2221,-2221
+"managed (intensive)",50,2,0.15,50,0,-1377,-1377
+"managed (intensive)",25,4,0.15,50,0,-2906,-2906
+"managed (intensive)",35,4,0.15,50,0,-2157,-2157
+"managed (intensive)",50,4,0.15,50,0,-1314,-1314
+"managed (intensive)",25,2,0.3,50,0,-1981,-1981
+"managed (intensive)",35,2,0.3,50,0,-1296,-1296
+"managed (intensive)",50,2,0.3,50,0,-533,-533
+"managed (intensive)",25,4,0.3,50,0,-1917,-1917
+"managed (intensive)",35,4,0.3,50,0,-1232,-1232
+"managed (intensive)",50,4,0.3,50,0,-469,-469
+"managed (intensive)",25,2,0.5,50,0,-664,-664
+"managed (intensive)",35,2,0.5,50,0,-64,-64
+"managed (intensive)",50,2,0.5,50,0,593,593
+"managed (intensive)",25,4,0.5,50,0,-598,-598
+"managed (intensive)",35,4,0.5,50,0,1,1
+"managed (intensive)",50,4,0.5,50,0,658,658
+"managed (intensive)",25,2,0.15,100,0,-2683,-2683
+"managed (intensive)",35,2,0.15,100,0,-1958,-1958
+"managed (intensive)",50,2,0.15,100,0,-1139,-1139
+"managed (intensive)",25,4,0.15,100,0,-2623,-2623
+"managed (intensive)",35,4,0.15,100,0,-1898,-1898
+"managed (intensive)",50,4,0.15,100,0,-1079,-1079
+"managed (intensive)",25,2,0.3,100,0,-1410,-1410
+"managed (intensive)",35,2,0.3,100,0,-772,-772
+"managed (intensive)",50,2,0.3,100,0,-56,-56
+"managed (intensive)",25,4,0.3,100,0,-1352,-1352
+"managed (intensive)",35,4,0.3,100,0,-715,-715
+"managed (intensive)",50,4,0.3,100,0,1,1
+"managed (intensive)",25,2,0.5,100,0,289,289
+"managed (intensive)",35,2,0.5,100,0,810,810
+"managed (intensive)",50,2,0.5,100,0,1387,1387
+"managed (intensive)",25,4,0.5,100,0,342,342
+"managed (intensive)",35,4,0.5,100,0,864,864
+"managed (intensive)",50,4,0.5,100,0,1441,1441
+"managed (intensive)",25,2,0.15,200,0,-2494,-2494
+"managed (intensive)",35,2,0.15,200,0,-1785,-1785
+"managed (intensive)",50,2,0.15,200,0,-981,-981
+"managed (intensive)",25,4,0.15,200,0,-2437,-2437
+"managed (intensive)",35,4,0.15,200,0,-1728,-1728
+"managed (intensive)",50,4,0.15,200,0,-924,-924
+"managed (intensive)",25,2,0.3,200,0,-1031,-1031
+"managed (intensive)",35,2,0.3,200,0,-425,-425
+"managed (intensive)",50,2,0.3,200,0,260,260
+"managed (intensive)",25,4,0.3,200,0,-979,-979
+"managed (intensive)",35,4,0.3,200,0,-373,-373
+"managed (intensive)",50,4,0.3,200,0,311,311
+"managed (intensive)",25,2,0.5,200,0,919,919
+"managed (intensive)",35,2,0.5,200,0,1389,1389
+"managed (intensive)",50,2,0.5,200,0,1914,1914
+"managed (intensive)",25,4,0.5,200,0,964,964
+"managed (intensive)",35,4,0.5,200,0,1433,1433
+"managed (intensive)",50,4,0.5,200,0,1958,1958
+"managed (intensive)",25,2,0.15,50,0.3,-2969,1256
+"managed (intensive)",35,2,0.15,50,0.3,-2221,2005
+"managed (intensive)",50,2,0.15,50,0.3,-1377,2848
+"managed (intensive)",25,4,0.15,50,0.3,-2906,1320
+"managed (intensive)",35,4,0.15,50,0.3,-2157,2068
+"managed (intensive)",50,4,0.15,50,0.3,-1314,2911
+"managed (intensive)",25,2,0.3,50,0.3,-1981,2244
+"managed (intensive)",35,2,0.3,50,0.3,-1296,2929
+"managed (intensive)",50,2,0.3,50,0.3,-533,3692
+"managed (intensive)",25,4,0.3,50,0.3,-1917,2308
+"managed (intensive)",35,4,0.3,50,0.3,-1232,2993
+"managed (intensive)",50,4,0.3,50,0.3,-469,3757
+"managed (intensive)",25,2,0.5,50,0.3,-664,3562
+"managed (intensive)",35,2,0.5,50,0.3,-64,4161
+"managed (intensive)",50,2,0.5,50,0.3,593,4818
+"managed (intensive)",25,4,0.5,50,0.3,-598,3627
+"managed (intensive)",35,4,0.5,50,0.3,1,4226
+"managed (intensive)",50,4,0.5,50,0.3,658,4883
+"managed (intensive)",25,2,0.15,100,0.3,-2683,1542
+"managed (intensive)",35,2,0.15,100,0.3,-1958,2267
+"managed (intensive)",50,2,0.15,100,0.3,-1139,3087
+"managed (intensive)",25,4,0.15,100,0.3,-2623,1602
+"managed (intensive)",35,4,0.15,100,0.3,-1898,2327
+"managed (intensive)",50,4,0.15,100,0.3,-1079,3146
+"managed (intensive)",25,2,0.3,100,0.3,-1410,2816
+"managed (intensive)",35,2,0.3,100,0.3,-772,3453
+"managed (intensive)",50,2,0.3,100,0.3,-56,4169
+"managed (intensive)",25,4,0.3,100,0.3,-1352,2873
+"managed (intensive)",35,4,0.3,100,0.3,-715,3511
+"managed (intensive)",50,4,0.3,100,0.3,1,4226
+"managed (intensive)",25,2,0.5,100,0.3,289,4514
+"managed (intensive)",35,2,0.5,100,0.3,810,5035
+"managed (intensive)",50,2,0.5,100,0.3,1387,5613
+"managed (intensive)",25,4,0.5,100,0.3,342,4568
+"managed (intensive)",35,4,0.5,100,0.3,864,5089
+"managed (intensive)",50,4,0.5,100,0.3,1441,5667
+"managed (intensive)",25,2,0.15,200,0.3,-2494,1731
+"managed (intensive)",35,2,0.15,200,0.3,-1785,2441
+"managed (intensive)",50,2,0.15,200,0.3,-981,3245
+"managed (intensive)",25,4,0.15,200,0.3,-2437,1788
+"managed (intensive)",35,4,0.15,200,0.3,-1728,2498
+"managed (intensive)",50,4,0.15,200,0.3,-924,3301
+"managed (intensive)",25,2,0.3,200,0.3,-1031,3194
+"managed (intensive)",35,2,0.3,200,0.3,-425,3801
+"managed (intensive)",50,2,0.3,200,0.3,260,4485
+"managed (intensive)",25,4,0.3,200,0.3,-979,3246
+"managed (intensive)",35,4,0.3,200,0.3,-373,3852
+"managed (intensive)",50,4,0.3,200,0.3,311,4537
+"managed (intensive)",25,2,0.5,200,0.3,919,5145
+"managed (intensive)",35,2,0.5,200,0.3,1389,5614
+"managed (intensive)",50,2,0.5,200,0.3,1914,6139
+"managed (intensive)",25,4,0.5,200,0.3,964,5189
+"managed (intensive)",35,4,0.5,200,0.3,1433,5659
+"managed (intensive)",50,4,0.5,200,0.3,1958,6184
+"managed (intensive)",25,2,0.15,50,0.45,-2969,3369
+"managed (intensive)",35,2,0.15,50,0.45,-2221,4117
+"managed (intensive)",50,2,0.15,50,0.45,-1377,4961
+"managed (intensive)",25,4,0.15,50,0.45,-2906,3432
+"managed (intensive)",35,4,0.15,50,0.45,-2157,4181
+"managed (intensive)",50,4,0.15,50,0.45,-1314,5024
+"managed (intensive)",25,2,0.3,50,0.45,-1981,4357
+"managed (intensive)",35,2,0.3,50,0.45,-1296,5041
+"managed (intensive)",50,2,0.3,50,0.45,-533,5805
+"managed (intensive)",25,4,0.3,50,0.45,-1917,4421
+"managed (intensive)",35,4,0.3,50,0.45,-1232,5106
+"managed (intensive)",50,4,0.3,50,0.45,-469,5869
+"managed (intensive)",25,2,0.5,50,0.45,-664,5674
+"managed (intensive)",35,2,0.5,50,0.45,-64,6274
+"managed (intensive)",50,2,0.5,50,0.45,593,6931
+"managed (intensive)",25,4,0.5,50,0.45,-598,5740
+"managed (intensive)",35,4,0.5,50,0.45,1,6339
+"managed (intensive)",50,4,0.5,50,0.45,658,6996
+"managed (intensive)",25,2,0.15,100,0.45,-2683,3655
+"managed (intensive)",35,2,0.15,100,0.45,-1958,4380
+"managed (intensive)",50,2,0.15,100,0.45,-1139,5199
+"managed (intensive)",25,4,0.15,100,0.45,-2623,3715
+"managed (intensive)",35,4,0.15,100,0.45,-1898,4439
+"managed (intensive)",50,4,0.15,100,0.45,-1079,5259
+"managed (intensive)",25,2,0.3,100,0.45,-1410,4928
+"managed (intensive)",35,2,0.3,100,0.45,-772,5566
+"managed (intensive)",50,2,0.3,100,0.45,-56,6282
+"managed (intensive)",25,4,0.3,100,0.45,-1352,4986
+"managed (intensive)",35,4,0.3,100,0.45,-715,5623
+"managed (intensive)",50,4,0.3,100,0.45,1,6339
+"managed (intensive)",25,2,0.5,100,0.45,289,6626
+"managed (intensive)",35,2,0.5,100,0.45,810,7148
+"managed (intensive)",50,2,0.5,100,0.45,1387,7725
+"managed (intensive)",25,4,0.5,100,0.45,342,6680
+"managed (intensive)",35,4,0.5,100,0.45,864,7202
+"managed (intensive)",50,4,0.5,100,0.45,1441,7779
+"managed (intensive)",25,2,0.15,200,0.45,-2494,3844
+"managed (intensive)",35,2,0.15,200,0.45,-1785,4553
+"managed (intensive)",50,2,0.15,200,0.45,-981,5357
+"managed (intensive)",25,4,0.15,200,0.45,-2437,3901
+"managed (intensive)",35,4,0.15,200,0.45,-1728,4610
+"managed (intensive)",50,4,0.15,200,0.45,-924,5414
+"managed (intensive)",25,2,0.3,200,0.45,-1031,5307
+"managed (intensive)",35,2,0.3,200,0.45,-425,5913
+"managed (intensive)",50,2,0.3,200,0.45,260,6598
+"managed (intensive)",25,4,0.3,200,0.45,-979,5358
+"managed (intensive)",35,4,0.3,200,0.45,-373,5965
+"managed (intensive)",50,4,0.3,200,0.45,311,6649
+"managed (intensive)",25,2,0.5,200,0.45,919,7257
+"managed (intensive)",35,2,0.5,200,0.45,1389,7727
+"managed (intensive)",50,2,0.5,200,0.45,1914,8252
+"managed (intensive)",25,4,0.5,200,0.45,964,7302
+"managed (intensive)",35,4,0.5,200,0.45,1433,7771
+"managed (intensive)",50,4,0.5,200,0.45,1958,8296
+"managed (intensive)",25,2,0.15,50,0.6,-2969,5482
+"managed (intensive)",35,2,0.15,50,0.6,-2221,6230
+"managed (intensive)",50,2,0.15,50,0.6,-1377,7073
+"managed (intensive)",25,4,0.15,50,0.6,-2906,5545
+"managed (intensive)",35,4,0.15,50,0.6,-2157,6293
+"managed (intensive)",50,4,0.15,50,0.6,-1314,7137
+"managed (intensive)",25,2,0.3,50,0.6,-1981,6470
+"managed (intensive)",35,2,0.3,50,0.6,-1296,7154
+"managed (intensive)",50,2,0.3,50,0.6,-533,7918
+"managed (intensive)",25,4,0.3,50,0.6,-1917,6534
+"managed (intensive)",35,4,0.3,50,0.6,-1232,7218
+"managed (intensive)",50,4,0.3,50,0.6,-469,7982
+"managed (intensive)",25,2,0.5,50,0.6,-664,7787
+"managed (intensive)",35,2,0.5,50,0.6,-64,8386
+"managed (intensive)",50,2,0.5,50,0.6,593,9043
+"managed (intensive)",25,4,0.5,50,0.6,-598,7852
+"managed (intensive)",35,4,0.5,50,0.6,1,8452
+"managed (intensive)",50,4,0.5,50,0.6,658,9109
+"managed (intensive)",25,2,0.15,100,0.6,-2683,5767
+"managed (intensive)",35,2,0.15,100,0.6,-1958,6492
+"managed (intensive)",50,2,0.15,100,0.6,-1139,7312
+"managed (intensive)",25,4,0.15,100,0.6,-2623,5827
+"managed (intensive)",35,4,0.15,100,0.6,-1898,6552
+"managed (intensive)",50,4,0.15,100,0.6,-1079,7372
+"managed (intensive)",25,2,0.3,100,0.6,-1410,7041
+"managed (intensive)",35,2,0.3,100,0.6,-772,7679
+"managed (intensive)",50,2,0.3,100,0.6,-56,8394
+"managed (intensive)",25,4,0.3,100,0.6,-1352,7098
+"managed (intensive)",35,4,0.3,100,0.6,-715,7736
+"managed (intensive)",50,4,0.3,100,0.6,1,8452
+"managed (intensive)",25,2,0.5,100,0.6,289,8739
+"managed (intensive)",35,2,0.5,100,0.6,810,9261
+"managed (intensive)",50,2,0.5,100,0.6,1387,9838
+"managed (intensive)",25,4,0.5,100,0.6,342,8793
+"managed (intensive)",35,4,0.5,100,0.6,864,9315
+"managed (intensive)",50,4,0.5,100,0.6,1441,9892
+"managed (intensive)",25,2,0.15,200,0.6,-2494,5957
+"managed (intensive)",35,2,0.15,200,0.6,-1785,6666
+"managed (intensive)",50,2,0.15,200,0.6,-981,7470
+"managed (intensive)",25,4,0.15,200,0.6,-2437,6014
+"managed (intensive)",35,4,0.15,200,0.6,-1728,6723
+"managed (intensive)",50,4,0.15,200,0.6,-924,7527
+"managed (intensive)",25,2,0.3,200,0.6,-1031,7419
+"managed (intensive)",35,2,0.3,200,0.6,-425,8026
+"managed (intensive)",50,2,0.3,200,0.6,260,8710
+"managed (intensive)",25,4,0.3,200,0.6,-979,7471
+"managed (intensive)",35,4,0.3,200,0.6,-373,8078
+"managed (intensive)",50,4,0.3,200,0.6,311,8762
+"managed (intensive)",25,2,0.5,200,0.6,919,9370
+"managed (intensive)",35,2,0.5,200,0.6,1389,9840
+"managed (intensive)",50,2,0.5,200,0.6,1914,10364
+"managed (intensive)",25,4,0.5,200,0.6,964,9414
+"managed (intensive)",35,4,0.5,200,0.6,1433,9884
+"managed (intensive)",50,4,0.5,200,0.6,1958,10409
+"managed (intensive)",25,2,0.15,50,0.9,-2969,9707
+"managed (intensive)",35,2,0.15,50,0.9,-2221,10455
+"managed (intensive)",50,2,0.15,50,0.9,-1377,11299
+"managed (intensive)",25,4,0.15,50,0.9,-2906,9770
+"managed (intensive)",35,4,0.15,50,0.9,-2157,10518
+"managed (intensive)",50,4,0.15,50,0.9,-1314,11362
+"managed (intensive)",25,2,0.3,50,0.9,-1981,10695
+"managed (intensive)",35,2,0.3,50,0.9,-1296,11379
+"managed (intensive)",50,2,0.3,50,0.9,-533,12143
+"managed (intensive)",25,4,0.3,50,0.9,-1917,10759
+"managed (intensive)",35,4,0.3,50,0.9,-1232,11444
+"managed (intensive)",50,4,0.3,50,0.9,-469,12207
+"managed (intensive)",25,2,0.5,50,0.9,-664,12012
+"managed (intensive)",35,2,0.5,50,0.9,-64,12612
+"managed (intensive)",50,2,0.5,50,0.9,593,13268
+"managed (intensive)",25,4,0.5,50,0.9,-598,12077
+"managed (intensive)",35,4,0.5,50,0.9,1,12677
+"managed (intensive)",50,4,0.5,50,0.9,658,13334
+"managed (intensive)",25,2,0.15,100,0.9,-2683,9993
+"managed (intensive)",35,2,0.15,100,0.9,-1958,10717
+"managed (intensive)",50,2,0.15,100,0.9,-1139,11537
+"managed (intensive)",25,4,0.15,100,0.9,-2623,10052
+"managed (intensive)",35,4,0.15,100,0.9,-1898,10777
+"managed (intensive)",50,4,0.15,100,0.9,-1079,11597
+"managed (intensive)",25,2,0.3,100,0.9,-1410,11266
+"managed (intensive)",35,2,0.3,100,0.9,-772,11904
+"managed (intensive)",50,2,0.3,100,0.9,-56,12620
+"managed (intensive)",25,4,0.3,100,0.9,-1352,11324
+"managed (intensive)",35,4,0.3,100,0.9,-715,11961
+"managed (intensive)",50,4,0.3,100,0.9,1,12677
+"managed (intensive)",25,2,0.5,100,0.9,289,12964
+"managed (intensive)",35,2,0.5,100,0.9,810,13486
+"managed (intensive)",50,2,0.5,100,0.9,1387,14063
+"managed (intensive)",25,4,0.5,100,0.9,342,13018
+"managed (intensive)",35,4,0.5,100,0.9,864,13540
+"managed (intensive)",50,4,0.5,100,0.9,1441,14117
+"managed (intensive)",25,2,0.15,200,0.9,-2494,10182
+"managed (intensive)",35,2,0.15,200,0.9,-1785,10891
+"managed (intensive)",50,2,0.15,200,0.9,-981,11695
+"managed (intensive)",25,4,0.15,200,0.9,-2437,10239
+"managed (intensive)",35,4,0.15,200,0.9,-1728,10948
+"managed (intensive)",50,4,0.15,200,0.9,-924,11752
+"managed (intensive)",25,2,0.3,200,0.9,-1031,11645
+"managed (intensive)",35,2,0.3,200,0.9,-425,12251
+"managed (intensive)",50,2,0.3,200,0.9,260,12936
+"managed (intensive)",25,4,0.3,200,0.9,-979,11696
+"managed (intensive)",35,4,0.3,200,0.9,-373,12303
+"managed (intensive)",50,4,0.3,200,0.9,311,12987
+"managed (intensive)",25,2,0.5,200,0.9,919,13595
+"managed (intensive)",35,2,0.5,200,0.9,1389,14065
+"managed (intensive)",50,2,0.5,200,0.9,1914,14590
+"managed (intensive)",25,4,0.5,200,0.9,964,13640
+"managed (intensive)",35,4,0.5,200,0.9,1433,14109
+"managed (intensive)",50,4,0.5,200,0.9,1958,14634
+"reserve (no harvest)",25,2,0.15,50,0,4811,4811
+"reserve (no harvest)",35,2,0.15,50,0,4811,4811
+"reserve (no harvest)",50,2,0.15,50,0,4811,4811
+"reserve (no harvest)",25,4,0.15,50,0,4811,4811
+"reserve (no harvest)",35,4,0.15,50,0,4811,4811
+"reserve (no harvest)",50,4,0.15,50,0,4811,4811
+"reserve (no harvest)",25,2,0.3,50,0,4811,4811
+"reserve (no harvest)",35,2,0.3,50,0,4811,4811
+"reserve (no harvest)",50,2,0.3,50,0,4811,4811
+"reserve (no harvest)",25,4,0.3,50,0,4811,4811
+"reserve (no harvest)",35,4,0.3,50,0,4811,4811
+"reserve (no harvest)",50,4,0.3,50,0,4811,4811
+"reserve (no harvest)",25,2,0.5,50,0,4811,4811
+"reserve (no harvest)",35,2,0.5,50,0,4811,4811
+"reserve (no harvest)",50,2,0.5,50,0,4811,4811
+"reserve (no harvest)",25,4,0.5,50,0,4811,4811
+"reserve (no harvest)",35,4,0.5,50,0,4811,4811
+"reserve (no harvest)",50,4,0.5,50,0,4811,4811
+"reserve (no harvest)",25,2,0.15,100,0,4811,4811
+"reserve (no harvest)",35,2,0.15,100,0,4811,4811
+"reserve (no harvest)",50,2,0.15,100,0,4811,4811
+"reserve (no harvest)",25,4,0.15,100,0,4811,4811
+"reserve (no harvest)",35,4,0.15,100,0,4811,4811
+"reserve (no harvest)",50,4,0.15,100,0,4811,4811
+"reserve (no harvest)",25,2,0.3,100,0,4811,4811
+"reserve (no harvest)",35,2,0.3,100,0,4811,4811
+"reserve (no harvest)",50,2,0.3,100,0,4811,4811
+"reserve (no harvest)",25,4,0.3,100,0,4811,4811
+"reserve (no harvest)",35,4,0.3,100,0,4811,4811
+"reserve (no harvest)",50,4,0.3,100,0,4811,4811
+"reserve (no harvest)",25,2,0.5,100,0,4811,4811
+"reserve (no harvest)",35,2,0.5,100,0,4811,4811
+"reserve (no harvest)",50,2,0.5,100,0,4811,4811
+"reserve (no harvest)",25,4,0.5,100,0,4811,4811
+"reserve (no harvest)",35,4,0.5,100,0,4811,4811
+"reserve (no harvest)",50,4,0.5,100,0,4811,4811
+"reserve (no harvest)",25,2,0.15,200,0,4811,4811
+"reserve (no harvest)",35,2,0.15,200,0,4811,4811
+"reserve (no harvest)",50,2,0.15,200,0,4811,4811
+"reserve (no harvest)",25,4,0.15,200,0,4811,4811
+"reserve (no harvest)",35,4,0.15,200,0,4811,4811
+"reserve (no harvest)",50,4,0.15,200,0,4811,4811
+"reserve (no harvest)",25,2,0.3,200,0,4811,4811
+"reserve (no harvest)",35,2,0.3,200,0,4811,4811
+"reserve (no harvest)",50,2,0.3,200,0,4811,4811
+"reserve (no harvest)",25,4,0.3,200,0,4811,4811
+"reserve (no harvest)",35,4,0.3,200,0,4811,4811
+"reserve (no harvest)",50,4,0.3,200,0,4811,4811
+"reserve (no harvest)",25,2,0.5,200,0,4811,4811
+"reserve (no harvest)",35,2,0.5,200,0,4811,4811
+"reserve (no harvest)",50,2,0.5,200,0,4811,4811
+"reserve (no harvest)",25,4,0.5,200,0,4811,4811
+"reserve (no harvest)",35,4,0.5,200,0,4811,4811
+"reserve (no harvest)",50,4,0.5,200,0,4811,4811
+"reserve (no harvest)",25,2,0.15,50,0.3,4811,4811
+"reserve (no harvest)",35,2,0.15,50,0.3,4811,4811
+"reserve (no harvest)",50,2,0.15,50,0.3,4811,4811
+"reserve (no harvest)",25,4,0.15,50,0.3,4811,4811
+"reserve (no harvest)",35,4,0.15,50,0.3,4811,4811
+"reserve (no harvest)",50,4,0.15,50,0.3,4811,4811
+"reserve (no harvest)",25,2,0.3,50,0.3,4811,4811
+"reserve (no harvest)",35,2,0.3,50,0.3,4811,4811
+"reserve (no harvest)",50,2,0.3,50,0.3,4811,4811
+"reserve (no harvest)",25,4,0.3,50,0.3,4811,4811
+"reserve (no harvest)",35,4,0.3,50,0.3,4811,4811
+"reserve (no harvest)",50,4,0.3,50,0.3,4811,4811
+"reserve (no harvest)",25,2,0.5,50,0.3,4811,4811
+"reserve (no harvest)",35,2,0.5,50,0.3,4811,4811
+"reserve (no harvest)",50,2,0.5,50,0.3,4811,4811
+"reserve (no harvest)",25,4,0.5,50,0.3,4811,4811
+"reserve (no harvest)",35,4,0.5,50,0.3,4811,4811
+"reserve (no harvest)",50,4,0.5,50,0.3,4811,4811
+"reserve (no harvest)",25,2,0.15,100,0.3,4811,4811
+"reserve (no harvest)",35,2,0.15,100,0.3,4811,4811
+"reserve (no harvest)",50,2,0.15,100,0.3,4811,4811
+"reserve (no harvest)",25,4,0.15,100,0.3,4811,4811
+"reserve (no harvest)",35,4,0.15,100,0.3,4811,4811
+"reserve (no harvest)",50,4,0.15,100,0.3,4811,4811
+"reserve (no harvest)",25,2,0.3,100,0.3,4811,4811
+"reserve (no harvest)",35,2,0.3,100,0.3,4811,4811
+"reserve (no harvest)",50,2,0.3,100,0.3,4811,4811
+"reserve (no harvest)",25,4,0.3,100,0.3,4811,4811
+"reserve (no harvest)",35,4,0.3,100,0.3,4811,4811
+"reserve (no harvest)",50,4,0.3,100,0.3,4811,4811
+"reserve (no harvest)",25,2,0.5,100,0.3,4811,4811
+"reserve (no harvest)",35,2,0.5,100,0.3,4811,4811
+"reserve (no harvest)",50,2,0.5,100,0.3,4811,4811
+"reserve (no harvest)",25,4,0.5,100,0.3,4811,4811
+"reserve (no harvest)",35,4,0.5,100,0.3,4811,4811
+"reserve (no harvest)",50,4,0.5,100,0.3,4811,4811
+"reserve (no harvest)",25,2,0.15,200,0.3,4811,4811
+"reserve (no harvest)",35,2,0.15,200,0.3,4811,4811
+"reserve (no harvest)",50,2,0.15,200,0.3,4811,4811
+"reserve (no harvest)",25,4,0.15,200,0.3,4811,4811
+"reserve (no harvest)",35,4,0.15,200,0.3,4811,4811
+"reserve (no harvest)",50,4,0.15,200,0.3,4811,4811
+"reserve (no harvest)",25,2,0.3,200,0.3,4811,4811
+"reserve (no harvest)",35,2,0.3,200,0.3,4811,4811
+"reserve (no harvest)",50,2,0.3,200,0.3,4811,4811
+"reserve (no harvest)",25,4,0.3,200,0.3,4811,4811
+"reserve (no harvest)",35,4,0.3,200,0.3,4811,4811
+"reserve (no harvest)",50,4,0.3,200,0.3,4811,4811
+"reserve (no harvest)",25,2,0.5,200,0.3,4811,4811
+"reserve (no harvest)",35,2,0.5,200,0.3,4811,4811
+"reserve (no harvest)",50,2,0.5,200,0.3,4811,4811
+"reserve (no harvest)",25,4,0.5,200,0.3,4811,4811
+"reserve (no harvest)",35,4,0.5,200,0.3,4811,4811
+"reserve (no harvest)",50,4,0.5,200,0.3,4811,4811
+"reserve (no harvest)",25,2,0.15,50,0.45,4811,4811
+"reserve (no harvest)",35,2,0.15,50,0.45,4811,4811
+"reserve (no harvest)",50,2,0.15,50,0.45,4811,4811
+"reserve (no harvest)",25,4,0.15,50,0.45,4811,4811
+"reserve (no harvest)",35,4,0.15,50,0.45,4811,4811
+"reserve (no harvest)",50,4,0.15,50,0.45,4811,4811
+"reserve (no harvest)",25,2,0.3,50,0.45,4811,4811
+"reserve (no harvest)",35,2,0.3,50,0.45,4811,4811
+"reserve (no harvest)",50,2,0.3,50,0.45,4811,4811
+"reserve (no harvest)",25,4,0.3,50,0.45,4811,4811
+"reserve (no harvest)",35,4,0.3,50,0.45,4811,4811
+"reserve (no harvest)",50,4,0.3,50,0.45,4811,4811
+"reserve (no harvest)",25,2,0.5,50,0.45,4811,4811
+"reserve (no harvest)",35,2,0.5,50,0.45,4811,4811
+"reserve (no harvest)",50,2,0.5,50,0.45,4811,4811
+"reserve (no harvest)",25,4,0.5,50,0.45,4811,4811
+"reserve (no harvest)",35,4,0.5,50,0.45,4811,4811
+"reserve (no harvest)",50,4,0.5,50,0.45,4811,4811
+"reserve (no harvest)",25,2,0.15,100,0.45,4811,4811
+"reserve (no harvest)",35,2,0.15,100,0.45,4811,4811
+"reserve (no harvest)",50,2,0.15,100,0.45,4811,4811
+"reserve (no harvest)",25,4,0.15,100,0.45,4811,4811
+"reserve (no harvest)",35,4,0.15,100,0.45,4811,4811
+"reserve (no harvest)",50,4,0.15,100,0.45,4811,4811
+"reserve (no harvest)",25,2,0.3,100,0.45,4811,4811
+"reserve (no harvest)",35,2,0.3,100,0.45,4811,4811
+"reserve (no harvest)",50,2,0.3,100,0.45,4811,4811
+"reserve (no harvest)",25,4,0.3,100,0.45,4811,4811
+"reserve (no harvest)",35,4,0.3,100,0.45,4811,4811
+"reserve (no harvest)",50,4,0.3,100,0.45,4811,4811
+"reserve (no harvest)",25,2,0.5,100,0.45,4811,4811
+"reserve (no harvest)",35,2,0.5,100,0.45,4811,4811
+"reserve (no harvest)",50,2,0.5,100,0.45,4811,4811
+"reserve (no harvest)",25,4,0.5,100,0.45,4811,4811
+"reserve (no harvest)",35,4,0.5,100,0.45,4811,4811
+"reserve (no harvest)",50,4,0.5,100,0.45,4811,4811
+"reserve (no harvest)",25,2,0.15,200,0.45,4811,4811
+"reserve (no harvest)",35,2,0.15,200,0.45,4811,4811
+"reserve (no harvest)",50,2,0.15,200,0.45,4811,4811
+"reserve (no harvest)",25,4,0.15,200,0.45,4811,4811
+"reserve (no harvest)",35,4,0.15,200,0.45,4811,4811
+"reserve (no harvest)",50,4,0.15,200,0.45,4811,4811
+"reserve (no harvest)",25,2,0.3,200,0.45,4811,4811
+"reserve (no harvest)",35,2,0.3,200,0.45,4811,4811
+"reserve (no harvest)",50,2,0.3,200,0.45,4811,4811
+"reserve (no harvest)",25,4,0.3,200,0.45,4811,4811
+"reserve (no harvest)",35,4,0.3,200,0.45,4811,4811
+"reserve (no harvest)",50,4,0.3,200,0.45,4811,4811
+"reserve (no harvest)",25,2,0.5,200,0.45,4811,4811
+"reserve (no harvest)",35,2,0.5,200,0.45,4811,4811
+"reserve (no harvest)",50,2,0.5,200,0.45,4811,4811
+"reserve (no harvest)",25,4,0.5,200,0.45,4811,4811
+"reserve (no harvest)",35,4,0.5,200,0.45,4811,4811
+"reserve (no harvest)",50,4,0.5,200,0.45,4811,4811
+"reserve (no harvest)",25,2,0.15,50,0.6,4811,4811
+"reserve (no harvest)",35,2,0.15,50,0.6,4811,4811
+"reserve (no harvest)",50,2,0.15,50,0.6,4811,4811
+"reserve (no harvest)",25,4,0.15,50,0.6,4811,4811
+"reserve (no harvest)",35,4,0.15,50,0.6,4811,4811
+"reserve (no harvest)",50,4,0.15,50,0.6,4811,4811
+"reserve (no harvest)",25,2,0.3,50,0.6,4811,4811
+"reserve (no harvest)",35,2,0.3,50,0.6,4811,4811
+"reserve (no harvest)",50,2,0.3,50,0.6,4811,4811
+"reserve (no harvest)",25,4,0.3,50,0.6,4811,4811
+"reserve (no harvest)",35,4,0.3,50,0.6,4811,4811
+"reserve (no harvest)",50,4,0.3,50,0.6,4811,4811
+"reserve (no harvest)",25,2,0.5,50,0.6,4811,4811
+"reserve (no harvest)",35,2,0.5,50,0.6,4811,4811
+"reserve (no harvest)",50,2,0.5,50,0.6,4811,4811
+"reserve (no harvest)",25,4,0.5,50,0.6,4811,4811
+"reserve (no harvest)",35,4,0.5,50,0.6,4811,4811
+"reserve (no harvest)",50,4,0.5,50,0.6,4811,4811
+"reserve (no harvest)",25,2,0.15,100,0.6,4811,4811
+"reserve (no harvest)",35,2,0.15,100,0.6,4811,4811
+"reserve (no harvest)",50,2,0.15,100,0.6,4811,4811
+"reserve (no harvest)",25,4,0.15,100,0.6,4811,4811
+"reserve (no harvest)",35,4,0.15,100,0.6,4811,4811
+"reserve (no harvest)",50,4,0.15,100,0.6,4811,4811
+"reserve (no harvest)",25,2,0.3,100,0.6,4811,4811
+"reserve (no harvest)",35,2,0.3,100,0.6,4811,4811
+"reserve (no harvest)",50,2,0.3,100,0.6,4811,4811
+"reserve (no harvest)",25,4,0.3,100,0.6,4811,4811
+"reserve (no harvest)",35,4,0.3,100,0.6,4811,4811
+"reserve (no harvest)",50,4,0.3,100,0.6,4811,4811
+"reserve (no harvest)",25,2,0.5,100,0.6,4811,4811
+"reserve (no harvest)",35,2,0.5,100,0.6,4811,4811
+"reserve (no harvest)",50,2,0.5,100,0.6,4811,4811
+"reserve (no harvest)",25,4,0.5,100,0.6,4811,4811
+"reserve (no harvest)",35,4,0.5,100,0.6,4811,4811
+"reserve (no harvest)",50,4,0.5,100,0.6,4811,4811
+"reserve (no harvest)",25,2,0.15,200,0.6,4811,4811
+"reserve (no harvest)",35,2,0.15,200,0.6,4811,4811
+"reserve (no harvest)",50,2,0.15,200,0.6,4811,4811
+"reserve (no harvest)",25,4,0.15,200,0.6,4811,4811
+"reserve (no harvest)",35,4,0.15,200,0.6,4811,4811
+"reserve (no harvest)",50,4,0.15,200,0.6,4811,4811
+"reserve (no harvest)",25,2,0.3,200,0.6,4811,4811
+"reserve (no harvest)",35,2,0.3,200,0.6,4811,4811
+"reserve (no harvest)",50,2,0.3,200,0.6,4811,4811
+"reserve (no harvest)",25,4,0.3,200,0.6,4811,4811
+"reserve (no harvest)",35,4,0.3,200,0.6,4811,4811
+"reserve (no harvest)",50,4,0.3,200,0.6,4811,4811
+"reserve (no harvest)",25,2,0.5,200,0.6,4811,4811
+"reserve (no harvest)",35,2,0.5,200,0.6,4811,4811
+"reserve (no harvest)",50,2,0.5,200,0.6,4811,4811
+"reserve (no harvest)",25,4,0.5,200,0.6,4811,4811
+"reserve (no harvest)",35,4,0.5,200,0.6,4811,4811
+"reserve (no harvest)",50,4,0.5,200,0.6,4811,4811
+"reserve (no harvest)",25,2,0.15,50,0.9,4811,4811
+"reserve (no harvest)",35,2,0.15,50,0.9,4811,4811
+"reserve (no harvest)",50,2,0.15,50,0.9,4811,4811
+"reserve (no harvest)",25,4,0.15,50,0.9,4811,4811
+"reserve (no harvest)",35,4,0.15,50,0.9,4811,4811
+"reserve (no harvest)",50,4,0.15,50,0.9,4811,4811
+"reserve (no harvest)",25,2,0.3,50,0.9,4811,4811
+"reserve (no harvest)",35,2,0.3,50,0.9,4811,4811
+"reserve (no harvest)",50,2,0.3,50,0.9,4811,4811
+"reserve (no harvest)",25,4,0.3,50,0.9,4811,4811
+"reserve (no harvest)",35,4,0.3,50,0.9,4811,4811
+"reserve (no harvest)",50,4,0.3,50,0.9,4811,4811
+"reserve (no harvest)",25,2,0.5,50,0.9,4811,4811
+"reserve (no harvest)",35,2,0.5,50,0.9,4811,4811
+"reserve (no harvest)",50,2,0.5,50,0.9,4811,4811
+"reserve (no harvest)",25,4,0.5,50,0.9,4811,4811
+"reserve (no harvest)",35,4,0.5,50,0.9,4811,4811
+"reserve (no harvest)",50,4,0.5,50,0.9,4811,4811
+"reserve (no harvest)",25,2,0.15,100,0.9,4811,4811
+"reserve (no harvest)",35,2,0.15,100,0.9,4811,4811
+"reserve (no harvest)",50,2,0.15,100,0.9,4811,4811
+"reserve (no harvest)",25,4,0.15,100,0.9,4811,4811
+"reserve (no harvest)",35,4,0.15,100,0.9,4811,4811
+"reserve (no harvest)",50,4,0.15,100,0.9,4811,4811
+"reserve (no harvest)",25,2,0.3,100,0.9,4811,4811
+"reserve (no harvest)",35,2,0.3,100,0.9,4811,4811
+"reserve (no harvest)",50,2,0.3,100,0.9,4811,4811
+"reserve (no harvest)",25,4,0.3,100,0.9,4811,4811
+"reserve (no harvest)",35,4,0.3,100,0.9,4811,4811
+"reserve (no harvest)",50,4,0.3,100,0.9,4811,4811
+"reserve (no harvest)",25,2,0.5,100,0.9,4811,4811
+"reserve (no harvest)",35,2,0.5,100,0.9,4811,4811
+"reserve (no harvest)",50,2,0.5,100,0.9,4811,4811
+"reserve (no harvest)",25,4,0.5,100,0.9,4811,4811
+"reserve (no harvest)",35,4,0.5,100,0.9,4811,4811
+"reserve (no harvest)",50,4,0.5,100,0.9,4811,4811
+"reserve (no harvest)",25,2,0.15,200,0.9,4811,4811
+"reserve (no harvest)",35,2,0.15,200,0.9,4811,4811
+"reserve (no harvest)",50,2,0.15,200,0.9,4811,4811
+"reserve (no harvest)",25,4,0.15,200,0.9,4811,4811
+"reserve (no harvest)",35,4,0.15,200,0.9,4811,4811
+"reserve (no harvest)",50,4,0.15,200,0.9,4811,4811
+"reserve (no harvest)",25,2,0.3,200,0.9,4811,4811
+"reserve (no harvest)",35,2,0.3,200,0.9,4811,4811
+"reserve (no harvest)",50,2,0.3,200,0.9,4811,4811
+"reserve (no harvest)",25,4,0.3,200,0.9,4811,4811
+"reserve (no harvest)",35,4,0.3,200,0.9,4811,4811
+"reserve (no harvest)",50,4,0.3,200,0.9,4811,4811
+"reserve (no harvest)",25,2,0.5,200,0.9,4811,4811
+"reserve (no harvest)",35,2,0.5,200,0.9,4811,4811
+"reserve (no harvest)",50,2,0.5,200,0.9,4811,4811
+"reserve (no harvest)",25,4,0.5,200,0.9,4811,4811
+"reserve (no harvest)",35,4,0.5,200,0.9,4811,4811
+"reserve (no harvest)",50,4,0.5,200,0.9,4811,4811
