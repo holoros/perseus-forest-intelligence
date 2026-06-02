@@ -18,21 +18,26 @@ npm run build      # static bundle -> dist/
 
 ## Refresh data
 
-The `public/api/` JSON and the `public/raster/` overlays are exported from the upstream `perseus_db` repo. To refresh after a DB change:
+> **`public/api/` is the canonical source of truth (as of v1.6).** The deployed
+> data was assembled from the June hybrid / treemap-spatial / 48-state pipeline
+> and committed here directly. The upstream `perseus_db` export
+> (`48_export_api.py`) is currently **partial** (11 states, 2 scenario buckets,
+> no `yc_treemap_spatial_v1`) and does **not** reproduce v1.6. Do NOT wholesale
+> `cp` the DB export over `public/api/` — it would regress the site to 8-state /
+> 2-bucket data. Edit `public/api/` directly, or merge specific files only after
+> verifying they match the deployed schema. Re-syncing `perseus_db` to reproduce
+> v1.6 is tracked in issue #24.
 
-1. From `perseus_db` (upstream): `python3 scripts/48_export_api.py .`
-2. Copy: `cp -r perseus_db/api/* path-to-this-repo/public/api/`
-3. Re-run `scripts/50_raster_image_overlays.sh` if the spatial inputs changed and copy `public/raster/`.
-4. Commit + push to `main`; the GitHub Actions workflow rebuilds and redeploys.
+The `public/raster/` overlays are produced by `scripts/50_raster_image_overlays.sh`. To add or update overlays, regenerate the affected PNGs + bounds JSON, drop them into `public/raster/`, commit, and push to `main`.
 
 ## Deploy
 
-The Pages site currently deploys via direct push to the `gh-pages` branch
-(Settings to Pages to Source: "Deploy from a branch", branch `gh-pages`). The
-`.github/workflows/deploy-pages.yml` workflow exists but is gated to
-`workflow_dispatch:` only and the Pages Source is intentionally NOT "GitHub
-Actions" -- both must stay that way until the v1.3 features are reconciled
-into main source. See `CONTRIBUTING.md` and `docs/desync.md`.
+Continuous deploy is live (v1.6, 2 June 2026). Pages Source is **"GitHub
+Actions"** and `.github/workflows/deploy-pages.yml` runs on every push to
+`main`: it builds with Vite and publishes `dist/` via the Pages artifact path.
+A clean build reproduces the deployed site byte-for-byte, so pushes to `main`
+are non-regressive. The legacy `gh-pages` branch is no longer the serving
+source. To deploy: commit to `main` and push; the workflow does the rest.
 
 ## What's in here
 
@@ -60,8 +65,7 @@ The current export catalogues 34 engines across 48 states and 70+ metrics coveri
 
 ## Known limitations
 
-* **Release tagging lag:** the latest release tag is v0.56 while the deployed app on gh-pages reports v1.3 and the source under `main/` reports v0.73. Cut new release tags when promoting deployments.
-* **Source-deploy desync:** the `gh-pages` branch carries v1.3 features (AOI upload, point-inspector, ycx animation, CSPI v3, divergence heatmap, AOI forward projection) that are not yet reflected in the `main` source. Until those features land in main, keep Pages Source = "Deploy from a branch: gh-pages" and keep the deploy workflow `on: workflow_dispatch:` only.
+* **perseus_db export is partial:** the upstream DB reproduces only 11 states / 2 scenario buckets and lacks `yc_treemap_spatial_v1`; `public/api/` is canonical until the DB is re-synced (issue #24).
 * **Western climate band:** CSI rasters cover only the eastern domain (lon -90 to -52); 18 western and plains states use a modeled transfer from the national climate-embedding PCs plus latitude (R^2 about 0.3 to 0.4) and are flagged `domain=modeled`.
 * **YC managed scenarios** are owner-class default rotations, not explicit per-stand silvicultural prescriptions.
 
