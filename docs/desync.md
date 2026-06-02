@@ -1,5 +1,18 @@
 # Source / deploy desync inventory
 
+> **RESOLVED 2026-06-02.** The six v1.3 features below were re-landed into
+> `main/src` (AOIReport.jsx, DivergenceHeatmap.jsx, shpjs upload, point
+> inspector, ycx animation, CSPI v3) by the recovery/reconcile commits
+> (`daa8203` and PRs #14-#21). **Verification:** a clean `npm ci && vite build`
+> from `main` now produces output **byte-identical** to the deployed gh-pages
+> bundle (index-CeqEGU_w.js, index-BjudXdwB.css, lib-DvTo-ATW.js all match by
+> content hash; index.html asset refs match). A build from main therefore
+> reproduces the live site exactly -- re-enabling continuous deployment is safe
+> and causes no feature regression. The historical inventory is kept below.
+
+---
+
+
 State as of 2026-05-31:
 
 * `main/src` is at app version v0.73 (anchored as tag `v0.73-source`).
@@ -108,3 +121,18 @@ Land in version order so the cumulative diff to main stays small:
 4. v1.1 ycx animation (independent)
 5. v1.2 point inspector (independent)
 6. v1.3 top-level AOI button + CSPI v3 reference (depends on v0.98)
+
+
+## Final step (needs `workflow` scope / Aaron)
+
+Reconciliation is verified; only the deploy-policy toggle remains, which a PAT
+without `workflow` scope cannot push:
+
+1. In `.github/workflows/deploy-pages.yml` change `on: { workflow_dispatch: }`
+   to `on: { push: { branches: [main] }, workflow_dispatch: }` and remove the
+   stale "main is v0.73 behind" comment.
+2. Confirm **Settings -> Pages -> Source = "GitHub Actions"** (the site has been
+   served from the `gh-pages` branch; the workflow uses the Actions Pages
+   deploy, so the source must switch once).
+3. Push to `main` / run the workflow. The build is byte-identical to what is
+   live, so this first deploy changes nothing visible and proves the pipeline.
