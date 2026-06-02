@@ -458,6 +458,12 @@
    "unit": "Tg C",
    "kind": "stock",
    "group": "carbon"
+  },
+  "standing_value_musd": {
+   "label": "Standing timber value",
+   "unit": "million USD (2020)",
+   "kind": "value",
+   "group": "economic"
   }
  },
  "buckets": [
