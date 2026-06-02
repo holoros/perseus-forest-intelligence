@@ -28,6 +28,27 @@ const LANDIS_LAYERS = [
 // CONUS overlay legends — colorbar stops + units + axis labels.
 // v0.73 palettes inspired by ggsci R package (Nature, Lancet, GSEA, NPG).
 const CONUS_LEGENDS = {
+  hybrid_agc2022: {
+    title: "Hybrid AG carbon, 2022 (Mg C/ha)",
+    type: "ramp",
+    ramp: ["#f7fcf5","#c7e9c0","#74c476","#31a354","#006d2c"],
+    lo: "0", mid: "125", hi: "250",
+    note: "Hybrid yield engine x FIA plots (anchored)",
+  },
+  hybrid_dagc100: {
+    title: "100-yr AG carbon change (Mg C/ha)",
+    type: "ramp",
+    ramp: ["#b2182b","#ef8a62","#f7f7f7","#67a9cf","#1b7837"],
+    lo: "-60", mid: "0", hi: "+60",
+    note: "Hybrid reserve projection, 2022 to 2122",
+  },
+  sawtimber_share: {
+    title: "Sawtimber share of AG biomass (%)",
+    type: "ramp",
+    ramp: ["#fff7ec","#fdbb84","#ef6548","#b30000","#7f0000"],
+    lo: "0", mid: "45", hi: "90",
+    note: "FIA size-class product allocation",
+  },
   lcms_2022: {
     title: "LCMS disturbance cause (2022)",
     type: "categorical",
@@ -657,6 +678,11 @@ export default function App(){
             </select>
             <select value={conusLayer} onChange={e=>setConusLayer(e.target.value)} title="CONUS overlay">
               <option value="none">CONUS layer: off</option>
+              <optgroup label="Hybrid yield engine (PERSEUS)">
+                <option value="hybrid_agc2022">AG carbon 2022 (Mg C/ha)</option>
+                <option value="hybrid_dagc100">100-yr AG carbon change</option>
+                <option value="sawtimber_share">Sawtimber share (%)</option>
+              </optgroup>
               <optgroup label="Disturbance / Harvest (TM2016)">
                 <option value="lcms_2022">LCMS disturbance cause 2022</option>
                 <option value="p_harvest_any">P(harvest · any)</option>
