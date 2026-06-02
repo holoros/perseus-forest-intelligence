@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="PERSEUS methods note: the hybrid yield form fit in production, and a harvested wood products (HWP) net-flux layer that compares management scenarios on a forest + products basis.">
+<title>PERSEUS · Hybrid in production + harvested wood products</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a472a'/%3E%3Cpath d='M16 6 L22 14 L19 14 L24 22 L18 22 L18 26 L14 26 L14 22 L8 22 L13 14 L10 14 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+<style>
+:root{--ink:#0b1015;--mut:#6a7480;--bg:#fafbfc;--card:#fff;--border:#e5e8eb;--accent:#1a472a;--accent-light:#d4e5d8;--warn:#c1440e;--good:#1d7e0f;--muted-bg:#f3f5f7;}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--bg)}
+.container{max-width:920px;margin:0 auto;padding:32px 24px 80px}
+header.top{border-bottom:1px solid var(--border);background:var(--card);padding:14px 0;margin-bottom:32px}
+header.top .container{padding-top:0;padding-bottom:0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:15px}
+.brand-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+nav a{color:var(--mut);text-decoration:none;font-size:14px;margin-left:18px;border-bottom:1px solid transparent;padding-bottom:2px}
+nav a:hover,nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:3px 10px;border-radius:999px;margin-bottom:14px}
+h1{font-size:36px;line-height:1.2;font-weight:700;margin:4px 0 14px;letter-spacing:-.01em}
+.lede{font-size:19px;color:var(--mut);margin:0 0 28px;max-width:760px}
+.byline{font-size:13.5px;color:var(--mut);margin-bottom:36px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.byline a{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+h2{font-size:24px;font-weight:700;margin:44px 0 14px;border-bottom:2px solid var(--accent);padding-bottom:6px;display:inline-block}
+h3{font-size:18px;font-weight:600;margin:28px 0 10px}
+p{margin:0 0 14px}
+.tldr{background:var(--accent-light);border-left:4px solid var(--accent);padding:18px 22px;border-radius:4px;margin:0 0 28px}
+.tldr h3{margin:0 0 8px;font-size:15.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.tldr p{margin:0;font-size:16px}
+figure{margin:28px 0 32px}figure img{width:100%;height:auto;border:1px solid var(--border);border-radius:6px;background:#fff;display:block}
+figcaption{margin-top:10px;font-size:14px;color:var(--mut)}figcaption strong{color:var(--ink)}
+table.matrix{width:100%;border-collapse:collapse;margin:18px 0 24px;font-size:14.5px}
+table.matrix th,table.matrix td{text-align:right;padding:8px 12px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+table.matrix th{text-align:left;font-weight:600;background:var(--muted-bg)}
+table.matrix th:first-child,table.matrix td:first-child{text-align:left;font-weight:600}
+table.matrix td.good{color:var(--good);font-weight:600}table.matrix td.bad{color:var(--warn);font-weight:600}
+code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;background:var(--muted-bg);padding:1px 6px;border-radius:3px}
+blockquote{margin:22px 0;padding:14px 22px;border-left:3px solid var(--mut);background:var(--muted-bg);font-size:15.5px}
+footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-size:13.5px;color:var(--mut);line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+.repo-link{display:inline-flex;align-items:center;gap:6px;color:var(--accent);background:var(--accent-light);padding:4px 12px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;margin:4px 6px 4px 0}
+@media(max-width:600px){h1{font-size:28px}.lede{font-size:17px}.container{padding:24px 18px 60px}nav a{margin-left:10px;font-size:13px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="container">
+  <a class="brand" href="../../"><div class="brand-icon">P</div><span>PERSEUS Forest Intelligence</span></a>
+  <nav><a href="../../">Explorer</a><a href="../" class="active">Methods</a><a href="https://github.com/holoros/perseus-forest-intelligence">Pipeline</a></nav>
+</div></header>
+
+<div class="container">
+<div class="tag">Methods note · 2026-05-31</div>
+<h1>Hybrid in production + harvested wood products</h1>
+<p class="lede">
+The hybrid yield form is now fit in production per forest-type x ecoregion x
+owner cell across 48 states, and a harvested wood products (HWP) layer lets the
+management scenarios be compared on a forest + products carbon basis rather than
+standing stock alone.
+</p>
+<p class="byline">
+PERSEUS yield-curve engine · scripts <code>ycx_hybrid_fit.R</code>,
+<code>ycx_treemap_hybrid.R</code>, <code>ycx_hybrid_anchor.R</code>,
+<code>ycx_hwp.R</code> · served as model <code>yc_hybrid_v1</code> (FIA-anchored)
+</p>
+
+<div class="tldr"><h3>TL;DR</h3><p>
+The hybrid (Chapman-Richards growth + an exponential decline tail beyond the
+per-cell empirical culmination) is now a fitted, FIA-anchored production engine.
+Anchored to the same 2022 standing carbon as the peak-decline engine
+(10,002 Tg C), its senescence tail yields a steadily more conservative
+trajectory: by 2122 CONUS reserve is 11,794 Tg C, about 20% below
+peak-decline's 14,813. The HWP layer adds the carbon held in wood products: it
+does not change reserve, but turns the managed 100-year change from
+standing-only -43% / -68% (harvest / intensive) into net -1,155 / -3,145 Tg C,
+and conservation from +469 to +2,196.
+</p></div>
+
+<h2>Hybrid fit in production</h2>
+<p>
+<code>ycx_hybrid_fit.R</code> fits y = A&middot;(1-exp(-k&middot;age))^p &middot;
+exp(-d&middot;max(0, age - A*)) per cell (fallback cell -> forest-type ->
+state), with A* the empirical culmination age. <code>ycx_treemap_hybrid.R</code>
+applies it to TreeMap 2022 pixels (reserve), and <code>ycx_hybrid_anchor.R</code>
+scales each state so its 2022 total matches the FIA-anchored production baseline
+(median scalar 0.86), preserving the trajectory shape. Anchored versus the
+current peak-decline projection:
+</p>
+<table class="matrix">
+<thead><tr><th>Year</th><th>peak-decline (Tg C)</th><th>hybrid, anchored (Tg C)</th><th>diff</th></tr></thead>
+<tbody>
+<tr><td>2022</td><td>10,002</td><td>10,002</td><td>0%</td></tr>
+<tr><td>2052</td><td>12,858</td><td>12,511</td><td>-2.7%</td></tr>
+<tr><td>2082</td><td>14,170</td><td>12,987</td><td class="bad">-8.4%</td></tr>
+<tr><td>2102</td><td>14,585</td><td>12,513</td><td class="bad">-14.2%</td></tr>
+<tr><td>2122</td><td>14,813</td><td>11,794</td><td class="bad">-20.4%</td></tr>
+</tbody>
+</table>
+<blockquote>
+Anchored to the same 2022 standing carbon, the hybrid diverges progressively
+below peak-decline, reaching about 20% lower by 2122. That gap is the senescence
+the decline tail introduces beyond each cell's empirical culmination:
+peak-decline keeps accumulating old-stand carbon, while the hybrid (the better
+CV-fitting form) turns it over. The anchored hybrid is served as
+<code>yc_hybrid_v1</code> and is a production-ready candidate to replace
+peak-decline pending team sign-off, since the choice materially changes the
+100-year old-forest carbon projection.
+</blockquote>
+
+<h2>Harvested wood products (net flux)</h2>
+<p>
+The scenario projections track standing live carbon and off-stump removals;
+they do not credit the carbon stored in wood products. <code>ycx_hwp.R</code>
+adds an IPCC-style first-order-decay HWP pool: each decade's removed carbon is
+split into sawtimber (long-lived in-use products, half-life 35 yr) and pulpwood
+(short-lived, 2 yr) by the national merch split, each cohort decaying
+exponentially. Net system carbon = standing live + HWP in-use.
+</p>
+<figure>
+  <img src="conus_hwp_netflux.png" alt="CONUS net system carbon (standing live plus harvested wood products) by management scenario, 2022 to 2122. Solid lines net; dotted standing-only. Adding HWP lifts the managed scenarios well above their standing-only trajectories.">
+  <figcaption><strong>Figure 1.</strong> CONUS net system carbon (standing live + HWP) by scenario. Solid = net; dotted = standing only. The HWP buffer is largest for the heavier-harvest scenarios.</figcaption>
+</figure>
+<table class="matrix">
+<thead><tr><th>Scenario</th><th>standing-only 100-yr</th><th>HWP buffer 2122</th><th>net 100-yr (forest+HWP)</th></tr></thead>
+<tbody>
+<tr><td>reserve (no harvest)</td><td class="good">+4,811</td><td>0</td><td class="good">+4,811</td></tr>
+<tr><td>managed (conservation)</td><td>+469</td><td>1,727</td><td class="good">+2,196</td></tr>
+<tr><td>managed (harvest)</td><td class="bad">-4,268</td><td>3,113</td><td>-1,155</td></tr>
+<tr><td>managed (intensive)</td><td class="bad">-6,753</td><td>3,608</td><td>-3,145</td></tr>
+</tbody>
+</table>
+<p>
+HWP materially narrows the gap: the managed scenarios still lose system carbon
+relative to reserve, but far less than standing stock alone implies.
+</p>
+
+<h3>Refinement: landfill pool and substitution</h3>
+<p>
+Adding a solid-waste-disposal-site (landfill) pool (30% of retired products,
+100-year half-life) extends product carbon retention; a substitution
+sensitivity (0.45 tC avoided per tC of harvested product, mid Sathre &amp;
+O'Connor) is reported separately as an emissions credit, not a carbon stock.
+Net carbon stock = standing live + HWP in-use + landfill:
+</p>
+<table class="matrix">
+<thead><tr><th>Scenario</th><th>standing 100-yr</th><th>net stock 100-yr (forest+HWP+landfill)</th><th>+ substitution sensitivity</th></tr></thead>
+<tbody>
+<tr><td>reserve (no harvest)</td><td class="good">+4,811</td><td class="good">+4,811</td><td class="good">+4,811</td></tr>
+<tr><td>managed (conservation)</td><td>+469</td><td class="good">+3,123</td><td class="good">+5,669</td></tr>
+<tr><td>managed (harvest)</td><td class="bad">-4,268</td><td class="good">+687</td><td class="good">+5,673</td></tr>
+<tr><td>managed (intensive)</td><td class="bad">-6,753</td><td>-772</td><td class="good">+5,566</td></tr>
+</tbody>
+</table>
+<p>
+With in-use plus landfill, business-as-usual harvest turns net-positive over 100
+years (+687 Tg C) and intensive is near-neutral; adding the substitution credit
+makes all managed scenarios strongly positive. Published as the live metric
+<code>net_forest_hwp_c</code> (carbon stock only; substitution excluded). The
+substitution displacement factor and landfill parameters are uncertain and bound
+the result, so substitution is kept as a sensitivity rather than folded into the
+stock metric.
+</p>
+
+<h2>Data and code</h2>
+<p>
+<a class="repo-link" href="https://github.com/holoros/perseus-forest-intelligence/tree/main/scripts/yield_curve_engine">yield_curve_engine scripts</a>
+</p>
+<h2>Provenance</h2>
+<p>
+PERSEUS, Center for Research on Sustainable Forests, University of Maine.
+Computation on OSC Cardinal (PUOM0008). Curves and HWP allocation fit from FIA
+tree data; TreeMap 2022 is USFS RDS-2025-0032. HWP half-lives follow IPCC
+defaults (sawnwood ~35 yr, paper ~2 yr).
+</p>
+<footer><p>PERSEUS Forest Intelligence · CRSF · University of Maine · 2026<br>
+Methods note on the production hybrid form and the harvested wood products net-flux layer. Live explorer at <a href="../../">the main interface</a>.</p></footer>
+</div>
+</body>
+</html>
