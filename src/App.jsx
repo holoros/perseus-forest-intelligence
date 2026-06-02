@@ -76,11 +76,11 @@ const CONUS_LEGENDS = {
     note: "Probability per pixel (conus_hcs v1)",
   },
   p_harvest_clearcut: {
-    title: "P(harvest · clearcut), TM2016",
+    title: "P(stand replacement), TM2016",
     type: "ramp",
     ramp: ["#ffe9e9","#ffc0e5","#ff7080","#d60c00","#7a0500"],
     lo: "0.0", mid: "0.5", hi: "1.0",
-    note: "Probability per pixel (conus_hcs v1)",
+    note: "Forest-to-non-forest transition over the FIA cycle (stand replacement / forest loss), not silvicultural clearcut. conus_hcs v4.",
   },
   p_harvest_partial: {
     title: "P(harvest · partial), TM2016",
@@ -156,6 +156,28 @@ const CLASS_COL = { CBM:"#66c2a5", FVS:"#fc8d62", LANDIS:"#8da0cb", OSM:"#e78ac3
   HCM:"#a6d854", YC:"#ffd92f", CEM:"#e5c494", FIA:"#b3b3b3", VCC:"#7570b3", "?":"#cccccc" };
 const METRIC_ORDER = ["agc_live_total","live_c_total","tree_c_total","agb_dry","vol_stem",
   "total_ecosystem_c","mean_stand_age","old_forest_share_120"];
+
+// FIA forest-type GROUP codes -> names (REF_FOREST_TYPE_GROUP). A detailed
+// FORTYPCD belongs to the largest group code <= it. Lets us show forest-type
+// composition from the plot fortypcd without a separate label table.
+const FIA_FT_GROUPS = [
+  [100,"White/red/jack pine"],[120,"Spruce/fir"],[140,"Longleaf/slash pine"],
+  [160,"Loblolly/shortleaf pine"],[170,"Other eastern softwoods"],[180,"Pinyon/juniper"],
+  [200,"Douglas-fir"],[220,"Ponderosa pine"],[240,"Western white pine"],
+  [260,"Fir/spruce/mtn hemlock"],[280,"Lodgepole pine"],[300,"Hemlock/Sitka spruce"],
+  [320,"Western larch"],[340,"Redwood"],[360,"Other western softwoods"],
+  [370,"California mixed conifer"],[380,"Exotic softwoods"],[400,"Oak/pine"],
+  [500,"Oak/hickory"],[600,"Oak/gum/cypress"],[700,"Elm/ash/cottonwood"],
+  [800,"Maple/beech/birch"],[900,"Aspen/birch"],[910,"Alder/maple"],[920,"Western oak"],
+  [940,"Tanoak/laurel"],[950,"Other western hardwoods"],[980,"Tropical hardwoods"],
+  [990,"Exotic hardwoods"],[995,"Other"],[999,"Nonstocked"],
+];
+function ftGroupName(code){
+  const c = +code; if(!isFinite(c)) return "Unknown";
+  let name = "Unknown";
+  for(const [g,n] of FIA_FT_GROUPS){ if(c >= g) name = n; else break; }
+  return name;
+}
 
 async function j(path){ const r = await fetch(BASE + path); if(!r.ok) throw new Error(path); return r.json(); }
 function parseHash(){ const p = new URLSearchParams(window.location.hash.replace(/^#/,""));
@@ -568,7 +590,12 @@ export default function App(){
     const ownership = Object.entries(own)
       .map(([k,v])=>({ label: (fp.meta.owngrpcd_labels||{})[k] || `owner ${k}`, n:v, pct: v/n*100 }))
       .sort((a,b)=>b.n-a.n);
-    return { n, meanAge, meanBA, ownership, invYears: fp.meta.inv_years };
+    const ft = {};
+    inside.forEach(p => { const g=ftGroupName(p[5]); ft[g]=(ft[g]||0)+1; });
+    const forestTypes = Object.entries(ft)
+      .map(([label,v])=>({ label, n:v, pct: v/n*100 }))
+      .sort((a,b)=>b.n-a.n).slice(0,6);
+    return { n, meanAge, meanBA, ownership, forestTypes, invYears: fp.meta.inv_years };
   };
 
   return (
@@ -633,7 +660,7 @@ export default function App(){
               <optgroup label="Disturbance / Harvest (TM2016)">
                 <option value="lcms_2022">LCMS disturbance cause 2022</option>
                 <option value="p_harvest_any">P(harvest · any)</option>
-                <option value="p_harvest_clearcut">P(harvest · clearcut)</option>
+                <option value="p_harvest_clearcut">P(stand replacement · forest loss)</option>
                 <option value="p_harvest_partial">P(harvest · partial)</option>
               </optgroup>
               <optgroup label="Forest structure (TreeMap 2022)">

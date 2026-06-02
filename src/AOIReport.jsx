@@ -14,6 +14,31 @@ const fmtArea = (m2) => {
 };
 const OWN_COL = { "Private (Family/Corporate)":"#3fb68b", "State / Local":"#6baed6",
   "National Forest":"#8da0cb", "Other Federal":"#e6ab02" };
+const FT_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d"];
+
+function downloadCsv(aoi){
+  const rows = [["field","value"]];
+  rows.push(["name", aoi.name||""]);
+  if(aoi.area_m2) rows.push(["area_ac",(aoi.area_m2/4046.8564224).toFixed(0)],["area_ha",(aoi.area_m2/1e4).toFixed(0)]);
+  if(aoi.centroid) rows.push(["centroid_lat",aoi.centroid[1].toFixed(4)],["centroid_lon",aoi.centroid[0].toFixed(4)]);
+  rows.push(["ecoregion_l3",`${aoi.l3code||""} ${aoi.l3name||""}`.trim()],["biome_l1",aoi.l1||""]);
+  const ps = aoi.plotStats;
+  if(ps && ps.n>0){
+    rows.push(["fia_plots",ps.n]);
+    if(ps.meanAge!=null) rows.push(["mean_stand_age_yr",ps.meanAge.toFixed(0)]);
+    if(ps.meanBA!=null) rows.push(["mean_live_ba_sqft_ac",ps.meanBA.toFixed(0)]);
+    (ps.ownership||[]).forEach(o=>rows.push([`owner_${o.label}`,`${o.pct.toFixed(0)}%`]));
+    (ps.forestTypes||[]).forEach(f=>rows.push([`fortype_${f.label}`,`${f.pct.toFixed(0)}%`]));
+  }
+  const c = aoi.curves && aoi.curves.untreated;
+  if(c) c.forEach(([age,v])=>rows.push([`agb_tonac_age${age}_untreated`, v]));
+  const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv],{type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `aoi_summary_${(aoi.l3code||"aoi").replace(/\./g,"_")}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
 
 export default function AOIReport({ aoi, onClose }){
   if(!aoi) return null;
@@ -31,7 +56,11 @@ export default function AOIReport({ aoi, onClose }){
     <div className="aoi-report">
       <div className="aoi-head">
         <b>AOI summary{name ? ` · ${name}` : ""}</b>
-        {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
+        <span>
+          <button className="mini-btn" style={{marginTop:0,marginRight:6}}
+            onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV ↓</button>
+          {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
+        </span>
       </div>
 
       <div className="aoi-grid">
@@ -57,6 +86,19 @@ export default function AOIReport({ aoi, onClose }){
                 <span className="aoi-bar-track"><span className="aoi-bar-fill"
                   style={{width:`${o.pct}%`, background: OWN_COL[o.label] || "#888"}}/></span>
                 <span className="aoi-bar-pct">{o.pct.toFixed(0)}%</span>
+              </div>
+            ))}
+          </div>
+        </>)}
+        {plotStats.forestTypes && plotStats.forestTypes.length > 0 && (<>
+          <div className="aoi-sub">Forest-type composition</div>
+          <div className="aoi-bars">
+            {plotStats.forestTypes.map((f,i) => (
+              <div key={f.label} className="aoi-bar-row" title={`${f.n} plots`}>
+                <span className="aoi-bar-lab">{f.label}</span>
+                <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                  style={{width:`${f.pct}%`, background: FT_PALETTE[i % FT_PALETTE.length]}}/></span>
+                <span className="aoi-bar-pct">{f.pct.toFixed(0)}%</span>
               </div>
             ))}
           </div>
