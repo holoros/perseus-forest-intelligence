@@ -162,6 +162,13 @@ const CONUS_LEGENDS = {
     lo: "0", mid: "mid", hi: "high",
     note: "TreeMap2022 volume x stumpage price; federal/private composite",
   },
+  standing_value_cv: {
+    title: "Value uncertainty (s.d., $/ac)",
+    type: "ramp",
+    ramp: ["#fff5eb","#fd8d3c","#d94801","#7f2704"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "within-species sawlog price dispersion (median ~15%), capped at 30%; larger in hardwood markets",
+  },
 };
 
 // Tier B layer B: gcbm_rasters_2022 stack (per-state, 30 m) for all 6 non-ME
@@ -713,6 +720,7 @@ export default function App(){
               </optgroup>
               <optgroup label="Economic value (TreeMap 2022)">
                 <option value="standing_value">Standing timber value ($/ac)</option>
+                <option value="standing_value_cv">Value uncertainty ($/ac s.d.)</option>
               </optgroup>
             </select>
             {conusLayer !== "none" && (
