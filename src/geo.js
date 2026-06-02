@@ -99,6 +99,30 @@ export function polygonCentroid(geom){
   return best;
 }
 
+// Polygon area in m^2. The Albers projection here is EQUAL-AREA, so the
+// shoelace area of the projected (unit-sphere) ring, times Earth radius^2, is
+// the true ground area. Subtracts holes.
+const EARTH_R_AREA = 6378137;
+function ringAreaProj(ring){
+  let a = 0;
+  for(let i = 0, j = ring.length - 1; i < ring.length; j = i++){
+    const [x1, y1] = project(ring[j][0], ring[j][1]);
+    const [x2, y2] = project(ring[i][0], ring[i][1]);
+    a += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(a / 2);
+}
+export function polygonAreaM2(geom){
+  if(!geom) return 0;
+  const polys = geom.type === "Polygon" ? [geom.coordinates]
+    : geom.type === "MultiPolygon" ? geom.coordinates : [];
+  let total = 0;
+  for(const poly of polys)
+    for(let r = 0; r < poly.length; r++)
+      total += (r === 0 ? 1 : -1) * ringAreaProj(poly[r]);
+  return Math.abs(total) * EARTH_R_AREA * EARTH_R_AREA;
+}
+
 // AGB (ton/ac) at a given age from a yield_curves_by_l3 entry
 export function agbAtAge(l3entry, age = 50, treatment = "untreated"){
   const c = l3entry && l3entry.curves && l3entry.curves.agb_tonac && l3entry.curves.agb_tonac[treatment];

@@ -8,7 +8,7 @@ import LandisStratified from "./LandisStratified.jsx";
 import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
-import { findFeature, agbAtAge, polygonCentroid } from "./geo.js";
+import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -221,6 +221,7 @@ export default function App(){
   const [inspectInfo,setInspectInfo] = useState(null);
   const [aoi,setAoi] = useState(null);
   const [playing,setPlaying] = useState(false);
+  const [fiaPlots,setFiaPlots] = useState({}); // state -> fia_plots json (cache)
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -537,10 +538,37 @@ export default function App(){
       const nVerts = poly.geometry.type === "Polygon"
         ? poly.geometry.coordinates[0].length
         : poly.geometry.coordinates[0][0].length;
+      const area_m2 = polygonAreaM2(poly.geometry);
+      const stCode = geoData && (findFeature(geoData.features, c[0], c[1]) || {}).properties
+        ? findFeature(geoData.features, c[0], c[1]).properties.state : null;
+      const plotStats = await aggregatePlots(poly.geometry, stCode);
       setAoi({ name:file.name, centroid:c, nVerts, l3code:code,
         l3name: ef && ef.properties.NA_L3NAME, l1: ef && ef.properties.NA_L1NAME,
-        curves: l3e && l3e.curves && l3e.curves.agb_tonac });
+        curves: l3e && l3e.curves && l3e.curves.agb_tonac,
+        area_m2, state: stCode, plotStats });
     }catch(err){ console.error("AOI parse failed", err); alert("Could not read AOI file: "+err.message); }
+  };
+
+  // aggregate FIA plots (6 states have them) inside an AOI polygon
+  const aggregatePlots = async (geom, stCode) => {
+    if(!stCode) return null;
+    let fp = fiaPlots[stCode];
+    if(fp === undefined){
+      try{ fp = await j(`api/fia_plots/${stCode}.json`); }catch(e){ fp = null; }
+      setFiaPlots(prev => ({...prev, [stCode]: fp}));
+    }
+    if(!fp || !fp.plots) return null;
+    const inside = fp.plots.filter(p => pointInGeometry(p[1], p[0], geom)); // [lat,lon,...]
+    const n = inside.length;
+    if(!n) return { n: 0, invYears: fp.meta.inv_years };
+    const meanAge = inside.reduce((s,p)=>s+(p[3]||0),0)/n;
+    const meanBA  = inside.reduce((s,p)=>s+(p[4]||0),0)/n;
+    const own = {};
+    inside.forEach(p => { const k=String(p[6]); own[k]=(own[k]||0)+1; });
+    const ownership = Object.entries(own)
+      .map(([k,v])=>({ label: (fp.meta.owngrpcd_labels||{})[k] || `owner ${k}`, n:v, pct: v/n*100 }))
+      .sort((a,b)=>b.n-a.n);
+    return { n, meanAge, meanBA, ownership, invYears: fp.meta.inv_years };
   };
 
   return (

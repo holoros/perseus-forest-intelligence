@@ -336,8 +336,10 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         // When a CONUS overlay is active, dim non-focal state fills so the
         // raster pattern beneath is visible. Keep focal states + selected
         // state outlined / opaque so they remain anchors.
-        if(conusOverlay){
-          opacity = isFocal ? 0.55 : (hasSeries ? 0.25 : 0.15);
+        if(conusOverlay || ecoData){
+          // overlay active: drop state fills back so the layer beneath reads
+          // clearly; keep focal/selected legible via their strokes.
+          opacity = isFocal ? 0.30 : 0.06;
         }
         const d = geomToD(ft.geometry);
         const isSel = st === selected;
