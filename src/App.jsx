@@ -29,7 +29,10 @@ const LANDIS_LAYERS = [
 // rasters (full 48-state coverage); the first layer is the bin default.
 const MAP_BINS = [
   { id:"structure", label:"Forest structure",
-    layers:[["fortype_2022","Forest type"],["rd_treemap","Relative density"],["sdimax_treemap","SDI max (Reineke)"]] },
+    layers:[["fortype_2022","Forest type"],["rd_treemap","Relative density"],["sdimax_treemap","SDI max (Reineke)"],
+            ["climate_stress","Climate Site Productivity Index (CSPI)"],["csi","Climate Site Index (CSI)"],
+            ["csi_2030","CSI · 2030"],["csi_2060","CSI · 2060"],["csi_2090","CSI · 2090"],
+            ["bgi","Bioclimatic Growth Index (BGI)"]] },
   { id:"landowner", label:"Landowner",
     layers:[["ownership","Ownership group"]] },
   { id:"products", label:"Stumpage / products",
@@ -39,9 +42,7 @@ const MAP_BINS = [
   { id:"risk", label:"Future risk",
     layers:[["gfc_lossyear","Forest loss year (Hansen)"],["lcms_2022","Disturbance cause (LCMS)"],
             ["p_harvest_clearcut","P(stand replacement)"],["p_harvest_any","P(harvest · any)"],
-            ["p_harvest_partial","P(harvest · partial)"],["climate_stress","Climate site stress (CSPI v4)"],
-            ["csi","CSI · Climate Site Index"],["csi_2030","CSI · 2030"],["csi_2060","CSI · 2060"],
-            ["csi_2090","CSI · 2090"],["bgi","BGI · Bioclimatic Growth Index"]] },
+            ["p_harvest_partial","P(harvest · partial)"]] },
 ];
 const binForLayer = (layer) => (MAP_BINS.find(b => b.layers.some(([k])=>k===layer)) || {}).id;
 
@@ -148,12 +149,12 @@ const CONUS_LEGENDS = {
     note: "Probability per pixel (conus_hcs v1)",
   },
   climate_stress: {
-    title: "CSPI · climate stress (v4, 1 km)",
+    title: "Climate Site Productivity Index (CSPI), v4 1 km",
     type: "ramp",
     // GSEA diverging (purple-low to red-high)
     ramp: ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"],
     lo: "low", mid: "mid", hi: "high",
-    note: "Composite Site Productivity Index v4",
+    note: "Climate Site Productivity Index v4 (higher = more productive)",
   },
   // v0.73 new layers
   bgi: {
