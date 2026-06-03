@@ -4,6 +4,7 @@ Status: ACCEPTED and IMPLEMENTED (deployed v1.4, 2026-06-02)
 Date: 2026-06-02
 Deciders: A. Weiskittel + PERSEUS team
 Supersedes: nothing. Extends the validation in `docs/hybrid_validation_vs_fia.md`.
+Superseded-in-part: the model-form/ratio-apply of the FIA AGC engine is replaced by the direct hybrid re-projection in ADR 0003 (v0.56, 2026-06-03); the recalibration kernel and scenario design here are retained.
 
 > Implemented in v1.4 (`release/recal-disturb-v1.4`, deployed to gh-pages): the
 > approved **agedist + physical-ceiling** recalibration is applied to the YC
