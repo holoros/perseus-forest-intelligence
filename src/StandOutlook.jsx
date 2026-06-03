@@ -5,6 +5,7 @@
 // TRADEOFFS (carbon, income, habitat, biodiversity, water, recreation, risk) so a
 // broad set of users -- not just foresters -- can weigh management actions.
 import { useState, useEffect } from "react";
+import { conv, unitLabel } from "./units.js";
 
 const RESP = [
   { key: "carbon_lbac",     label: "AG carbon",        unit: "ton C/ac", scale: 1 / 2000 },
@@ -43,7 +44,7 @@ function valuePerCuft(stumpage, st) {
   return { dpc: 0.55 * sawCuft + 0.45 * pulpCuft, note };
 }
 
-export default function StandOutlook({ aoi, stumpage }) {
+export default function StandOutlook({ aoi, stumpage, units = "imperial" }) {
   const all = aoi && aoi.allCurves;
   const fiaAge = aoi && aoi.plotStats && aoi.plotStats.meanAge;
   const [resp, setResp] = useState("carbon_lbac");
@@ -62,7 +63,12 @@ export default function StandOutlook({ aoi, stumpage }) {
     <div className="note" style={{ margin: "6px 2px" }}>No stumpage prices for {aoi.state || "this state"} yet. Pick another response.</div></div>);
   if (!src || !src.untreated || !src.harvested) return <div className="note" style={{ margin: "6px 2px" }}>This response has no fitted curve here.</div>;
 
-  const k = r.dollars ? vpc.dpc : r.scale;
+  // Unit conversion: scale all displayed values by the metric factor for this
+  // response's unit, and relabel. Multiplying k keeps chart/bands/table consistent.
+  const baseUnit = r.unit.replace(" (est)", "");
+  const uf = conv(1, baseUnit, units).value;
+  const dispUnit = unitLabel(baseUnit, units) + (r.unit.includes("(est)") ? " (est)" : "");
+  const k = (r.dollars ? vpc.dpc : r.scale) * uf;
   let unt = src.untreated.map(([a, v]) => [a, v * k]);
   let har = src.harvested.map(([a, v]) => [a, v * k]);
   const base = interp(unt, age);
@@ -120,7 +126,7 @@ export default function StandOutlook({ aoi, stumpage }) {
         </g>))}
         {xt.map(t => <text key={t} x={sx(t)} y={H - 9} textAnchor="middle" fontSize="9" fill="var(--mut)">{t}</text>)}
         <text x={(P.l + W - P.r) / 2} y={H - 0.5} textAnchor="middle" fontSize="9" fill="var(--mut)">Stand age (yr)</text>
-        <text x={4} y={10} fontSize="9" fill="var(--mut)">{r.unit}</text>
+        <text x={4} y={10} fontSize="9" fill="var(--mut)">{dispUnit}</text>
         <line x1={sx(age)} x2={sx(age)} y1={P.t} y2={H - P.b} stroke="#f4c430" strokeWidth="1" strokeDasharray="3 2" />
         <path d={band(valU)} fill="#3fb68b" opacity="0.16" />
         <path d={band(valH)} fill="#e6ab02" opacity="0.16" />
@@ -138,7 +144,7 @@ export default function StandOutlook({ aoi, stumpage }) {
 
       <div className="so-now">
         Estimated now (age <b>{age}</b>): <b>{r.dollars ? "$" : ""}{fmt(nowU)}</b>{" "}
-        <span style={{ color: "var(--mut)" }}>{r.dollars ? "/ac" : r.unit} (likely {r.dollars ? "$" : ""}{fmt(nowLo)}–{r.dollars ? "$" : ""}{fmt(nowHi)})</span>
+        <span style={{ color: "var(--mut)" }}>{r.dollars ? (units==="metric"?"/ha":"/ac") : dispUnit} (likely {r.dollars ? "$" : ""}{fmt(nowLo)}–{r.dollars ? "$" : ""}{fmt(nowHi)})</span>
         {r.dollars && vpc && <div style={{ color: "var(--mut)", fontSize: 10.5, marginTop: 2 }}>standing timber value · {vpc.note}</div>}
       </div>
 
@@ -147,7 +153,7 @@ export default function StandOutlook({ aoi, stumpage }) {
         <input type="range" min="5" max="100" step="1" value={age} onChange={e => setAge(+e.target.value)} />
       </div>
       {!r.dollars && <div className="so-ctrl">
-        <label>Calibrate to my stand <span style={{ color: "var(--mut)" }}>({r.unit} now, optional)</span></label>
+        <label>Calibrate to my stand <span style={{ color: "var(--mut)" }}>({dispUnit} now, optional)</span></label>
         <input type="number" className="so-num" placeholder={fmt(interp(src.untreated.map(([a, v]) => [a, v * r.scale]), age))}
           value={cal} onChange={e => setCal(e.target.value)} />
       </div>}

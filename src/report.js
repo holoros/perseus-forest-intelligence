@@ -15,14 +15,15 @@ const interp = (curve, age) => {
   return null;
 };
 const esc = (s) => String(s==null?"":s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-const fmtArea = (m2) => { if(!m2) return "—"; const ac=m2/4046.8564224, ha=m2/1e4;
-  return `${Math.round(ac).toLocaleString()} ac (${Math.round(ha).toLocaleString()} ha)`; };
+import { conv, unitLabel, fmtArea as fmtAreaU } from "./units.js";
 const num = (v,d=0) => v==null?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:d});
 
-function buildReportHTML(aoi, stumpage){
+function buildReportHTML(aoi, stumpage, system = "imperial"){
   const { name, l3code, l3name, l1, centroid, area_m2, state, plotStats, landscape, allCurves } = aoi || {};
   const today = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
   const ps = plotStats, ls = landscape || {};
+  const cvNum = (v, u, d=0) => v==null?"—":`${conv(v,u,system).value.toFixed(d)} ${conv(v,u,system).unit}`;
+  const price = (v, u) => v==null?"—":`$${Math.round(conv(v,u,system).value)}/${conv(v,u,system).unit.replace("$/","")}`;
 
   const row = (k,v) => `<tr><td class="k">${esc(k)}</td><td class="v">${v}</td></tr>`;
   const bar = (label, pct, color) => `<div class="bar"><span class="bl">${esc(label)}</span>
@@ -46,7 +47,7 @@ function buildReportHTML(aoi, stumpage){
 
   // ---- identity ----
   let html = `<table class="kv">`;
-  if(area_m2) html += row("Area", fmtArea(area_m2));
+  if(area_m2) html += row("Area", fmtAreaU(area_m2, system));
   if(centroid) html += row("Centroid", `${centroid[1].toFixed(3)}°, ${centroid[0].toFixed(3)}°`);
   html += row("State", esc(state||"—"));
   html += row("EPA L3 ecoregion", l3code?`${esc(l3code)} ${esc(l3name||"")}`:"—");
@@ -58,7 +59,7 @@ function buildReportHTML(aoi, stumpage){
   if(ps && ps.n>0){
     attrs += `<h2>Forest attributes <span class="sub">${ps.n} FIA plots${ps.invYears?` · ${ps.invYears[0]}–${ps.invYears[1]}`:""}</span></h2><table class="kv">`;
     if(ps.meanAge!=null) attrs += row("Mean stand age", `${num(ps.meanAge)} yr`);
-    if(ps.meanBA!=null) attrs += row("Mean live basal area", `${num(ps.meanBA)} sq ft/ac`);
+    if(ps.meanBA!=null) attrs += row("Mean live basal area", cvNum(ps.meanBA, "sq ft/ac"));
     attrs += `</table>`;
     if(ps.forestTypes && ps.forestTypes.length){
       attrs += `<div class="bars">` + ps.forestTypes.map(f=>bar(f.label, f.pct, "#3fb68b")).join("") + `</div>`;
@@ -90,10 +91,10 @@ function buildReportHTML(aoi, stumpage){
   let stump = "";
   if(ls.stumpage){
     const s=ls.stumpage, r=[];
-    if(s.sawSW!=null) r.push(row("Sawlog · softwood", `$${num(s.sawSW)}/MBF`));
-    if(s.sawHW!=null) r.push(row("Sawlog · hardwood", `$${num(s.sawHW)}/MBF`));
-    if(s.pulpSW!=null) r.push(row("Pulpwood · softwood", `$${num(s.pulpSW)}/cord`));
-    if(s.pulpHW!=null) r.push(row("Pulpwood · hardwood", `$${num(s.pulpHW)}/cord`));
+    if(s.sawSW!=null) r.push(row("Sawlog · softwood", price(s.sawSW,"$/MBF")));
+    if(s.sawHW!=null) r.push(row("Sawlog · hardwood", price(s.sawHW,"$/MBF")));
+    if(s.pulpSW!=null) r.push(row("Pulpwood · softwood", price(s.pulpSW,"$/cord")));
+    if(s.pulpHW!=null) r.push(row("Pulpwood · hardwood", price(s.pulpHW,"$/cord")));
     if(r.length) stump = `<h2>Stumpage prices${state?` · ${esc(state)}`:""}</h2><table class="kv">${r.join("")}</table>`;
   }
 
@@ -102,11 +103,12 @@ function buildReportHTML(aoi, stumpage){
   const agb = allCurves && allCurves.agb_tonac;
   if(agb && agb.untreated && agb.harvested){
     const ages=[5,25,50,75,100];
-    const cells = a => `<td>${num(interp(agb.untreated,a))}</td><td>${num(interp(agb.harvested,a))}</td>`;
-    outlook = `<h2>Management outlook <span class="sub">above-ground biomass, ton/ac</span></h2>
+    const f = conv(1, "ton/ac", system).value, U = unitLabel("ton/ac", system);
+    const cells = a => `<td>${num(interp(agb.untreated,a)*f)}</td><td>${num(interp(agb.harvested,a)*f)}</td>`;
+    outlook = `<h2>Management outlook <span class="sub">above-ground biomass, ${U}</span></h2>
       <table class="proj"><thead><tr><th>Stand age (yr)</th>${ages.map(a=>`<th colspan=2>${a}</th>`).join("")}</tr>
       <tr><th></th>${ages.map(()=>`<th>reserve</th><th>managed</th>`).join("")}</tr></thead>
-      <tbody><tr><td>AGB (ton/ac)</td>${ages.map(cells).join("")}</tr></tbody></table>
+      <tbody><tr><td>AGB (${U})</td>${ages.map(cells).join("")}</tr></tbody></table>
       <p class="note">Reserve = unharvested trajectory; managed = working-forest (harvest) trajectory, both from the ycX yield curves for the encompassing ecoregion.</p>`;
   }
 
@@ -150,8 +152,8 @@ function buildReportHTML(aoi, stumpage){
 </div></body></html>`;
 }
 
-export function downloadReport(aoi, stumpage){
-  const html = buildReportHTML(aoi, stumpage);
+export function downloadReport(aoi, stumpage, system = "imperial"){
+  const html = buildReportHTML(aoi, stumpage, system);
   const blob = new Blob([html], { type: "text/html" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -161,9 +163,9 @@ export function downloadReport(aoi, stumpage){
 }
 
 // Open the report in a new tab (better for print-to-PDF).
-export function openReport(aoi, stumpage){
-  const html = buildReportHTML(aoi, stumpage);
+export function openReport(aoi, stumpage, system = "imperial"){
+  const html = buildReportHTML(aoi, stumpage, system);
   const w = window.open("", "_blank");
   if(w){ w.document.write(html); w.document.close(); }
-  else downloadReport(aoi, stumpage);
+  else downloadReport(aoi, stumpage, system);
 }

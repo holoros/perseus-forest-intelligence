@@ -428,6 +428,7 @@ export default function App(){
   const [baseOn,setBaseOn] = useState(true);          // forest/non-forest context base
   const [baseBounds,setBaseBounds] = useState(null);
   const [focusGeom,setFocusGeom] = useState(null);    // geom to auto-zoom the map to
+  const [units,setUnits] = useState("imperial");      // imperial | metric (unit toggle)
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -776,8 +777,11 @@ export default function App(){
     const inside = fp.plots.filter(p => pointInGeometry(p[1], p[0], geom)); // [lat,lon,...]
     const n = inside.length;
     if(!n) return { n: 0, invYears: fp.meta.inv_years };
-    const meanAge = inside.reduce((s,p)=>s+(p[3]||0),0)/n;
-    const meanBA  = inside.reduce((s,p)=>s+(p[4]||0),0)/n;
+    // Guard against FIA sentinel/negative codes (e.g. -ve = nonstocked/unknown).
+    const ages = inside.map(p=>p[3]).filter(a=>a!=null && a>0 && a<=600);
+    const bas  = inside.map(p=>p[4]).filter(b=>b!=null && b>=0 && b<=1000);
+    const meanAge = ages.length ? ages.reduce((s,a)=>s+a,0)/ages.length : null;
+    const meanBA  = bas.length  ? bas.reduce((s,b)=>s+b,0)/bas.length   : null;
     const own = {};
     inside.forEach(p => { const k=String(p[6]); own[k]=(own[k]||0)+1; });
     const ownership = Object.entries(own)
@@ -1040,6 +1044,11 @@ export default function App(){
             <label className="mc-tog" title="EPA L3 ecoregion overlay, colored by AGB at 50 yr">
               <input type="checkbox" checked={ecoOn} onChange={e=>setEcoOn(e.target.checked)}/> ecoregions
             </label>
+            <select value={units} onChange={e=>setUnits(e.target.value)} title="Display units"
+              style={{fontSize:"11.5px"}}>
+              <option value="imperial">Imperial (ac · ton)</option>
+              <option value="metric">Metric (ha · Mg)</option>
+            </select>
             <span className="ctrl-sep"/>
             {/* GROUP · Explore tools */}
             <span className="ctrl-grp-lab">Explore</span>
@@ -1192,7 +1201,7 @@ export default function App(){
             })}
           </div>
           <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>
-          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} onClose={()=>setAoi(null)}/>}
+          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} onClose={()=>setAoi(null)}/>}
           {tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
             onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
           {tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}

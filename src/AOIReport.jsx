@@ -6,6 +6,7 @@
 import MiniChart from "./MiniChart.jsx";
 import StandOutlook from "./StandOutlook.jsx";
 import { openReport } from "./report.js";
+import { conv, fmtArea as fmtAreaU } from "./units.js";
 
 const valAt = (curve, age) => { const h = (curve||[]).find(([a])=>a===age); return h?h[1]:null; };
 const fmtArea = (m2) => {
@@ -80,8 +81,10 @@ function downloadCsv(aoi){
   a.click(); URL.revokeObjectURL(a.href);
 }
 
-export default function AOIReport({ aoi, stumpage, onClose }){
+export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }){
   if(!aoi) return null;
+  const cv = (v, u, d=0) => { const c = conv(v, u, units); return `${c.value.toFixed(d)} ${c.unit}`; };
+  const price = (v, u) => { const c = conv(v, u, units); return `$${Math.round(c.value)}/${c.unit.replace("$/","")}`; };
   const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats, landscape } = aoi;
   const unt = (curves && curves.untreated) || [];
   const har = (curves && curves.harvested) || [];
@@ -98,7 +101,7 @@ export default function AOIReport({ aoi, stumpage, onClose }){
         <b>AOI summary{name ? ` · ${name}` : ""}</b>
         <span>
           <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",fontWeight:600}}
-            onClick={()=>openReport(aoi, stumpage)} title="open a full printable area report (save or print to PDF)">Report ↗</button>
+            onClick={()=>openReport(aoi, stumpage, units)} title="open a full printable area report (save or print to PDF)">Report ↗</button>
           <button className="mini-btn" style={{marginTop:0,marginRight:6}}
             onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV ↓</button>
           {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
@@ -106,18 +109,18 @@ export default function AOIReport({ aoi, stumpage, onClose }){
       </div>
 
       <div className="aoi-grid">
-        {area_m2 ? <Row k="Area" v={fmtArea(area_m2)}/> : null}
+        {area_m2 ? <Row k="Area" v={fmtAreaU(area_m2, units)}/> : null}
         {centroid ? <Row k="Centroid" v={`${centroid[1].toFixed(3)}°, ${centroid[0].toFixed(3)}°`}/> : null}
         <Row k="Ecoregion" v={l3code ? `${l3code} ${l3name||""}` : "—"}/>
         {l1 ? <Row k="Biome (L1)" v={l1}/> : null}
-        {agb50 != null ? <Row k="AGB @50yr" v={`${agb50.toFixed(0)} ton/ac${agb50h!=null?` (${agb50h.toFixed(0)} harvested)`:""}`}/> : null}
+        {agb50 != null ? <Row k="AGB @50yr" v={`${cv(agb50,"ton/ac")}${agb50h!=null?` (${conv(agb50h,"ton/ac",units).value.toFixed(0)} harvested)`:""}`}/> : null}
       </div>
 
       {plotStats && plotStats.n > 0 && (<>
         <div className="aoi-sub">Forest attributes · {plotStats.n} FIA plots{plotStats.invYears?` (${plotStats.invYears[0]}–${plotStats.invYears[1]})`:""}</div>
         <div className="aoi-grid">
           {plotStats.meanAge != null && <Row k="Mean stand age" v={`${plotStats.meanAge.toFixed(0)} yr`}/>}
-          {plotStats.meanBA != null && <Row k="Mean live BA" v={`${plotStats.meanBA.toFixed(0)} sq ft/ac`}/>}
+          {plotStats.meanBA != null && <Row k="Mean live BA" v={cv(plotStats.meanBA,"sq ft/ac")}/>}
         </div>
         {plotStats.ownership && plotStats.ownership.length > 0 && (<>
           <div className="aoi-sub">Landowner composition</div>
@@ -232,10 +235,10 @@ export default function AOIReport({ aoi, stumpage, onClose }){
         {landscape.stumpage && (<>
           <div className="aoi-sub" style={{borderTop:"none",marginTop:6}}>Stumpage prices{state?` · ${state}`:""}</div>
           <div className="aoi-grid">
-            {landscape.stumpage.sawSW!=null && <Row k="Sawlog · softwood" v={`$${Math.round(landscape.stumpage.sawSW)}/MBF`}/>}
-            {landscape.stumpage.sawHW!=null && <Row k="Sawlog · hardwood" v={`$${Math.round(landscape.stumpage.sawHW)}/MBF`}/>}
-            {landscape.stumpage.pulpSW!=null && <Row k="Pulpwood · softwood" v={`$${Math.round(landscape.stumpage.pulpSW)}/cord`}/>}
-            {landscape.stumpage.pulpHW!=null && <Row k="Pulpwood · hardwood" v={`$${Math.round(landscape.stumpage.pulpHW)}/cord`}/>}
+            {landscape.stumpage.sawSW!=null && <Row k="Sawlog · softwood" v={price(landscape.stumpage.sawSW,"$/MBF")}/>}
+            {landscape.stumpage.sawHW!=null && <Row k="Sawlog · hardwood" v={price(landscape.stumpage.sawHW,"$/MBF")}/>}
+            {landscape.stumpage.pulpSW!=null && <Row k="Pulpwood · softwood" v={price(landscape.stumpage.pulpSW,"$/cord")}/>}
+            {landscape.stumpage.pulpHW!=null && <Row k="Pulpwood · hardwood" v={price(landscape.stumpage.pulpHW,"$/cord")}/>}
           </div>
         </>)}
         <div className="note" style={{margin:"4px 0 2px"}}>
@@ -245,7 +248,7 @@ export default function AOIReport({ aoi, stumpage, onClose }){
         </div>
       </>)}
 
-      <StandOutlook aoi={aoi} stumpage={stumpage}/>
+      <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
       <div className="note" style={{marginTop:6}}>
         Sources: FIA plots (attributes, ownership), yield_curves_by_l3 (projection),
         us_eco_l3_features (ecoregion). Area is geodesic (Albers equal-area).
