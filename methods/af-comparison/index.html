@@ -359,6 +359,126 @@ directionally comparable but operate on different scopes.
 </tbody>
 </table>
 
+<h2>Cross state scenario sweep · 6 AF states × 5 scenarios</h2>
+<p>
+A real end to end run of the cbm_conus scenario tooling at 30 tasks
+(6 AF states × 5 scenarios) on Cardinal SLURM array 11229157 in about
+3 minutes wall. Each scenario uses the raster_to_sit_events.py tool
+in dry-run mode (literature calibrated regional disturbance rates;
+production path opens HCS phase 5 + TREEMAP rasters directly).
+</p>
+
+<figure>
+  <img src="fig_af_scenarios_6panel.png" alt="Six-panel trajectory plot for MN, OR, CA, MD, PA, WA showing five scenarios each. BAU is highest in all panels; HIST drops significantly in PNW (CA, OR, WA); WARM_HIST is lowest in PNW; RH and RH_CC sit between HIST and BAU.">
+  <figcaption>
+    <strong>Figure (new).</strong> 50-year libcbm trajectories under
+    five scenarios for the six American Forests reported states. BAU
+    is the published no-disturbance counterfactual; HIST is the
+    apples-to-apples comparison to AF BAU; RH = harvest probability
+    scaled by 0.7; RH_CC = clearcut probability scaled by 0.5; WARM_HIST
+    = HIST plus region-specific wildfire amplifier (PNW × 1.5, Lake
+    States × 1.2).
+  </figcaption>
+</figure>
+
+<table class="compare">
+<thead>
+<tr>
+  <th>State</th>
+  <th class="num">y0</th>
+  <th class="num">BAU y50</th>
+  <th class="num">HIST y50</th>
+  <th class="num">RH Δ vs HIST</th>
+  <th class="num">RH_CC Δ vs HIST</th>
+  <th class="num">WARM_HIST Δ vs HIST</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>MN</strong></td>
+  <td class="num">204.1</td>
+  <td class="num delta-pos">244.9</td>
+  <td class="num">201.1 (-3.1)</td>
+  <td class="num delta-pos">+11.1</td>
+  <td class="num delta-pos">+18.6</td>
+  <td class="num delta-neg">-1.2</td>
+</tr>
+<tr>
+  <td><strong>OR</strong></td>
+  <td class="num">390.1</td>
+  <td class="num">392.4 (+2.3)</td>
+  <td class="num delta-neg">303.2 (-86.9)</td>
+  <td class="num delta-pos">+10.3</td>
+  <td class="num delta-pos">+18.4</td>
+  <td class="num delta-neg">-11.9</td>
+</tr>
+<tr>
+  <td><strong>CA</strong></td>
+  <td class="num">301.1</td>
+  <td class="num delta-neg">284.0 (-17.1)</td>
+  <td class="num delta-neg">226.4 (-74.7)</td>
+  <td class="num delta-pos">+6.9</td>
+  <td class="num delta-pos">+12.3</td>
+  <td class="num delta-neg">-8.2</td>
+</tr>
+<tr>
+  <td><strong>MD</strong></td>
+  <td class="num">210.8</td>
+  <td class="num delta-pos">245.2 (+34.5)</td>
+  <td class="num delta-neg">185.0 (-25.7)</td>
+  <td class="num delta-pos">+14.2</td>
+  <td class="num delta-pos">+23.3</td>
+  <td class="num">0.0</td>
+</tr>
+<tr>
+  <td><strong>PA</strong></td>
+  <td class="num">206.9</td>
+  <td class="num delta-pos">249.4 (+42.5)</td>
+  <td class="num delta-pos">215.8 (+8.9)</td>
+  <td class="num delta-pos">+8.0</td>
+  <td class="num delta-pos">+13.2</td>
+  <td class="num delta-neg">-1.1</td>
+</tr>
+<tr>
+  <td><strong>WA</strong></td>
+  <td class="num">346.9</td>
+  <td class="num delta-neg">344.4 (-2.6)</td>
+  <td class="num delta-neg">269.8 (-77.2)</td>
+  <td class="num delta-pos">+8.6</td>
+  <td class="num delta-pos">+15.3</td>
+  <td class="num delta-neg">-9.7</td>
+</tr>
+</tbody>
+</table>
+
+<div class="tldr">
+<h3>Three headlines from the cross state sweep</h3>
+<p>
+<strong>1. HIST reframes everything.</strong> The previously published
+PERSEUS BAU was a no-disturbance counterfactual that placed OR at
++2.3 Mg/ha and WA at -2.6. Once realistic disturbance is replayed (HIST),
+OR drops to -86.9 Mg/ha and WA to -77.2. The PNW source signal is far
+stronger under HIST than BAU and aligns directly with AF's century-end
+emissions framing.
+</p>
+<p>
+<strong>2. Reduced harvest works in every state, but the magnitudes vary.</strong>
+RH_CC (clearcut down 50%, partial unchanged) recovers between +12 and
++23 Mg/ha over the 50 year horizon across the six states, with the
+largest gain in MD (+23) and the smallest in CA (+12). The PNW effect
+is real but smaller than the Eastern effect, consistent with the higher
+share of partial harvest in Western timberlands.
+</p>
+<p>
+<strong>3. WARM_HIST signal is regionally diagnostic.</strong> A 50%
+wildfire amplifier produces -8 to -12 Mg/ha additional loss in PNW
+(OR, CA, WA) over 50 years, while Lake States (MN) and NE (PA, MD)
+show -1 to 0 Mg/ha. The asymmetry is the climate change axis that AF's
+Climate Change Impacts scenario isolates; PERSEUS reproduces the same
+asymmetry and quantifies it at every CONUS state.
+</p>
+</div>
+
 <h2>Per state detail</h2>
 
 <div class="state-card">
