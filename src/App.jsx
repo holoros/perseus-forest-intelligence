@@ -607,7 +607,8 @@ export default function App(){
       l3code: code, l3name: ef && ef.properties && ef.properties.NA_L3NAME,
       l1: ef && ef.properties && ef.properties.NA_L1NAME,
       agb50: agbAtAge(l3e, 50, "untreated"),
-      curves: l3e && l3e.curves && l3e.curves.agb_tonac });
+      curves: l3e && l3e.curves && l3e.curves.agb_tonac,
+      allCurves: l3e && l3e.curves });
   };
 
   const handleAoiFile = async (file)=>{
@@ -640,6 +641,7 @@ export default function App(){
       setAoi({ name:file.name, centroid:c, nVerts, l3code:code,
         l3name: ef && ef.properties.NA_L3NAME, l1: ef && ef.properties.NA_L1NAME,
         curves: l3e && l3e.curves && l3e.curves.agb_tonac,
+        allCurves: l3e && l3e.curves,
         area_m2, state: stCode, plotStats });
     }catch(err){ console.error("AOI parse failed", err); alert("Could not read AOI file: "+err.message); }
   };
@@ -694,7 +696,8 @@ export default function App(){
       centroid: [lon,lat], radiusKm, area_m2, state: stCode,
       l3code: code, l3name: ef && ef.properties && ef.properties.NA_L3NAME,
       l1: ef && ef.properties && ef.properties.NA_L1NAME,
-      curves: l3e && l3e.curves && l3e.curves.agb_tonac, plotStats });
+      curves: l3e && l3e.curves && l3e.curves.agb_tonac,
+      allCurves: l3e && l3e.curves, plotStats });
     setInspectInfo(null);
   };
 

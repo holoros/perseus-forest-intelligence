@@ -4,6 +4,7 @@
 // polygon (where available), and the ycx yield trajectory (untreated vs
 // harvested) from yield_curves_by_l3.
 import MiniChart from "./MiniChart.jsx";
+import StandOutlook from "./StandOutlook.jsx";
 
 const valAt = (curve, age) => { const h = (curve||[]).find(([a])=>a===age); return h?h[1]:null; };
 const fmtArea = (m2) => {
@@ -111,18 +112,7 @@ export default function AOIReport({ aoi, onClose }){
         <div className="note" style={{margin:"2px 0 6px"}}>Plot-level attributes available for ME, GA, IN, MN, OR, WA AOIs.</div>
       )}
 
-      {series.length ? <>
-        <div className="aoi-sub">Model projection · ycx by ecoregion</div>
-        <div className="chartcard" style={{padding:"6px 8px"}}>
-          <MiniChart series={series} unit="AGB (ton/ac)" height={200}/>
-        </div>
-        <div className="lgd" style={{marginTop:6}}>
-          <span><i style={{background:"#3fb68b",width:14,height:3}}/>untreated</span>
-          <span><i style={{background:"#e6ab02",width:14,height:3}}/>harvested</span>
-        </div>
-      </> : (
-        <div className="note" style={{margin:"4px 0"}}>L3 {l3code} {l3name} has no fitted ycx yield curve yet.</div>
-      )}
+      <StandOutlook aoi={aoi}/>
       <div className="note" style={{marginTop:6}}>
         Sources: FIA plots (attributes, ownership), yield_curves_by_l3 (projection),
         us_eco_l3_features (ecoregion). Area is geodesic (Albers equal-area).
