@@ -126,6 +126,27 @@ export async function riskSummary(url, bounds, ring){
   return { mean, band, lo: 100*lo/n, mod: 100*mod/n, hi: 100*hi/n };
 }
 
+// Generic relative position along a sequential ramp (0..1) for the AOI box.
+// For each opaque pixel, find the nearest ramp stop; its index / (n-1) is its
+// relative level. Returns { rel, band } with no unit assumptions — works for any
+// ramp layer (CSPI, SVI, standing value, ...).
+export async function rampRelative(url, bounds, ring, rampHexes){
+  const { px } = await samplePixels(url, bounds, ring);
+  if(!px.length) return null;
+  const stops = rampHexes.map(hex2rgb);
+  let sum = 0, n = 0;
+  for(const p of px){
+    let bi = 0, bd = Infinity;
+    for(let i = 0; i < stops.length; i++){ const d = dist2(p, stops[i]); if(d < bd){ bd = d; bi = i; } }
+    if(bd > 16000) continue;              // not a ramp color (edge/other layer)
+    sum += bi / (stops.length - 1); n++;
+  }
+  if(!n) return null;
+  const rel = sum / n;
+  const band = rel < 0.34 ? "Low" : rel < 0.67 ? "Moderate" : "High";
+  return { rel, band };
+}
+
 // Forest cover fraction in the box (opaque forest pixels / all box pixels).
 export async function forestFraction(url, bounds, ring){
   const { px, total } = await samplePixels(url, bounds, ring);

@@ -9,7 +9,7 @@ import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
-import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity } from "./rasterSample.js";
+import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative } from "./rasterSample.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -794,13 +794,18 @@ export default function App(){
     const R = (p) => `${BASE}raster/${p}`;
     let landscape = null;
     try{
-      const [own, risk, ffrac] = await Promise.all([
-        ownershipComposition(R("conus_ownership.png"), FRAME, ring).catch(()=>null),
+      const CSPI_RAMP = ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"];
+      const SVI_RAMP = ["#f7fcf5","#74c476","#238b45","#00441b"];
+      const [own, risk, ffrac, rdivers, cspi, svi] = await Promise.all([
+        ownershipComposition(R("conus_ownership.png?v=2"), FRAME, ring).catch(()=>null),
         riskSummary(R("conus_p_disturbance_2022.png"), FRAME, ring).catch(()=>null),
         forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, ring).catch(()=>null),
+        forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, ring).catch(()=>null),
+        rampRelative(R("conus_climate_stress.png"), FRAME, ring, CSPI_RAMP).catch(()=>null),
+        rampRelative(R("conus_species_value_index.png"), FRAME, ring, SVI_RAMP).catch(()=>null),
       ]);
-      // Forest-type diversity for biodiversity: prefer FIA plot composition (the
-      // fortype raster collapses to one class), fall back to ecoregion richness.
+      // Biodiversity proxy from forest-type diversity: prefer FIA plot composition
+      // (finer type groups), fall back to the fortype raster (CONUS-wide, 3 groups).
       let divers = null;
       if(plotStats && plotStats.forestTypes && plotStats.forestTypes.length){
         const fts = plotStats.forestTypes.filter(f=>f.label && f.label.toLowerCase()!=="nonforest");
@@ -808,6 +813,15 @@ export default function App(){
         let H = 0; const tot = fts.reduce((a,f)=>a+f.pct,0) || 1;
         for(const f of fts){ const p = f.pct/tot; if(p>0) H -= p*Math.log(p); }
         if(richness>0) divers = { evenness: richness>1 ? H/Math.log(richness) : 0, richness };
+      }
+      if(!divers) divers = rdivers;
+      // Stumpage prices for the AOI's state (no sampling; from stumpage.json).
+      let stump = null;
+      if(stumpage && stumpage.latest && stCode){
+        const g = (b) => (stumpage.latest[b] && stumpage.latest[b][stCode]) ? stumpage.latest[b][stCode].value : null;
+        const sv = { sawSW:g("sawlog_softwood"), sawHW:g("sawlog_hardwood"),
+                     pulpSW:g("pulpwood_softwood"), pulpHW:g("pulpwood_hardwood") };
+        if(Object.values(sv).some(v=>v!=null)) stump = sv;
       }
       // Indicative composite ecosystem indices (0..1) from available spatial inputs.
       const ageScore = plotStats && plotStats.meanAge != null
@@ -823,6 +837,7 @@ export default function App(){
         ownership: own, risk, forestFrac: ffrac, diversity: divers,
         habitat: habScore!=null ? { score: habScore, band: band(habScore) } : null,
         biodiversity: bioScore!=null ? { score: bioScore, band: band(bioScore) } : null,
+        siteProductivity: cspi, speciesValue: svi, stumpage: stump,
       };
     }catch(e){ landscape = null; }
 

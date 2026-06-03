@@ -115,7 +115,7 @@ export default function AOIReport({ aoi, stumpage, onClose }){
         <div className="note" style={{margin:"2px 0 6px"}}>Plot-level attributes available for ME, GA, IN, MN, OR, WA AOIs.</div>
       )}
 
-      {landscape && (landscape.ownership || landscape.risk || landscape.habitat || landscape.biodiversity) && (<>
+      {landscape && (landscape.ownership || landscape.risk || landscape.habitat || landscape.biodiversity || landscape.siteProductivity || landscape.speciesValue || landscape.stumpage) && (<>
         <div className="aoi-sub">Surrounding landscape · sampled from CONUS layers</div>
         {landscape.forestFrac != null && (
           <div className="aoi-grid">
@@ -163,7 +163,34 @@ export default function AOIReport({ aoi, stumpage, onClose }){
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.biodiversity.band]}}>{landscape.biodiversity.band}</span>
             </div>
           )}
+          {landscape.siteProductivity && (
+            <div className="aoi-bar-row" title="Relative position on the Climate Site Productivity Index (CSPI) within this area">
+              <span className="aoi-bar-lab">Site productivity (CSPI)</span>
+              <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                style={{width:`${landscape.siteProductivity.rel*100}%`,
+                        background: BAND_GOOD_HIGH[landscape.siteProductivity.band] || "#888"}}/></span>
+              <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.siteProductivity.band]}}>{landscape.siteProductivity.band}</span>
+            </div>
+          )}
+          {landscape.speciesValue && (
+            <div className="aoi-bar-row" title="Relative commercial species value (SVI, regional mean = 1) within this area">
+              <span className="aoi-bar-lab">Species value (SVI)</span>
+              <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                style={{width:`${landscape.speciesValue.rel*100}%`,
+                        background: BAND_GOOD_HIGH[landscape.speciesValue.band] || "#888"}}/></span>
+              <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.speciesValue.band]}}>{landscape.speciesValue.band}</span>
+            </div>
+          )}
         </div>
+        {landscape.stumpage && (<>
+          <div className="aoi-sub" style={{borderTop:"none",marginTop:6}}>Stumpage prices{state?` · ${state}`:""}</div>
+          <div className="aoi-grid">
+            {landscape.stumpage.sawSW!=null && <Row k="Sawlog · softwood" v={`$${Math.round(landscape.stumpage.sawSW)}/MBF`}/>}
+            {landscape.stumpage.sawHW!=null && <Row k="Sawlog · hardwood" v={`$${Math.round(landscape.stumpage.sawHW)}/MBF`}/>}
+            {landscape.stumpage.pulpSW!=null && <Row k="Pulpwood · softwood" v={`$${Math.round(landscape.stumpage.pulpSW)}/cord`}/>}
+            {landscape.stumpage.pulpHW!=null && <Row k="Pulpwood · hardwood" v={`$${Math.round(landscape.stumpage.pulpHW)}/cord`}/>}
+          </div>
+        </>)}
         <div className="note" style={{margin:"4px 0 2px"}}>
           Landowner, forest cover, and disturbance risk are sampled from the CONUS rasters inside this area.
           Habitat and biodiversity (<i>~</i>) are indicative composites of forest continuity, structural maturity,
