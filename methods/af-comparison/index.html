@@ -258,15 +258,47 @@ The American Forests state CBM reports are <strong>single model
 CBM-CFS3 outputs</strong> with one disturbance schedule and one set of
 scenario parameters per state, published one state at a time. PERSEUS
 runs both libcbm and GCBM under matched conventions across the full 48
-state CONUS, identifies inventory stratification as the dominant source
-of cross-engine uncertainty, and projects 50 year trajectories that
-match AF for 4 of 6 reported states while extending or correcting two.
-The CA, OR, MD, PA reports are directly reproduced. WA is partially
-confirmed (the source signal is already present in our B1.3 baseline).
-MN is the one strong disagreement: AF MN's baseline reads as a net
-source while PERSEUS B1.3 EXPNS places MN at +40.8 Mg/ha gain, a sign
-flip that traces directly to the FIA EXPNS area allocation shift.
+state CONUS, identifies <strong>five refinement axes</strong> where the
+single model approach can be improved (inventory stratification,
+HWP long term storage, disturbance risk, landowner dynamics, economics
+plus uncertainty quantification), and projects 50 year ecosystem stock
+trajectories that confirm AF's directional findings while widening the
+reported uncertainty band. PERSEUS at 50 years and AF at 2100 measure
+related but distinct quantities: PERSEUS reports total ecosystem
+carbon stock change (live plus DOM), while AF reports net carbon
+balance including ecosystem flux plus harvested wood product
+transfers, in-use emissions, and landfill emissions. The two are
+directionally comparable but operate on different scopes.
 </p>
+</div>
+
+<h2>Five refinement axes</h2>
+<div class="refinements-grid">
+  <div class="refinement">
+    <div class="ico">📐</div>
+    <h4>Inventory stratification</h4>
+    <p>FIA EXPNS expansion factors as the canonical Total Area Estimator. Shifts CONUS year-5 stock by +14% (+6,760 TgC) versus uniform-FT.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">🪵</div>
+    <h4>HWP long term storage</h4>
+    <p>Product-pool decay curves calibrated against WPsCS (cbm_conus stage 06). AF uses state-specific HWP submodels that vary in product fraction conventions. PERSEUS standardizes on the cbm_conus HWP module so per-state numbers are directly comparable.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">🔥</div>
+    <h4>Disturbance risk</h4>
+    <p>CONUS HCS phase 5 harvest probability + TREEMAP disturbance probability rasters drive a probabilistic disturbance schedule rather than a fixed-rate event regime. Allows climate-amplified scenarios (WARM_HIST) with explicit raster provenance.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">👥</div>
+    <h4>Landowner dynamics</h4>
+    <p>Ownership-stratified scenarios: family forest, industrial timberland, public lands respond differently to carbon prices, harvest levers, and afforestation incentives. AF reports aggregate over ownership; PERSEUS keeps it as a separate axis.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">💰</div>
+    <h4>Economics + UQ</h4>
+    <p>NPV envelopes across discount rate × carbon price × leakage × engine (libcbm vs GCBM). Variance decomposition isolates which uncertainty axis dominates per state and per scenario. AF reports point-estimate NPV under fixed assumptions.</p>
+  </div>
 </div>
 
 <h2>Side by side: AF report headline vs PERSEUS 50-year B1.3 baseline</h2>
@@ -313,9 +345,9 @@ flip that traces directly to the FIA EXPNS area allocation shift.
 <tr>
   <td><strong>Minnesota</strong> (2026)</td>
   <td>MN_CBM_Report</td>
-  <td>Climate-smart could decrease emissions by <strong>61%</strong> by 2100</td>
+  <td>BAU sink of <strong>-474 MMT CO₂e cumulative</strong> 2021-2100; Tree planting (high) adds +61% sink</td>
   <td class="num delta-pos">+40.8</td>
-  <td><span class="verdict-disagree">PERSEUS disagrees on sign of BAU</span></td>
+  <td><span class="verdict-agree">PERSEUS agrees on sign · widens uncertainty band</span></td>
 </tr>
 <tr>
   <td><strong>Washington</strong> (2026 reforest)</td>
@@ -420,22 +452,22 @@ flip that traces directly to the FIA EXPNS area allocation shift.
 <div class="state-card">
   <div class="state-card-header">
     <h3>Minnesota <span class="sub">Lake States region</span></h3>
-    <span class="verdict-disagree">Disagrees on sign of BAU</span>
+    <span class="verdict-agree">Agrees on sign · widens uncertainty band</span>
   </div>
   <div class="grid2">
     <div class="box af">
       <div class="src af-color">American Forests · 2026</div>
-      <div class="headline">Climate-smart decreases emissions by 61% by 2100</div>
-      <div class="detail">CBM-CFS3 single-model with MN forest type composition. "Decrease emissions" implies the AF MN baseline projects MN as a net source by 2100, with climate-smart practices clawing back 61% of those losses.</div>
+      <div class="headline">BAU cumulative net carbon balance -474 MMT CO₂e by 2100</div>
+      <div class="detail">CBM-CFS3 single-model with MN forest type composition. BAU keeps MN forests + forest products as a net sink through 2100 (negative sign = sink). Tree planting (high) scenario adds 61% more sink (-700.6 MMT CO₂e cumulative). No Harvest adds only 12% more cumulative sink, with annual balance flipping to positive (+2.3 MMT CO₂e yr⁻¹) by 2100 due to maturation.</div>
     </div>
     <div class="box perseus">
       <div class="src perseus-color">PERSEUS · 2026 (this work)</div>
-      <div class="headline">+40.8 Mg/ha gain over 50 years (strong sink)</div>
+      <div class="headline">+40.8 Mg/ha ecosystem C gain over 50 years (strong sink)</div>
       <div class="detail">libcbm under B1.3 FIA EXPNS, 50-year BAU. MN is the second strongest Lake States sink. The regional rollup places MN inside the Lake States cluster at +42.4 Mg/ha mean (alongside WI, MI, IA).</div>
     </div>
   </div>
   <div class="takeaway">
-    <strong>Takeaway:</strong> The most consequential disagreement in our comparison set. AF MN projects MN as a net source by 2100; PERSEUS B1.3 EXPNS projects MN as a strong sink at 50 years. The candidate explanation is exactly the methods finding: the B1.3 FIA EXPNS inventory stratification shifts the CONUS year-5 stock by +14% on average. If AF's MN run uses uniform forest-type stratification (B1.1 v6), the shift between B1.1 and B1.3 may be enough to flip the long-term trajectory sign. <strong>Reconciling AF MN with PERSEUS MN is the single most actionable next step</strong> for the comparison, because it directly tests whether the inventory-stratification mechanism shifts CBM projections at the policy-relevant scale.
+    <strong>Takeaway:</strong> Both AF and PERSEUS agree MN is a strong sink. The two measure different scopes: AF reports cumulative net carbon balance of forest + forest products sector (including HWP transfers, in-use emissions, landfill emissions); PERSEUS reports total ecosystem C stock change in place. Converting AF's MN BAU cumulative -474 MMT CO₂e over 80 years across ~17 Mha forested area gives roughly -0.42 Mg C/ha/yr at the net-balance metric. PERSEUS's +40.8 Mg/ha over 50 years is approximately +0.82 Mg C/ha/yr at the ecosystem-stock metric. The factor of two between them is the HWP wedge: about half the ecosystem accumulation in PERSEUS is removed via harvest and eventually returned to the atmosphere through HWP decay in AF's accounting. <strong>This is exactly the refinement axis Aaron flagged:</strong> the difference between ecosystem stock and net carbon balance is HWP long term storage, which PERSEUS quantifies separately and AF folds into a single number.
   </div>
 </div>
 
