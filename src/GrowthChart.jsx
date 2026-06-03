@@ -47,24 +47,33 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   } else {
     Y = v => (H-B) - (v-y0)/((y1-y0)||1)*(H-T-B);
   }
-  const grid=[]; const nTicks = 4;
-  for(let i=0;i<=nTicks;i++){
-    let v;
-    if(yMode==="log"){
-      const ly0 = Math.log10(Math.max(0.1, y0||0.1));
-      const ly1 = Math.log10(Math.max(y1, 1));
-      v = Math.pow(10, ly0 + (ly1-ly0)*i/nTicks);
-    } else {
-      v = y0 + (y1-y0)*i/nTicks;
-    }
+  const grid=[];
+  let yticks=[];
+  if(yMode==="log"){
+    const ly0 = Math.log10(Math.max(0.1, y0||0.1));
+    const ly1 = Math.log10(Math.max(y1, 1));
+    for(let i=0;i<=4;i++) yticks.push(Math.pow(10, ly0 + (ly1-ly0)*i/4));
+  } else {
+    // "nice" round-number ticks that adapt to the visible data range
+    const range = (y1 - y0) || 1;
+    const raw = range / 4;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const norm = raw / mag;
+    const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+    const start = Math.ceil(y0 / step) * step;
+    for(let v = start; v <= y1 + step*1e-6; v += step) yticks.push(+v.toFixed(6));
+    if(yticks.length < 2) yticks = [y0, y1];
+  }
+  const ydec = (yMode!=="log" && yticks.length>1 && (yticks[1]-yticks[0]) < 1) ? 1 : 0;
+  yticks.forEach((v,i)=>{
     const yy=Y(v);
     grid.push(<g key={"g"+i}>
       <line x1={L} y1={yy} x2={W-R} y2={yy} stroke="#2a3a47" strokeWidth="1"/>
       <text x={L-6} y={yy+3} textAnchor="end" fill="#8aa0b0" fontSize="10">
-        {v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(v>=10?0:1)}
+        {v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(ydec)}
       </text>
     </g>);
-  }
+  });
   const xticks=[]; for(let t=Math.ceil(x0/20)*20; t<=x1; t+=20)
     xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{t}</text>);
   const bands = showBands ? visible.filter(s=> s.pts.some(p=>p.length>=4)).map((s,i)=>{

@@ -88,6 +88,8 @@ select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
 .so-ctrl{display:flex;flex-direction:column;gap:2px;margin:7px 0 2px}
 .so-ctrl label{font-size:11px;color:var(--mut)}
 .so-ctrl label b{color:var(--ink)}
+.so-now{margin:7px 0 2px;font-size:12.5px;color:var(--ink);background:rgba(244,196,48,.08);
+  border-left:2px solid #f4c430;border-radius:4px;padding:4px 8px}
 .so-fia{color:var(--accent)}
 .so-ctrl input[type=range]{accent-color:#f4c430;width:100%}
 .so-num{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;
