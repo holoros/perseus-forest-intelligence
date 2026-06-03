@@ -10,8 +10,10 @@ const PAD = 8;
 // projection output (which is in radians). gdalwarp emits bounds in m so the
 // CONUS overlay placement needs this conversion.
 const EARTH_R = 6378137;
-// US Albers parameters (NAD83 Conus Albers standard)
-const PHI0 = 38 * Math.PI / 180;
+// US Albers parameters. lat_0 MUST match the raster warp target (ESRI:102003,
+// USA Contiguous Albers) whose lat_0 = 37.5°. A prior 38° value shifted every
+// CONUS raster overlay ~12px south of the state polygons; 37.5° aligns them.
+const PHI0 = 37.5 * Math.PI / 180;
 const PHI1 = 29.5 * Math.PI / 180;
 const PHI2 = 45.5 * Math.PI / 180;
 const LAM0 = -96 * Math.PI / 180;
@@ -106,7 +108,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7,
                                   stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7,
                                   ecoData, ecoFill, ecoOpacity = 0.75,
-                                  inspectMode = false, onInspect }){
+                                  inspectMode = false, onInspect, userLoc = null }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -376,6 +378,22 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                clipPath="url(#clip-selected-state)"
                style={{pointerEvents:"none"}}/>
       )}
+      {userLoc && isFinite(userLoc[0]) && isFinite(userLoc[1]) && (()=>{
+        const [mx, my] = projPath(userLoc[0], userLoc[1]);
+        const r = 6 / view.k;                       // constant screen size at any zoom
+        return (
+          <g style={{pointerEvents:"none"}}>
+            <circle cx={mx} cy={my} r={r*2.2} fill="#2f81f7" opacity="0.22">
+              <animate attributeName="r" values={`${r*1.6};${r*2.8};${r*1.6}`}
+                       dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.30;0.05;0.30"
+                       dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx={mx} cy={my} r={r} fill="#2f81f7"
+                    stroke="#ffffff" strokeWidth={1.6/view.k}/>
+          </g>
+        );
+      })()}
       </g>
       {/* Zoom controls (fixed, outside the pan/zoom group) */}
       <g transform={`translate(${W-100},${H-32})`}>

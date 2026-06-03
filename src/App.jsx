@@ -40,9 +40,10 @@ const MAP_BINS = [
             ["sawtimber_share","Sawtimber share (%)"],["expected_removal","Expected removal"],
             ["hybrid_agc2022","AG carbon 2022 (Mg C/ha)"],["hybrid_dagc100","100-yr AG carbon change"]] },
   { id:"risk", label:"Future risk",
-    layers:[["gfc_lossyear","Forest loss year (Hansen)"],["lcms_2022","Disturbance cause (LCMS)"],
+    layers:[["p_disturbance_2022","P(disturbance) · 2022"],
             ["p_harvest_clearcut","P(stand replacement)"],["p_harvest_any","P(harvest · any)"],
-            ["p_harvest_partial","P(harvest · partial)"]] },
+            ["p_harvest_partial","P(harvest · partial)"],
+            ["lcms_2022","Disturbance cause (LCMS)"],["gfc_lossyear","Forest loss year (Hansen)"]] },
 ];
 const binForLayer = (layer) => (MAP_BINS.find(b => b.layers.some(([k])=>k===layer)) || {}).id;
 
@@ -125,6 +126,13 @@ const CONUS_LEGENDS = {
     ramp: ["#fde725","#5ec962","#21918c","#3b528b","#440154"],
     lo: "0", mid: "600", hi: "1500",
     note: "Trees per acre, TreeMap 2022 basis",
+  },
+  p_disturbance_2022: {
+    title: "P(disturbance), 2022",
+    type: "ramp",
+    ramp: ["#ffffcc","#fed976","#fd8d3c","#f03b20","#bd0026"],
+    lo: "0.0", mid: "0.35", hi: "0.72",
+    note: "TreeMap 2022 disturbance probability (fire, insect, disease, wind, etc.) — Cardinal TREEMAP_outputs_v5",
   },
   p_harvest_any: {
     title: "P(harvest · any), TM2016",
@@ -698,12 +706,14 @@ export default function App(){
       l1: ef && ef.properties && ef.properties.NA_L1NAME,
       curves: l3e && l3e.curves && l3e.curves.agb_tonac,
       allCurves: l3e && l3e.curves, plotStats });
+    setUserLoc([lon, lat]);   // drop a blue marker at the selected/located point
     setInspectInfo(null);
   };
 
   // "Forest near me" — locate the user precisely (browser geolocation first,
   // IP-based fallback) and open the local forest analysis for their area.
   const [locating, setLocating] = useState(false);
+  const [userLoc, setUserLoc] = useState(null);  // [lon,lat] of selected/located point
   const goToLatLon = async (lon, lat) => {
     if (!isFinite(lon) || !isFinite(lat)) { alert("Couldn't determine your location."); return; }
     if (lon < -125 || lon > -66 || lat < 24 || lat > 50) {
@@ -791,7 +801,8 @@ export default function App(){
                           ecoData={ecoOn ? ecoGeo : null}
                           ecoFill={ecoFill}
                           inspectMode={inspectMode}
-                          onInspect={handleInspect}/>
+                          onInspect={handleInspect}
+                          userLoc={userLoc}/>
                 </div>);
               })()}
           <div className="map-ctrl">
