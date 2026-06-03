@@ -14,8 +14,11 @@ const fmtArea = (m2) => {
                     : `${ac.toFixed(0)} ac (${ha.toFixed(0)} ha)`;
 };
 const OWN_COL = { "Private (Family/Corporate)":"#3fb68b", "State / Local":"#6baed6",
-  "National Forest":"#8da0cb", "Other Federal":"#e6ab02" };
+  "National Forest":"#8da0cb", "Other Federal":"#3C5488", "Tribal":"#8c510a" };
 const FT_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d"];
+// Band coloring. Risk: low=good(green). Habitat/biodiversity: high=good(green).
+const BAND_GOOD_HIGH = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
+const BAND_GOOD_LOW  = { "Low":"#3fb68b", "Moderate":"#e6ab02", "High":"#d9534f" };
 
 function downloadCsv(aoi){
   const rows = [["field","value"]];
@@ -43,7 +46,7 @@ function downloadCsv(aoi){
 
 export default function AOIReport({ aoi, stumpage, onClose }){
   if(!aoi) return null;
-  const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats } = aoi;
+  const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats, landscape } = aoi;
   const unt = (curves && curves.untreated) || [];
   const har = (curves && curves.harvested) || [];
   const agb50 = valAt(unt, 50), agb50h = valAt(har, 50);
@@ -111,6 +114,62 @@ export default function AOIReport({ aoi, stumpage, onClose }){
       {!plotStats && (
         <div className="note" style={{margin:"2px 0 6px"}}>Plot-level attributes available for ME, GA, IN, MN, OR, WA AOIs.</div>
       )}
+
+      {landscape && (landscape.ownership || landscape.risk || landscape.habitat || landscape.biodiversity) && (<>
+        <div className="aoi-sub">Surrounding landscape · sampled from CONUS layers</div>
+        {landscape.forestFrac != null && (
+          <div className="aoi-grid">
+            <Row k="Forest cover (area)" v={`${Math.round(landscape.forestFrac*100)}%`}/>
+          </div>
+        )}
+        {landscape.ownership && landscape.ownership.length > 0 && (<>
+          <div className="aoi-sub" style={{borderTop:"none",marginTop:4}}>Landowner composition (forest ownership)</div>
+          <div className="aoi-bars">
+            {landscape.ownership.map(o => (
+              <div key={o.label} className="aoi-bar-row" title={`${o.n} sampled cells`}>
+                <span className="aoi-bar-lab">{o.label}</span>
+                <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                  style={{width:`${o.pct}%`, background: OWN_COL[o.label] || "#888"}}/></span>
+                <span className="aoi-bar-pct">{o.pct.toFixed(0)}%</span>
+              </div>
+            ))}
+          </div>
+        </>)}
+        <div className="aoi-bars" style={{marginTop:6}}>
+          {landscape.risk && (
+            <div className="aoi-bar-row" title={`mean P(disturbance) ${landscape.risk.mean.toFixed(2)}; ${landscape.risk.hi.toFixed(0)}% of area high-risk`}>
+              <span className="aoi-bar-lab">Disturbance risk (2022)</span>
+              <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                style={{width:`${Math.min(100, landscape.risk.mean/0.72*100)}%`,
+                        background: BAND_GOOD_LOW[landscape.risk.band] || "#888"}}/></span>
+              <span className="aoi-bar-pct" style={{color:BAND_GOOD_LOW[landscape.risk.band]}}>{landscape.risk.band}</span>
+            </div>
+          )}
+          {landscape.habitat && (
+            <div className="aoi-bar-row" title="Indicative composite of forest continuity, structural maturity, and disturbance">
+              <span className="aoi-bar-lab">Habitat quality <i style={{opacity:.6,fontStyle:"normal"}}>~</i></span>
+              <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                style={{width:`${landscape.habitat.score*100}%`,
+                        background: BAND_GOOD_HIGH[landscape.habitat.band] || "#888"}}/></span>
+              <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.habitat.band]}}>{landscape.habitat.band}</span>
+            </div>
+          )}
+          {landscape.biodiversity && (
+            <div className="aoi-bar-row" title={`Forest-type evenness ${(landscape.diversity?landscape.diversity.evenness:0).toFixed(2)}; richness ${landscape.diversity?landscape.diversity.richness:0}`}>
+              <span className="aoi-bar-lab">Biodiversity <i style={{opacity:.6,fontStyle:"normal"}}>~</i></span>
+              <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                style={{width:`${landscape.biodiversity.score*100}%`,
+                        background: BAND_GOOD_HIGH[landscape.biodiversity.band] || "#888"}}/></span>
+              <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.biodiversity.band]}}>{landscape.biodiversity.band}</span>
+            </div>
+          )}
+        </div>
+        <div className="note" style={{margin:"4px 0 2px"}}>
+          Landowner, forest cover, and disturbance risk are sampled from the CONUS rasters inside this area.
+          Habitat and biodiversity (<i>~</i>) are indicative composites of forest continuity, structural maturity,
+          and forest-type diversity — refine with field inventory.
+        </div>
+      </>)}
 
       <StandOutlook aoi={aoi} stumpage={stumpage}/>
       <div className="note" style={{marginTop:6}}>

@@ -4,7 +4,9 @@
 // used (NAD83 CONUS Albers on a unit sphere); SVGMap now imports it from here.
 
 const D2R = Math.PI / 180, R2D = 180 / Math.PI;
-export const PHI0 = 38 * D2R;
+// lat_0 = 37.5° to match the ESRI:102003 frame that all CONUS rasters are warped
+// to (was 38°, which left overlays ~7.5px off and inspect-inverse slightly off).
+export const PHI0 = 37.5 * D2R;
 const PHI1 = 29.5 * D2R, PHI2 = 45.5 * D2R;
 export const LAM0 = -96 * D2R;
 export const N = (Math.sin(PHI1) + Math.sin(PHI2)) / 2;

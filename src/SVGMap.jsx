@@ -108,7 +108,9 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   conusOverlay, conusOverlayBounds, conusOverlayOpacity = 0.7,
                                   stateOverlay, stateOverlayBounds, stateOverlayOpacity = 0.7,
                                   ecoData, ecoFill, ecoOpacity = 0.75,
-                                  inspectMode = false, onInspect, userLoc = null }){
+                                  inspectMode = false, onInspect, userLoc = null,
+                                  baseLayer = null, baseBounds = null, baseOpacity = 0.6,
+                                  focusGeom = null }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -239,6 +241,14 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     animateTo(clampView({ k, tx: W/2 - cx * k, ty: H/2 - cy * k }));
   };
+  // Auto-zoom to a geometry (e.g. the "forest near me" AOI box) when it changes.
+  const lastFocusRef = useRef(null);
+  useEffect(() => {
+    if(focusGeom && focusGeom !== lastFocusRef.current){
+      lastFocusRef.current = focusGeom;
+      fitFeature(focusGeom);
+    }
+  }, [focusGeom]);
   const view = viewRef.current;
 
   if(!geo || !states) return <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"100%",display:"block"}}/>;
@@ -258,6 +268,15 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     const sy1 = -ry1 * SCALE + TY;
     conusBox = { x: Math.min(sx0, sx1), y: Math.min(sy0, sy1),
                  width: Math.abs(sx1 - sx0), height: Math.abs(sy1 - sy0) };
+  }
+  // Forest/non-forest base layer placement (same projected-meter frame).
+  let baseBox = null;
+  if(baseLayer && baseBounds){
+    const { x0, x1, y0, y1 } = baseBounds;
+    const sx0 = (x0 / EARTH_R) * SCALE + TX, sx1 = (x1 / EARTH_R) * SCALE + TX;
+    const sy0 = -(y0 / EARTH_R) * SCALE + TY, sy1 = -(y1 / EARTH_R) * SCALE + TY;
+    baseBox = { x: Math.min(sx0, sx1), y: Math.min(sy0, sy1),
+                width: Math.abs(sx1 - sx0), height: Math.abs(sy1 - sy0) };
   }
   // Per-state overlay placement.
   //   v0.69+: bounds in Albers meters (x0/y0/x1/y1) when the PNG was warped to
@@ -317,6 +336,12 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
       <rect x="0" y="0" width={W} height={H} fill="url(#ocean-bg)"/>
       <rect x="0" y="0" width={W} height={H} fill="url(#ocean-vignette)"/>
       <g transform={`translate(${view.tx},${view.ty}) scale(${view.k})`}>
+      {baseLayer && baseBox && (
+        <image href={baseLayer} x={baseBox.x} y={baseBox.y}
+               width={baseBox.width} height={baseBox.height}
+               opacity={baseOpacity} preserveAspectRatio="none"
+               style={{pointerEvents:"none"}}/>
+      )}
       {conusOverlay && conusBox && (
         <image href={conusOverlay} x={conusBox.x} y={conusBox.y}
                width={conusBox.width} height={conusBox.height}
@@ -348,8 +373,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         // When a CONUS overlay is active, dim non-focal state fills so the
         // raster pattern beneath is visible. Keep focal states + selected
         // state outlined / opaque so they remain anchors.
-        if(conusOverlay || ecoData){
-          // overlay active: drop state fills back so the layer beneath reads
+        if(conusOverlay || ecoData || baseLayer){
+          // overlay/base active: drop state fills back so the layer beneath reads
           // clearly; keep focal/selected legible via their strokes.
           opacity = isFocal ? 0.30 : 0.06;
         }

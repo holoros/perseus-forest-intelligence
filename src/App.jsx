@@ -9,6 +9,7 @@ import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
+import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity } from "./rasterSample.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -325,6 +326,10 @@ export default function App(){
   const [aoi,setAoi] = useState(null);
   const [playing,setPlaying] = useState(false);
   const [fiaPlots,setFiaPlots] = useState({}); // state -> fia_plots json (cache)
+  // v0.74 forest/non-forest NLCD base layer + zoom-to-located-area
+  const [baseOn,setBaseOn] = useState(true);          // forest/non-forest context base
+  const [baseBounds,setBaseBounds] = useState(null);
+  const [focusGeom,setFocusGeom] = useState(null);    // geom to auto-zoom the map to
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -527,6 +532,12 @@ export default function App(){
     return ()=> clearInterval(id);
   },[playing,mapMode]);
 
+  // ---- load forest/non-forest base bounds once ----
+  useEffect(()=>{
+    if(baseBounds) return;
+    j("raster/conus_forest_nonforest_bounds.json").then(setBaseBounds).catch(()=>{});
+  },[baseBounds]);
+
   // ---- lazy-load CONUS overlay bounds.json ----
   useEffect(()=>{
     if(conusLayer === "none" || conusBounds[conusLayer]) return;
@@ -699,14 +710,45 @@ export default function App(){
     const stCode = geoData && (findFeature(geoData.features, lon, lat) || {properties:{}}).properties.state;
     let area_m2; try{ area_m2 = polygonAreaM2(geom); }catch(e){ area_m2 = null; }
     const plotStats = await aggregatePlots(geom, stCode);
+
+    // Surrounding-landscape metrics sampled from the CONUS overlay rasters
+    // (works for any location, not just the FIA-plot states).
+    const FRAME = { x0:-2561585, x1:2463176, y0:-1604872.736, y1:1714610 };
+    const R = (p) => `${BASE}raster/${p}`;
+    let landscape = null;
+    try{
+      const [own, risk, ffrac, divers] = await Promise.all([
+        ownershipComposition(R("conus_ownership.png"), FRAME, ring).catch(()=>null),
+        riskSummary(R("conus_p_disturbance_2022.png"), FRAME, ring).catch(()=>null),
+        forestFraction(R("conus_forest_nonforest.png"), FRAME, ring).catch(()=>null),
+        forestTypeDiversity(R("conus_fortype_2022.png"), FRAME, ring).catch(()=>null),
+      ]);
+      // Indicative composite ecosystem indices (0..1) from available spatial inputs.
+      const ageScore = plotStats && plotStats.meanAge != null
+        ? Math.max(0, Math.min(1, plotStats.meanAge / 120)) : null;
+      const contin = ffrac != null ? ffrac : null;            // forest continuity
+      const riskPen = risk ? Math.max(0, 1 - risk.mean / 0.72) : null;
+      const habParts = [[contin,0.45],[ageScore,0.30],[riskPen,0.25]].filter(p=>p[0]!=null);
+      const wsum = habParts.reduce((a,p)=>a+p[1],0);
+      const habScore = habParts.length ? habParts.reduce((a,p)=>a+p[0]*p[1],0)/wsum : null;
+      const bioScore = divers ? (0.7*divers.evenness + 0.3*Math.min(1,(divers.richness-1)/2)) : null;
+      const band = (s)=> s==null?null : s<0.34?"Low":s<0.67?"Moderate":"High";
+      landscape = {
+        ownership: own, risk, forestFrac: ffrac, diversity: divers,
+        habitat: habScore!=null ? { score: habScore, band: band(habScore) } : null,
+        biodiversity: bioScore!=null ? { score: bioScore, band: band(bioScore) } : null,
+      };
+    }catch(e){ landscape = null; }
+
     setAoi({
       name: `area ~${radiusKm} km · ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
       centroid: [lon,lat], radiusKm, area_m2, state: stCode,
       l3code: code, l3name: ef && ef.properties && ef.properties.NA_L3NAME,
       l1: ef && ef.properties && ef.properties.NA_L1NAME,
       curves: l3e && l3e.curves && l3e.curves.agb_tonac,
-      allCurves: l3e && l3e.curves, plotStats });
+      allCurves: l3e && l3e.curves, plotStats, landscape });
     setUserLoc([lon, lat]);   // drop a blue marker at the selected/located point
+    setFocusGeom(geom);       // zoom the map into the located/selected area
     setInspectInfo(null);
   };
 
@@ -802,14 +844,23 @@ export default function App(){
                           ecoFill={ecoFill}
                           inspectMode={inspectMode}
                           onInspect={handleInspect}
-                          userLoc={userLoc}/>
+                          userLoc={userLoc}
+                          baseLayer={baseOn ? `${BASE}raster/conus_forest_nonforest.png` : null}
+                          baseBounds={baseBounds}
+                          baseOpacity={0.6}
+                          focusGeom={focusGeom}/>
                 </div>);
               })()}
           <div className="map-ctrl">
+            {/* GROUP · View mode */}
+            <span className="ctrl-grp-lab">View</span>
             <select value={mapMode} onChange={e=>setMapMode(e.target.value)} title="Map mode">
-              <option value="coverage">map: engine coverage</option>
-              <option value="carbon">map: carbon trajectory (libcbm)</option>
+              <option value="coverage">engine coverage</option>
+              <option value="carbon">carbon trajectory</option>
             </select>
+            <span className="ctrl-sep"/>
+            {/* GROUP · Data layer */}
+            <span className="ctrl-grp-lab">Data layer</span>
             <div className="bin-row" style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}>
               {MAP_BINS.map(b => {
                 const active = binForLayer(conusLayer) === b.id;
@@ -823,15 +874,24 @@ export default function App(){
                     .map(([k,lbl]) => <option key={k} value={k}>{lbl}</option>)}
                 </select>
               )}
+              {conusLayer !== "none" && (
+                <input type="range" min="0.2" max="1" step="0.05" value={conusOpacity}
+                  onChange={e=>setConusOpacity(+e.target.value)}
+                  title={`Overlay opacity: ${conusOpacity}`} style={{width:70}}/>
+              )}
             </div>
-            {conusLayer !== "none" && (
-              <input type="range" min="0.2" max="1" step="0.05" value={conusOpacity}
-                onChange={e=>setConusOpacity(+e.target.value)}
-                title={`CONUS overlay opacity: ${conusOpacity}`} style={{width:80}}/>
-            )}
+            <span className="ctrl-sep"/>
+            {/* GROUP · Context layers */}
+            <span className="ctrl-grp-lab">Context</span>
+            <label className="mc-tog" title="NLCD forest / non-forest base map (forest = green)">
+              <input type="checkbox" checked={baseOn} onChange={e=>setBaseOn(e.target.checked)}/> forest base
+            </label>
             <label className="mc-tog" title="EPA L3 ecoregion overlay, colored by AGB at 50 yr">
               <input type="checkbox" checked={ecoOn} onChange={e=>setEcoOn(e.target.checked)}/> ecoregions
             </label>
+            <span className="ctrl-sep"/>
+            {/* GROUP · Explore tools */}
+            <span className="ctrl-grp-lab">Explore</span>
             <label className="mc-tog" title="click the map to inspect a point (state, L3 ecoregion, AGB at 50 yr)">
               <input type="checkbox" checked={inspectMode}
                 onChange={e=>{ setInspectMode(e.target.checked); if(!e.target.checked) setInspectInfo(null); }}/> inspect
@@ -841,10 +901,12 @@ export default function App(){
                 onChange={e=>handleAoiFile(e.target.files[0])}/>
             </label>
             <button className="mc-locate" onClick={locateMe} disabled={locating}
-              title="Find the forest around your approximate location and open the local analysis">
+              title="Find the forest around your approximate location and zoom in to the local analysis">
               {locating ? "locating…" : "◎ Forest near me"}
             </button>
             {mapMode === "carbon" && timeline && (<>
+              <span className="ctrl-sep"/>
+              <span className="ctrl-grp-lab">Scenario</span>
               <select value={mapScenario} onChange={e=>setMapScenario(e.target.value)} title="Scenario">
                 <option value="harvest_baseline">BAU (baseline harvest)</option>
                 <option value="libcbm_reduced">aggressive reduce</option>
