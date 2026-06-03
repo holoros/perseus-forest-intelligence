@@ -875,13 +875,17 @@ export default function App(){
     try{
       const CSPI_RAMP = ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"];
       const SVI_RAMP = ["#f7fcf5","#74c476","#238b45","#00441b"];
-      const [own, risk, ffrac, rdivers, cspi, svi] = await Promise.all([
+      const RD_RAMP = ["#f0f8ed","#a8dba8","#42b540","#1d7e0f","#053d04"];
+      const SAW_RAMP = ["#fff7ec","#fdbb84","#ef6548","#b30000","#7f0000"];
+      const [own, risk, ffrac, rdivers, cspi, svi, rd, saw] = await Promise.all([
         ownershipComposition(R("conus_ownership.png?v=2"), FRAME, geom).catch(()=>null),
         riskSummary(R("conus_p_disturbance_2022.png"), FRAME, geom).catch(()=>null),
         forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, geom).catch(()=>null),
         forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, geom).catch(()=>null),
         rampRelative(R("conus_climate_stress.png"), FRAME, geom, CSPI_RAMP).catch(()=>null),
         rampRelative(R("conus_species_value_index.png"), FRAME, geom, SVI_RAMP).catch(()=>null),
+        rampRelative(R("conus_rd_treemap.png"), FRAME, geom, RD_RAMP).catch(()=>null),
+        rampRelative(R("conus_sawtimber_share.png"), FRAME, geom, SAW_RAMP).catch(()=>null),
       ]);
       // Biodiversity proxy from forest-type diversity: prefer FIA plot composition
       // (finer type groups), fall back to the fortype raster (CONUS-wide, 3 groups).
@@ -931,6 +935,7 @@ export default function App(){
         habitat: habScore!=null ? { score: habScore, band: band(habScore) } : null,
         biodiversity: bioScore!=null ? { score: bioScore, band: band(bioScore) } : null,
         siteProductivity: cspi, speciesValue: svi, stumpage: stump,
+        relDensity: rd, sawtimberShare: saw,
         index: haveIdx ? idxAxes : null,
       };
     }catch(e){ landscape = null; }

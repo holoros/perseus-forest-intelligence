@@ -255,6 +255,23 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.speciesValue.band]}}>{landscape.speciesValue.band}</span>
             </div>
           )}
+          {landscape.relDensity && (
+            <div className="aoi-bar-row" title="Relative stand density / stocking (TreeMap relative density) within this area">
+              <span className="aoi-bar-lab">Relative density (stocking)</span>
+              <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                style={{width:`${landscape.relDensity.rel*100}%`, background:"#42b540"}}/></span>
+              <span className="aoi-bar-pct">{landscape.relDensity.band}</span>
+            </div>
+          )}
+          {landscape.sawtimberShare && (
+            <div className="aoi-bar-row" title="Sawtimber share of biomass (larger, higher-value size classes) within this area">
+              <span className="aoi-bar-lab">Sawtimber share</span>
+              <span className="aoi-bar-track"><span className="aoi-bar-fill"
+                style={{width:`${landscape.sawtimberShare.rel*100}%`,
+                        background: BAND_GOOD_HIGH[landscape.sawtimberShare.band] || "#888"}}/></span>
+              <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.sawtimberShare.band]}}>{landscape.sawtimberShare.band}</span>
+            </div>
+          )}
         </div>
         {landscape.stumpage && (<>
           <div className="aoi-sub" style={{borderTop:"none",marginTop:6}}>Stumpage prices{state?` · ${state}`:""}</div>
