@@ -1,7 +1,7 @@
 {
- "generated": "2026-06-03T15:56:06.694253+00:00",
+ "generated": "2026-06-03T18:10:05.739330+00:00",
  "schema": "perseus_api_v1",
- "db_version": "v0.56",
+ "db_version": "v0.57",
  "stats": {
   "states": 48,
   "engines": 35,
