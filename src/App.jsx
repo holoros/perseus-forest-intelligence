@@ -45,6 +45,8 @@ const MAP_BINS = [
     layers:[["p_disturbance_2022","P(disturbance) · 2022"],
             ["p_harvest_clearcut","P(stand replacement)"],["p_harvest_any","P(harvest · any)"],
             ["p_harvest_partial","P(harvest · partial)"],
+            ["hcs_v4_intensity_partial","Partial intensity (v4, 2024)"],
+            ["hcs_v4_intensity_clearcut","Clearcut intensity (v4, 2024)"],
             ["value_at_risk","Value at risk of removal"],["volume_removed","Volume removed (annual)"],
             ["lcms_2022","Disturbance cause (LCMS)"],["gfc_lossyear","Forest loss year (Hansen)"]] },
 ];
@@ -216,6 +218,20 @@ const CONUS_LEGENDS = {
     ramp: ["#fff5eb","#fd8d3c","#d94801","#7f2704"],
     lo: "low", mid: "mid", hi: "high",
     note: "within-species sawlog price dispersion (median ~15%), capped at 30%; larger in hardwood markets",
+  },
+  hcs_v4_intensity_partial: {
+    title: "Partial-harvest intensity (v4, 2024)",
+    type: "ramp",
+    ramp: ["#440154","#3b528b","#21918c","#5ec962","#fde725"],
+    lo: "0", mid: "0.3", hi: "0.6",
+    note: "CONUS-HCS v4 fraction of basal area removed, conditional on partial harvest",
+  },
+  hcs_v4_intensity_clearcut: {
+    title: "Clearcut intensity (v4, 2024)",
+    type: "ramp",
+    ramp: ["#440154","#3b528b","#21918c","#5ec962","#fde725"],
+    lo: "0", mid: "0.5", hi: "1.0",
+    note: "CONUS-HCS v4 fraction of basal area removed, conditional on stand replacement (mean ~0.9)",
   },
   species_value_index: {
     title: "Species value index (SVI, regional mean = 1)",
