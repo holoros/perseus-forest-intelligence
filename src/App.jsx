@@ -855,11 +855,26 @@ export default function App(){
       const habScore = habParts.length ? habParts.reduce((a,p)=>a+p[0]*p[1],0)/wsum : null;
       const bioScore = divers ? (0.6*divers.evenness + 0.4*Math.min(1,(divers.richness-1)/3)) : null;
       const band = (s)=> s==null?null : s<0.34?"Low":s<0.67?"Moderate":"High";
+      // Composite condition index (0..1 per axis) for the quick-look radar:
+      // forest structure, economic value, ecosystem value, risk vulnerability.
+      const mean = (arr) => { const v = arr.filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
+      // economic value: SVI relative if present, else state stumpage normalized ($/MBF ~0..600)
+      let econ = svi ? svi.rel : null;
+      if(econ == null && stump && stump.sawHW != null) econ = Math.max(0, Math.min(1, stump.sawHW/600));
+      if(econ == null && stump && stump.sawSW != null) econ = Math.max(0, Math.min(1, stump.sawSW/600));
+      const idxAxes = {
+        structure:  mean([cspi?cspi.rel:null, contin, ageScore]),
+        economic:   econ,
+        ecosystem:  mean([habScore, bioScore]),
+        risk:       risk ? Math.max(0, Math.min(1, risk.mean/0.72)) : null,  // vulnerability (high = worse)
+      };
+      const haveIdx = Object.values(idxAxes).filter(v=>v!=null).length >= 3;
       landscape = {
         ownership: own, risk, forestFrac: ffrac, diversity: divers,
         habitat: habScore!=null ? { score: habScore, band: band(habScore) } : null,
         biodiversity: bioScore!=null ? { score: bioScore, band: band(bioScore) } : null,
         siteProductivity: cspi, speciesValue: svi, stumpage: stump,
+        index: haveIdx ? idxAxes : null,
       };
     }catch(e){ landscape = null; }
 

@@ -21,6 +21,41 @@ const FT_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d"]
 const BAND_GOOD_HIGH = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
 const BAND_GOOD_LOW  = { "Low":"#3fb68b", "Moderate":"#e6ab02", "High":"#d9534f" };
 
+// Condition-index radar: 4 axes (structure, economic value, ecosystem value,
+// risk vulnerability), each 0..1. Outer = higher magnitude of that dimension.
+function ConditionRadar({ index }){
+  if(!index) return null;
+  const AX = [
+    ["structure","Forest\nstructure"], ["economic","Economic\nvalue"],
+    ["ecosystem","Ecosystem\nvalue"], ["risk","Risk\nvuln."],
+  ];
+  const C = 96, R = 62;                      // center, max radius
+  const ang = i => (-90 + i*90) * Math.PI/180;
+  const pt = (i, r) => [C + r*Math.cos(ang(i)), C + r*Math.sin(ang(i))];
+  const rings = [0.25,0.5,0.75,1].map((f,k) =>
+    <circle key={k} cx={C} cy={C} r={R*f} fill="none" stroke="var(--line)" strokeWidth="0.75"/>);
+  const spokes = AX.map((_,i) => { const [x,y]=pt(i,R);
+    return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="var(--line)" strokeWidth="0.75"/>; });
+  const vals = AX.map(([k]) => index[k]==null ? 0 : Math.max(0,Math.min(1,index[k])));
+  const poly = AX.map((_,i) => pt(i, R*vals[i]).map(n=>n.toFixed(1)).join(",")).join(" ");
+  const labels = AX.map(([k,lab],i) => {
+    const [x,y]=pt(i, R+16); const lines=lab.split("\n");
+    const has = index[k]!=null;
+    return <text key={k} x={x} y={y - (lines.length-1)*5} textAnchor="middle"
+      fontSize="9" fill={has?"var(--ink)":"#5e7180"}>
+      {lines.map((ln,j)=><tspan key={j} x={x} dy={j?10:0}>{ln}</tspan>)}</text>;
+  });
+  const dots = AX.map((_,i) => { const [x,y]=pt(i, R*vals[i]);
+    return <circle key={i} cx={x} cy={y} r="2.4" fill="#3fb68b"/>; });
+  return (
+    <svg viewBox="0 0 192 200" style={{width:"100%",maxWidth:230,display:"block",margin:"2px auto 0"}}>
+      {rings}{spokes}
+      <polygon points={poly} fill="#3fb68b" fillOpacity="0.22" stroke="#3fb68b" strokeWidth="1.6"/>
+      {dots}{labels}
+    </svg>
+  );
+}
+
 function downloadCsv(aoi){
   const rows = [["field","value"]];
   rows.push(["name", aoi.name||""]);
@@ -118,7 +153,16 @@ export default function AOIReport({ aoi, stumpage, onClose }){
         <div className="note" style={{margin:"2px 0 6px"}}>Plot-level attributes available for ME, GA, IN, MN, OR, WA AOIs.</div>
       )}
 
-      {landscape && (landscape.ownership || landscape.risk || landscape.habitat || landscape.biodiversity || landscape.siteProductivity || landscape.speciesValue || landscape.stumpage) && (<>
+      {landscape && (landscape.ownership || landscape.risk || landscape.habitat || landscape.biodiversity || landscape.siteProductivity || landscape.speciesValue || landscape.stumpage || landscape.index) && (<>
+        <div className="aoi-sub">Condition index · quick look</div>
+        {landscape.index && (
+          <div>
+            <ConditionRadar index={landscape.index}/>
+            <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
+              Integrated condition across four dimensions (0–1). Outer = higher; for Risk, outer = more vulnerable.
+            </div>
+          </div>
+        )}
         <div className="aoi-sub">Surrounding landscape · sampled from CONUS layers</div>
         {landscape.forestFrac != null && (
           <div className="aoi-grid">

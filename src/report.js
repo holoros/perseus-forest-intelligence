@@ -29,6 +29,21 @@ function buildReportHTML(aoi, stumpage){
     <span class="bt"><i style="width:${Math.max(0,Math.min(100,pct))}%;background:${color}"></i></span>
     <span class="bp">${Math.round(pct)}%</span></div>`;
 
+  // ---- condition-index radar ----
+  let radar = "";
+  if(ls.index){
+    const AX=[["structure","Forest structure"],["economic","Economic value"],["ecosystem","Ecosystem value"],["risk","Risk vuln."]];
+    const C=110,R=72, ang=i=>(-90+i*90)*Math.PI/180, pt=(i,r)=>[C+r*Math.cos(ang(i)),C+r*Math.sin(ang(i))];
+    const rings=[0.25,0.5,0.75,1].map(f=>`<circle cx="${C}" cy="${C}" r="${(R*f).toFixed(1)}" fill="none" stroke="#d8e0e3"/>`).join("");
+    const spokes=AX.map((_,i)=>{const[x,y]=pt(i,R);return `<line x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#d8e0e3"/>`;}).join("");
+    const vals=AX.map(([k])=>ls.index[k]==null?0:Math.max(0,Math.min(1,ls.index[k])));
+    const poly=AX.map((_,i)=>pt(i,R*vals[i]).map(n=>n.toFixed(1)).join(",")).join(" ");
+    const labels=AX.map(([k,lab],i)=>{const[x,y]=pt(i,R+14);return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="10" fill="#1a3d28">${esc(lab)}</text>`;}).join("");
+    radar = `<h2>Condition index <span class="sub">0–1 per axis; outer = higher (Risk: outer = more vulnerable)</span></h2>
+      <svg viewBox="0 0 220 232" style="width:260px;display:block;margin:2px auto">${rings}${spokes}
+      <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.22" stroke="#1a7a4d" stroke-width="2"/>${labels}</svg>`;
+  }
+
   // ---- identity ----
   let html = `<table class="kv">`;
   if(area_m2) html += row("Area", fmtArea(area_m2));
@@ -126,7 +141,7 @@ function buildReportHTML(aoi, stumpage){
     <h1>PERSEUS Forest Intelligence — Area Report</h1>
     <div class="meta">${esc(name||"Area of interest")} · generated ${esc(today)}</div>
   </header>
-  ${html}${attrs}${owners}${land}${stump}${outlook}
+  ${html}${radar}${attrs}${owners}${land}${stump}${outlook}
   <footer>
     Center for Research on Sustainable Forests · Center for Advanced Forestry Systems · PERSEUS (USDA NIFA SAS).
     Sources: FIA plots, TreeMap 2022, yield_curves_by_l3, CONUS overlays. Habitat and biodiversity are indicative
