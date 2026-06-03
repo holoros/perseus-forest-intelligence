@@ -743,7 +743,7 @@ export default function App(){
       const [own, risk, ffrac, divers] = await Promise.all([
         ownershipComposition(R("conus_ownership.png"), FRAME, ring).catch(()=>null),
         riskSummary(R("conus_p_disturbance_2022.png"), FRAME, ring).catch(()=>null),
-        forestFraction(R("conus_forest_nonforest.png"), FRAME, ring).catch(()=>null),
+        forestFraction(R("conus_forest_nonforest.png?v=2"), FRAME, ring).catch(()=>null),
         forestTypeDiversity(R("conus_fortype_2022.png"), FRAME, ring).catch(()=>null),
       ]);
       // Indicative composite ecosystem indices (0..1) from available spatial inputs.
@@ -868,7 +868,7 @@ export default function App(){
                           inspectMode={inspectMode}
                           onInspect={handleInspect}
                           userLoc={userLoc}
-                          baseLayer={baseOn ? `${BASE}raster/conus_forest_nonforest.png` : null}
+                          baseLayer={baseOn ? `${BASE}raster/conus_forest_nonforest.png?v=2` : null}
                           baseBounds={baseBounds}
                           baseOpacity={0.82}
                           focusGeom={focusGeom}/>
