@@ -740,12 +740,21 @@ export default function App(){
     const R = (p) => `${BASE}raster/${p}`;
     let landscape = null;
     try{
-      const [own, risk, ffrac, divers] = await Promise.all([
+      const [own, risk, ffrac] = await Promise.all([
         ownershipComposition(R("conus_ownership.png"), FRAME, ring).catch(()=>null),
         riskSummary(R("conus_p_disturbance_2022.png"), FRAME, ring).catch(()=>null),
-        forestFraction(R("conus_forest_nonforest.png?v=2"), FRAME, ring).catch(()=>null),
-        forestTypeDiversity(R("conus_fortype_2022.png"), FRAME, ring).catch(()=>null),
+        forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, ring).catch(()=>null),
       ]);
+      // Forest-type diversity for biodiversity: prefer FIA plot composition (the
+      // fortype raster collapses to one class), fall back to ecoregion richness.
+      let divers = null;
+      if(plotStats && plotStats.forestTypes && plotStats.forestTypes.length){
+        const fts = plotStats.forestTypes.filter(f=>f.label && f.label.toLowerCase()!=="nonforest");
+        const richness = fts.length;
+        let H = 0; const tot = fts.reduce((a,f)=>a+f.pct,0) || 1;
+        for(const f of fts){ const p = f.pct/tot; if(p>0) H -= p*Math.log(p); }
+        if(richness>0) divers = { evenness: richness>1 ? H/Math.log(richness) : 0, richness };
+      }
       // Indicative composite ecosystem indices (0..1) from available spatial inputs.
       const ageScore = plotStats && plotStats.meanAge != null
         ? Math.max(0, Math.min(1, plotStats.meanAge / 120)) : null;
@@ -754,7 +763,7 @@ export default function App(){
       const habParts = [[contin,0.45],[ageScore,0.30],[riskPen,0.25]].filter(p=>p[0]!=null);
       const wsum = habParts.reduce((a,p)=>a+p[1],0);
       const habScore = habParts.length ? habParts.reduce((a,p)=>a+p[0]*p[1],0)/wsum : null;
-      const bioScore = divers ? (0.7*divers.evenness + 0.3*Math.min(1,(divers.richness-1)/2)) : null;
+      const bioScore = divers ? (0.6*divers.evenness + 0.4*Math.min(1,(divers.richness-1)/3)) : null;
       const band = (s)=> s==null?null : s<0.34?"Low":s<0.67?"Moderate":"High";
       landscape = {
         ownership: own, risk, forestFrac: ffrac, diversity: divers,
@@ -868,7 +877,7 @@ export default function App(){
                           inspectMode={inspectMode}
                           onInspect={handleInspect}
                           userLoc={userLoc}
-                          baseLayer={baseOn ? `${BASE}raster/conus_forest_nonforest.png?v=2` : null}
+                          baseLayer={baseOn ? `${BASE}raster/conus_forest_nonforest.png?v=3` : null}
                           baseBounds={baseBounds}
                           baseOpacity={0.82}
                           focusGeom={focusGeom}/>
