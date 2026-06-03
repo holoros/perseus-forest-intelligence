@@ -715,9 +715,12 @@ export default function App(){
             })}
           </select>)}
         <div className="brandbar" title="PERSEUS · Center for Advanced Forestry Systems · Center for Research on Sustainable Forests">
-          <img src={`${BASE}logos/perseus.png`} alt="PERSEUS"/>
-          <img src={`${BASE}logos/cafs.png`} alt="CAFS"/>
-          <img src={`${BASE}logos/crsf.png`} alt="CRSF"/>
+          <a href="https://perseus.uga.edu/" target="_blank" rel="noopener noreferrer" title="PERSEUS project site">
+            <img src={`${BASE}logos/perseus.png`} alt="PERSEUS"/></a>
+          <a href="https://cafsresearch.org" target="_blank" rel="noopener noreferrer" title="Center for Advanced Forestry Systems">
+            <img src={`${BASE}logos/cafs.png`} alt="CAFS"/></a>
+          <a href="https://crsf.umaine.edu" target="_blank" rel="noopener noreferrer" title="Center for Research on Sustainable Forests">
+            <img src={`${BASE}logos/crsf.png`} alt="CRSF"/></a>
         </div>
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
       </header>
