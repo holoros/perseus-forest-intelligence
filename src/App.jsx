@@ -431,6 +431,10 @@ export default function App(){
   const [isolatedEngine,setIsolatedEngine] = useState(null);
   // v1.3 reconstruction: detail-panel tabs + their datasets
   const [tab,setTab] = useState("engines"); // engines | rd | divergence | stumpage
+  // Progressive disclosure: when a landowner summarizes an AOI, the dense
+  // research surface (engine tabs + multi-model chart) collapses behind a
+  // reveal so the radar / trajectory / priorities lead. Power users reopen it.
+  const [researchOpen,setResearchOpen] = useState(false);
   const [divergence,setDivergence] = useState(null);
   const [stumpage,setStumpage] = useState(null);
   const [landis,setLandis] = useState(null);
@@ -1301,7 +1305,8 @@ export default function App(){
             </div>);})()}
         </div>
         <div className="detail">
-          <div className="tabs">
+          {/* When an AOI is active, the research surface is collapsed by default. */}
+          {(!aoi || researchOpen) && <div className="tabs">
             {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["stumpage","Stumpage"],["landis","LANDIS stratified"],
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]].map(([k,lbl])=>{
@@ -1314,16 +1319,20 @@ export default function App(){
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
             })}
-          </div>
-          <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>
+          </div>}
+          {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
           {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} onClose={()=>setAoi(null)}/>}
-          {tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
+          {aoi && <button className="mini-btn" style={{margin:"6px 4px 2px",borderStyle:"solid"}}
+            onClick={()=>setResearchOpen(o=>!o)}
+            title="show or hide the multi-model research tools (engine comparison, scenarios, stumpage, rotation)">
+            {researchOpen ? "Hide research tools ▴" : "Model comparison & research tools ▾"}</button>}
+          {(!aoi || researchOpen) && tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
             onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
-          {tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}
-          {tab==="landis" && <LandisStratified data={landis} state={sel}/>}
-          {tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
-          {tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
-          {(tab==="engines"||tab==="rd") && (<>
+          {(!aoi || researchOpen) && tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}
+          {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
+          {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
+          {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
+          {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
               <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>

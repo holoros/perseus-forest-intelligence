@@ -178,6 +178,41 @@ const fitBand = f => f==null?null : f<0.34?"Low":f<0.67?"Moderate":"High";
 const FIT_COL = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
 const ord = n => { const s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
 
+// One plain-language takeaway at the top of an AOI: forest type, stocking read,
+// the strongest region-relative outcome, and a management cue. Built only from
+// fields already computed, so it never invents data.
+const IDX_LABEL = { carbon:"carbon", value:"timber value", productivity:"productivity",
+  habitat:"habitat", biodiversity:"biodiversity", resilience:"resilience" };
+function plainHeadline(aoi){
+  const ls = aoi.landscape; if(!ls) return null;
+  const parts = [];
+  // dominant forest type (FIA plots preferred, else CONUS fortype)
+  const ft = aoi.plotStats && aoi.plotStats.forestTypes && aoi.plotStats.forestTypes[0];
+  if(ft && ft.label && ft.label.toLowerCase()!=="nonforest") parts.push(ft.label);
+  // stocking / density read from the RD trajectory's latest point
+  let rdCue = null;
+  if(ls.rdSeries && ls.rdSeries.length){
+    const last = ls.rdSeries.filter(p=>p.rd!=null).pop();
+    if(last){ const rd=last.rd;
+      const word = rd>0.60 ? "dense" : rd<0.30 ? "understocked" : "well stocked";
+      parts.push(`${word} (RD ${rd.toFixed(2)})`);
+      rdCue = rd>0.60 ? "a thinning candidate" : rd<0.30 ? "room to grow" : null;
+    }
+  }
+  // strongest region-relative outcome
+  if(ls.index){
+    const good = Object.entries(ls.index).filter(([k,v])=>k!=="biodiversity" && axV(v)!=null)
+      .map(([k,v])=>[k,axV(v)]).sort((a,b)=>b[1]-a[1]);
+    if(good.length){ const hi=good[0];
+      parts.push(`high ${IDX_LABEL[hi[0]]} for its region (${ord(Math.round(hi[1]*100))} pct)`); }
+  }
+  if(!parts.length) return null;
+  let s = parts.join(", ");
+  if(rdCue) s += `. ${rdCue.charAt(0).toUpperCase()+rdCue.slice(1)}.`;
+  else s += ".";
+  return s;
+}
+
 // Rule-based pathway recommendation from the weighted profile. Groups outcomes
 // into a production lean (income + productivity) and a conservation lean (carbon
 // + habitat + biodiversity), modulated by how the area actually ranks and how
@@ -326,6 +361,14 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
           {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
         </span>
       </div>
+
+      {plainHeadline(aoi) && (
+        <div style={{margin:"2px 6px 8px",padding:"7px 10px",borderRadius:6,
+          background:"rgba(63,182,139,0.10)",border:"1px solid var(--line)",
+          fontSize:13.5,lineHeight:1.35,color:"var(--ink)"}}>
+          {plainHeadline(aoi)}
+        </div>
+      )}
 
       <div className="aoi-grid">
         {area_m2 ? <Row k="Area" v={fmtAreaU(area_m2, units)}/> : null}
