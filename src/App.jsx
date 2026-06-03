@@ -769,14 +769,13 @@ export default function App(){
     const R = (p) => `${BASE}raster/${p}`;
     let landscape = null;
     try{
-      const [own, risk, ffrac, rdivers] = await Promise.all([
-        ownershipComposition(R("conus_ownership.png?v=2"), FRAME, ring).catch(()=>null),
+      const [own, risk, ffrac] = await Promise.all([
+        ownershipComposition(R("conus_ownership.png"), FRAME, ring).catch(()=>null),
         riskSummary(R("conus_p_disturbance_2022.png"), FRAME, ring).catch(()=>null),
         forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, ring).catch(()=>null),
-        forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, ring).catch(()=>null),
       ]);
-      // Biodiversity proxy from forest-type diversity: prefer FIA plot composition
-      // (finer type groups), fall back to the fortype raster (CONUS-wide, 3 groups).
+      // Forest-type diversity for biodiversity: prefer FIA plot composition (the
+      // fortype raster collapses to one class), fall back to ecoregion richness.
       let divers = null;
       if(plotStats && plotStats.forestTypes && plotStats.forestTypes.length){
         const fts = plotStats.forestTypes.filter(f=>f.label && f.label.toLowerCase()!=="nonforest");
@@ -785,7 +784,6 @@ export default function App(){
         for(const f of fts){ const p = f.pct/tot; if(p>0) H -= p*Math.log(p); }
         if(richness>0) divers = { evenness: richness>1 ? H/Math.log(richness) : 0, richness };
       }
-      if(!divers) divers = rdivers;
       // Indicative composite ecosystem indices (0..1) from available spatial inputs.
       const ageScore = plotStats && plotStats.meanAge != null
         ? Math.max(0, Math.min(1, plotStats.meanAge / 120)) : null;
