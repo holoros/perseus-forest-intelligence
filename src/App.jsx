@@ -921,11 +921,11 @@ export default function App(){
       // region). Carbon / timber value / productivity / habitat / risk are sampled
       // per-pixel; biodiversity is the stand forest-type evenness.
       const GREEN5 = ["#f7fcf5","#c7e9c0","#74c476","#31a354","#006d2c"];
-      const ORANGE5 = ["#fff7ec","#fdbb84","#ef6548","#b30000","#7f0000"];
+      const VALUE_RAMP = ["#f7fcf5","#74c476","#238b45","#00441b"];  // matches standing_value render
       const DIST5 = ["#ffffcc","#fed976","#fd8d3c","#f03b20","#bd0026"];
       const LAY = {
         carbon:       ["conus_hybrid_agc2022.png", GREEN5],
-        value:        ["conus_standing_value.png", ORANGE5],
+        value:        ["conus_standing_value.png", VALUE_RAMP],
         productivity: ["conus_climate_stress.png", CSPI_RAMP],
         habitat:      ["conus_gedi_agbd.png", GREEN5],
         risk:         ["conus_p_disturbance_2022.png", DIST5],

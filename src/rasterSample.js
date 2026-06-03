@@ -160,18 +160,29 @@ export async function rampRelative(url, bounds, geom, rampHexes){
   return { rel, band };
 }
 
-// Sorted array of per-pixel relative positions (0..1) along a ramp for a geom.
-// Used to build a region (ecoregion) distribution and rank an AOI within it.
+// Build a fine continuous LUT (default 64 steps) interpolating a ramp's hex
+// stops, so matched values are continuous 0..1 (not just the few stop levels).
+function rampLUT(hexes, steps = 64){
+  const stops = hexes.map(hex2rgb), lut = [];
+  for(let i = 0; i <= steps; i++){
+    const t = i / steps * (stops.length - 1);
+    const k = Math.min(stops.length - 2, Math.floor(t)), f = t - k;
+    lut.push([[0,1,2].map(j => stops[k][j] + f * (stops[k+1][j] - stops[k][j])), i / steps]);
+  }
+  return lut;
+}
+// Sorted array of per-pixel relative positions (continuous 0..1) along a ramp for
+// a geom. Used to build a region distribution and rank an AOI within it.
 export async function rampValues(url, bounds, geom, rampHexes){
   const { px } = await samplePixels(url, bounds, geom);
   if(!px.length) return null;
-  const stops = rampHexes.map(hex2rgb);
+  const lut = rampLUT(rampHexes);
   const out = [];
   for(const p of px){
-    let bi = 0, bd = Infinity;
-    for(let i = 0; i < stops.length; i++){ const d = dist2(p, stops[i]); if(d < bd){ bd = d; bi = i; } }
-    if(bd > 16000) continue;
-    out.push(bi / (stops.length - 1));
+    let bv = 0, bd = Infinity;
+    for(const [c, v] of lut){ const d = dist2(p, c); if(d < bd){ bd = d; bv = v; } }
+    if(bd > 14000) continue;
+    out.push(bv);
   }
   return out.length ? out.sort((a, b) => a - b) : null;
 }
