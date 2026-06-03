@@ -906,7 +906,7 @@ export default function App(){
             <span className="ctrl-sep"/>
             {/* GROUP · Context layers */}
             <span className="ctrl-grp-lab">Context</span>
-            <label className="mc-tog" title="NLCD forest / non-forest base map (forest = green)">
+            <label className="mc-tog" title="Forest / non-forest context base (forest = green)">
               <input type="checkbox" checked={baseOn} onChange={e=>setBaseOn(e.target.checked)}/> forest base
             </label>
             <label className="mc-tog" title="EPA L3 ecoregion overlay, colored by AGB at 50 yr">
@@ -989,7 +989,7 @@ export default function App(){
               <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
               <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
               <div><i style={{background:"#2a3a47"}}></i>no model data yet</div>
-              {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest (NLCD)</div>}
+              {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest cover</div>}
             </div>)}
           {mapMode === "carbon" && (
             <div className="legend">
