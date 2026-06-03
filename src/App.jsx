@@ -47,6 +47,7 @@ const MAP_BINS = [
             ["p_harvest_partial","P(harvest · partial)"],
             ["hcs_v4_intensity_partial","Partial intensity (v4, 2024)"],
             ["hcs_v4_intensity_clearcut","Clearcut intensity (v4, 2024)"],
+            ["hcs_v4_class_partial","Silvicultural class · partial (v4)"],
             ["value_at_risk","Value at risk of removal"],["volume_removed","Volume removed (annual)"],
             ["lcms_2022","Disturbance cause (LCMS)"],["gfc_lossyear","Forest loss year (Hansen)"]] },
 ];
@@ -232,6 +233,18 @@ const CONUS_LEGENDS = {
     ramp: ["#440154","#3b528b","#21918c","#5ec962","#fde725"],
     lo: "0", mid: "0.5", hi: "1.0",
     note: "CONUS-HCS v4 fraction of basal area removed, conditional on stand replacement (mean ~0.9)",
+  },
+  hcs_v4_class_partial: {
+    title: "Partial silvicultural class (v4, 2024)",
+    type: "categorical",
+    stops: [
+      ["#1f77b4", "Crown thinning / improvement"],
+      ["#ff7f0e", "Low thinning / pre-commercial"],
+      ["#2ca02c", "Overstory removal"],
+      ["#d62728", "Partial (unspecified)"],
+      ["#9467bd", "Shelterwood preparation"],
+    ],
+    note: "CONUS-HCS v4 modal partial-harvest silvicultural treatment (M4 classifier)",
   },
   species_value_index: {
     title: "Species value index (SVI, regional mean = 1)",
