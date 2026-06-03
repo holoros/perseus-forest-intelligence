@@ -202,7 +202,7 @@ export function percentile(value, sortedDist){
 
 // Forest cover fraction in the box (opaque forest pixels / all box pixels).
 export async function forestFraction(url, bounds, geom){
-  const { px, total } = await samplePixels(url, bounds, ring);
+  const { px, total } = await samplePixels(url, bounds, geom);
   if(!total) return null;
   return px.length / total;   // forest pixels are the opaque ones
 }

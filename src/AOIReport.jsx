@@ -3,7 +3,7 @@
 // FIA-derived forest attributes and landowner composition for plots inside the
 // polygon (where available), and the ycx yield trajectory (untreated vs
 // harvested) from yield_curves_by_l3.
-import { useState } from "react";
+import React, { useState } from "react";
 import MiniChart from "./MiniChart.jsx";
 import StandOutlook from "./StandOutlook.jsx";
 import { openReport } from "./report.js";
@@ -84,6 +84,78 @@ function ConditionRadar({ index }){
       <polygon points={poly} fill="#3fb68b" fillOpacity="0.20" stroke="#3fb68b" strokeWidth="1.8"/>
       {dots}{labels}{hits}{tip}
     </svg>
+  );
+}
+
+// Priorities dial. The user weights what they care about (carbon, income,
+// habitat, resilience, ...) and the area's outcomes are combined into one
+// region-relative "priority fit" score. Risk is inverted (low risk = good).
+// This is the user-prioritized dial of the multi-objective thesis: the same
+// area scores differently depending on what the landowner values.
+const PRIO = [
+  ["carbon","Carbon",false], ["value","Timber income",false],
+  ["productivity","Productivity",false], ["habitat","Habitat",false],
+  ["biodiversity","Biodiversity",false], ["risk","Resilience",true],
+];
+// goodness 0..1 for each axis: percentile as-is, but risk is inverted so that
+// "resilience" (low disturbance risk) counts as good.
+const axisGood = (index, k, invert) => {
+  const v = index[k]; if(v==null) return null;
+  return invert ? 1 - v : v;
+};
+const fitBand = f => f==null?null : f<0.34?"Low":f<0.67?"Moderate":"High";
+const FIT_COL = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
+
+function PriorityDial({ index }){
+  const init = {}; PRIO.forEach(([k])=>{ init[k]=1; });
+  const [w, setW] = useState(init);
+  if(!index) return null;
+  const avail = PRIO.filter(([k]) => index[k]!=null);
+  if(avail.length < 2) return null;
+  let num=0, den=0, contrib=[];
+  for(const [k,lab,inv] of avail){
+    const g = axisGood(index, k, inv); if(g==null) continue;
+    const wt = w[k]; num += g*wt; den += wt;
+    contrib.push([lab, g, wt]);
+  }
+  const fit = den>0 ? num/den : null;
+  const band = fitBand(fit);
+  // strongest / weakest weighted matches (only among axes the user weights > 0)
+  const weighted = contrib.filter(c=>c[2]>0).slice().sort((a,b)=>b[1]-a[1]);
+  const best = weighted[0], worst = weighted[weighted.length-1];
+  const setk = (k,val) => setW(p=>({...p,[k]:val}));
+  return (
+    <div style={{margin:"4px 6px 6px"}}>
+      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>What do you value? · priorities</div>
+      <div style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:"3px 8px",alignItems:"center"}}>
+        {avail.map(([k,lab]) => (
+          <React.Fragment key={k}>
+            <span style={{fontSize:11.5,color:"var(--ink)"}}>{lab}</span>
+            <input type="range" min="0" max="3" step="1" value={w[k]}
+              onChange={e=>setk(k, +e.target.value)} style={{width:"100%",accentColor:"#3fb68b"}}/>
+            <span style={{fontSize:10.5,color:"#5e7180",width:34,textAlign:"right"}}>
+              {["off","×1","×2","×3"][w[k]]}</span>
+          </React.Fragment>
+        ))}
+      </div>
+      {fit!=null && den>0 && (
+        <div style={{marginTop:6}}>
+          <div className="aoi-bar-row" title="Weighted region-relative fit across the outcomes you value">
+            <span className="aoi-bar-lab" style={{fontWeight:600}}>Priority fit</span>
+            <span className="aoi-bar-track"><span className="aoi-bar-fill"
+              style={{width:`${fit*100}%`, background: FIT_COL[band] || "#888"}}/></span>
+            <span className="aoi-bar-pct" style={{color:FIT_COL[band]}}>{Math.round(fit*100)}th</span>
+          </div>
+          {best && worst && (
+            <div className="note" style={{margin:"2px 0 0"}}>
+              For your priorities this area scores around the {Math.round(fit*100)}th percentile of its ecoregion —
+              strongest match: <b style={{color:"var(--ink)"}}>{best[0]}</b>, weakest: <b style={{color:"var(--ink)"}}>{worst[0]}</b>.
+            </div>
+          )}
+        </div>
+      )}
+      {den===0 && <div className="note" style={{margin:"2px 0 0"}}>Set a weight above to see your priority fit.</div>}
+    </div>
   );
 }
 
@@ -197,6 +269,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
               Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Hover a point for the value. Biodiversity is a stand diversity index.
             </div>
+            <PriorityDial index={landscape.index}/>
           </div>
         )}
         <div className="aoi-sub">Surrounding landscape · sampled from CONUS layers</div>

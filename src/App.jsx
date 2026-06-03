@@ -932,13 +932,18 @@ export default function App(){
       };
       const ecoGeom = ef && ef.geometry;
       const idxAxes = {};
+      // AOI representative value uses the MEAN, not the median: a small AOI's
+      // median collapses onto a single ramp stop and snaps to the distribution
+      // tails (0/1), making productivity/habitat look saturated. The mean keeps
+      // the percentile continuous within the ecoregion.
+      const mean = a => (a && a.length) ? a.reduce((x,y)=>x+y,0)/a.length : null;
       if(ecoGeom){
         await Promise.all(Object.entries(LAY).map(async ([k,[u,ramp]]) => {
           const [aoiArr, ecoArr] = await Promise.all([
             rampValues(R(u), FRAME, geom, ramp).catch(()=>null),
             rampValues(R(u), FRAME, ecoGeom, ramp).catch(()=>null),
           ]);
-          idxAxes[k] = percentile(median(aoiArr), ecoArr);
+          idxAxes[k] = percentile(mean(aoiArr), ecoArr);
         }));
       }
       idxAxes.biodiversity = bioScore;   // stand forest-type evenness (absolute)
