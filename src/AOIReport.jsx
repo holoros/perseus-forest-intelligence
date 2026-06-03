@@ -37,7 +37,7 @@ function radarNarrative(index){
 
 // Condition-index radar: 4 axes (structure, economic value, ecosystem value,
 // risk vulnerability), each 0..1. Outer = higher magnitude of that dimension.
-function ConditionRadar({ index }){
+function ConditionRadar({ index, eco, state }){
   if(!index) return null;
   const AX = [
     ["structure","Forest\nstructure"], ["economic","Economic\nvalue"],
@@ -46,26 +46,34 @@ function ConditionRadar({ index }){
   const C = 96, R = 62;                      // center, max radius
   const ang = i => (-90 + i*90) * Math.PI/180;
   const pt = (i, r) => [C + r*Math.cos(ang(i)), C + r*Math.sin(ang(i))];
+  const polyFor = idx => AX.map((a,i) => {
+    const v = idx[a[0]]==null ? 0 : Math.max(0,Math.min(1,idx[a[0]]));
+    return pt(i, R*v).map(n=>n.toFixed(1)).join(",");
+  }).join(" ");
   const rings = [0.25,0.5,0.75,1].map((f,k) =>
     <circle key={k} cx={C} cy={C} r={R*f} fill="none" stroke="var(--line)" strokeWidth="0.75"/>);
   const spokes = AX.map((_,i) => { const [x,y]=pt(i,R);
     return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="var(--line)" strokeWidth="0.75"/>; });
-  const vals = AX.map(([k]) => index[k]==null ? 0 : Math.max(0,Math.min(1,index[k])));
-  const poly = AX.map((_,i) => pt(i, R*vals[i]).map(n=>n.toFixed(1)).join(",")).join(" ");
   const labels = AX.map(([k,lab],i) => {
     const [x,y]=pt(i, R+16); const lines=lab.split("\n");
-    const has = index[k]!=null;
     return <text key={k} x={x} y={y - (lines.length-1)*5} textAnchor="middle"
-      fontSize="9" fill={has?"var(--ink)":"#5e7180"}>
+      fontSize="9" fill={index[k]!=null?"var(--ink)":"#5e7180"}>
       {lines.map((ln,j)=><tspan key={j} x={x} dy={j?10:0}>{ln}</tspan>)}</text>;
   });
-  const dots = AX.map((_,i) => { const [x,y]=pt(i, R*vals[i]);
-    return <circle key={i} cx={x} cy={y} r="2.4" fill="#3fb68b"/>; });
+  const aoiDots = AX.map((a,i) => { const v = index[a[0]]==null?0:Math.max(0,Math.min(1,index[a[0]]));
+    const [x,y]=pt(i, R*v); return <circle key={i} cx={x} cy={y} r="2.4" fill="#3fb68b"/>; });
   return (
-    <svg viewBox="0 0 192 200" style={{width:"100%",maxWidth:230,display:"block",margin:"2px auto 0"}}>
+    <svg viewBox="0 0 192 214" style={{width:"100%",maxWidth:240,display:"block",margin:"2px auto 0"}}>
       {rings}{spokes}
-      <polygon points={poly} fill="#3fb68b" fillOpacity="0.22" stroke="#3fb68b" strokeWidth="1.6"/>
-      {dots}{labels}
+      {state && <polygon points={polyFor(state)} fill="none" stroke="#6baed6" strokeWidth="1.3" strokeDasharray="2 3"/>}
+      {eco && <polygon points={polyFor(eco)} fill="none" stroke="#e6ab02" strokeWidth="1.4" strokeDasharray="5 3"/>}
+      <polygon points={polyFor(index)} fill="#3fb68b" fillOpacity="0.22" stroke="#3fb68b" strokeWidth="1.8"/>
+      {aoiDots}{labels}
+      <g fontSize="8.5" fill="var(--mut)">
+        <line x1="14" y1="204" x2="26" y2="204" stroke="#3fb68b" strokeWidth="2"/><text x="29" y="207">this area</text>
+        {eco && (<><line x1="78" y1="204" x2="90" y2="204" stroke="#e6ab02" strokeWidth="1.6" strokeDasharray="5 3"/><text x="93" y="207">ecoregion</text></>)}
+        {state && (<><line x1="146" y1="204" x2="158" y2="204" stroke="#6baed6" strokeWidth="1.4" strokeDasharray="2 3"/><text x="161" y="207">state</text></>)}
+      </g>
     </svg>
   );
 }
@@ -173,7 +181,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         <div className="aoi-sub">Condition index · quick look</div>
         {landscape.index && (
           <div>
-            <ConditionRadar index={landscape.index}/>
+            <ConditionRadar index={landscape.index} eco={landscape.indexEco} state={landscape.indexState}/>
             {radarNarrative(landscape.index) && (
               <div style={{margin:"2px 6px 4px",fontSize:12.5,color:"var(--ink)"}}>{radarNarrative(landscape.index)}</div>
             )}

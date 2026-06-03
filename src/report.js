@@ -37,9 +37,14 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
     const C=110,R=72, ang=i=>(-90+i*90)*Math.PI/180, pt=(i,r)=>[C+r*Math.cos(ang(i)),C+r*Math.sin(ang(i))];
     const rings=[0.25,0.5,0.75,1].map(f=>`<circle cx="${C}" cy="${C}" r="${(R*f).toFixed(1)}" fill="none" stroke="#d8e0e3"/>`).join("");
     const spokes=AX.map((_,i)=>{const[x,y]=pt(i,R);return `<line x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#d8e0e3"/>`;}).join("");
-    const vals=AX.map(([k])=>ls.index[k]==null?0:Math.max(0,Math.min(1,ls.index[k])));
-    const poly=AX.map((_,i)=>pt(i,R*vals[i]).map(n=>n.toFixed(1)).join(",")).join(" ");
+    const polyFor=idx=>AX.map((a,i)=>{const v=idx[a[0]]==null?0:Math.max(0,Math.min(1,idx[a[0]]));return pt(i,R*v).map(n=>n.toFixed(1)).join(",");}).join(" ");
+    const poly=polyFor(ls.index);
+    const ecoP = ls.indexEco ? `<polygon points="${polyFor(ls.indexEco)}" fill="none" stroke="#e6ab02" stroke-width="1.6" stroke-dasharray="6 3"/>` : "";
+    const stP = ls.indexState ? `<polygon points="${polyFor(ls.indexState)}" fill="none" stroke="#6baed6" stroke-width="1.4" stroke-dasharray="2 3"/>` : "";
     const labels=AX.map(([k,lab],i)=>{const[x,y]=pt(i,R+14);return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="10" fill="#1a3d28">${esc(lab)}</text>`;}).join("");
+    const leg = `<g font-size="9" fill="#5e7180"><line x1="16" y1="228" x2="30" y2="228" stroke="#1a7a4d" stroke-width="2"/><text x="33" y="231">this area</text>`
+      + (ls.indexEco?`<line x1="92" y1="228" x2="106" y2="228" stroke="#e6ab02" stroke-width="1.6" stroke-dasharray="6 3"/><text x="109" y="231">ecoregion</text>`:"")
+      + (ls.indexState?`<line x1="170" y1="228" x2="184" y2="228" stroke="#6baed6" stroke-width="1.4" stroke-dasharray="2 3"/><text x="187" y="231">state</text>`:"") + `</g>`;
     const NM={structure:"forest structure",economic:"economic value",ecosystem:"ecosystem value",risk:"disturbance risk"};
     const lvl=v=>v<0.34?"low":v<0.67?"moderate":"high";
     const good=Object.entries(ls.index).filter(([k,v])=>k!=="risk"&&v!=null).sort((a,b)=>b[1]-a[1]);
@@ -47,9 +52,9 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
     if(good.length>=2){ const hi=good[0],lo=good[good.length-1];
       const rk=ls.index.risk!=null?` Disturbance risk is ${lvl(ls.index.risk)}.`:"";
       narr=`<p class="note" style="text-align:center;margin:2px 0 0">This area is strongest on ${NM[hi[0]]} (${lvl(hi[1])}) and weakest on ${NM[lo[0]]} (${lvl(lo[1])}).${rk}</p>`; }
-    radar = `<h2>Condition index <span class="sub">0–1 per axis; outer = higher (Risk: outer = more vulnerable)</span></h2>
-      <svg viewBox="0 0 220 232" style="width:260px;display:block;margin:2px auto">${rings}${spokes}
-      <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.22" stroke="#1a7a4d" stroke-width="2"/>${labels}</svg>${narr}`;
+    radar = `<h2>Condition index <span class="sub">0–1 per axis; outer = higher (Risk: outer = more vulnerable). Rings: this area vs ecoregion vs state.</span></h2>
+      <svg viewBox="0 0 220 240" style="width:280px;display:block;margin:2px auto">${rings}${spokes}${stP}${ecoP}
+      <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.22" stroke="#1a7a4d" stroke-width="2"/>${labels}${leg}</svg>${narr}`;
   }
 
   // ---- identity ----

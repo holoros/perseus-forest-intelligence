@@ -817,6 +817,37 @@ export default function App(){
     return { n, meanAge, meanBA, ownership, forestTypes, invYears: fp.meta.inv_years };
   };
 
+  // Lightweight, raster-only condition index (4 axes 0..1) for ANY geometry —
+  // used to add ecoregion- and state-level context rings to the AOI radar.
+  const idxForGeom = async (geom, stCode2) => {
+    const R = (p) => `${BASE}raster/${p}`;
+    const FRAME = { x0:-2561585, x1:2463176, y0:-1604872.736, y1:1714610 };
+    const CSPI = ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"];
+    const SVI = ["#f7fcf5","#74c476","#238b45","#00441b"];
+    const [risk, ffrac, cspi, svi, divers] = await Promise.all([
+      riskSummary(R("conus_p_disturbance_2022.png"), FRAME, geom).catch(()=>null),
+      forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, geom).catch(()=>null),
+      rampRelative(R("conus_climate_stress.png"), FRAME, geom, CSPI).catch(()=>null),
+      rampRelative(R("conus_species_value_index.png"), FRAME, geom, SVI).catch(()=>null),
+      forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, geom).catch(()=>null),
+    ]);
+    const mean = (a)=>{ const v=a.filter(x=>x!=null); return v.length?v.reduce((x,y)=>x+y,0)/v.length:null; };
+    let econ = svi ? svi.rel : null;
+    if(econ==null && stumpage && stumpage.latest && stCode2){
+      const g=(b)=> (stumpage.latest[b] && stumpage.latest[b][stCode2]) ? stumpage.latest[b][stCode2].value : null;
+      const hw = g("sawlog_hardwood") ?? g("sawlog_softwood"); if(hw!=null) econ = Math.max(0,Math.min(1,hw/600));
+    }
+    const bio = divers ? (0.6*divers.evenness + 0.4*Math.min(1,(divers.richness-1)/3)) : null;
+    const riskPen = risk ? Math.max(0,1-risk.mean/0.72) : null;
+    const axes = {
+      structure: mean([cspi?cspi.rel:null, ffrac]),
+      economic:  econ,
+      ecosystem: mean([ffrac!=null?ffrac:null, riskPen, bio]),
+      risk:      risk ? Math.max(0,Math.min(1,risk.mean/0.72)) : null,
+    };
+    return Object.values(axes).filter(v=>v!=null).length>=3 ? axes : null;
+  };
+
   // Build a small square AOI (side = 2*radiusKm) around an inspected point and
   // summarize it: current conditions + landowner composition (FIA plots inside)
   // and the ycx future projection for the encompassing ecoregion.
@@ -845,12 +876,12 @@ export default function App(){
       const CSPI_RAMP = ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"];
       const SVI_RAMP = ["#f7fcf5","#74c476","#238b45","#00441b"];
       const [own, risk, ffrac, rdivers, cspi, svi] = await Promise.all([
-        ownershipComposition(R("conus_ownership.png?v=2"), FRAME, ring).catch(()=>null),
-        riskSummary(R("conus_p_disturbance_2022.png"), FRAME, ring).catch(()=>null),
-        forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, ring).catch(()=>null),
-        forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, ring).catch(()=>null),
-        rampRelative(R("conus_climate_stress.png"), FRAME, ring, CSPI_RAMP).catch(()=>null),
-        rampRelative(R("conus_species_value_index.png"), FRAME, ring, SVI_RAMP).catch(()=>null),
+        ownershipComposition(R("conus_ownership.png?v=2"), FRAME, geom).catch(()=>null),
+        riskSummary(R("conus_p_disturbance_2022.png"), FRAME, geom).catch(()=>null),
+        forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, geom).catch(()=>null),
+        forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, geom).catch(()=>null),
+        rampRelative(R("conus_climate_stress.png"), FRAME, geom, CSPI_RAMP).catch(()=>null),
+        rampRelative(R("conus_species_value_index.png"), FRAME, geom, SVI_RAMP).catch(()=>null),
       ]);
       // Biodiversity proxy from forest-type diversity: prefer FIA plot composition
       // (finer type groups), fall back to the fortype raster (CONUS-wide, 3 groups).
@@ -903,6 +934,16 @@ export default function App(){
         index: haveIdx ? idxAxes : null,
       };
     }catch(e){ landscape = null; }
+
+    // Context rings: the same condition index for the encompassing ecoregion and
+    // state, so a landowner sees their stand relative to the broader landscape.
+    if(landscape && landscape.index){
+      try{
+        if(ef && ef.geometry) landscape.indexEco = await idxForGeom(ef.geometry, stCode);
+        const stFeat = geoData && geoData.features.find(f => f.properties && f.properties.state === stCode);
+        if(stFeat && stFeat.geometry) landscape.indexState = await idxForGeom(stFeat.geometry, stCode);
+      }catch(e){}
+    }
 
     setAoi({
       name: `area ~${radiusKm} km · ${lat.toFixed(2)}, ${lon.toFixed(2)}`,

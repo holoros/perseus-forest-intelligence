@@ -4,7 +4,7 @@
 // or ramp-inverted values for pixels inside the box. This lets the AOI report
 // pull landowner / risk / forest-cover for ANY CONUS location, not just the six
 // FIA-plot states.
-import { project } from "./geo.js";
+import { project, projectInverse, pointInGeometry } from "./geo.js";
 
 const EARTH_R = 6378137;
 const _cache = {};   // url -> Promise<{data,w,h}>
@@ -37,13 +37,24 @@ function lonLatToPixel(lon, lat, b, w, h){
   const py = (b.y1 - my) / (b.y1 - b.y0) * h;
   return [px, py];
 }
+function pixelToLonLat(x, y, b, w, h){
+  const mx = b.x0 + (x / w) * (b.x1 - b.x0), my = b.y1 - (y / h) * (b.y1 - b.y0);
+  return projectInverse(mx / EARTH_R, my / EARTH_R);
+}
+function geomBBox(geom){
+  let lo0=Infinity, la0=Infinity, lo1=-Infinity, la1=-Infinity;
+  const scan = ring => ring.forEach(([lo,la]) => { if(lo<lo0)lo0=lo; if(lo>lo1)lo1=lo; if(la<la0)la0=la; if(la>la1)la1=la; });
+  if(geom.type === "Polygon") geom.coordinates.forEach(scan);
+  else if(geom.type === "MultiPolygon") geom.coordinates.forEach(p => p.forEach(scan));
+  return [lo0, la0, lo1, la1];
+}
 
-// Sample opaque pixels inside an AOI ring. Returns { px:[[r,g,b],...], total }
-// where total counts every box pixel (opaque + transparent) for fraction math.
-async function samplePixels(url, bounds, ring, target = 1400){
+// Sample opaque pixels inside an AOI geometry (box or state/ecoregion polygon).
+// Pixels are masked to the polygon, so `total` counts in-polygon pixels only
+// (forest fraction = forest / polygon area). Returns { px:[[r,g,b],...], total }.
+async function samplePixels(url, bounds, geom, target = 1600){
   const { data, w, h } = await loadRaster(url);
-  let lon0 = Infinity, lon1 = -Infinity, lat0 = Infinity, lat1 = -Infinity;
-  ring.forEach(([lo, la]) => { if(lo<lon0)lon0=lo; if(lo>lon1)lon1=lo; if(la<lat0)lat0=la; if(la>lat1)lat1=la; });
+  const [lon0, lat0, lon1, lat1] = geomBBox(geom);
   const c1 = lonLatToPixel(lon0, lat1, bounds, w, h);
   const c2 = lonLatToPixel(lon1, lat0, bounds, w, h);
   let x0 = Math.max(0, Math.floor(Math.min(c1[0], c2[0])));
@@ -56,6 +67,8 @@ async function samplePixels(url, bounds, ring, target = 1400){
   const px = []; let total = 0;
   for(let y = y0; y <= y1; y += step){
     for(let x = x0; x <= x1; x += step){
+      const [lon, lat] = pixelToLonLat(x, y, bounds, w, h);
+      if(!pointInGeometry(lon, lat, geom)) continue;   // mask to the polygon
       total++;
       const i = (y * w + x) * 4;
       if(data[i + 3] < 24) continue;       // transparent = non-forest / no-data
@@ -74,8 +87,8 @@ const OWN_CLASSES = [
   ["Tribal", "#8c510a"], ["Other Federal", "#3C5488"],
   ["State / Local", "#6baed6"], ["State / Local", "#80cdc1"],
 ];
-export async function ownershipComposition(url, bounds, ring){
-  const { px } = await samplePixels(url, bounds, ring);
+export async function ownershipComposition(url, bounds, geom){
+  const { px } = await samplePixels(url, bounds, geom);
   if(!px.length) return null;
   const refs = OWN_CLASSES.map(([lab, hex]) => [lab, hex2rgb(hex)]);
   const counts = {};
@@ -109,8 +122,8 @@ function buildLUT(ramp, steps = 96){
   return lut;
 }
 const DIST_LUT = buildLUT(DIST_RAMP);
-export async function riskSummary(url, bounds, ring){
-  const { px } = await samplePixels(url, bounds, ring);
+export async function riskSummary(url, bounds, geom){
+  const { px } = await samplePixels(url, bounds, geom);
   if(!px.length) return null;
   let sum = 0, n = 0, lo = 0, mod = 0, hi = 0;
   for(const p of px){
@@ -130,8 +143,8 @@ export async function riskSummary(url, bounds, ring){
 // For each opaque pixel, find the nearest ramp stop; its index / (n-1) is its
 // relative level. Returns { rel, band } with no unit assumptions — works for any
 // ramp layer (CSPI, SVI, standing value, ...).
-export async function rampRelative(url, bounds, ring, rampHexes){
-  const { px } = await samplePixels(url, bounds, ring);
+export async function rampRelative(url, bounds, geom, rampHexes){
+  const { px } = await samplePixels(url, bounds, geom);
   if(!px.length) return null;
   const stops = rampHexes.map(hex2rgb);
   let sum = 0, n = 0;
@@ -148,7 +161,7 @@ export async function rampRelative(url, bounds, ring, rampHexes){
 }
 
 // Forest cover fraction in the box (opaque forest pixels / all box pixels).
-export async function forestFraction(url, bounds, ring){
+export async function forestFraction(url, bounds, geom){
   const { px, total } = await samplePixels(url, bounds, ring);
   if(!total) return null;
   return px.length / total;   // forest pixels are the opaque ones
@@ -159,8 +172,8 @@ export async function forestFraction(url, bounds, ring){
 const FORTYPE_COLORS = [
   ["Softwood","#00A087"], ["Mixedwood","#3C5488"], ["Hardwood","#E64B35"],
 ];
-export async function forestTypeDiversity(url, bounds, ring){
-  const { px } = await samplePixels(url, bounds, ring);
+export async function forestTypeDiversity(url, bounds, geom){
+  const { px } = await samplePixels(url, bounds, geom);
   if(!px.length) return null;
   const refs = FORTYPE_COLORS.map(([lab,hex]) => [lab, hex2rgb(hex)]);
   const counts = {};
