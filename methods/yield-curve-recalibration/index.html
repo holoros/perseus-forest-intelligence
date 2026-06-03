@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PERSEUS · YC recalibration &amp; decline scenarios</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a472a'/%3E%3Cpath d='M16 6 L22 14 L19 14 L24 22 L18 22 L18 26 L14 26 L14 22 L8 22 L13 14 L10 14 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+<style>
+:root{--ink:#0b1015;--mut:#6a7480;--bg:#fafbfc;--card:#fff;--border:#e5e8eb;--accent:#1a472a;--accent-light:#d4e5d8;}
+*{box-sizing:border-box;} html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--bg);}
+.container{max-width:920px;margin:0 auto;padding:32px 24px 80px;}
+header.top{border-bottom:1px solid var(--border);background:var(--card);padding:14px 0;margin-bottom:32px;}
+header.top .container{padding-top:0;padding-bottom:0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:15px;}
+.brand-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;}
+nav a{color:var(--mut);text-decoration:none;font-size:14px;margin-left:18px;border-bottom:1px solid transparent;padding-bottom:2px;}
+nav a:hover,nav a.active{color:var(--accent);border-bottom-color:var(--accent);}
+h1{font-size:32px;margin:0 0 10px;letter-spacing:-0.01em;}
+h2{font-size:21px;margin:34px 0 10px;}
+.lede{font-size:18px;color:var(--mut);margin:0 0 28px;max-width:740px;}
+.tag{display:inline-block;background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:600;border-radius:4px;padding:2px 8px;margin-bottom:14px;}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;}
+th,td{border:1px solid var(--border);padding:6px 10px;text-align:right;}
+th:first-child,td:first-child{text-align:left;}
+thead th{background:#f3f5f7;}
+figure{margin:18px 0;}figure img{width:100%;border:1px solid var(--border);border-radius:8px;}
+figcaption{font-size:13px;color:var(--mut);margin-top:6px;}
+.callout{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:12px 16px;margin:16px 0;font-size:14.5px;}
+code{background:#f3f5f7;border-radius:4px;padding:1px 5px;font-size:13px;}
+a.inline{color:var(--accent);}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="container">
+    <a class="brand" href="../../"><div class="brand-icon">P</div><span>PERSEUS Forest Intelligence</span></a>
+    <nav>
+      <a href="../../">Explorer</a>
+      <a href="../">Methods</a>
+      <a href="https://github.com/holoros/perseus-forest-intelligence">Repo</a>
+    </nav>
+  </div>
+</header>
+<div class="container">
+<div class="tag">v1.4 / v1.5 · deployed 2026-06-02</div>
+<h1>Chronosequence recalibration &amp; no-management decline scenarios</h1>
+<p class="lede">How the YC empirical engine's near-term growth was corrected to the FIA
+longitudinal record, and two data-grounded scenarios showing that a no-harvest reserve
+is a conditional carbon sink, not an automatic one.</p>
+
+<h2>1. The bias: space-for-time</h2>
+<p>Age-based yield curves are fit to a <b>chronosequence</b> (stands of different ages
+seen once). On 272,356 undisturbed FIA remeasurement plots, the chronosequence local
+slope is about <b>half</b> the observed <b>longitudinal</b> increment at young-to-mid
+ages, because the oldest stands in the cross-section sit on systematically poorer or
+more disturbance-shaped sites. Marched forward, the curves under-projected growth by
+<b>&minus;0.68&nbsp;%/yr</b> at the CONUS mean (every state below the 1:1 line).</p>
+
+<h2>2. The fix: recalibrate to the longitudinal record (ADR 0002)</h2>
+<p>A cell-level (forest-type &times; ecoregion &times; owner) observed-increment kernel,
+blended into the hybrid trajectory with weight decaying to zero by each cell's
+culmination age <code>A*</code> (senescence preserved) and capped at the 95th-percentile
+observed standing carbon. Stress-tested with held-out CV, a weight sweep, a physical
+ceiling, and a bootstrap.</p>
+<table>
+<thead><tr><th>variant</th><th>t100 (Tg C)</th><th>100-yr gain</th><th>near-term bias</th><th>spatial r</th></tr></thead>
+<tbody>
+<tr><td>production hybrid</td><td>13,701</td><td>+18.0%</td><td>&minus;0.68</td><td>0.78</td></tr>
+<tr><td><b>agedist + ceiling (shipped)</b></td><td><b>17,722</b></td><td><b>+52.7%</b></td><td><b>&minus;0.41</b></td><td><b>0.84</b></td></tr>
+</tbody></table>
+
+<h2>3. Decline scenarios: a reserve is conditional</h2>
+<p>The recalibrated reserve already carries <i>average</i> 2000&ndash;2020 disturbance.
+Two scenarios expose the downside under climate-elevated loss:</p>
+<p><b>Disturbance-exposed</b> (exogenous): an explicit FIA-COND disturbance drag
+(<code>p_dist&middot;severity&middot;density</code>, fire-led). At recent rates the reserve
+tracks the growth ceiling (+62%); at 2&times; disturbance frequency it goes flat
+(&minus;1%), and at 3&times; it becomes a net <b>source</b> (&minus;21%), with 34,201 of
+59,136 forest-strata pixels ending below their 2022 stock.</p>
+<p><b>Mortality-stressed</b> (endogenous): the FIA GRM density-dependent mortality
+<code>m(C)</code> applied as <i>excess</i> loss on the recalibrated reserve, age-anchored
+so the baseline reproduces production exactly. CONUS 100-yr: +53% baseline, +31% at
+1.5&times; mortality, +13% at 2&times; with ~half of pixels declining. This is the chronic
+competition / self-thinning channel, complementary to the episodic disturbance arm.</p>
+
+<figure>
+  <img src="./recal_disturb_maps.png" alt="CONUS maps of recalibration uplift, near-term correction, and disturbance-exposed decline">
+  <figcaption>CONUS choropleths: recalibration growth uplift (left), near-term growth
+  correction toward FIA observations (center), and disturbance-exposed decline area by
+  state (right). The lift concentrates in young, productive Eastern/Lake-States forest
+  where the chronosequence bias bit hardest.</figcaption>
+</figure>
+
+<h2>4. Managed-scenario stress (first-order)</h2>
+<div class="callout">The disturbance and mortality stress are also offered on the
+<code>managed (harvest)</code> scenario as <code>managed (harvest, disturbance-exposed)</code>
+and <code>managed (harvest, mortality-stressed)</code>. These apply the reserve-derived
+<i>fractional</i> stress factor to the managed trajectory. The disturbance fractional drag
+is roughly density-independent and transfers well; the mortality fractional drag is
+density-dependent, so the managed mortality figure is an <b>upper bound</b> (managed stands
+are younger and less dense than an unharvested reserve). A future revision will re-project
+the managed scenarios with the stressors in-loop.</div>
+
+<h2>Reproducibility</h2>
+<p>Scripts (in <code>scripts/yield_curve_engine/</code>): <code>ycx_ingrowth_gap.R</code>,
+<code>ycx_recal_cell.R</code>, <code>ycx_recal_capped_export.R</code>,
+<code>ycx_disturbance_quantify.R</code>, <code>ycx_disturb_scenario.R</code>,
+<code>ycx_endog_mortality.R</code>, <code>ycx_mortality_arm.R</code>,
+<code>ycx_apply_recal_disturb.R</code> &rarr; <code>ycx_merge_perseus.py</code>. Decision
+record: <a class="inline" href="https://github.com/holoros/perseus-forest-intelligence/blob/main/docs/decisions/0002-chronosequence-growth-bias.md">ADR&nbsp;0002</a>;
+results: <a class="inline" href="https://github.com/holoros/perseus-forest-intelligence/blob/main/docs/results/disturbance_decline_scenario.md">disturbance_decline_scenario.md</a>.</p>
+</div>
+</body>
+</html>

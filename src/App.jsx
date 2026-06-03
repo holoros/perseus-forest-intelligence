@@ -750,6 +750,10 @@ export default function App(){
           <a href="https://crsf.umaine.edu" target="_blank" rel="noopener noreferrer" title="Center for Research on Sustainable Forests">
             <img src={`${BASE}logos/crsf.png`} alt="CRSF"/></a>
         </div>
+        <nav className="topnav" style={{display:"flex",gap:14,fontSize:13,marginLeft:4}}>
+          <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Methods notes">Methods</a>
+          <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Ecoregion economics viewer">Ecoregion</a>
+        </nav>
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
       </header>
       <div className="main">
