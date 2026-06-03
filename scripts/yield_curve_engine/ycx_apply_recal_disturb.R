@@ -40,6 +40,9 @@ rc <- read.csv(RECAL,stringsAsFactors=FALSE)        # state,year,hybrid_Tg,recal
 rc$ratio <- with(rc, pmin(ifelse(hybrid_Tg>0, recal_Tg/hybrid_Tg, 1), RATIO_CAP))
 da <- read.csv(DARMS,stringsAsFactors=FALSE)        # state,arm,year,agc_Tg
 ma <- read.csv(MARMS,stringsAsFactors=FALSE)        # state,arm,year,agc_Tg (mortality arms)
+MGR  <- file.path(td,"disturb","managed_stress_ratio_bystate.csv")  # in-loop managed ratios
+mg <- read.csv(MGR,stringsAsFactors=FALSE)          # state,year,dist_moderate,dist_severe,mort_1p5x,mort_2x
+mg_fun <- function(st,col){d<-mg[mg$state==st,]; if(!nrow(d)) return(function(y) rep(1,length(y))); approxfun(d$year,d[[col]],rule=2)}
 
 recal_fun <- function(st){d<-rc[rc$state==st,]; if(!nrow(d)) return(function(y) rep(1,length(y)))
   approxfun(d$year, d$ratio, rule=2)}
@@ -63,6 +66,8 @@ for(f in files){
   rmod<-arm_ratio_fun(st,"moderate"); rsev<-arm_ratio_fun(st,"severe")
   # 3. mortality-stressed reserve (endogenous GRM density mortality), per metric
   m15<-mort_ratio_fun(st,"mort_1p5x"); m20<-mort_ratio_fun(st,"mort_2x")
+  # managed (harvest) in-loop stress ratios
+  gmdmod<-mg_fun(st,"dist_moderate"); gmdsev<-mg_fun(st,"dist_severe"); gmm15<-mg_fun(st,"mort_1p5x"); gmm20<-mg_fun(st,"mort_2x")
   add <- list()
   for(mt in unique(s$metric)){
     base <- s[s$metric==mt & s$mgmt==RESERVE,]; if(!nrow(base)) next
@@ -76,17 +81,15 @@ for(f in files){
     nm$value_lo <- base$value * m20(base$year)      # 2x mortality
     nm$value_hi <- base$value                       # baseline mortality
     add[[paste0(mt,"_m")]] <- nm
-    # 4. same climate stress on the managed (harvest) BAU scenario (first-order:
-    #    reserve-derived FRACTIONAL stress factor applied to the managed trajectory;
-    #    disturbance fractional drag is ~density-independent so transfers well, the
-    #    mortality fractional drag is density-dependent so the managed figure is an
-    #    upper bound since managed stands are younger/less dense).
+    # 4. climate stress on managed (harvest) BAU, using the IN-LOOP managed ratios
+    #    (ycx_managed_stress.R: harvest age-resets correctly lower stress exposure;
+    #    replaces the earlier reserve-borrowed fractional approximation).
     mb <- s[s$metric==mt & s$mgmt==MANAGED,]; if(nrow(mb)){
       md <- mb; md$mgmt <- NEWSC_MD
-      md$value    <- mb$value * rmod(mb$year); md$value_lo <- mb$value * rsev(mb$year); md$value_hi <- mb$value
+      md$value    <- mb$value * gmdmod(mb$year); md$value_lo <- mb$value * gmdsev(mb$year); md$value_hi <- mb$value
       add[[paste0(mt,"_md")]] <- md
       mm2 <- mb; mm2$mgmt <- NEWSC_MM
-      mm2$value   <- mb$value * m15(mb$year); mm2$value_lo <- mb$value * m20(mb$year); mm2$value_hi <- mb$value
+      mm2$value   <- mb$value * gmm15(mb$year); mm2$value_lo <- mb$value * gmm20(mb$year); mm2$value_hi <- mb$value
       add[[paste0(mt,"_mm")]] <- mm2
     }
   }
