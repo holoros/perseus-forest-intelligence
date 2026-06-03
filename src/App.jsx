@@ -714,6 +714,11 @@ export default function App(){
               return <option key={st} value={st}>{st} · {c.name}{focal} · {c.engines}eng · {c.rows.toLocaleString()} rows</option>;
             })}
           </select>)}
+        <div className="brandbar" title="PERSEUS · Center for Advanced Forestry Systems · Center for Research on Sustainable Forests">
+          <img src={`${BASE}logos/perseus.png`} alt="PERSEUS"/>
+          <img src={`${BASE}logos/cafs.png`} alt="CAFS"/>
+          <img src={`${BASE}logos/crsf.png`} alt="CRSF"/>
+        </div>
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
       </header>
       <div className="main">
