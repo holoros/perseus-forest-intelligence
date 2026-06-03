@@ -65,11 +65,16 @@ injector (`ycx_inject_hybrid.py`). The original per-plot scalar loop
 - Scenario behavior (CONUS, t0 -> t100): disturbance-exposed reserve -15%,
   mortality-stressed reserve +42%, managed harvest -38%, intensive -65%,
   conservation +18%. Declines without active management are surfaced.
-- **Scope limit:** only `agc_live_total` is swapped. `agb_dry`, `vol_stem`, and
-  the merch metrics remain on the peak-decline empirical-curve basis (volume and
-  merch lack hybrid fits; biomass has `agb_tonac` hybrid fits but is not yet
-  projected). These metrics now disagree in form with carbon; bringing at least
-  biomass onto the hybrid basis is the recommended follow-on.
+- **Scope (now complete):** as of v0.58 all five FIA stock metrics share the
+  hybrid+recal form. `agc_live_total` (this ADR, v0.56), `agb_dry` (v0.57), and
+  `vol_stem` / `merch_vol_mcf` / `merch_bio_dry` (v0.58) were each re-projected on
+  their own hybrid fits (`carbon_lbac`, `agb_tonac`, `voltot_cuftac`,
+  `merchvol_cuftac`, `merchbio_tonac`) via the response-parameterized projector
+  `ycx_fia_hybrid_fullseries_resp.R`. CONUS reserve, peak-decline -> hybrid+recal:
+  carbon +112%->+63%, biomass +113%->+62%, volume +112%->+72%, merch volume
+  +138%->+66%, merch biomass +146%->+70%. Volume/merch mortality is mapped from the
+  carbon GRM grid via a per-response carbon ratio (GRM lacks native volume/merch
+  mortality at merch resolution).
 - The FIA empirical engine keeps its own t0 anchor, which sits below the
   TreeMap/hybrid t0 in some states. Reconciling all three to a common t0 is a
   separate anchor-reconciliation pass, not done here.
