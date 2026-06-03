@@ -47,6 +47,52 @@ function radarNarrative(index){
   return `Within its ecoregion this area ranks highest on ${IDX_NAMES[hi[0]]} (${Math.round(hi[1]*100)}th pct) and lowest on ${IDX_NAMES[lo[0]]} (${Math.round(lo[1]*100)}th pct).${res}`;
 }
 
+// Letter grade + color from a percentile (0..1). Centered so the regional
+// median (~0.5) reads as a C: top of region = A, bottom = F.
+const GRADE = p => p==null ? null
+  : p>=0.80 ? {letter:"A", color:"#2e9e6b"}
+  : p>=0.60 ? {letter:"B", color:"#5cb85c"}
+  : p>=0.40 ? {letter:"C", color:"#e6ab02"}
+  : p>=0.20 ? {letter:"D", color:"#e08a3c"}
+  :           {letter:"F", color:"#d9534f"};
+
+// Composite scorecard: one overall letter grade from the region-relative axes,
+// plus a per-axis colored letter chip. Each chip's tooltip compares the AOI to
+// the ecoregion median (50th by construction) and the state average (ref), so
+// the comparison the user asked for is explicit and rankable.
+function Scorecard({ index }){
+  if(!index) return null;
+  const axes = AXES6.filter(([k]) => axV(index[k])!=null);
+  if(axes.length < 3) return null;
+  const vals = axes.map(([k]) => axV(index[k]));
+  const comp = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const g = GRADE(comp);
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:11,margin:"2px 6px 8px"}}>
+      <div title={`Composite of ${axes.length} region-relative outcomes`} style={{flex:"0 0 auto",
+        width:48,height:48,borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",
+        background:g.color+"22",border:`2px solid ${g.color}`}}>
+        <span style={{fontSize:25,fontWeight:700,color:g.color,lineHeight:1}}>{g.letter}</span>
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:12,color:"var(--ink)",fontWeight:600}}>
+          Overall {ord(Math.round(comp*100))} percentile in its ecoregion
+        </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:"3px 5px",marginTop:3}}>
+          {axes.map(([k,lab]) => { const o=index[k], v=axV(o), gg=GRADE(v);
+            const tip = (o && o.ref!=null)
+              ? `${lab}: this area ${ord(Math.round(v*100))} · state avg ${ord(Math.round(o.ref*100))} · ecoregion median 50th`
+              : `${lab}: this area ${ord(Math.round(v*100))} pct of ecoregion`;
+            return <span key={k} title={tip} style={{fontSize:10.5,padding:"1px 7px",borderRadius:9,
+              background:gg.color+"22",color:gg.color,border:`1px solid ${gg.color}66`,whiteSpace:"nowrap"}}>
+              {lab} {gg.letter}</span>;
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Interactive 6-axis radar. Each percentile axis = this area's rank within its
 // ecoregion (50% ring = regional median). Hover a point for its value.
 function ConditionRadar({ index }){
@@ -422,6 +468,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         <div className="aoi-sub">Condition index · quick look</div>
         {landscape.index && (
           <div>
+            <Scorecard index={landscape.index}/>
             <ConditionRadar index={landscape.index}/>
             {radarNarrative(landscape.index) && (
               <div style={{margin:"2px 6px 4px",fontSize:12.5,color:"var(--ink)"}}>{radarNarrative(landscape.index)}</div>

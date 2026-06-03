@@ -51,7 +51,13 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
       const rk=ls.index.resilience!=null?` Resilience to disturbance sits around the ${Math.round(aV(ls.index.resilience)*100)}th percentile.`:"";
       narr=`<p class="note" style="text-align:center;margin:2px 0 0">Within its ecoregion this area ranks highest on ${NM[hi[0]]} (${Math.round(hi[1]*100)}th pct) and lowest on ${NM[lo[0]]} (${Math.round(lo[1]*100)}th pct).${rk}</p>`; }
     const refLeg=hasRef?`<p class="note" style="text-align:center;margin:0">Solid = this area · dashed grey = state average · whiskers = within-area spread.</p>`:"";
-    radar = `<h2>Condition index <span class="sub">each axis = this area's percentile within its ecoregion (dashed ring = regional median); biodiversity is a stand diversity index</span></h2>
+    // composite grade
+    const gvals=AX.map(a=>aV(ls.index[a[0]])).filter(v=>v!=null);
+    let gradeHtml="";
+    if(gvals.length>=3){ const comp=gvals.reduce((a,b)=>a+b,0)/gvals.length;
+      const G=comp>=0.80?["A","#2e9e6b"]:comp>=0.60?["B","#5cb85c"]:comp>=0.40?["C","#caa300"]:comp>=0.20?["D","#d2691e"]:["F","#c0392b"];
+      gradeHtml=`<p style="text-align:center;margin:0 0 2px"><span style="display:inline-block;min-width:30px;padding:2px 8px;border:2px solid ${G[1]};border-radius:8px;color:${G[1]};font-weight:700;font-size:18px">${G[0]}</span> <span class="sub">overall ${Math.round(comp*100)}th percentile in its ecoregion</span></p>`; }
+    radar = `<h2>Condition index <span class="sub">each axis = this area's percentile within its ecoregion (dashed ring = regional median); biodiversity is a stand diversity index</span></h2>${gradeHtml}
       <svg viewBox="0 0 220 236" style="width:290px;display:block;margin:2px auto">${rings}${spokes}
       ${refPoly?`<polygon points="${refPoly}" fill="none" stroke="#9aa7b0" stroke-width="1.1" stroke-dasharray="4 3"/>`:""}
       <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.20" stroke="#1a7a4d" stroke-width="2"/>${ebars}${labels}</svg>${narr}${refLeg}`;
