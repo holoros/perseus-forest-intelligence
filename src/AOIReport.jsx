@@ -3,6 +3,7 @@
 // FIA-derived forest attributes and landowner composition for plots inside the
 // polygon (where available), and the ycx yield trajectory (untreated vs
 // harvested) from yield_curves_by_l3.
+import { useState } from "react";
 import MiniChart from "./MiniChart.jsx";
 import StandOutlook from "./StandOutlook.jsx";
 import { openReport } from "./report.js";
@@ -22,58 +23,66 @@ const FT_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d"]
 const BAND_GOOD_HIGH = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
 const BAND_GOOD_LOW  = { "Low":"#3fb68b", "Moderate":"#e6ab02", "High":"#d9534f" };
 
-// One- or two-sentence plain-language read of the condition index.
-const IDX_NAMES = { structure:"forest structure", economic:"economic value",
-  ecosystem:"ecosystem value", risk:"disturbance risk" };
+// Six outcome axes. `pctl` = displayed as ecoregion percentile; biodiversity is
+// an absolute stand-diversity index.
+const AXES6 = [
+  ["carbon","Carbon",true], ["value","Timber value",true],
+  ["productivity","Productivity",true], ["risk","Risk",true],
+  ["habitat","Habitat",true], ["biodiversity","Biodiversity",false],
+];
+const IDX_NAMES = { carbon:"carbon", value:"timber value", productivity:"productivity",
+  habitat:"habitat", biodiversity:"biodiversity", risk:"disturbance risk" };
+
+// Plain-language read: highest/lowest-ranked outcome within the ecoregion.
 function radarNarrative(index){
   if(!index) return null;
-  const lvl = v => v<0.34?"low":v<0.67?"moderate":"high";
-  const good = Object.entries(index).filter(([k,v])=>k!=="risk" && v!=null).sort((a,b)=>b[1]-a[1]);
+  const good = Object.entries(index).filter(([k,v])=>k!=="risk" && k!=="biodiversity" && v!=null).sort((a,b)=>b[1]-a[1]);
   if(good.length < 2) return null;
   const hi = good[0], lo = good[good.length-1];
-  const risk = index.risk!=null ? ` Disturbance risk is ${lvl(index.risk)}.` : "";
-  return `This area is strongest on ${IDX_NAMES[hi[0]]} (${lvl(hi[1])}) and weakest on ${IDX_NAMES[lo[0]]} (${lvl(lo[1])}).${risk}`;
+  const risk = index.risk!=null ? ` Disturbance risk is around the ${Math.round(index.risk*100)}th percentile.` : "";
+  return `Within its ecoregion this area ranks highest on ${IDX_NAMES[hi[0]]} (${Math.round(hi[1]*100)}th pct) and lowest on ${IDX_NAMES[lo[0]]} (${Math.round(lo[1]*100)}th pct).${risk}`;
 }
 
-// Condition-index radar: 4 axes (structure, economic value, ecosystem value,
-// risk vulnerability), each 0..1. Outer = higher magnitude of that dimension.
-function ConditionRadar({ index, eco, state }){
+// Interactive 6-axis radar. Each percentile axis = this area's rank within its
+// ecoregion (50% ring = regional median). Hover a point for its value.
+function ConditionRadar({ index }){
+  const [hi, setHi] = useState(null);
   if(!index) return null;
-  const AX = [
-    ["structure","Forest\nstructure"], ["economic","Economic\nvalue"],
-    ["ecosystem","Ecosystem\nvalue"], ["risk","Risk\nvuln."],
-  ];
-  const C = 96, R = 62;                      // center, max radius
-  const ang = i => (-90 + i*90) * Math.PI/180;
+  const N = AXES6.length, C = 110, R = 74;
+  const ang = i => (-90 + i*360/N) * Math.PI/180;
   const pt = (i, r) => [C + r*Math.cos(ang(i)), C + r*Math.sin(ang(i))];
-  const polyFor = idx => AX.map((a,i) => {
-    const v = idx[a[0]]==null ? 0 : Math.max(0,Math.min(1,idx[a[0]]));
-    return pt(i, R*v).map(n=>n.toFixed(1)).join(",");
-  }).join(" ");
+  const val = i => { const v = index[AXES6[i][0]]; return v==null ? 0 : Math.max(0,Math.min(1,v)); };
   const rings = [0.25,0.5,0.75,1].map((f,k) =>
-    <circle key={k} cx={C} cy={C} r={R*f} fill="none" stroke="var(--line)" strokeWidth="0.75"/>);
-  const spokes = AX.map((_,i) => { const [x,y]=pt(i,R);
-    return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="var(--line)" strokeWidth="0.75"/>; });
-  const labels = AX.map(([k,lab],i) => {
-    const [x,y]=pt(i, R+16); const lines=lab.split("\n");
-    return <text key={k} x={x} y={y - (lines.length-1)*5} textAnchor="middle"
-      fontSize="9" fill={index[k]!=null?"var(--ink)":"#5e7180"}>
-      {lines.map((ln,j)=><tspan key={j} x={x} dy={j?10:0}>{ln}</tspan>)}</text>;
-  });
-  const aoiDots = AX.map((a,i) => { const v = index[a[0]]==null?0:Math.max(0,Math.min(1,index[a[0]]));
-    const [x,y]=pt(i, R*v); return <circle key={i} cx={x} cy={y} r="2.4" fill="#3fb68b"/>; });
+    <circle key={k} cx={C} cy={C} r={R*f} fill="none"
+      stroke={f===0.5?"#6a8190":"var(--line)"} strokeWidth={f===0.5?1:0.6}
+      strokeDasharray={f===0.5?"3 3":"0"}/>);
+  const spokes = AXES6.map((_,i) => { const [x,y]=pt(i,R);
+    return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="var(--line)" strokeWidth="0.6"/>; });
+  const poly = AXES6.map((_,i) => pt(i, R*val(i)).map(n=>n.toFixed(1)).join(",")).join(" ");
+  const labels = AXES6.map(([k,lab],i) => { const [x,y]=pt(i, R+15);
+    const anc = Math.abs(x-C)<5 ? "middle" : (x>C ? "start" : "end");
+    return <text key={k} x={x} y={y+3} textAnchor={anc} fontSize="9.5"
+      fill={index[k]!=null?"var(--ink)":"#5e7180"}>{lab}</text>; });
+  const dots = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
+    return <circle key={i} cx={x} cy={y} r={hi===i?4.2:3} fill="#3fb68b" stroke="#0b1015" strokeWidth="0.5"/>; });
+  const hits = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
+    return <circle key={"h"+i} cx={x} cy={y} r="11" fill="transparent" style={{cursor:"pointer"}}
+      onMouseEnter={()=>setHi(i)} onMouseLeave={()=>setHi(null)}/>; });
+  let tip = null;
+  if(hi!=null){ const [k,lab,pctl]=AXES6[hi]; const v=index[k]; const [x,y]=pt(hi, R*val(hi));
+    const txt = v==null ? `${lab}: n/a`
+      : pctl ? `${lab}: ${Math.round(v*100)}th pct of ecoregion`
+             : `${lab}: ${Math.round(v*100)}% (stand index)`;
+    const w = txt.length*5 + 10, tx = Math.max(2, Math.min(220-w, x-w/2));
+    tip = <g style={{pointerEvents:"none"}}>
+      <rect x={tx} y={y-22} width={w} height="15" rx="3" fill="rgba(15,20,25,0.94)" stroke="var(--line)"/>
+      <text x={tx+5} y={y-11} fontSize="9" fill="#e8eef2">{txt}</text></g>;
+  }
   return (
-    <svg viewBox="0 0 192 214" style={{width:"100%",maxWidth:240,display:"block",margin:"2px auto 0"}}>
+    <svg viewBox="0 0 220 234" style={{width:"100%",maxWidth:290,display:"block",margin:"2px auto 0"}}>
       {rings}{spokes}
-      {state && <polygon points={polyFor(state)} fill="none" stroke="#6baed6" strokeWidth="1.3" strokeDasharray="2 3"/>}
-      {eco && <polygon points={polyFor(eco)} fill="none" stroke="#e6ab02" strokeWidth="1.4" strokeDasharray="5 3"/>}
-      <polygon points={polyFor(index)} fill="#3fb68b" fillOpacity="0.22" stroke="#3fb68b" strokeWidth="1.8"/>
-      {aoiDots}{labels}
-      <g fontSize="8.5" fill="var(--mut)">
-        <line x1="14" y1="204" x2="26" y2="204" stroke="#3fb68b" strokeWidth="2"/><text x="29" y="207">this area</text>
-        {eco && (<><line x1="78" y1="204" x2="90" y2="204" stroke="#e6ab02" strokeWidth="1.6" strokeDasharray="5 3"/><text x="93" y="207">ecoregion</text></>)}
-        {state && (<><line x1="146" y1="204" x2="158" y2="204" stroke="#6baed6" strokeWidth="1.4" strokeDasharray="2 3"/><text x="161" y="207">state</text></>)}
-      </g>
+      <polygon points={poly} fill="#3fb68b" fillOpacity="0.20" stroke="#3fb68b" strokeWidth="1.8"/>
+      {dots}{labels}{hits}{tip}
     </svg>
   );
 }
@@ -181,12 +190,12 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         <div className="aoi-sub">Condition index · quick look</div>
         {landscape.index && (
           <div>
-            <ConditionRadar index={landscape.index} eco={landscape.indexEco} state={landscape.indexState}/>
+            <ConditionRadar index={landscape.index}/>
             {radarNarrative(landscape.index) && (
               <div style={{margin:"2px 6px 4px",fontSize:12.5,color:"var(--ink)"}}>{radarNarrative(landscape.index)}</div>
             )}
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
-              Integrated condition across four dimensions (0–1). Outer = higher; for Risk, outer = more vulnerable.
+              Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Hover a point for the value. Biodiversity is a stand diversity index.
             </div>
           </div>
         )}

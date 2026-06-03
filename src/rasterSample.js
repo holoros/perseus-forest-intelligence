@@ -160,6 +160,35 @@ export async function rampRelative(url, bounds, geom, rampHexes){
   return { rel, band };
 }
 
+// Sorted array of per-pixel relative positions (0..1) along a ramp for a geom.
+// Used to build a region (ecoregion) distribution and rank an AOI within it.
+export async function rampValues(url, bounds, geom, rampHexes){
+  const { px } = await samplePixels(url, bounds, geom);
+  if(!px.length) return null;
+  const stops = rampHexes.map(hex2rgb);
+  const out = [];
+  for(const p of px){
+    let bi = 0, bd = Infinity;
+    for(let i = 0; i < stops.length; i++){ const d = dist2(p, stops[i]); if(d < bd){ bd = d; bi = i; } }
+    if(bd > 16000) continue;
+    out.push(bi / (stops.length - 1));
+  }
+  return out.length ? out.sort((a, b) => a - b) : null;
+}
+// Median of a numeric array (assumes finite values).
+export function median(arr){
+  if(!arr || !arr.length) return null;
+  const s = arr.slice().sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+// Percentile (0..1) of value within a sorted distribution.
+export function percentile(value, sortedDist){
+  if(value == null || !sortedDist || !sortedDist.length) return null;
+  let lo = 0; for(const x of sortedDist) if(x <= value) lo++;
+  return lo / sortedDist.length;
+}
+
 // Forest cover fraction in the box (opaque forest pixels / all box pixels).
 export async function forestFraction(url, bounds, geom){
   const { px, total } = await samplePixels(url, bounds, ring);

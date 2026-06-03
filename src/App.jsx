@@ -9,7 +9,7 @@ import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
-import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative } from "./rasterSample.js";
+import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -916,20 +916,33 @@ export default function App(){
       const habScore = habParts.length ? habParts.reduce((a,p)=>a+p[0]*p[1],0)/wsum : null;
       const bioScore = divers ? (0.6*divers.evenness + 0.4*Math.min(1,(divers.richness-1)/3)) : null;
       const band = (s)=> s==null?null : s<0.34?"Low":s<0.67?"Moderate":"High";
-      // Composite condition index (0..1 per axis) for the quick-look radar:
-      // forest structure, economic value, ecosystem value, risk vulnerability.
-      const mean = (arr) => { const v = arr.filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
-      // economic value: SVI relative if present, else state stumpage normalized ($/MBF ~0..600)
-      let econ = svi ? svi.rel : null;
-      if(econ == null && stump && stump.sawHW != null) econ = Math.max(0, Math.min(1, stump.sawHW/600));
-      if(econ == null && stump && stump.sawSW != null) econ = Math.max(0, Math.min(1, stump.sawSW/600));
-      const idxAxes = {
-        structure:  mean([cspi?cspi.rel:null, contin, ageScore]),
-        economic:   econ,
-        ecosystem:  mean([habScore, bioScore]),
-        risk:       risk ? Math.max(0, Math.min(1, risk.mean/0.72)) : null,  // vulnerability (high = worse)
+      // Region-relative condition index: each axis is the AOI's PERCENTILE within
+      // its ecoregion for that outcome (quantile-based, so "high" = high for the
+      // region). Carbon / timber value / productivity / habitat / risk are sampled
+      // per-pixel; biodiversity is the stand forest-type evenness.
+      const GREEN5 = ["#f7fcf5","#c7e9c0","#74c476","#31a354","#006d2c"];
+      const ORANGE5 = ["#fff7ec","#fdbb84","#ef6548","#b30000","#7f0000"];
+      const DIST5 = ["#ffffcc","#fed976","#fd8d3c","#f03b20","#bd0026"];
+      const LAY = {
+        carbon:       ["conus_hybrid_agc2022.png", GREEN5],
+        value:        ["conus_standing_value.png", ORANGE5],
+        productivity: ["conus_climate_stress.png", CSPI_RAMP],
+        habitat:      ["conus_gedi_agbd.png", GREEN5],
+        risk:         ["conus_p_disturbance_2022.png", DIST5],
       };
-      const haveIdx = Object.values(idxAxes).filter(v=>v!=null).length >= 3;
+      const ecoGeom = ef && ef.geometry;
+      const idxAxes = {};
+      if(ecoGeom){
+        await Promise.all(Object.entries(LAY).map(async ([k,[u,ramp]]) => {
+          const [aoiArr, ecoArr] = await Promise.all([
+            rampValues(R(u), FRAME, geom, ramp).catch(()=>null),
+            rampValues(R(u), FRAME, ecoGeom, ramp).catch(()=>null),
+          ]);
+          idxAxes[k] = percentile(median(aoiArr), ecoArr);
+        }));
+      }
+      idxAxes.biodiversity = bioScore;   // stand forest-type evenness (absolute)
+      const haveIdx = Object.values(idxAxes).filter(v=>v!=null).length >= 4;
       landscape = {
         ownership: own, risk, forestFrac: ffrac, diversity: divers,
         habitat: habScore!=null ? { score: habScore, band: band(habScore) } : null,
@@ -939,16 +952,6 @@ export default function App(){
         index: haveIdx ? idxAxes : null,
       };
     }catch(e){ landscape = null; }
-
-    // Context rings: the same condition index for the encompassing ecoregion and
-    // state, so a landowner sees their stand relative to the broader landscape.
-    if(landscape && landscape.index){
-      try{
-        if(ef && ef.geometry) landscape.indexEco = await idxForGeom(ef.geometry, stCode);
-        const stFeat = geoData && geoData.features.find(f => f.properties && f.properties.state === stCode);
-        if(stFeat && stFeat.geometry) landscape.indexState = await idxForGeom(stFeat.geometry, stCode);
-      }catch(e){}
-    }
 
     setAoi({
       name: `area ~${radiusKm} km · ${lat.toFixed(2)}, ${lon.toFixed(2)}`,
