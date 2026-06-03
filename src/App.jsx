@@ -918,8 +918,12 @@ export default function App(){
       const band = (s)=> s==null?null : s<0.34?"Low":s<0.67?"Moderate":"High";
       // Region-relative condition index: each axis is the AOI's PERCENTILE within
       // its ecoregion for that outcome (quantile-based, so "high" = high for the
-      // region). Carbon / timber value / productivity / habitat / risk are sampled
-      // per-pixel; biodiversity is the stand forest-type evenness.
+      // region). Each axis carries {v, lo, hi, ref}: v = AOI mean's percentile,
+      // lo/hi = the AOI's interquartile spread mapped to ecoregion percentiles
+      // (the radar error bar), ref = the encompassing STATE mean's percentile
+      // (the comparison polygon). Risk is inverted into RESILIENCE so every axis
+      // reads "high = good". Biodiversity is the absolute stand forest-type
+      // evenness (no region distribution, so lo=hi=v).
       const GREEN5 = ["#f7fcf5","#c7e9c0","#74c476","#31a354","#006d2c"];
       const VALUE_RAMP = ["#f7fcf5","#74c476","#238b45","#00441b"];  // matches standing_value render
       const DIST5 = ["#ffffcc","#fed976","#fd8d3c","#f03b20","#bd0026"];
@@ -931,23 +935,50 @@ export default function App(){
         risk:         ["conus_p_disturbance_2022.png", DIST5],
       };
       const ecoGeom = ef && ef.geometry;
+      // State polygon (for the comparison overlay): the encompassing state's mean
+      // for each outcome, expressed as a percentile within the same ecoregion.
+      const stFeat = geoData && findFeature(geoData.features, lon, lat);
+      const stGeom = stFeat && stFeat.geometry;
       const idxAxes = {};
-      // AOI representative value uses the MEAN, not the median: a small AOI's
-      // median collapses onto a single ramp stop and snaps to the distribution
-      // tails (0/1), making productivity/habitat look saturated. The mean keeps
-      // the percentile continuous within the ecoregion.
       const mean = a => (a && a.length) ? a.reduce((x,y)=>x+y,0)/a.length : null;
+      const qAt = (a,q) => a[Math.min(a.length-1, Math.max(0, Math.floor(q*a.length)))];
+      const axisStat = (aoiArr, ecoArr, stArr) => {
+        if(!aoiArr || !aoiArr.length || !ecoArr || !ecoArr.length) return null;
+        return {
+          v:  percentile(mean(aoiArr), ecoArr),
+          lo: percentile(qAt(aoiArr,0.25), ecoArr),
+          hi: percentile(qAt(aoiArr,0.75), ecoArr),
+          ref: (stArr && stArr.length) ? percentile(mean(stArr), ecoArr) : null,
+        };
+      };
       if(ecoGeom){
         await Promise.all(Object.entries(LAY).map(async ([k,[u,ramp]]) => {
-          const [aoiArr, ecoArr] = await Promise.all([
+          const [aoiArr, ecoArr, stArr] = await Promise.all([
             rampValues(R(u), FRAME, geom, ramp).catch(()=>null),
             rampValues(R(u), FRAME, ecoGeom, ramp).catch(()=>null),
+            stGeom ? rampValues(R(u), FRAME, stGeom, ramp).catch(()=>null) : Promise.resolve(null),
           ]);
-          idxAxes[k] = percentile(mean(aoiArr), ecoArr);
+          idxAxes[k] = axisStat(aoiArr, ecoArr, stArr);
         }));
       }
-      idxAxes.biodiversity = bioScore;   // stand forest-type evenness (absolute)
+      // Invert risk -> resilience (high = good): swap and complement the band.
+      if(idxAxes.risk){
+        const r = idxAxes.risk;
+        idxAxes.resilience = { v:1-r.v, lo:1-r.hi, hi:1-r.lo, ref: r.ref==null?null:1-r.ref };
+      }
+      delete idxAxes.risk;
+      idxAxes.biodiversity = bioScore==null ? null : { v:bioScore, lo:bioScore, hi:bioScore, ref:null };
       const haveIdx = Object.values(idxAxes).filter(v=>v!=null).length >= 4;
+      // Observed RD trajectory from the three deployed TreeMap-basis RD overlays
+      // (2016 / 2020 / 2022). Mean relative density inside the AOI, in RD units
+      // (ramp hi label = 1.5). A real calendar-year change signal for the area.
+      const RD_YEARS = [[2016,"conus_rd_2016.png"],[2020,"conus_rd_2020.png"],[2022,"conus_rd_2022.png"]];
+      const rdSeries = await Promise.all(RD_YEARS.map(async ([yr,u]) => {
+        const arr = await rampValues(R(u), FRAME, geom, RD_RAMP).catch(()=>null);
+        const m = mean(arr);
+        return { year: yr, rd: m==null ? null : +(m*1.5).toFixed(3) };
+      }));
+      const haveRd = rdSeries.filter(p=>p.rd!=null).length >= 2;
       landscape = {
         ownership: own, risk, forestFrac: ffrac, diversity: divers,
         habitat: habScore!=null ? { score: habScore, band: band(habScore) } : null,
@@ -955,6 +986,8 @@ export default function App(){
         siteProductivity: cspi, speciesValue: svi, stumpage: stump,
         relDensity: rd, sawtimberShare: saw,
         index: haveIdx ? idxAxes : null,
+        rdSeries: haveRd ? rdSeries : null,
+        stateName: stCode || null,
       };
     }catch(e){ landscape = null; }
 

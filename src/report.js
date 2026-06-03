@@ -31,23 +31,54 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
     <span class="bp">${Math.round(pct)}%</span></div>`;
 
   // ---- condition-index radar (6 axes, ecoregion percentile) ----
+  const aV = x => (x && typeof x==="object") ? x.v : x;   // tolerate number or {v,lo,hi,ref}
   let radar = "";
   if(ls.index){
-    const AX=[["carbon","Carbon"],["value","Timber value"],["productivity","Productivity"],["risk","Risk"],["habitat","Habitat"],["biodiversity","Biodiversity"]];
+    const AX=[["carbon","Carbon"],["value","Timber value"],["productivity","Productivity"],["resilience","Resilience"],["habitat","Habitat"],["biodiversity","Biodiversity"]];
     const N=AX.length, C=110, R=78, ang=i=>(-90+i*360/N)*Math.PI/180, pt=(i,r)=>[C+r*Math.cos(ang(i)),C+r*Math.sin(ang(i))];
+    const cl=v=>v==null?null:Math.max(0,Math.min(1,v));
     const rings=[0.25,0.5,0.75,1].map(f=>`<circle cx="${C}" cy="${C}" r="${(R*f).toFixed(1)}" fill="none" stroke="${f===0.5?'#9aa7af':'#d8e0e3'}"${f===0.5?' stroke-dasharray="3 3"':''}/>`).join("");
     const spokes=AX.map((_,i)=>{const[x,y]=pt(i,R);return `<line x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#d8e0e3"/>`;}).join("");
-    const poly=AX.map((a,i)=>{const v=ls.index[a[0]]==null?0:Math.max(0,Math.min(1,ls.index[a[0]]));return pt(i,R*v).map(n=>n.toFixed(1)).join(",");}).join(" ");
+    const poly=AX.map((a,i)=>{const v=cl(aV(ls.index[a[0]]))||0;return pt(i,R*v).map(n=>n.toFixed(1)).join(",");}).join(" ");
+    const hasRef=AX.some(a=>{const o=ls.index[a[0]];return o&&o.ref!=null;});
+    const refPoly=hasRef?AX.map((a,i)=>{const o=ls.index[a[0]];const r=(o&&o.ref!=null)?cl(o.ref):0;return pt(i,R*r).map(n=>n.toFixed(1)).join(",");}).join(" "):"";
+    const ebars=AX.map((a,i)=>{const o=ls.index[a[0]];if(!o||o.lo==null||o.hi==null||o.lo===o.hi)return"";const[x1,y1]=pt(i,R*cl(o.lo)),[x2,y2]=pt(i,R*cl(o.hi));const nx=Math.cos(ang(i)+Math.PI/2)*2.4,ny=Math.sin(ang(i)+Math.PI/2)*2.4;return `<g stroke="#7bbf9a" stroke-width="1.1"><line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/><line x1="${(x1-nx).toFixed(1)}" y1="${(y1-ny).toFixed(1)}" x2="${(x1+nx).toFixed(1)}" y2="${(y1+ny).toFixed(1)}"/><line x1="${(x2-nx).toFixed(1)}" y1="${(y2-ny).toFixed(1)}" x2="${(x2+nx).toFixed(1)}" y2="${(y2+ny).toFixed(1)}"/></g>`;}).join("");
     const labels=AX.map(([k,lab],i)=>{const[x,y]=pt(i,R+15);const anc=Math.abs(x-C)<5?'middle':(x>C?'start':'end');return `<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="${anc}" font-size="10" fill="#1a3d28">${esc(lab)}</text>`;}).join("");
-    const NM={carbon:"carbon",value:"timber value",productivity:"productivity",habitat:"habitat",biodiversity:"biodiversity",risk:"disturbance risk"};
-    const good=Object.entries(ls.index).filter(([k,v])=>k!=="risk"&&k!=="biodiversity"&&v!=null).sort((a,b)=>b[1]-a[1]);
+    const NM={carbon:"carbon",value:"timber value",productivity:"productivity",habitat:"habitat",biodiversity:"biodiversity",resilience:"resilience"};
+    const good=Object.entries(ls.index).filter(([k,v])=>k!=="biodiversity"&&aV(v)!=null).map(([k,v])=>[k,aV(v)]).sort((a,b)=>b[1]-a[1]);
     let narr="";
     if(good.length>=2){ const hi=good[0],lo=good[good.length-1];
-      const rk=ls.index.risk!=null?` Disturbance risk is around the ${Math.round(ls.index.risk*100)}th percentile.`:"";
+      const rk=ls.index.resilience!=null?` Resilience to disturbance sits around the ${Math.round(aV(ls.index.resilience)*100)}th percentile.`:"";
       narr=`<p class="note" style="text-align:center;margin:2px 0 0">Within its ecoregion this area ranks highest on ${NM[hi[0]]} (${Math.round(hi[1]*100)}th pct) and lowest on ${NM[lo[0]]} (${Math.round(lo[1]*100)}th pct).${rk}</p>`; }
+    const refLeg=hasRef?`<p class="note" style="text-align:center;margin:0">Solid = this area · dashed grey = state average · whiskers = within-area spread.</p>`:"";
     radar = `<h2>Condition index <span class="sub">each axis = this area's percentile within its ecoregion (dashed ring = regional median); biodiversity is a stand diversity index</span></h2>
       <svg viewBox="0 0 220 236" style="width:290px;display:block;margin:2px auto">${rings}${spokes}
-      <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.20" stroke="#1a7a4d" stroke-width="2"/>${labels}</svg>${narr}`;
+      ${refPoly?`<polygon points="${refPoly}" fill="none" stroke="#9aa7b0" stroke-width="1.1" stroke-dasharray="4 3"/>`:""}
+      <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.20" stroke="#1a7a4d" stroke-width="2"/>${ebars}${labels}</svg>${narr}${refLeg}`;
+  }
+
+  // ---- RD trajectory (2016/2020/2022) with 0.30-0.60 sweet spot ----
+  let rdTraj = "";
+  if(ls.rdSeries){
+    const pts=ls.rdSeries.filter(p=>p.rd!=null);
+    if(pts.length>=2){
+      const W=300,H=130,ml=34,mr=54,mt=12,mb=22,x0=ml,x1=W-mr,y0=mt,y1=H-mb;
+      const yMax=Math.max(0.9,...pts.map(p=>p.rd))*1.05, yr0=2016,yr1=2022;
+      const sx=yr=>x0+(yr-yr0)/(yr1-yr0)*(x1-x0), sy=rd=>y1-(rd/yMax)*(y1-y0);
+      const line=pts.map(p=>`${sx(p.year).toFixed(1)},${sy(p.rd).toFixed(1)}`).join(" ");
+      const latest=pts[pts.length-1].rd, pos=latest<0.30?"below":latest>0.60?"above":"within";
+      const msg=pos==="within"?`Latest RD ${latest.toFixed(2)} sits in the 0.30–0.60 sweet spot (near-optimal growth, low density-driven mortality).`:pos==="below"?`Latest RD ${latest.toFixed(2)} is below the 0.30–0.60 sweet spot (understocked; growing space available).`:`Latest RD ${latest.toFixed(2)} is above the 0.30–0.60 sweet spot (dense; a thinning candidate to lower mortality and risk).`;
+      const grid=[0,0.3,0.6,0.9].filter(t=>t<=yMax).map(t=>`<text x="${x0-4}" y="${(sy(t)+3).toFixed(1)}" font-size="9" text-anchor="end" fill="#6a7c84">${t.toFixed(1)}</text>`).join("");
+      const dots=pts.map(p=>`<circle cx="${sx(p.year).toFixed(1)}" cy="${sy(p.rd).toFixed(1)}" r="3.2" fill="#1d7e0f"/><text x="${sx(p.year).toFixed(1)}" y="${y1+13}" font-size="9.5" text-anchor="middle" fill="#6a7c84">${p.year}</text><text x="${sx(p.year).toFixed(1)}" y="${(sy(p.rd)-6).toFixed(1)}" font-size="9" text-anchor="middle" fill="#1a3d28">${p.rd.toFixed(2)}</text>`).join("");
+      rdTraj=`<h2>Relative density over time <span class="sub">2016 → 2022 · TreeMap-basis overlays</span></h2>
+        <svg viewBox="0 0 ${W} ${H}" style="width:340px;display:block;margin:0 auto">
+        <rect x="${x0}" y="${sy(0.60).toFixed(1)}" width="${x1-x0}" height="${(sy(0.30)-sy(0.60)).toFixed(1)}" fill="#3fb68b" opacity="0.13"/>
+        <text x="${x1+3}" y="${(sy(0.45)+3).toFixed(1)}" font-size="9" fill="#1a7a4d">sweet spot</text>
+        <text x="${x1+3}" y="${(sy(0.45)+13).toFixed(1)}" font-size="8.5" fill="#6a7c84">0.30–0.60</text>
+        <line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="#d8e0e3"/><line x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}" stroke="#d8e0e3"/>
+        ${grid}<polyline points="${line}" fill="none" stroke="#1d7e0f" stroke-width="2"/>${dots}</svg>
+        <p class="note" style="text-align:center;margin:2px 0 0">${msg}</p>`;
+    }
   }
 
   // ---- identity ----

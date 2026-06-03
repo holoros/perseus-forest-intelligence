@@ -23,24 +23,28 @@ const FT_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d"]
 const BAND_GOOD_HIGH = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
 const BAND_GOOD_LOW  = { "Low":"#3fb68b", "Moderate":"#e6ab02", "High":"#d9534f" };
 
-// Six outcome axes. `pctl` = displayed as ecoregion percentile; biodiversity is
-// an absolute stand-diversity index.
+// Six outcome axes (all "high = good"). `pctl` = displayed as ecoregion
+// percentile; biodiversity is an absolute stand-diversity index. Each index[k]
+// is an object { v, lo, hi, ref }: v = AOI percentile, lo/hi = interquartile
+// spread (error bar), ref = encompassing-state mean percentile (comparison).
 const AXES6 = [
   ["carbon","Carbon",true], ["value","Timber value",true],
-  ["productivity","Productivity",true], ["risk","Risk",true],
+  ["productivity","Productivity",true], ["resilience","Resilience",true],
   ["habitat","Habitat",true], ["biodiversity","Biodiversity",false],
 ];
 const IDX_NAMES = { carbon:"carbon", value:"timber value", productivity:"productivity",
-  habitat:"habitat", biodiversity:"biodiversity", risk:"disturbance risk" };
+  habitat:"habitat", biodiversity:"biodiversity", resilience:"resilience" };
+const axV = x => (x && typeof x==="object") ? x.v : x;   // tolerate number or {v,...}
 
 // Plain-language read: highest/lowest-ranked outcome within the ecoregion.
 function radarNarrative(index){
   if(!index) return null;
-  const good = Object.entries(index).filter(([k,v])=>k!=="risk" && k!=="biodiversity" && v!=null).sort((a,b)=>b[1]-a[1]);
+  const good = Object.entries(index).filter(([k,v])=>k!=="biodiversity" && axV(v)!=null)
+    .map(([k,v])=>[k,axV(v)]).sort((a,b)=>b[1]-a[1]);
   if(good.length < 2) return null;
   const hi = good[0], lo = good[good.length-1];
-  const risk = index.risk!=null ? ` Disturbance risk is around the ${Math.round(index.risk*100)}th percentile.` : "";
-  return `Within its ecoregion this area ranks highest on ${IDX_NAMES[hi[0]]} (${Math.round(hi[1]*100)}th pct) and lowest on ${IDX_NAMES[lo[0]]} (${Math.round(lo[1]*100)}th pct).${risk}`;
+  const res = index.resilience!=null ? ` Resilience to disturbance sits around the ${Math.round(axV(index.resilience)*100)}th percentile.` : "";
+  return `Within its ecoregion this area ranks highest on ${IDX_NAMES[hi[0]]} (${Math.round(hi[1]*100)}th pct) and lowest on ${IDX_NAMES[lo[0]]} (${Math.round(lo[1]*100)}th pct).${res}`;
 }
 
 // Interactive 6-axis radar. Each percentile axis = this area's rank within its
@@ -51,82 +55,185 @@ function ConditionRadar({ index }){
   const N = AXES6.length, C = 110, R = 74;
   const ang = i => (-90 + i*360/N) * Math.PI/180;
   const pt = (i, r) => [C + r*Math.cos(ang(i)), C + r*Math.sin(ang(i))];
-  const val = i => { const v = index[AXES6[i][0]]; return v==null ? 0 : Math.max(0,Math.min(1,v)); };
+  const clamp = v => v==null ? null : Math.max(0,Math.min(1,v));
+  const ax = i => index[AXES6[i][0]];
+  const val = i => { const v = clamp(axV(ax(i))); return v==null ? 0 : v; };
+  const hasRef = AXES6.some((_,i)=>{ const a=ax(i); return a && a.ref!=null; });
   const rings = [0.25,0.5,0.75,1].map((f,k) =>
     <circle key={k} cx={C} cy={C} r={R*f} fill="none"
       stroke={f===0.5?"#6a8190":"var(--line)"} strokeWidth={f===0.5?1:0.6}
       strokeDasharray={f===0.5?"3 3":"0"}/>);
   const spokes = AXES6.map((_,i) => { const [x,y]=pt(i,R);
     return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="var(--line)" strokeWidth="0.6"/>; });
+  // comparison polygon (encompassing state mean within the ecoregion)
+  const refPoly = hasRef ? AXES6.map((_,i) => { const a=ax(i); const r=a&&a.ref!=null?clamp(a.ref):0;
+    return pt(i, R*r).map(n=>n.toFixed(1)).join(","); }).join(" ") : null;
   const poly = AXES6.map((_,i) => pt(i, R*val(i)).map(n=>n.toFixed(1)).join(",")).join(" ");
+  // error bars: radial segment from lo to hi percentile on each spoke
+  const ebars = AXES6.map((_,i) => { const a=ax(i);
+    if(!a || a.lo==null || a.hi==null || a.lo===a.hi) return null;
+    const [x1,y1]=pt(i, R*clamp(a.lo)), [x2,y2]=pt(i, R*clamp(a.hi));
+    const cap=2.4, nx=Math.cos(ang(i)+Math.PI/2)*cap, ny=Math.sin(ang(i)+Math.PI/2)*cap;
+    return <g key={"e"+i} stroke="#bfe6cf" strokeWidth="1.1" opacity="0.8">
+      <line x1={x1} y1={y1} x2={x2} y2={y2}/>
+      <line x1={x1-nx} y1={y1-ny} x2={x1+nx} y2={y1+ny}/>
+      <line x1={x2-nx} y1={y2-ny} x2={x2+nx} y2={y2+ny}/></g>; });
   const labels = AXES6.map(([k,lab],i) => { const [x,y]=pt(i, R+15);
     const anc = Math.abs(x-C)<5 ? "middle" : (x>C ? "start" : "end");
     return <text key={k} x={x} y={y+3} textAnchor={anc} fontSize="9.5"
-      fill={index[k]!=null?"var(--ink)":"#5e7180"}>{lab}</text>; });
+      fill={axV(ax(i))!=null?"var(--ink)":"#5e7180"}>{lab}</text>; });
   const dots = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
     return <circle key={i} cx={x} cy={y} r={hi===i?4.2:3} fill="#3fb68b" stroke="#0b1015" strokeWidth="0.5"/>; });
   const hits = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
     return <circle key={"h"+i} cx={x} cy={y} r="11" fill="transparent" style={{cursor:"pointer"}}
       onMouseEnter={()=>setHi(i)} onMouseLeave={()=>setHi(null)}/>; });
   let tip = null;
-  if(hi!=null){ const [k,lab,pctl]=AXES6[hi]; const v=index[k]; const [x,y]=pt(hi, R*val(hi));
+  if(hi!=null){ const [k,lab,pctl]=AXES6[hi]; const a=ax(hi); const v=axV(a); const [x,y]=pt(hi, R*val(hi));
+    const band = (a&&a.lo!=null&&a.hi!=null&&a.lo!==a.hi) ? ` (${Math.round(a.lo*100)}–${Math.round(a.hi*100)})` : "";
+    const refTxt = (a&&a.ref!=null) ? ` · state ${Math.round(a.ref*100)}th` : "";
     const txt = v==null ? `${lab}: n/a`
-      : pctl ? `${lab}: ${Math.round(v*100)}th pct of ecoregion`
+      : pctl ? `${lab}: ${Math.round(v*100)}th pct${band}${refTxt}`
              : `${lab}: ${Math.round(v*100)}% (stand index)`;
-    const w = txt.length*5 + 10, tx = Math.max(2, Math.min(220-w, x-w/2));
+    const w = txt.length*4.7 + 10, tx = Math.max(2, Math.min(220-w, x-w/2));
     tip = <g style={{pointerEvents:"none"}}>
       <rect x={tx} y={y-22} width={w} height="15" rx="3" fill="rgba(15,20,25,0.94)" stroke="var(--line)"/>
       <text x={tx+5} y={y-11} fontSize="9" fill="#e8eef2">{txt}</text></g>;
   }
   return (
-    <svg viewBox="0 0 220 234" style={{width:"100%",maxWidth:290,display:"block",margin:"2px auto 0"}}>
+    <svg viewBox="0 0 220 240" style={{width:"100%",maxWidth:290,display:"block",margin:"2px auto 0"}}>
       {rings}{spokes}
+      {refPoly && <polygon points={refPoly} fill="none" stroke="#9aa7b0" strokeWidth="1.1" strokeDasharray="4 3" opacity="0.85"/>}
       <polygon points={poly} fill="#3fb68b" fillOpacity="0.20" stroke="#3fb68b" strokeWidth="1.8"/>
-      {dots}{labels}{hits}{tip}
+      {ebars}{dots}{labels}{hits}{tip}
+      {hasRef && <g>
+        <line x1={C-46} y1={236} x2={C-34} y2={236} stroke="#3fb68b" strokeWidth="1.8"/>
+        <text x={C-31} y={239} fontSize="8" fill="#5e7180">this area</text>
+        <line x1={C+8} y1={236} x2={C+20} y2={236} stroke="#9aa7b0" strokeWidth="1.1" strokeDasharray="4 3"/>
+        <text x={C+23} y={239} fontSize="8" fill="#5e7180">state avg</text></g>}
     </svg>
   );
 }
 
-// Priorities dial. The user weights what they care about (carbon, income,
-// habitat, resilience, ...) and the area's outcomes are combined into one
-// region-relative "priority fit" score. Risk is inverted (low risk = good).
+// Observed RD trajectory (2016/2020/2022 TreeMap-basis). Shades the 0.30–0.60
+// management sweet spot (max growth, min mortality/risk) and flags where the
+// area's latest RD sits relative to it.
+const RD_LO = 0.30, RD_HI = 0.60;
+function RDTrajectory({ series }){
+  if(!series || series.length < 2) return null;
+  const pts = series.filter(p=>p.rd!=null);
+  if(pts.length < 2) return null;
+  const W=260, H=120, ml=30, mr=46, mt=10, mb=20;
+  const x0=ml, x1=W-mr, y0=mt, y1=H-mb;
+  const yMax = Math.max(0.9, ...pts.map(p=>p.rd))*1.05;
+  const yr0=2016, yr1=2022;
+  const sx = yr => x0 + (yr-yr0)/(yr1-yr0)*(x1-x0);
+  const sy = rd => y1 - (rd/yMax)*(y1-y0);
+  const line = pts.map(p=>`${sx(p.year).toFixed(1)},${sy(p.rd).toFixed(1)}`).join(" ");
+  const latest = pts[pts.length-1].rd;
+  const inBand = latest>=RD_LO && latest<=RD_HI;
+  const pos = latest<RD_LO ? "below" : latest>RD_HI ? "above" : "within";
+  const msg = pos==="within"
+    ? `Latest RD ${latest.toFixed(2)} sits in the 0.30–0.60 sweet spot — near-optimal growth with low density-driven mortality.`
+    : pos==="below"
+    ? `Latest RD ${latest.toFixed(2)} is below the 0.30–0.60 sweet spot — understocked; growing space is available.`
+    : `Latest RD ${latest.toFixed(2)} is above the 0.30–0.60 sweet spot — dense; competition raises mortality and disturbance risk (a thinning candidate).`;
+  return (
+    <div style={{margin:"4px 6px 6px"}}>
+      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Relative density over time · 2016 → 2022</div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:340,display:"block",margin:"0 auto"}}>
+        <rect x={x0} y={sy(RD_HI)} width={x1-x0} height={sy(RD_LO)-sy(RD_HI)} fill="#3fb68b" opacity="0.13"/>
+        <line x1={x0} y1={sy(RD_HI)} x2={x1} y2={sy(RD_HI)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
+        <line x1={x0} y1={sy(RD_LO)} x2={x1} y2={sy(RD_LO)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
+        <text x={x1+3} y={sy(0.45)+3} fontSize="8" fill="#3fb68b">sweet spot</text>
+        <text x={x1+3} y={sy(0.45)+13} fontSize="7.5" fill="#5e7180">0.30–0.60</text>
+        <line x1={x0} y1={y0} x2={x0} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
+        <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
+        {[0,0.3,0.6,0.9].filter(t=>t<=yMax).map((t,k)=>(
+          <text key={k} x={x0-4} y={sy(t)+3} fontSize="8" textAnchor="end" fill="#5e7180">{t.toFixed(1)}</text>
+        ))}
+        <polyline points={line} fill="none" stroke="#1d7e0f" strokeWidth="1.8"/>
+        {pts.map((p,k)=>(<g key={k}>
+          <circle cx={sx(p.year)} cy={sy(p.rd)} r="3.2" fill={inBand&&k===pts.length-1?"#3fb68b":"#1d7e0f"} stroke="#0b1015" strokeWidth="0.5"/>
+          <text x={sx(p.year)} y={y1+12} fontSize="8.5" textAnchor="middle" fill="#5e7180">{p.year}</text>
+          <text x={sx(p.year)} y={sy(p.rd)-6} fontSize="8" textAnchor="middle" fill="var(--ink)">{p.rd.toFixed(2)}</text>
+        </g>))}
+      </svg>
+      <div className="note" style={{margin:"2px 0 0"}}>{msg} <i style={{opacity:.7,fontStyle:"normal"}}>RD from TreeMap-basis overlays; the band reflects density-management guidance.</i></div>
+    </div>
+  );
+}
+
+// Priorities dial. The user weights what they care about and the area's outcomes
+// combine into one region-relative "priority-fit" score, a ranked contribution
+// list, and a rule-based management leaning. All axes already read "high = good"
+// (resilience is the inverted-risk axis), so no per-axis inversion is needed.
 // This is the user-prioritized dial of the multi-objective thesis: the same
-// area scores differently depending on what the landowner values.
+// area scores differently — and earns a different recommendation — depending on
+// what the landowner values.
 const PRIO = [
-  ["carbon","Carbon",false], ["value","Timber income",false],
-  ["productivity","Productivity",false], ["habitat","Habitat",false],
-  ["biodiversity","Biodiversity",false], ["risk","Resilience",true],
+  ["carbon","Carbon"], ["value","Timber income"], ["productivity","Productivity"],
+  ["habitat","Habitat"], ["biodiversity","Biodiversity"], ["resilience","Resilience"],
 ];
-// goodness 0..1 for each axis: percentile as-is, but risk is inverted so that
-// "resilience" (low disturbance risk) counts as good.
-const axisGood = (index, k, invert) => {
-  const v = index[k]; if(v==null) return null;
-  return invert ? 1 - v : v;
-};
 const fitBand = f => f==null?null : f<0.34?"Low":f<0.67?"Moderate":"High";
 const FIT_COL = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
+const ord = n => { const s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
+
+// Rule-based pathway recommendation from the weighted profile. Groups outcomes
+// into a production lean (income + productivity) and a conservation lean (carbon
+// + habitat + biodiversity), modulated by how the area actually ranks and how
+// much weight resilience carries.
+function recommendPathway(rows){
+  // rows: [{k,lab,g,wt}] with wt>0 only
+  const tot = rows.reduce((a,r)=>a+r.wt,0) || 1;
+  const wOf = ks => rows.filter(r=>ks.includes(r.k)).reduce((a,r)=>a+r.wt,0)/tot;
+  const gOf = k => { const r=rows.find(x=>x.k===k); return r?r.g:null; };
+  const prod = wOf(["value","productivity"]);
+  const cons = wOf(["carbon","habitat","biodiversity"]);
+  const resW = wOf(["resilience"]);
+  const resG = gOf("resilience");
+  let lean, why;
+  if(prod > cons + 0.12){
+    const strong = (gOf("value")??0) >= 0.5 || (gOf("productivity")??0) >= 0.5;
+    lean = "Actively managed";
+    why = strong
+      ? "your weights favor income and productivity, and this area ranks well on them — it can support a managed timber rotation."
+      : "your weights favor income and productivity, but this area ranks low on them for its region — returns may be modest; weigh against sites that rank higher.";
+  } else if(cons > prod + 0.12){
+    lean = "Reserve / light-touch";
+    why = "your weights favor carbon, habitat, and biodiversity — a reserve or light-touch regime preserves standing stocks and structure.";
+  } else {
+    lean = "Climate-smart (balanced)";
+    why = "you weight production and conservation comparably — a climate-smart regime (partial harvest, retention, longer rotations) balances income against carbon and habitat.";
+  }
+  // Resilience override: if resilience matters and the area is fragile, fold in
+  // risk-reduction regardless of the production/conservation balance.
+  if(resW >= 0.18 && resG!=null && resG < 0.4){
+    why += " Because resilience is a priority and this area ranks low on it, add risk-reduction treatments (thinning to the 0.30–0.60 RD sweet spot, fuels work).";
+  }
+  return { lean, why };
+}
 
 function PriorityDial({ index }){
   const init = {}; PRIO.forEach(([k])=>{ init[k]=1; });
   const [w, setW] = useState(init);
   if(!index) return null;
-  const avail = PRIO.filter(([k]) => index[k]!=null);
+  const avail = PRIO.filter(([k]) => axV(index[k])!=null);
   if(avail.length < 2) return null;
-  let num=0, den=0, contrib=[];
-  for(const [k,lab,inv] of avail){
-    const g = axisGood(index, k, inv); if(g==null) continue;
+  let num=0, den=0; const rows=[];
+  for(const [k,lab] of avail){
+    const g = axV(index[k]); if(g==null) continue;
     const wt = w[k]; num += g*wt; den += wt;
-    contrib.push([lab, g, wt]);
+    rows.push({ k, lab, g, wt });
   }
   const fit = den>0 ? num/den : null;
   const band = fitBand(fit);
-  // strongest / weakest weighted matches (only among axes the user weights > 0)
-  const weighted = contrib.filter(c=>c[2]>0).slice().sort((a,b)=>b[1]-a[1]);
-  const best = weighted[0], worst = weighted[weighted.length-1];
+  const active = rows.filter(r=>r.wt>0).slice().sort((a,b)=> (b.g*b.wt)-(a.g*a.wt));
+  const rec = den>0 ? recommendPathway(rows.filter(r=>r.wt>0)) : null;
   const setk = (k,val) => setW(p=>({...p,[k]:val}));
   return (
     <div style={{margin:"4px 6px 6px"}}>
       <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>What do you value? · priorities</div>
+      <div className="note" style={{margin:"0 0 3px"}}>Slide what matters; the fit, ranking, and recommendation update live.</div>
       <div style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:"3px 8px",alignItems:"center"}}>
         {avail.map(([k,lab]) => (
           <React.Fragment key={k}>
@@ -146,15 +253,25 @@ function PriorityDial({ index }){
               style={{width:`${fit*100}%`, background: FIT_COL[band] || "#888"}}/></span>
             <span className="aoi-bar-pct" style={{color:FIT_COL[band]}}>{Math.round(fit*100)}th</span>
           </div>
-          {best && worst && (
-            <div className="note" style={{margin:"2px 0 0"}}>
-              For your priorities this area scores around the {Math.round(fit*100)}th percentile of its ecoregion —
-              strongest match: <b style={{color:"var(--ink)"}}>{best[0]}</b>, weakest: <b style={{color:"var(--ink)"}}>{worst[0]}</b>.
+          {active.length>0 && (
+            <div style={{display:"flex",flexWrap:"wrap",gap:"3px 5px",margin:"4px 0 2px"}}>
+              {active.map((r,i)=>(
+                <span key={r.k} style={{fontSize:10.5,padding:"1px 6px",borderRadius:9,
+                  background:i===0?"rgba(63,182,139,0.18)":"rgba(120,140,150,0.13)",
+                  color:i===0?"#bfe6cf":"#9fb0ba",border:"1px solid var(--line)"}}>
+                  {r.lab} {ord(Math.round(r.g*100))}
+                </span>
+              ))}
+            </div>
+          )}
+          {rec && (
+            <div className="note" style={{margin:"3px 0 0"}}>
+              For your priorities, lean <b style={{color:"var(--ink)"}}>{rec.lean}</b> — {rec.why}
             </div>
           )}
         </div>
       )}
-      {den===0 && <div className="note" style={{margin:"2px 0 0"}}>Set a weight above to see your priority fit.</div>}
+      {den===0 && <div className="note" style={{margin:"2px 0 0"}}>Set a weight above to see your priority fit and recommendation.</div>}
     </div>
   );
 }
@@ -267,11 +384,12 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
               <div style={{margin:"2px 6px 4px",fontSize:12.5,color:"var(--ink)"}}>{radarNarrative(landscape.index)}</div>
             )}
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
-              Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Hover a point for the value. Biodiversity is a stand diversity index.
+              Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Whiskers show the within-area spread; the grey dashed polygon is the state average. Hover a point for values. Resilience = low disturbance risk; biodiversity is a stand diversity index.
             </div>
             <PriorityDial index={landscape.index}/>
           </div>
         )}
+        {landscape.rdSeries && <RDTrajectory series={landscape.rdSeries}/>}
         <div className="aoi-sub">Surrounding landscape · sampled from CONUS layers</div>
         {landscape.forestFrac != null && (
           <div className="aoi-grid">
