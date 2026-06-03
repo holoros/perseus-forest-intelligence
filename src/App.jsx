@@ -30,7 +30,9 @@ const LANDIS_LAYERS = [
 // rasters (full 48-state coverage); the first layer is the bin default.
 const MAP_BINS = [
   { id:"structure", label:"Forest structure",
-    layers:[["fortype_2022","Forest type"],["rd_treemap","Relative density"],["sdimax_treemap","SDI max (Reineke)"],
+    layers:[["fortype_2022","Forest type"],["canopy_height","Canopy height (m)"],
+            ["rd_treemap","Relative density"],["sdimax_treemap","SDI max (Reineke)"],
+            ["gedi_agbd","GEDI biomass (Mg/ha)"],["asym_agb","Asymptotic AGB (max)"],
             ["climate_stress","Climate Site Productivity Index (CSPI)"],["csi","Climate Site Index (CSI)"],
             ["csi_2030","CSI · 2030"],["csi_2060","CSI · 2060"],["csi_2090","CSI · 2090"],
             ["bgi","Bioclimatic Growth Index (BGI)"]] },
@@ -39,7 +41,7 @@ const MAP_BINS = [
   { id:"products", label:"Stumpage / products",
     layers:[["standing_value","Standing value ($/ac)"],["standing_value_cv","Value uncertainty ($/ac s.d.)"],
             ["species_value_index","Species value index (SVI)"],
-            ["sawtimber_share","Sawtimber share (%)"],["expected_removal","Expected removal"],
+            ["sawtimber_share","Sawtimber share (%)"],
             ["hybrid_agc2022","AG carbon 2022 (Mg C/ha)"],["hybrid_dagc100","100-yr AG carbon change"]] },
   { id:"risk", label:"Future risk",
     layers:[["p_disturbance_2022","P(disturbance) · 2022"],
@@ -49,7 +51,7 @@ const MAP_BINS = [
             ["hcs_v4_intensity_clearcut","Clearcut intensity (v4, 2024)"],
             ["hcs_v4_class_partial","Silvicultural class · partial (v4)"],
             ["value_at_risk","Value at risk of removal"],["volume_removed","Volume removed (annual)"],
-            ["lcms_2022","Disturbance cause (LCMS)"],["gfc_lossyear","Forest loss year (Hansen)"]] },
+            ["gfc_lossyear","Forest loss year (Hansen)"]] },
 ];
 const binForLayer = (layer) => (MAP_BINS.find(b => b.layers.some(([k])=>k===layer)) || {}).id;
 
@@ -266,6 +268,27 @@ const CONUS_LEGENDS = {
     ramp: ["#000004","#51127c","#b73779","#fc8961","#fcfdbf"],
     lo: "0", mid: "1.6", hi: "high",
     note: "merch. volume × (P(partial)·intensity_partial + P(stand-repl)·intensity_clearcut), native 30 m. conus_hcs v4, TreeMap2022.",
+  },
+  canopy_height: {
+    title: "Canopy height (m)",
+    type: "ramp",
+    ramp: ["#ffffe5","#d9f0a3","#78c679","#238443","#004529"],
+    lo: "0", mid: "20", hi: "40+",
+    note: "Modeled forest canopy height (TreeMap-derived).",
+  },
+  gedi_agbd: {
+    title: "Above-ground biomass density (Mg/ha)",
+    type: "ramp",
+    ramp: ["#f7fcf5","#c7e9c0","#74c476","#31a354","#006d2c"],
+    lo: "0", mid: "150", hi: "300+",
+    note: "GEDI L4B above-ground biomass density.",
+  },
+  asym_agb: {
+    title: "Asymptotic AGB (max attainable)",
+    type: "ramp",
+    ramp: ["#fff7fb","#d0d1e6","#67a9cf","#02818a","#014636"],
+    lo: "low", mid: "mid", hi: "high",
+    note: "Modeled maximum attainable above-ground biomass (growth-model asymptote).",
   },
 };
 
