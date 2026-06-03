@@ -32,6 +32,10 @@ header.top .state-pick:hover{border-color:var(--accent)}
 .map-ctrl select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
   border-radius:5px;padding:3px 6px;font-size:11.5px}
 .map-ctrl input[type=range]{accent-color:var(--accent)}
+.mc-locate{background:var(--accent);color:#0b1015;border:none;border-radius:6px;
+  padding:3px 9px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+.mc-locate:hover:not(:disabled){filter:brightness(1.1)}
+.mc-locate:disabled{opacity:.6;cursor:default}
 .legend{position:absolute;bottom:12px;left:12px;z-index:2;font-size:11px;color:var(--mut);
   background:rgba(23,32,41,.9);padding:8px 10px;border:1px solid var(--line);border-radius:8px;line-height:1.7}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:middle}

@@ -701,6 +701,34 @@ export default function App(){
     setInspectInfo(null);
   };
 
+  // "Forest near me" — locate the user (IP first, browser geolocation fallback)
+  // and open the local forest analysis for their area.
+  const [locating, setLocating] = useState(false);
+  const goToLatLon = async (lon, lat) => {
+    if (!isFinite(lon) || !isFinite(lat)) { alert("Couldn't determine your location."); return; }
+    if (lon < -125 || lon > -66 || lat < 24 || lat > 50) {
+      alert("You appear to be outside the CONUS coverage area.");
+      return;
+    }
+    const sf = geoData && findFeature(geoData.features, lon, lat);
+    if (sf && sf.properties && sf.properties.state) setSel(sf.properties.state);
+    await summarizeArea(lon, lat, aoiRadiusKm);
+  };
+  const locateMe = async () => {
+    setLocating(true);
+    try {
+      const r = await fetch("https://ipapi.co/json/");
+      const d = await r.json();
+      await goToLatLon(+d.longitude, +d.latitude);
+    } catch (e) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          p => goToLatLon(p.coords.longitude, p.coords.latitude),
+          () => alert("Couldn't determine your location."));
+      } else alert("Couldn't determine your location.");
+    } finally { setLocating(false); }
+  };
+
   return (
     <div className="app">
       <header className="top">
@@ -715,7 +743,7 @@ export default function App(){
             })}
           </select>)}
         <div className="brandbar" title="PERSEUS · Center for Advanced Forestry Systems · Center for Research on Sustainable Forests">
-          <a href="https://perseus.uga.edu/" target="_blank" rel="noopener noreferrer" title="PERSEUS project site">
+          <a href="https://ag.purdue.edu/digital-forestry/projects/perseus/index.html" target="_blank" rel="noopener noreferrer" title="PERSEUS project site">
             <img src={`${BASE}logos/perseus.png`} alt="PERSEUS"/></a>
           <a href="https://cafsresearch.org" target="_blank" rel="noopener noreferrer" title="Center for Advanced Forestry Systems">
             <img src={`${BASE}logos/cafs.png`} alt="CAFS"/></a>
@@ -796,6 +824,10 @@ export default function App(){
               AOI ↑<input type="file" accept=".zip,.json,.geojson" style={{display:"none"}}
                 onChange={e=>handleAoiFile(e.target.files[0])}/>
             </label>
+            <button className="mc-locate" onClick={locateMe} disabled={locating}
+              title="Find the forest around your approximate location and open the local analysis">
+              {locating ? "locating…" : "◎ Forest near me"}
+            </button>
             {mapMode === "carbon" && timeline && (<>
               <select value={mapScenario} onChange={e=>setMapScenario(e.target.value)} title="Scenario">
                 <option value="harvest_baseline">BAU (baseline harvest)</option>
