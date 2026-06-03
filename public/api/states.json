@@ -249,10 +249,10 @@
   ]
  },
  "US": {
-  "engines": 1,
-  "metrics": 5,
-  "rows": 55,
-  "name": "United States",
+  "engines": 5,
+  "metrics": 11,
+  "rows": 1336,
+  "name": "United States (CONUS aggregate)",
   "centroid": [
    -98.6,
    39.8
@@ -260,10 +260,16 @@
   "has_series": true,
   "has_tier_b": false,
   "series_metrics": [
+   "agb_dry",
+   "agc_live_total",
    "animal_observed_pct",
    "disease_observed_pct",
    "fire_observed_pct",
+   "harvest_c_yr",
    "insect_observed_pct",
+   "merch_bio_dry",
+   "merch_vol_mcf",
+   "vol_stem",
    "weather_observed_pct"
   ]
  },
