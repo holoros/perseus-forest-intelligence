@@ -105,6 +105,20 @@ loses little). CONUS managed (harvest) at 2&times; stress: &minus;30% (disturban
 only &minus;4% / &minus;18% given its low disturbance). This replaces the earlier
 reserve-borrowed fractional approximation.</div>
 
+<h2>5. Data-driven disturbance from the CONUS rasters (v1.8)</h2>
+<p>Disturbance frequency and severity are now sampled <b>per FIA plot</b> from the v5
+CONUS disturbance rasters &mdash; the same <code>p_disturbance</code> /
+<code>expected_severity</code> / <code>p_type</code> layers the explorer shows as risk
+metrics &mdash; then calibrated so the CONUS-mean annual rate matches the FIA-observed
+0.0146/yr (spatial pattern from the raster, level from FIA). This links the risk maps to
+the decline scenarios and captures the real fat tail of high-disturbance Western
+fire-prone conifer (Ponderosa, Lodgepole, Western oak) that ecoregion-mean stratification
+washed out: the raster-driven reserve goes &minus;35% (2&times;) / &minus;60% (3&times;)
+vs the smoothed &minus;1% / &minus;21%. The in-loop stress is now offered on <b>all three</b>
+management regimes (harvest, intensive, conservation), each roughly &minus;50% (disturbance)
+and &minus;27% (mortality) at 2&times; vs its own baseline &mdash; 12 scenario buckets in all.
+Script: <code>ycx_raster_disturb_params.R</code> (terra point-sampling at plot coordinates).</p>
+
 <h2>Reproducibility</h2>
 <p>Scripts (in <code>scripts/yield_curve_engine/</code>): <code>ycx_ingrowth_gap.R</code>,
 <code>ycx_recal_cell.R</code>, <code>ycx_recal_capped_export.R</code>,

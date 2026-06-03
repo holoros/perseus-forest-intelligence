@@ -80,12 +80,8 @@ Mg<-build(UND)   # GROSS undisturbed kernel
 cat(sprintf("[scn] g_undist models: %d cell %d ft %d state\n",length(Mg$ce),length(Mg$ft),length(Mg$st)))
 
 ## disturbance params per ecoregion x ft (p_dist annual; type-weighted severity)
-dp<-do.call(rbind,lapply(split(INC,interaction(INC$prov,INC$ft,drop=TRUE)),function(x){if(nrow(x)<30)return(NULL)
-  ts<-prop.table(table(factor(x$dtype[x$disturbed==1],levels=names(SEV_TYPE))))
-  sev<-sum(ts*SEV_TYPE[names(ts)],na.rm=TRUE)
-  data.frame(prov=x$prov[1],ft=x$ft[1],p=mean(x$disturbed)/mean(x$remper),sev=ifelse(is.finite(sev)&sev>0,sev,0.25))}))
-dkey<-function(prov,ft)paste(prov,ft,sep="|"); DP<-setNames(dp$p,dkey(dp$prov,dp$ft)); DS<-setNames(dp$sev,dkey(dp$prov,dp$ft))
-p_nat<-mean(INC$disturbed)/mean(INC$remper)
+rp<-read.csv(file.path(dd,"disturb_params_raster.csv"),stringsAsFactors=FALSE); rp$key<-paste(rp$prov,rp$ft,sep="|")
+dkey<-function(prov,ft)paste(prov,ft,sep="|"); DP<-setNames(rp$p_dist_ann,rp$key); DS<-setNames(rp$sev,rp$key); p_nat<-mean(rp$p_dist_ann)
 getp<-function(prov,ft){v<-DP[dkey(prov,ft)]; if(is.na(v))p_nat else v}
 gets<-function(prov,ft){v<-DS[dkey(prov,ft)]; if(is.na(v))0.25 else v}
 
@@ -136,6 +132,10 @@ for(nm in names(ARMS)){x<-ct[,nm]; cat(sprintf("  %-18s %5.0f  %5.0f  %5.0f  %+5
 
 long<-do.call(rbind,lapply(names(ARMS),function(nm) data.frame(arm=nm,year=TM_BASE+offs,agc_Tg=round(ct[,nm],2),row.names=NULL)))
 write.csv(long,file.path(dd,"conus_disturb_arms_100yr.csv"),row.names=FALSE)
+## per-state x year x arm (for production wiring of the disturbance-exposed reserve)
+bystate<-do.call(rbind,lapply(names(ARMS),function(nm) do.call(rbind,lapply(states,function(st)
+  data.frame(state=st,arm=nm,year=TM_BASE+offs,agc_Tg=round(res[[nm]][st,],3),row.names=NULL)))))
+write.csv(bystate,file.path(dd,"disturb_arms_bystate_100yr.csv"),row.names=FALSE)
 nn<-data.frame(state=states,pix=npix,severe_netneg=netneg,pct_netneg=round(100*netneg/pmax(npix,1),1),
   recent_t100=round(res$recent[,length(offs)],1),severe_t100=round(res$severe[,length(offs)],1),row.names=NULL)
 write.csv(nn[order(-nn$pct_netneg),],file.path(dd,"disturb_state_netneg.csv"),row.names=FALSE)
