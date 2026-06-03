@@ -906,7 +906,7 @@ export default function App(){
                           inspectMode={inspectMode}
                           onInspect={handleInspect}
                           userLoc={userLoc}
-                          baseLayer={baseOn ? `${BASE}raster/conus_forest_nonforest.png?v=3` : null}
+                          baseLayer={baseOn && conusLayer === "none" ? `${BASE}raster/conus_forest_nonforest.png?v=3` : null}
                           baseBounds={baseBounds}
                           baseOpacity={0.82}
                           focusGeom={focusGeom}/>
