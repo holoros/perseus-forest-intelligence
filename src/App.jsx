@@ -1090,6 +1090,12 @@ export default function App(){
               onChange={e=>setManualLoc(e.target.value)}
               onKeyDown={e=>{ if(e.key==="Enter") goToManual(); }}
               title="Jump to coordinates: type a lat, lon (e.g. 45.2, -69.0) and press Enter"/>
+            <select value={aoiRadiusKm} title="Search radius for the area summary"
+              onChange={e=>{ const rk=+e.target.value; setAoiRadiusKm(rk);
+                if(aoi && aoi.centroid) summarizeArea(aoi.centroid[0], aoi.centroid[1], rk); }}>
+              <option value={5}>± 5 km</option><option value={10}>± 10 km</option>
+              <option value={25}>± 25 km</option><option value={50}>± 50 km</option>
+            </select>
             {mapMode === "carbon" && timeline && (<>
               <span className="ctrl-sep"/>
               <span className="ctrl-grp-lab">Scenario</span>

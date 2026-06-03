@@ -40,9 +40,16 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
     const vals=AX.map(([k])=>ls.index[k]==null?0:Math.max(0,Math.min(1,ls.index[k])));
     const poly=AX.map((_,i)=>pt(i,R*vals[i]).map(n=>n.toFixed(1)).join(",")).join(" ");
     const labels=AX.map(([k,lab],i)=>{const[x,y]=pt(i,R+14);return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="10" fill="#1a3d28">${esc(lab)}</text>`;}).join("");
+    const NM={structure:"forest structure",economic:"economic value",ecosystem:"ecosystem value",risk:"disturbance risk"};
+    const lvl=v=>v<0.34?"low":v<0.67?"moderate":"high";
+    const good=Object.entries(ls.index).filter(([k,v])=>k!=="risk"&&v!=null).sort((a,b)=>b[1]-a[1]);
+    let narr="";
+    if(good.length>=2){ const hi=good[0],lo=good[good.length-1];
+      const rk=ls.index.risk!=null?` Disturbance risk is ${lvl(ls.index.risk)}.`:"";
+      narr=`<p class="note" style="text-align:center;margin:2px 0 0">This area is strongest on ${NM[hi[0]]} (${lvl(hi[1])}) and weakest on ${NM[lo[0]]} (${lvl(lo[1])}).${rk}</p>`; }
     radar = `<h2>Condition index <span class="sub">0–1 per axis; outer = higher (Risk: outer = more vulnerable)</span></h2>
       <svg viewBox="0 0 220 232" style="width:260px;display:block;margin:2px auto">${rings}${spokes}
-      <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.22" stroke="#1a7a4d" stroke-width="2"/>${labels}</svg>`;
+      <polygon points="${poly}" fill="#3fb68b" fill-opacity="0.22" stroke="#1a7a4d" stroke-width="2"/>${labels}</svg>${narr}`;
   }
 
   // ---- identity ----

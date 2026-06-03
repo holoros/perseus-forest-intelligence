@@ -22,6 +22,19 @@ const FT_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d"]
 const BAND_GOOD_HIGH = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
 const BAND_GOOD_LOW  = { "Low":"#3fb68b", "Moderate":"#e6ab02", "High":"#d9534f" };
 
+// One- or two-sentence plain-language read of the condition index.
+const IDX_NAMES = { structure:"forest structure", economic:"economic value",
+  ecosystem:"ecosystem value", risk:"disturbance risk" };
+function radarNarrative(index){
+  if(!index) return null;
+  const lvl = v => v<0.34?"low":v<0.67?"moderate":"high";
+  const good = Object.entries(index).filter(([k,v])=>k!=="risk" && v!=null).sort((a,b)=>b[1]-a[1]);
+  if(good.length < 2) return null;
+  const hi = good[0], lo = good[good.length-1];
+  const risk = index.risk!=null ? ` Disturbance risk is ${lvl(index.risk)}.` : "";
+  return `This area is strongest on ${IDX_NAMES[hi[0]]} (${lvl(hi[1])}) and weakest on ${IDX_NAMES[lo[0]]} (${lvl(lo[1])}).${risk}`;
+}
+
 // Condition-index radar: 4 axes (structure, economic value, ecosystem value,
 // risk vulnerability), each 0..1. Outer = higher magnitude of that dimension.
 function ConditionRadar({ index }){
@@ -161,6 +174,9 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         {landscape.index && (
           <div>
             <ConditionRadar index={landscape.index}/>
+            {radarNarrative(landscape.index) && (
+              <div style={{margin:"2px 6px 4px",fontSize:12.5,color:"var(--ink)"}}>{radarNarrative(landscape.index)}</div>
+            )}
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
               Integrated condition across four dimensions (0–1). Outer = higher; for Risk, outer = more vulnerable.
             </div>
