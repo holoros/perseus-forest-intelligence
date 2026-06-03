@@ -4,7 +4,7 @@
 import { useRef, useState } from "react";
 
 export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
-                                      showBands, hiddenEngines, yMode,
+                                      showBands, showInvBand, hiddenEngines, yMode,
                                       overlayNode, overlayLabel,
                                       isolatedEngine, onIsolate }){
   const W=560,H=320,L=48,R=14,T=14,B=30;
@@ -83,6 +83,17 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const dn = bp.slice().reverse().map(p=> "L" + X(p[0]).toFixed(1) + " " + Y(p[2]).toFixed(1)).join(" ");
     return <path key={"b"+i} d={up+" "+dn+" Z"} fill={col} opacity="0.12" stroke="none"/>;
   }) : null;
+  const INV_MODELS=["yc_hybrid_v1","yc_treemap_spatial_v1"];
+  const invBand = (showInvBand ? (()=>{
+    const ser=visible.filter(s=>INV_MODELS.includes(s.model));
+    if(ser.length<2) return null;
+    const byYr={}; ser.forEach(s=>s.pts.forEach(p=>{(byYr[p[0]]=byYr[p[0]]||[]).push(p[1]);}));
+    const yrs=Object.keys(byYr).map(Number).filter(y=>byYr[y].length>=2).sort((a,b)=>a-b);
+    if(yrs.length<2) return null;
+    const up=yrs.map((y,k)=>(k?"L":"M")+X(y).toFixed(1)+" "+Y(Math.max(...byYr[y])).toFixed(1)).join(" ");
+    const dn=yrs.slice().reverse().map(y=>"L"+X(y).toFixed(1)+" "+Y(Math.min(...byYr[y])).toFixed(1)).join(" ");
+    return <path d={up+" "+dn+" Z"} fill="#caa15a" opacity="0.18" stroke="none"><title>Inventory-basis range: FIA-anchored (yc_hybrid) vs TreeMap pixel</title></path>;
+  })() : null);
   const drawLine = (s, i, dashed) => {
     const col = classCol[s.cls] || "#bbb";
     const d = s.pts.map((p,k)=> (k? "L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
@@ -165,7 +176,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
            style={{width:"100%",height:"auto",display:"block"}}
            onMouseMove={onMouseMove} onMouseLeave={()=> setHoverX(null)}>
-        {grid}{xticks}{bands}
+        {grid}{xticks}{invBand}{bands}
         {fiaRef!=null && fiaRef >= y0 && fiaRef <= y1 && <>
           <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="5 4" strokeWidth="1"/>
           <text x={L+4} y={Y(fiaRef)-4} fill="#8aa0b0" fontSize="10">FIA observed {fiaRef} Tg{fiaYear?` (${fiaYear})`:""}</text>

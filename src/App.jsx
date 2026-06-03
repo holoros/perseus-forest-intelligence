@@ -327,6 +327,7 @@ export default function App(){
   const [metric,setMetric] = useState("agc_live_total");
   const [bucket,setBucket] = useState("managed (harvest)");
   const [showBands,setShowBands] = useState(true);  // v0.63: default ON
+  const [showInvBand,setShowInvBand] = useState(false); // FIADB vs TreeMap inventory range
   const [mapReady,setMapReady] = useState(false);
   const [rasterOn,setRasterOn] = useState(false);
   const [rasterT,setRasterT] = useState(0);
@@ -640,6 +641,7 @@ export default function App(){
   const hasCarbon = metricsAvail.some(m=>CARBON.includes(m));
   const bucketsAvail = series && series[metric] ? Object.keys(series[metric]) : [];
   const hasBands = !!(node && node.some(s=> s.pts.some(p=> p.length>=4)));
+  const hasInvBand = !!(node && ["yc_hybrid_v1","yc_treemap_spatial_v1"].every(m=> node.some(s=> s.model===m)));
   const fiaRef = (metric==="agc_live_total" && fia[sel]) ? fia[sel].tg_agc : null;
   const mlabel = (mc)=> (meta && meta.metrics[mc]) ? meta.metrics[mc].label : mc;
   const allEngines = rawNode ? [...new Set(rawNode.map(s=>s.model))].sort() : [];
@@ -1168,6 +1170,9 @@ export default function App(){
               {hasBands && <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
                 <input type="checkbox" checked={showBands} onChange={e=>setShowBands(e.target.checked)}/> uncertainty
               </label>}
+              {hasInvBand && <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}} title="Shade the area between the FIA-anchored (yc_hybrid) and TreeMap pixel engines">
+                <input type="checkbox" checked={showInvBand} onChange={e=>setShowInvBand(e.target.checked)}/> inventory range
+              </label>}
               <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
                 <input type="checkbox" checked={compareOn} onChange={e=>setCompareOn(e.target.checked)}/> compare
               </label>
@@ -1194,6 +1199,7 @@ export default function App(){
               <GrowthChart node={node} fiaRef={fiaRef} fiaYear={fia[sel] && fia[sel].year}
                 unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} classCol={CLASS_COL}
                 showBands={showBands && hasBands}
+                showInvBand={showInvBand && hasInvBand}
                 hiddenEngines={hiddenEngines} yMode={yMode}
                 overlayNode={overlayNode} overlayLabel={cmpState}
                 isolatedEngine={isolatedEngine} onIsolate={setIsolatedEngine}/>
