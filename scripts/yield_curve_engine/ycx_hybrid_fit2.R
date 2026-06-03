@@ -1,15 +1,19 @@
 ## ycx_hybrid_fit2.R  (production hybrid fitter, multi-response)
 ##
-## Generalizes ycx_hybrid_fit.R to fit the hybrid form
-##   y = A*(1-exp(-k*age))^p * exp(-d*max(0, age - Astar))
-## for BOTH production responses that drive the live TreeMap engine:
-##   carbon_lbac  (AG carbon, lb/ac)  -> carbon trajectory + scenarios
-##   agb_tonac    (AG dry biomass, tons/ac) -> product-resolved biomass
+## Fits the hybrid form  y = A*(1-exp(-k*age))^p * exp(-d*max(0, age - Astar))
+## for the production responses:
+##   carbon_lbac      (AG carbon, lb/ac)
+##   agb_tonac        (AG dry biomass, tons/ac)
+##   voltot_cuftac    (gross total stem volume, cuft/ac)   -> vol_stem
+##   merchvol_cuftac  (net merch volume, cuft/ac)          -> merch_vol_mcf
+##   merchbio_tonac   (merch bole dry biomass, tons/ac)    -> merch_bio_dry
 ## per forest-type x ecoregion x owner cell (fallback cell -> ft -> state),
 ## Astar = empirical culmination age per grouping.
 ##
 ## Output: ycx_<ST>_hybrid_fits.csv (scope, cell_key, ft_group, prov_code,
-##         owner, response, A, k, p, d, Astar, n_plots)  -- now multi-response.
+##         owner, response, A, k, p, d, Astar, n_plots)  -- multi-response.
+## carbon_lbac / agb_tonac rows reproduce the prior file byte-for-byte (same data,
+## same seed); the three volume/merch responses are added.
 ##
 ## Usage: Rscript ycx_hybrid_fit2.R <ST> [out_dir] [fia_dir]
 
@@ -20,7 +24,7 @@ fia<-if(length(args)>=3) args[3] else file.path(Sys.getenv("HOME"),"fia_data")
 cfg<-file.path(out,"config")
 MIN_FIT<-30L; AGE_BIN<-10L; ASTAR_MIN<-30; ASTAR_MAX<-200
 SCRATCH_FIA<-"/fs/scratch/PUOM0008/crsfaaron/FIA"; set.seed(20260531)
-RESP<-c("carbon_lbac","agb_tonac")
+RESP<-c("carbon_lbac","agb_tonac","voltot_cuftac","merchvol_cuftac","merchbio_tonac")
 cat(sprintf("[hfit2] state=%s responses=%s\n",ST,paste(RESP,collapse=",")))
 
 resolve_tree<-function(ST,need){
@@ -32,15 +36,17 @@ resolve_tree<-function(ST,need){
 }
 mem<-read.csv(file.path(cfg,sprintf("ycx_membership_%s.csv",ST)),stringsAsFactors=FALSE)
 mem<-mem[order(mem$PLT_CN,-mem$INVYR),]; mem<-mem[!duplicated(mem$PLT_CN),]
-need<-c("PLT_CN","STATUSCD","CARBON_AG","DRYBIO_AG","TPA_UNADJ")
+need<-c("PLT_CN","STATUSCD","CARBON_AG","DRYBIO_AG","TPA_UNADJ","VOLTSGRS","VOLCFNET","DRYBIO_BOLE")
 tf<-resolve_tree(ST,need); hdr<-gsub('"','',strsplit(readLines(tf,n=1),",")[[1]]); idx<-match(need,hdr)
 slim<-file.path(out,sprintf(".tmp_hfit2_%s.csv",ST))
 system(sprintf("cut -d, -f%s '%s' > '%s'",paste(idx,collapse=","),tf,slim))
 tr<-read.csv(slim,stringsAsFactors=FALSE); unlink(slim)
-for(c0 in c("CARBON_AG","DRYBIO_AG","TPA_UNADJ")) tr[[c0]]<-suppressWarnings(as.numeric(tr[[c0]]))
+for(c0 in c("CARBON_AG","DRYBIO_AG","TPA_UNADJ","VOLTSGRS","VOLCFNET","DRYBIO_BOLE")) tr[[c0]]<-suppressWarnings(as.numeric(tr[[c0]]))
 tr$STATUSCD<-suppressWarnings(as.integer(tr$STATUSCD)); tr<-tr[!is.na(tr$STATUSCD)&tr$STATUSCD==1,]
-cb<-aggregate(cbind(carbon_lbac=CARBON_AG*TPA_UNADJ, agb_raw=DRYBIO_AG*TPA_UNADJ)~PLT_CN,tr,sum,na.rm=TRUE)
-cb$agb_tonac<-cb$agb_raw/2000
+cb<-aggregate(cbind(carbon_lbac=CARBON_AG*TPA_UNADJ, agb_raw=DRYBIO_AG*TPA_UNADJ,
+                    voltot_cuftac=VOLTSGRS*TPA_UNADJ, merchvol_cuftac=VOLCFNET*TPA_UNADJ,
+                    merchbio_raw=DRYBIO_BOLE*TPA_UNADJ)~PLT_CN,tr,sum,na.rm=TRUE)
+cb$agb_tonac<-cb$agb_raw/2000; cb$merchbio_tonac<-cb$merchbio_raw/2000
 pd<-merge(cb,mem[,c("PLT_CN","ft_group","prov_code","owner4","STDAGE","treatment")],by="PLT_CN")
 pd<-pd[pd$treatment=="untreated" & !is.na(pd$STDAGE)&pd$STDAGE>0,]
 pd$cell<-paste(pd$ft_group,pd$prov_code,pd$owner4,sep="|")
