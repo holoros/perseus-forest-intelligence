@@ -41,7 +41,7 @@ function downloadCsv(aoi){
   a.click(); URL.revokeObjectURL(a.href);
 }
 
-export default function AOIReport({ aoi, onClose }){
+export default function AOIReport({ aoi, stumpage, onClose }){
   if(!aoi) return null;
   const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats } = aoi;
   const unt = (curves && curves.untreated) || [];
@@ -112,7 +112,7 @@ export default function AOIReport({ aoi, onClose }){
         <div className="note" style={{margin:"2px 0 6px"}}>Plot-level attributes available for ME, GA, IN, MN, OR, WA AOIs.</div>
       )}
 
-      <StandOutlook aoi={aoi}/>
+      <StandOutlook aoi={aoi} stumpage={stumpage}/>
       <div className="note" style={{marginTop:6}}>
         Sources: FIA plots (attributes, ownership), yield_curves_by_l3 (projection),
         us_eco_l3_features (ecoregion). Area is geodesic (Albers equal-area).

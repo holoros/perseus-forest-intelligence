@@ -701,8 +701,8 @@ export default function App(){
     setInspectInfo(null);
   };
 
-  // "Forest near me" — locate the user (IP first, browser geolocation fallback)
-  // and open the local forest analysis for their area.
+  // "Forest near me" — locate the user precisely (browser geolocation first,
+  // IP-based fallback) and open the local forest analysis for their area.
   const [locating, setLocating] = useState(false);
   const goToLatLon = async (lon, lat) => {
     if (!isFinite(lon) || !isFinite(lat)) { alert("Couldn't determine your location."); return; }
@@ -714,19 +714,20 @@ export default function App(){
     if (sf && sf.properties && sf.properties.state) setSel(sf.properties.state);
     await summarizeArea(lon, lat, aoiRadiusKm);
   };
-  const locateMe = async () => {
+  const locateByIP = async () => {
+    try { const r = await fetch("https://ipapi.co/json/"); const d = await r.json();
+      await goToLatLon(+d.longitude, +d.latitude); }
+    catch (e) { alert("Couldn't determine your location."); }
+    finally { setLocating(false); }
+  };
+  const locateMe = () => {
     setLocating(true);
-    try {
-      const r = await fetch("https://ipapi.co/json/");
-      const d = await r.json();
-      await goToLatLon(+d.longitude, +d.latitude);
-    } catch (e) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          p => goToLatLon(p.coords.longitude, p.coords.latitude),
-          () => alert("Couldn't determine your location."));
-      } else alert("Couldn't determine your location.");
-    } finally { setLocating(false); }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        p => { goToLatLon(p.coords.longitude, p.coords.latitude).finally(() => setLocating(false)); },
+        () => { locateByIP(); },   // permission denied or failed -> IP fallback (city level)
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+    } else locateByIP();
   };
 
   return (
@@ -962,7 +963,7 @@ export default function App(){
             })}
           </div>
           <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>
-          {aoi && <AOIReport aoi={aoi} onClose={()=>setAoi(null)}/>}
+          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} onClose={()=>setAoi(null)}/>}
           {tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
             onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
           {tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}
