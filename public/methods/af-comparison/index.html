@@ -469,6 +469,44 @@ directionally comparable but operate on different scopes.
   <div class="takeaway">
     <strong>Takeaway:</strong> Both AF and PERSEUS agree MN is a strong sink. The two measure different scopes: AF reports cumulative net carbon balance of forest + forest products sector (including HWP transfers, in-use emissions, landfill emissions); PERSEUS reports total ecosystem C stock change in place. Converting AF's MN BAU cumulative -474 MMT CO₂e over 80 years across ~17 Mha forested area gives roughly -0.42 Mg C/ha/yr at the net-balance metric. PERSEUS's +40.8 Mg/ha over 50 years is approximately +0.82 Mg C/ha/yr at the ecosystem-stock metric. The factor of two between them is the HWP wedge: about half the ecosystem accumulation in PERSEUS is removed via harvest and eventually returned to the atmosphere through HWP decay in AF's accounting. <strong>This is exactly the refinement axis Aaron flagged:</strong> the difference between ecosystem stock and net carbon balance is HWP long term storage, which PERSEUS quantifies separately and AF folds into a single number.
   </div>
+
+  <div style="margin-top:18px;background:var(--muted-bg);border-radius:8px;padding:14px 16px;">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--mut);margin-bottom:6px;">First scenario sweep result · MN · 2026-06-03</div>
+    <div style="font-size:14px;line-height:1.55;color:#2a323a;margin-bottom:10px;">
+      A first end to end run of the cbm_conus scenario tooling (HCS phase 5 harvest probability + TREEMAP disturbance probability rasters → libcbm sit_events → libcbm 50 year trajectory) on MN under five scenarios. The reframing exposed here is important. PERSEUS BAU as published is a <em>no disturbance counterfactual</em>, not the realistic baseline. The apples to apples comparison to the AF MN BAU is PERSEUS HIST, where the historical disturbance schedule is replayed.
+    </div>
+    <figure style="margin:0 0 10px;">
+      <img src="fig_MN_scenarios_50yr.png" style="width:100%;max-width:780px;display:block;border-radius:4px;" alt="Five-scenario trajectory plot for Minnesota: BAU climbs from 204 to 245 Mg/ha; HIST drops to 201; RH to 212; RH_CC to 220; WARM_HIST to 200">
+      <figcaption style="font-size:12px;color:var(--mut);margin-top:6px;">
+        MN year-50 total ecosystem carbon density (Mg / ha) under five scenarios.
+        BAU = no disturbance counterfactual.
+        HIST = literature-calibrated historical disturbance schedule.
+        RH = harvest probability scaled by 0.7.
+        RH_CC = clearcut probability scaled by 0.5, partial harvest unchanged.
+        WARM_HIST = HIST plus 20% wildfire amplifier (LakeStates regional factor).
+      </figcaption>
+    </figure>
+    <table style="width:100%;font-size:13px;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#e5edf5;color:var(--af);">
+          <th style="text-align:left;padding:6px 8px;">Scenario</th>
+          <th style="text-align:right;padding:6px 8px;">y50 Mg/ha</th>
+          <th style="text-align:right;padding:6px 8px;">Δ vs BAU</th>
+          <th style="text-align:right;padding:6px 8px;">Δ vs HIST</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:5px 8px;">BAU</td><td style="text-align:right;padding:5px 8px;">244.9</td><td style="text-align:right;padding:5px 8px;">—</td><td style="text-align:right;padding:5px 8px;">+43.86</td></tr>
+        <tr><td style="padding:5px 8px;">HIST</td><td style="text-align:right;padding:5px 8px;">201.1</td><td style="text-align:right;padding:5px 8px;">-43.86</td><td style="text-align:right;padding:5px 8px;">—</td></tr>
+        <tr><td style="padding:5px 8px;">RH</td><td style="text-align:right;padding:5px 8px;">212.1</td><td style="text-align:right;padding:5px 8px;">-32.80</td><td style="text-align:right;padding:5px 8px;color:var(--good);">+11.06</td></tr>
+        <tr><td style="padding:5px 8px;">RH_CC</td><td style="text-align:right;padding:5px 8px;">219.7</td><td style="text-align:right;padding:5px 8px;">-25.21</td><td style="text-align:right;padding:5px 8px;color:var(--good);">+18.65</td></tr>
+        <tr><td style="padding:5px 8px;">WARM_HIST</td><td style="text-align:right;padding:5px 8px;">199.8</td><td style="text-align:right;padding:5px 8px;">-45.08</td><td style="text-align:right;padding:5px 8px;color:var(--warn);">-1.22</td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:13px;color:#2a323a;margin-top:10px;">
+      MN HIST projects an almost flat ecosystem stock at year 50 (-3.07 Mg/ha vs the inventory year), consistent with AF's framing of MN forests as near steady state but ultimately a net sink once HWP storage is added. RH recovers +11 Mg/ha vs HIST; RH_CC recovers +19 Mg/ha. The Lake States WARM_HIST signal is small (-1.2 Mg/ha vs HIST) because baseline wildfire rates are low; the PNW and Mountain West will show much larger WARM_HIST effects.
+    </div>
+  </div>
 </div>
 
 <div class="state-card">
