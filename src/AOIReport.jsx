@@ -5,6 +5,7 @@
 // harvested) from yield_curves_by_l3.
 import MiniChart from "./MiniChart.jsx";
 import StandOutlook from "./StandOutlook.jsx";
+import { openReport } from "./report.js";
 
 const valAt = (curve, age) => { const h = (curve||[]).find(([a])=>a===age); return h?h[1]:null; };
 const fmtArea = (m2) => {
@@ -61,6 +62,8 @@ export default function AOIReport({ aoi, stumpage, onClose }){
       <div className="aoi-head">
         <b>AOI summary{name ? ` · ${name}` : ""}</b>
         <span>
+          <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",fontWeight:600}}
+            onClick={()=>openReport(aoi, stumpage)} title="open a full printable area report (save or print to PDF)">Report ↗</button>
           <button className="mini-btn" style={{marginTop:0,marginRight:6}}
             onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV ↓</button>
           {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
