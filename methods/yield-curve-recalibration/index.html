@@ -44,6 +44,7 @@ a.inline{color:var(--accent);}
 </header>
 <div class="container">
 <div class="tag">v1.4 / v1.5 · deployed 2026-06-02</div>
+<div style="border-left:4px solid #2166ac;background:#eef4fb;padding:10px 14px;margin:8px 0 4px;font-size:0.93em"><b>Update (v0.56, 2026-06-03):</b> the deployed FIA AGC engine (<code>yc_fia_empirical_v1</code>, <code>agc_live_total</code>) no longer applies the recalibration as a ratio on the peak-decline base. It is now re-projected directly on the hybrid Chapman-Richards + decline form, so it shares a model form with the TreeMap engine. CONUS reserve is <b>+63%</b> (was +112% on peak-decline) vs TreeMap +48%, and the FIADB vs TreeMap spread now reads as a true inventory-basis range. Per-state t0 anchor preserved; only the post-t0 trajectory shape changed. See <a href="https://github.com/holoros/perseus-forest-intelligence/blob/main/docs/decisions/0003-fia-agc-hybrid-recal-engine.md">ADR 0003</a>. The numbers below describe the prior ratio-apply method and are retained for provenance.</div>
 <h1>Chronosequence recalibration &amp; no-management decline scenarios</h1>
 <p class="lede">How the YC empirical engine's near-term growth was corrected to the FIA
 longitudinal record, and two data-grounded scenarios showing that a no-harvest reserve
