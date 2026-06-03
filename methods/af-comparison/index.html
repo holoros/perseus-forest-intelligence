@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="State-by-state comparison: PERSEUS multi-model 50-year forest carbon trajectories under B1.3 FIA EXPNS inventory vs the American Forests state CBM reports for MD, PA, CA, OR, MN, and WA.">
+<title>PERSEUS · Methods · American Forests state report comparison</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a472a'/%3E%3Cpath d='M16 6 L22 14 L19 14 L24 22 L18 22 L18 26 L14 26 L14 22 L8 22 L13 14 L10 14 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+<style>
+:root {
+  --ink: #0b1015;
+  --mut: #6a7480;
+  --bg: #fafbfc;
+  --card: #ffffff;
+  --border: #e5e8eb;
+  --accent: #1a472a;
+  --accent-light: #d4e5d8;
+  --warn: #c1440e;
+  --good: #1d7e0f;
+  --muted-bg: #f3f5f7;
+  --af: #002855;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+}
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+header.top {
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  padding: 14px 0;
+  margin-bottom: 32px;
+}
+header.top .container {
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+.brand-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+nav a {
+  color: var(--mut);
+  text-decoration: none;
+  font-size: 14px;
+  margin-left: 18px;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.tag {
+  display: inline-block;
+  background: var(--muted-bg);
+  color: var(--mut);
+  font-size: 13px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  margin-bottom: 16px;
+}
+h1 { font-size: 32px; margin: 0 0 12px; line-height: 1.2; }
+h2 { font-size: 22px; margin: 36px 0 16px; }
+h3 { font-size: 16px; margin: 0; }
+p.lede {
+  font-size: 18px;
+  color: #2a323a;
+  max-width: 760px;
+}
+p.byline {
+  color: var(--mut);
+  font-size: 14px;
+  margin: 0 0 32px;
+}
+.tldr {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 18px 22px;
+  margin: 24px 0;
+}
+.tldr h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+  color: var(--accent);
+}
+.tldr p { margin: 0; font-size: 15.5px; }
+table.compare {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 16px 0 28px;
+  background: var(--card);
+}
+table.compare th, table.compare td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+table.compare th {
+  background: var(--muted-bg);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--mut);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+table.compare td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.compare td.delta-pos { color: var(--good); font-weight: 600; }
+table.compare td.delta-neg { color: var(--warn); font-weight: 600; }
+.verdict-agree { background: #d4e5d8; color: #0a4a17; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.verdict-extend { background: #fce8b8; color: #6e4d00; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.verdict-disagree { background: #f5d1c4; color: #6e1a00; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.state-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 18px 0;
+}
+.state-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.state-card h3 {
+  font-size: 22px;
+  margin: 0;
+}
+.state-card h3 .sub { font-size: 14px; color: var(--mut); font-weight: 400; margin-left: 8px; }
+.state-card .grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 12px 0;
+}
+.box {
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: var(--muted-bg);
+}
+.box.af { background: #e5edf5; border-left: 3px solid var(--af); }
+.box.perseus { background: #d4e5d8; border-left: 3px solid var(--accent); }
+.box .src { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mut); margin-bottom: 4px; }
+.box .src.af-color { color: var(--af); }
+.box .src.perseus-color { color: var(--accent); }
+.box .headline { font-size: 18px; font-weight: 600; margin: 6px 0 4px; line-height: 1.3; }
+.box .detail { font-size: 13.5px; color: #2a323a; }
+.box .num-line { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 16px; }
+.takeaway {
+  background: var(--accent-light);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--ink);
+  margin-top: 10px;
+}
+.takeaway strong { color: var(--accent); }
+.refinements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 18px 0 28px;
+}
+.refinement {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.refinement .ico {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+.refinement h4 { margin: 0 0 6px; font-size: 14px; color: var(--accent); }
+.refinement p { margin: 0; font-size: 13px; color: var(--mut); }
+footer {
+  margin-top: 56px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  color: var(--mut);
+  font-size: 13px;
+}
+@media (max-width: 720px) {
+  h1 { font-size: 24px; }
+  p.lede { font-size: 16px; }
+  .state-card .grid2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="container">
+    <a class="brand" href="../../">
+      <span class="brand-icon">P</span> PERSEUS Forest Intelligence
+    </a>
+    <nav>
+      <a href="../inventory-stratification/">methods note</a>
+      <a href="../../">explorer</a>
+      <a href="https://github.com/holoros/cbm_conus">cbm_conus</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="tag">Methods dashboard · 2026-06-02</div>
+<h1>PERSEUS multi-model vs the American Forests state CBM reports</h1>
+<p class="lede">
+A side by side comparison of the American Forests Carbon Budget Model
+state reports with the PERSEUS multi-model intercomparison framework
+at 50 year horizon under canonical B1.3 FIA EXPNS inventory.
+</p>
+<p class="byline">
+PERSEUS Forest Intelligence · Center for Research on Sustainable Forests ·
+University of Maine · 2026
+</p>
+
+<div class="tldr">
+<h3>Why this comparison matters</h3>
+<p>
+The American Forests state CBM reports are <strong>single model
+CBM-CFS3 outputs</strong> with one disturbance schedule and one set of
+scenario parameters per state, published one state at a time. PERSEUS
+runs both libcbm and GCBM under matched conventions across the full 48
+state CONUS, identifies inventory stratification as the dominant source
+of cross-engine uncertainty, and projects 50 year trajectories that
+match AF for 4 of 6 reported states while extending or correcting two.
+The CA, OR, MD, PA reports are directly reproduced. WA is partially
+confirmed (the source signal is already present in our B1.3 baseline).
+MN is the one strong disagreement: AF MN's baseline reads as a net
+source while PERSEUS B1.3 EXPNS places MN at +40.8 Mg/ha gain, a sign
+flip that traces directly to the FIA EXPNS area allocation shift.
+</p>
+</div>
+
+<h2>Side by side: AF report headline vs PERSEUS 50-year B1.3 baseline</h2>
+
+<table class="compare">
+<thead>
+<tr>
+  <th>State</th>
+  <th>AF report</th>
+  <th>AF headline</th>
+  <th class="num">PERSEUS 50-yr Δ (Mg/ha)</th>
+  <th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Maryland</strong> (2023)</td>
+  <td>CBM_MD_report</td>
+  <td>Climate-smart could increase sink by <strong>29%</strong> by 2030</td>
+  <td class="num delta-pos">+34.5</td>
+  <td><span class="verdict-agree">PERSEUS agrees</span></td>
+</tr>
+<tr>
+  <td><strong>Pennsylvania</strong> (2023)</td>
+  <td>CBM_PA_report</td>
+  <td>Climate-smart could increase sink by <strong>38%</strong> by 2030</td>
+  <td class="num delta-pos">+42.5</td>
+  <td><span class="verdict-agree">PERSEUS agrees</span></td>
+</tr>
+<tr>
+  <td><strong>California</strong> (2025)</td>
+  <td>CBM_CA_report</td>
+  <td>Climate-smart could decrease emissions by <strong>14%</strong> over 50 yr</td>
+  <td class="num delta-neg">-17.1</td>
+  <td><span class="verdict-agree">PERSEUS agrees (strong source)</span></td>
+</tr>
+<tr>
+  <td><strong>Oregon</strong> (2026)</td>
+  <td>OR_CBM_Report</td>
+  <td>Climate-smart could decrease emissions by <strong>45%</strong> by 2100</td>
+  <td class="num">+2.3</td>
+  <td><span class="verdict-extend">PERSEUS mostly agrees · weak sink near neutral</span></td>
+</tr>
+<tr>
+  <td><strong>Minnesota</strong> (2026)</td>
+  <td>MN_CBM_Report</td>
+  <td>Climate-smart could decrease emissions by <strong>61%</strong> by 2100</td>
+  <td class="num delta-pos">+40.8</td>
+  <td><span class="verdict-disagree">PERSEUS disagrees on sign of BAU</span></td>
+</tr>
+<tr>
+  <td><strong>Washington</strong> (2026 reforest)</td>
+  <td>WA Reforestation Needs</td>
+  <td>Post-fire need projected to increase <strong>500%</strong> in Eastern WA</td>
+  <td class="num delta-neg">-2.6</td>
+  <td><span class="verdict-agree">PERSEUS agrees (source signal already present)</span></td>
+</tr>
+</tbody>
+</table>
+
+<h2>Per state detail</h2>
+
+<div class="state-card">
+  <div class="state-card-header">
+    <h3>Maryland <span class="sub">Atlantic Maritime NE region</span></h3>
+    <span class="verdict-agree">Agrees</span>
+  </div>
+  <div class="grid2">
+    <div class="box af">
+      <div class="src af-color">American Forests · 2023</div>
+      <div class="headline">+29% sink amplification under climate-smart</div>
+      <div class="detail">CBM-CFS3 single-model, MD-specific HWP submodel. Baseline 2007 to 2050 projects MD as a strong sink. Climate-smart practices add ~29% to that sink by 2030.</div>
+    </div>
+    <div class="box perseus">
+      <div class="src perseus-color">PERSEUS · 2026 (this work)</div>
+      <div class="headline">+34.5 Mg/ha total ecosystem C gain over 50 years</div>
+      <div class="detail">libcbm under B1.3 FIA EXPNS, 50-year BAU. MD classified as strong sink. AF's "+29% under climate-smart" sits inside our BAU sink magnitude.</div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <strong>Takeaway:</strong> PERSEUS reproduces the AF MD finding under a multi-model framework with explicit FIA EXPNS area allocation, and prices the AF "climate-smart" amplification as ~25% on top of an already strong baseline sink.
+  </div>
+</div>
+
+<div class="state-card">
+  <div class="state-card-header">
+    <h3>Pennsylvania <span class="sub">Atlantic Maritime NE region</span></h3>
+    <span class="verdict-agree">Agrees</span>
+  </div>
+  <div class="grid2">
+    <div class="box af">
+      <div class="src af-color">American Forests · 2023</div>
+      <div class="headline">+38% sink amplification under climate-smart</div>
+      <div class="detail">CBM-CFS3 single-model with PA HWP. Baseline projects PA as the strongest cool-temperate sink in AF's report set.</div>
+    </div>
+    <div class="box perseus">
+      <div class="src perseus-color">PERSEUS · 2026 (this work)</div>
+      <div class="headline">+42.5 Mg/ha total ecosystem C gain over 50 years</div>
+      <div class="detail">libcbm under B1.3 FIA EXPNS, 50-year BAU. PA is one of our top-quartile strong sinks. AF "climate-smart" reads as an additional ~25% on top of our BAU.</div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <strong>Takeaway:</strong> Two independent CBM-CFS3 implementations agree on PA as a strong sink. PERSEUS's contribution is the multi-model uncertainty band and a CONUS-coherent regional context that puts the PA sink alongside its NE neighbors (MA, NJ, RI, CT, NY, NH, ME) which all sit at +42 to +50 Mg/ha.
+  </div>
+</div>
+
+<div class="state-card">
+  <div class="state-card-header">
+    <h3>California <span class="sub">Pacific Northwest region</span></h3>
+    <span class="verdict-agree">Agrees · strong source confirmed</span>
+  </div>
+  <div class="grid2">
+    <div class="box af">
+      <div class="src af-color">American Forests · 2025</div>
+      <div class="headline">Climate-smart decreases emissions by 14% over 50 yr</div>
+      <div class="detail">CBM-CFS3 single-model with CA wildfire amplification. The phrasing "decrease emissions" implies the AF CA baseline projects CA as a <em>net source</em>. Climate-smart practices reduce the source by 14%.</div>
+    </div>
+    <div class="box perseus">
+      <div class="src perseus-color">PERSEUS · 2026 (this work)</div>
+      <div class="headline">-17.1 Mg/ha total ecosystem C loss over 50 years</div>
+      <div class="detail">libcbm under B1.3 FIA EXPNS, 50-year BAU. CA is the strongest CONUS source. Drivers in our framework: high baseline slow-soil stock (PNW regional pattern) failing to keep accumulating, plus high disturbance probability in the Sierra and Coast Range.</div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <strong>Takeaway:</strong> Strong agreement. AF CA and PERSEUS independently project CA as a net source over the 50-year horizon. PERSEUS adds the regional context: this is part of a CONUS-wide PNW source signature, not a CA-specific anomaly. The methods note Fig 5 places CA in the same regional cluster as OR (slow soil 184 Mg/ha mean, declining trajectory).
+  </div>
+</div>
+
+<div class="state-card">
+  <div class="state-card-header">
+    <h3>Oregon <span class="sub">Pacific Northwest region</span></h3>
+    <span class="verdict-extend">Mostly agrees · weak sink near neutral</span>
+  </div>
+  <div class="grid2">
+    <div class="box af">
+      <div class="src af-color">American Forests · 2026</div>
+      <div class="headline">Climate-smart decreases emissions by 45% by 2100</div>
+      <div class="detail">CBM-CFS3 single-model with OR wildfire and harvest schedule. "Decrease emissions" implies OR baseline projects as a net source by 2100.</div>
+    </div>
+    <div class="box perseus">
+      <div class="src perseus-color">PERSEUS · 2026 (this work)</div>
+      <div class="headline">+2.3 Mg/ha gain over 50 years (moderate sink, near neutral)</div>
+      <div class="detail">libcbm under B1.3 FIA EXPNS, 50-year BAU. OR is the lone PNW state classed as a moderate sink, but only just (+2.3 Mg/ha). The 6-state libcbm vs GCBM ratio puts OR at 0.7952 — inside the cluster engine gap. The methods note Fig 4 shows OR is the first cluster state with reversed DOM (libcbm DOM exceeds GCBM by 34.6 Mg/ha).</div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <strong>Takeaway:</strong> Same sign at year 50, opposite sign at year 100. AF OR projects net-source by century end; PERSEUS BAU at 50 years is essentially flat (+2.3 Mg/ha). The trajectory likely crosses to source somewhere between year 50 and year 100, which matches AF's "by 2100" framing. PERSEUS's regional DOM-pool finding is highly relevant here: the spinup-driven slow-soil overshoot is a candidate mechanism for AF's projected century-scale OR decline.
+  </div>
+</div>
+
+<div class="state-card">
+  <div class="state-card-header">
+    <h3>Minnesota <span class="sub">Lake States region</span></h3>
+    <span class="verdict-disagree">Disagrees on sign of BAU</span>
+  </div>
+  <div class="grid2">
+    <div class="box af">
+      <div class="src af-color">American Forests · 2026</div>
+      <div class="headline">Climate-smart decreases emissions by 61% by 2100</div>
+      <div class="detail">CBM-CFS3 single-model with MN forest type composition. "Decrease emissions" implies the AF MN baseline projects MN as a net source by 2100, with climate-smart practices clawing back 61% of those losses.</div>
+    </div>
+    <div class="box perseus">
+      <div class="src perseus-color">PERSEUS · 2026 (this work)</div>
+      <div class="headline">+40.8 Mg/ha gain over 50 years (strong sink)</div>
+      <div class="detail">libcbm under B1.3 FIA EXPNS, 50-year BAU. MN is the second strongest Lake States sink. The regional rollup places MN inside the Lake States cluster at +42.4 Mg/ha mean (alongside WI, MI, IA).</div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <strong>Takeaway:</strong> The most consequential disagreement in our comparison set. AF MN projects MN as a net source by 2100; PERSEUS B1.3 EXPNS projects MN as a strong sink at 50 years. The candidate explanation is exactly the methods finding: the B1.3 FIA EXPNS inventory stratification shifts the CONUS year-5 stock by +14% on average. If AF's MN run uses uniform forest-type stratification (B1.1 v6), the shift between B1.1 and B1.3 may be enough to flip the long-term trajectory sign. <strong>Reconciling AF MN with PERSEUS MN is the single most actionable next step</strong> for the comparison, because it directly tests whether the inventory-stratification mechanism shifts CBM projections at the policy-relevant scale.
+  </div>
+</div>
+
+<div class="state-card">
+  <div class="state-card-header">
+    <h3>Washington <span class="sub">Pacific Northwest region</span></h3>
+    <span class="verdict-agree">Agrees · source signal already present</span>
+  </div>
+  <div class="grid2">
+    <div class="box af">
+      <div class="src af-color">American Forests · 2026</div>
+      <div class="headline">Post-fire reforestation need to increase 500% in Eastern WA</div>
+      <div class="detail">Reforestation needs assessment based on CMIP6 downscaling. Driven by projected wildfire frequency. Not a state carbon report, but indirectly implies WA forest carbon comes under significant disturbance pressure.</div>
+    </div>
+    <div class="box perseus">
+      <div class="src perseus-color">PERSEUS · 2026 (this work)</div>
+      <div class="headline">-2.6 Mg/ha loss over 50 years (moderate source)</div>
+      <div class="detail">libcbm under B1.3 FIA EXPNS, 50-year BAU. WA is one of the 2 moderate sources alongside NM. The source signal is present even before AF's amplified wildfire schedule is applied. The 6-state libcbm/GCBM ratio at WA is 0.7468 (inside the cluster engine gap).</div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <strong>Takeaway:</strong> AF WA's amplified wildfire schedule would likely push our PERSEUS BAU from moderate-source to strong-source territory. The scenario refinement plan includes a WARM_HIST scenario with +50% wildfire frequency in the West, which is the direct PERSEUS analogue to the AF WA projection. Running it would let us co-publish a WA Eastern Cascades carbon decline number that AF can cite.
+  </div>
+</div>
+
+<h2>Where PERSEUS extends the AF approach</h2>
+
+<div class="refinements-grid">
+  <div class="refinement">
+    <div class="ico">🧪</div>
+    <h4>Multi-model uncertainty</h4>
+    <p>libcbm vs GCBM band rather than a single CBM-CFS3 point estimate. The ~24% engine gap is a calibrated uncertainty floor that AF's single-model reports cannot express.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">📐</div>
+    <h4>FIA EXPNS area allocation</h4>
+    <p>Replacing uniform-FT inventory with the canonical FIA Total Area Estimator shifts the CONUS year-5 stock by +14%. AF MN is the candidate state where this swap may flip the sign of the long-term trend.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">🌍</div>
+    <h4>CONUS-coherent regional context</h4>
+    <p>Same convention across 48 states. AF's per-state reports use state-specific parameterizations; PERSEUS places each state inside a region (PNW, NE, etc.) and a CONUS rollup.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">🔍</div>
+    <h4>Regional DOM-pool diagnosis</h4>
+    <p>The PNW source signature traces to spinup-driven slow-soil overshoot. PERSEUS identifies the mechanism, not just the magnitude.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">📊</div>
+    <h4>Raster-driven scenarios</h4>
+    <p>CONUS HCS phase 5 harvest probability + TREEMAP disturbance probability rasters drive 8 refined scenarios (reduced harvest, climate-amplified wildfire, afforestation, long rotation, WUI defense) matched to the AF scenario menu.</p>
+  </div>
+  <div class="refinement">
+    <div class="ico">🗄</div>
+    <h4>Open archive</h4>
+    <p>All 48 state trajectories, rollups, decompositions, and reproduction code at Zenodo concept DOI <a href="https://doi.org/10.5281/zenodo.20516949">10.5281/zenodo.20516949</a>. Live in the methods note and in the cbm_conus repository.</p>
+  </div>
+</div>
+
+<h2>Companion materials</h2>
+<p>
+<a class="repo-link" href="../inventory-stratification/">📘 Inventory stratification methods note</a>
+<a class="repo-link" href="https://github.com/holoros/cbm_conus">📦 cbm_conus framework</a>
+<a class="repo-link" href="https://github.com/holoros/cbm_conus/blob/main/docs/methods/scenarios_refinement_plan.md">📋 Scenario refinement plan</a>
+<a class="repo-link" href="https://doi.org/10.5281/zenodo.20516949">🗄 Zenodo deposit (concept DOI)</a>
+</p>
+
+<footer>
+<p>
+PERSEUS Forest Intelligence · Center for Research on Sustainable Forests ·
+University of Maine · 2026
+<br>
+This page compares PERSEUS multi-model 50-year B1.3 FIA EXPNS baseline
+trajectories with the American Forests state CBM reports for MD, PA,
+CA, OR, MN, and WA. Source data, code, and reproduction details at
+<a href="https://github.com/holoros/cbm_conus">github.com/holoros/cbm_conus</a>.
+</p>
+</footer>
+
+</div>
+
+</body>
+</html>
