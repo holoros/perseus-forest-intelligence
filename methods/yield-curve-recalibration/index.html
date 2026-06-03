@@ -92,15 +92,18 @@ competition / self-thinning channel, complementary to the episodic disturbance a
   where the chronosequence bias bit hardest.</figcaption>
 </figure>
 
-<h2>4. Managed-scenario stress (first-order)</h2>
+<h2>4. Managed-scenario stress (in-loop)</h2>
 <div class="callout">The disturbance and mortality stress are also offered on the
 <code>managed (harvest)</code> scenario as <code>managed (harvest, disturbance-exposed)</code>
-and <code>managed (harvest, mortality-stressed)</code>. These apply the reserve-derived
-<i>fractional</i> stress factor to the managed trajectory. The disturbance fractional drag
-is roughly density-independent and transfers well; the mortality fractional drag is
-density-dependent, so the managed mortality figure is an <b>upper bound</b> (managed stands
-are younger and less dense than an unharvested reserve). A future revision will re-project
-the managed scenarios with the stressors in-loop.</div>
+and <code>managed (harvest, mortality-stressed)</code>. These are now projected
+<b>in-loop</b> (<code>ycx_managed_stress.R</code>): each pixel is run forward under its owner
+harvest regime (Industrial clearcut R=45; NIPF/State/Public-Other partial), with the stress
+drag responding to the managed stand's <i>actual</i> carbon each year &mdash; so harvest
+age-resets correctly lower the exposure (a recently cut stand is young, low-carbon, and
+loses little). CONUS managed (harvest) at 2&times; stress: &minus;30% (disturbance) and
+&minus;27% (mortality) vs the managed baseline, with strong geographic variation (e.g. Maine
+only &minus;4% / &minus;18% given its low disturbance). This replaces the earlier
+reserve-borrowed fractional approximation.</div>
 
 <h2>Reproducibility</h2>
 <p>Scripts (in <code>scripts/yield_curve_engine/</code>): <code>ycx_ingrowth_gap.R</code>,
