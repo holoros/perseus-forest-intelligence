@@ -7,14 +7,16 @@ hybrid+recal [year, central, lo, hi] band. Other models in each bucket and all o
 metrics are left untouched (biomass/volume/merch remain on the empirical-curve basis).
 The decadal (11-pt) hybrid series is linearly interpolated onto the 5-yr (21-pt) grid
 that sibling models use. US.json is re-summed from the 48 state series.
-Usage: python3 ycx_inject_hybrid.py <api_dir> <fia_hybrid_fullseries_agc.csv>
+Usage: python3 ycx_inject_hybrid.py <api_dir> <fullseries.csv> [metric=agc_live_total]
 """
 import csv, json, os, sys
 api, csvp = sys.argv[1], sys.argv[2]
-METRIC = "agc_live_total"; MODEL = "yc_fia_empirical_v1"; CLS = "YC"
-LABEL = ("YC empirical yield curve (FIA plots, hybrid Chapman-Richards + decline form, "
-         "recalibrated to FIA longitudinal increment + 95th-pct ceiling; raster fire/insect "
-         "disturbance + GRM density mortality; owner-rotation harvest, FIA-anchored)")
+METRIC = sys.argv[3] if len(sys.argv) > 3 else "agc_live_total"
+MODEL = "yc_fia_empirical_v1"; CLS = "YC"
+_what = "dry biomass" if METRIC == "agb_dry" else "carbon"
+LABEL = (f"YC empirical yield curve (FIA plots, hybrid Chapman-Richards + decline form, "
+         f"recalibrated to FIA longitudinal {_what} increment + 95th-pct ceiling; raster "
+         f"fire/insect disturbance + GRM density mortality; owner-rotation harvest, FIA-anchored)")
 BUCKETS = ["reserve (no harvest)","reserve (no harvest, disturbance-exposed)",
   "reserve (no harvest, mortality-stressed)","managed (harvest)",
   "managed (harvest, disturbance-exposed)","managed (harvest, mortality-stressed)",
