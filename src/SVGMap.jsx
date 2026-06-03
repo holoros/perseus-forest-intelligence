@@ -56,6 +56,17 @@ function projPath(lon, lat){
   return [x * SCALE + TX, -y * SCALE + TY];
 }
 
+// Convert a client (screen) point to viewBox coordinates, accounting for the
+// SVG's preserveAspectRatio="xMidYMid meet" letterboxing. The naive
+// (clientX-rect.left)/rect.width*W is wrong whenever the element's aspect ratio
+// differs from W/H, which shifted inspect clicks (typically southward).
+function clientToVB(el, clientX, clientY){
+  const rect = el.getBoundingClientRect();
+  const scale = Math.min(rect.width / W, rect.height / H);
+  const offX = (rect.width - W * scale) / 2, offY = (rect.height - H * scale) / 2;
+  return [(clientX - rect.left - offX) / scale, (clientY - rect.top - offY) / scale];
+}
+
 // Convert a single ring (array of [lon,lat]) to SVG path commands
 function ringToD(ring){
   let d = "";
@@ -142,9 +153,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     const el = svgRef.current; if(!el) return;
     const onWheel = (e) => {
       e.preventDefault();
-      const rect = el.getBoundingClientRect();
-      const cx = (e.clientX - rect.left) / rect.width * W;
-      const cy = (e.clientY - rect.top) / rect.height * H;
+      const [cx, cy] = clientToVB(el, e.clientX, e.clientY);
       // Adaptive zoom factor: small wheel delta = small step, big = big step.
       // Cap deltaY magnitude to prevent extreme jumps on trackpads.
       const mag = Math.min(50, Math.abs(e.deltaY)) / 50;
@@ -171,8 +180,9 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     if(Math.abs(e.clientX - dragRef.current.x) + Math.abs(e.clientY - dragRef.current.y) > 4)
       movedRef.current = true;
     const rect = svgRef.current.getBoundingClientRect();
-    const dx = (e.clientX - dragRef.current.x) / rect.width * W;
-    const dy = (e.clientY - dragRef.current.y) / rect.height * H;
+    const scale = Math.min(rect.width / W, rect.height / H);
+    const dx = (e.clientX - dragRef.current.x) / scale;
+    const dy = (e.clientY - dragRef.current.y) / scale;
     viewRef.current = clampView({ ...viewRef.current,
       tx: dragRef.current.tx + dx, ty: dragRef.current.ty + dy });
     sync();
@@ -185,9 +195,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
     if(inspectMode && dr && e && svgRef.current && e.type === "mouseup"){
       const moved = Math.abs(e.clientX - dr.x) + Math.abs(e.clientY - dr.y);
       if(moved < 5){
-        const rect = svgRef.current.getBoundingClientRect();
-        const cx = (e.clientX - rect.left) / rect.width * W;
-        const cy = (e.clientY - rect.top) / rect.height * H;
+        const [cx, cy] = clientToVB(svgRef.current, e.clientX, e.clientY);
         const v = viewRef.current;
         const gx = (cx - v.tx) / v.k, gy = (cy - v.ty) / v.k;
         const x = (gx - TX) / SCALE, y = -(gy - TY) / SCALE;
