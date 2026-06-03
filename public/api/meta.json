@@ -471,7 +471,8 @@
   "managed (harvest)",
   "managed (intensive)",
   "managed (conservation)",
-  "reserve (no harvest, disturbance-exposed)"
+  "reserve (no harvest, disturbance-exposed)",
+  "reserve (no harvest, mortality-stressed)"
  ],
  "default_models": {
   "agc_live_total": "yc_hybrid_v1"

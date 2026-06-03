@@ -119,3 +119,18 @@ recalibration (both change published totals).
 Artifacts: `scripts/yield_curve_engine/ycx_disturbance_quantify.R`,
 `ycx_disturb_scenario.R`; `docs/results/conus_disturb_arms_100yr.csv`,
 `disturb_state_netneg.csv`, `disturb_by_type.csv`, `disturb_decline.png`.
+
+## Update (v1.5) — mortality-stressed arm + CONUS maps
+
+A second, first-class endogenous decline scenario shipped: **`reserve (no harvest,
+mortality-stressed)`**. It applies the FIA GRM density-dependent mortality m(C) as
+*excess* loss on the recalibrated reserve (age-anchored, so MULT=1 reproduces the
+production reserve exactly; no carbon-space overshoot). CONUS reserve: baseline +53%,
+1.5× mortality +31%, 2× mortality +13% over 100 yr, with ~half of forest pixels ending
+below current carbon at 2×. This is the chronic competition / self-thinning channel,
+complementary to the exogenous fire/insect `disturbance-exposed` arm.
+
+CONUS choropleths of the v1.4/v1.5 story are in
+`docs/results/conus_recal_disturb_maps.png` (recalibration growth uplift; near-term
+growth correction toward FIA observations; disturbance-exposed decline by state).
+Scripts: `ycx_mortality_arm.R`, `ycx_maps.R`.

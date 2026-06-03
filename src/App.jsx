@@ -1073,6 +1073,13 @@ export default function App(){
                 turn on <b>uncertainty</b> to see the band from historical rates (upper) to ~3× /
                 stand-replacing severity (lower). It shows that passive carbon storage is conditional —
                 under climate-elevated fire/insect/wind it can plateau or turn into a net source.</>}
+              {bucket === "reserve (no harvest, mortality-stressed)" && <>
+                {" "}<b>Mortality-stressed reserve:</b> endogenous decline from the FIA GRM
+                density-dependent mortality m(C) applied to the recalibrated no-harvest reserve.
+                Central line = 1.5× baseline mortality; turn on <b>uncertainty</b> for the band
+                from baseline (upper) to 2× mortality (lower). Distinct from disturbance-exposed:
+                chronic competition / self-thinning mortality amplified by climate stress, not
+                episodic fire/insect events.</>}
             </div>
           </>)}
           </>)}

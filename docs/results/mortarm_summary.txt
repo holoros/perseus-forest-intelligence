@@ -1,0 +1,7 @@
+Endogenous mortality-stressed reserve (GRM density-dependent m(C) on recalibrated reserve)
+
+  baseline   t0=11554 t100=17722 (+53.4%)
+  mort_1p5x  t0=11554 t100=15115 (+30.8%)
+  mort_2x    t0=11554 t100=13011 (+12.6%)
+
+under 2x mortality, 29512 of 59136 pixels end below current carbon
