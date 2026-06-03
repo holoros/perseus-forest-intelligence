@@ -892,17 +892,30 @@ export default function App(){
   const locateByIP = async () => {
     try { const r = await fetch("https://ipapi.co/json/"); const d = await r.json();
       await goToLatLon(+d.longitude, +d.latitude); }
-    catch (e) { alert("Couldn't determine your location."); }
+    catch (e) { alert("Couldn't determine your location. Try entering a lat, lon."); }
     finally { setLocating(false); }
   };
   const locateMe = () => {
     setLocating(true);
+    let done = false;
+    const finishIP = () => { if (!done) { done = true; locateByIP(); } };
     if (navigator.geolocation) {
+      // City-level is plenty for "forest near me"; skip high-accuracy (slow GPS)
+      // and fall back to IP fast so the button never appears to hang.
       navigator.geolocation.getCurrentPosition(
-        p => { goToLatLon(p.coords.longitude, p.coords.latitude).finally(() => setLocating(false)); },
-        () => { locateByIP(); },   // permission denied or failed -> IP fallback (city level)
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+        p => { if (done) return; done = true; goToLatLon(p.coords.longitude, p.coords.latitude).finally(() => setLocating(false)); },
+        finishIP, { enableHighAccuracy: false, timeout: 4000, maximumAge: 300000 });
+      setTimeout(finishIP, 4500);   // hard backstop if the prompt is ignored
     } else locateByIP();
+  };
+  // Manual "lat, lon" entry — a reliable way to jump anywhere (e.g. in a demo).
+  const [manualLoc, setManualLoc] = useState("");
+  const goToManual = () => {
+    const m = manualLoc.trim().match(/(-?\d+(?:\.\d+)?)[ ,]+(-?\d+(?:\.\d+)?)/);
+    if (!m) { alert("Enter coordinates as: lat, lon  (e.g. 45.2, -69.0)"); return; }
+    let lat = parseFloat(m[1]), lon = parseFloat(m[2]);
+    if (lat < lon) { const t = lat; lat = lon; lon = t; }   // tolerate lon,lat order
+    setLocating(true); goToLatLon(lon, lat).finally(() => setLocating(false));
   };
 
   return (
@@ -1027,6 +1040,10 @@ export default function App(){
               title="Find the forest around your approximate location and zoom in to the local analysis">
               {locating ? "locating…" : "◎ Forest near me"}
             </button>
+            <input className="mc-coord" value={manualLoc} placeholder="lat, lon"
+              onChange={e=>setManualLoc(e.target.value)}
+              onKeyDown={e=>{ if(e.key==="Enter") goToManual(); }}
+              title="Jump to coordinates: type a lat, lon (e.g. 45.2, -69.0) and press Enter"/>
             {mapMode === "carbon" && timeline && (<>
               <span className="ctrl-sep"/>
               <span className="ctrl-grp-lab">Scenario</span>
