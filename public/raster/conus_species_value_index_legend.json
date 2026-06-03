@@ -1,0 +1,5 @@
+{
+  "metric": "conus_species_value_index",
+  "unit": "index (regional mean=1)",
+  "breaks": [0.779, 0.974, 0.993, 1.007, 1.02, 1.032, 1.045, 1.061, 1.223]
+}

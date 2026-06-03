@@ -1,0 +1,5 @@
+{
+  "metric": "conus_value_at_risk",
+  "unit": "value-weighted m3/ha/yr",
+  "breaks": [0, 0.527, 0.889, 1.217, 1.556, 1.957, 2.509, 3.45, 37.025]
+}

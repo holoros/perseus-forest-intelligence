@@ -38,12 +38,14 @@ const MAP_BINS = [
     layers:[["ownership","Ownership group"]] },
   { id:"products", label:"Stumpage / products",
     layers:[["standing_value","Standing value ($/ac)"],["standing_value_cv","Value uncertainty ($/ac s.d.)"],
+            ["species_value_index","Species value index (SVI)"],
             ["sawtimber_share","Sawtimber share (%)"],["expected_removal","Expected removal"],
             ["hybrid_agc2022","AG carbon 2022 (Mg C/ha)"],["hybrid_dagc100","100-yr AG carbon change"]] },
   { id:"risk", label:"Future risk",
     layers:[["p_disturbance_2022","P(disturbance) · 2022"],
             ["p_harvest_clearcut","P(stand replacement)"],["p_harvest_any","P(harvest · any)"],
             ["p_harvest_partial","P(harvest · partial)"],
+            ["value_at_risk","Value at risk of removal"],["volume_removed","Volume removed (annual)"],
             ["lcms_2022","Disturbance cause (LCMS)"],["gfc_lossyear","Forest loss year (Hansen)"]] },
 ];
 const binForLayer = (layer) => (MAP_BINS.find(b => b.layers.some(([k])=>k===layer)) || {}).id;
@@ -214,6 +216,27 @@ const CONUS_LEGENDS = {
     ramp: ["#fff5eb","#fd8d3c","#d94801","#7f2704"],
     lo: "low", mid: "mid", hi: "high",
     note: "within-species sawlog price dispersion (median ~15%), capped at 30%; larger in hardwood markets",
+  },
+  species_value_index: {
+    title: "Species value index (SVI, regional mean = 1)",
+    type: "ramp",
+    ramp: ["#f7fcf5","#74c476","#238b45","#00441b"],
+    lo: "0.78", mid: "1.0", hi: "1.22",
+    note: "Basal-area-weighted price-anchored species value from TreeMap2022 composition; >1 = above-average commercial species value. All 2,697 species via TPO/group allocation.",
+  },
+  value_at_risk: {
+    title: "Value at risk of removal (value-weighted m³/ha/yr)",
+    type: "ramp",
+    ramp: ["#000004","#51127c","#b73779","#fc8961","#fcfdbf"],
+    lo: "0", mid: "1.6", hi: "high",
+    note: "Expected annual volume removed × SVI = where harvest pressure meets high-value forest. conus_hcs v4, TreeMap2022.",
+  },
+  volume_removed: {
+    title: "Expected volume removed (m³/ha/yr)",
+    type: "ramp",
+    ramp: ["#000004","#51127c","#b73779","#fc8961","#fcfdbf"],
+    lo: "0", mid: "1.6", hi: "high",
+    note: "merch. volume × (P(partial)·intensity_partial + P(stand-repl)·intensity_clearcut), native 30 m. conus_hcs v4, TreeMap2022.",
   },
 };
 
@@ -847,7 +870,7 @@ export default function App(){
                           userLoc={userLoc}
                           baseLayer={baseOn ? `${BASE}raster/conus_forest_nonforest.png` : null}
                           baseBounds={baseBounds}
-                          baseOpacity={0.6}
+                          baseOpacity={0.82}
                           focusGeom={focusGeom}/>
                 </div>);
               })()}
@@ -966,6 +989,7 @@ export default function App(){
               <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
               <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
               <div><i style={{background:"#2a3a47"}}></i>no model data yet</div>
+              {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest (NLCD)</div>}
             </div>)}
           {mapMode === "carbon" && (
             <div className="legend">
