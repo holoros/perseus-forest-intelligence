@@ -60,7 +60,7 @@ export default function StandOutlook({ aoi, stumpage }) {
   if (r.dollars && !vpc) return (<div className="stand-outlook"><div className="so-head"><b>Stand Outlook</b>
     <select value={resp} onChange={e => setResp(e.target.value)}>{RESP.map(x => <option key={x.key} value={x.key}>{x.label}</option>)}</select></div>
     <div className="note" style={{ margin: "6px 2px" }}>No stumpage prices for {aoi.state || "this state"} yet. Pick another response.</div></div>);
-  if (!src || !src.untreated) return <div className="note" style={{ margin: "6px 2px" }}>This response has no fitted curve here.</div>;
+  if (!src || !src.untreated || !src.harvested) return <div className="note" style={{ margin: "6px 2px" }}>This response has no fitted curve here.</div>;
 
   const k = r.dollars ? vpc.dpc : r.scale;
   let unt = src.untreated.map(([a, v]) => [a, v * k]);
@@ -91,8 +91,8 @@ export default function StandOutlook({ aoi, stumpage }) {
 
   // ---- multi-objective tradeoffs (carbon + value data-driven; services indicative) ----
   const cC = all.carbon_lbac;
-  const carbR = cC ? interp(cC.untreated.map(([a, v]) => [a, v / 2000]), Math.min(age + 50, 100)) : 0;
-  const carbM = cC ? interp(cC.harvested.map(([a, v]) => [a, v / 2000]), Math.min(age + 50, 100)) : 0;
+  const carbR = (cC && cC.untreated) ? interp(cC.untreated.map(([a, v]) => [a, v / 2000]), Math.min(age + 50, 100)) : 0;
+  const carbM = (cC && cC.harvested) ? interp(cC.harvested.map(([a, v]) => [a, v / 2000]), Math.min(age + 50, 100)) : 0;
   const cMax = Math.max(carbR, carbM) || 1;
   const TRADE = [
     { label: "Carbon storage", r: carbR / cMax, m: carbM / cMax, hard: true },
