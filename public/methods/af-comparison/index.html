@@ -359,6 +359,111 @@ directionally comparable but operate on different scopes.
 </tbody>
 </table>
 
+<h2>CONUS scenario sweep · 48 states × 4 scenarios + BAU</h2>
+<p>
+Cardinal SLURM array <code>11258063</code> generated 192 trajectories (48
+states × 4 scenarios) in about 14 minutes wall on 16 concurrent CPUs.
+Combined with the previously published n=48 BAU baseline this gives a
+240 trajectory cross sectional view of how the CONUS forest carbon
+budget responds to disturbance and management levers.
+</p>
+
+<figure>
+  <img src="fig_conus_sweep.png" alt="Two panel CONUS scenario sweep: left a region-by-scenario heatmap of 50-year carbon delta in Mg/ha; right a CONUS net delta bar chart showing BAU +4870 TgC, HIST -10100 TgC, RH -7100, RH_CC -5100, WARM_HIST -11100">
+  <figcaption>
+    <strong>Figure (new).</strong> CONUS scenario sweep at the 50-year
+    horizon. <strong>(A)</strong> Regional ecosystem stock delta
+    (Mg/ha) under each scenario for the six EPA Level III aggregated
+    regions. PNW (-80 to -90 Mg/ha) is the most extreme source under
+    every disturbance scenario; LakeStates and NE_AtlanticMaritime stay
+    closest to neutral. <strong>(B)</strong> CONUS net 50-year delta
+    in TgC. BAU is a +4,870 TgC sink (no-disturbance counterfactual);
+    HIST (literature-calibrated historical disturbance schedule) is a
+    -10,100 TgC source, a 15,000 TgC swing. Reduced harvest (RH)
+    recovers +3,000 TgC vs HIST; RH_CC recovers +5,000. WARM_HIST adds
+    another -1,000 TgC on top of HIST.
+  </figcaption>
+</figure>
+
+<table class="compare">
+<thead>
+<tr>
+  <th>Scenario</th>
+  <th class="num">CONUS y50 (TgC)</th>
+  <th class="num">Δ vs y0 (TgC)</th>
+  <th class="num">Δ Mg/ha</th>
+  <th class="num">vs HIST (TgC)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>BAU</strong> · no disturbance</td>
+  <td class="num delta-pos">66,245</td>
+  <td class="num delta-pos">+4,870</td>
+  <td class="num delta-pos">+17.7</td>
+  <td class="num delta-pos">+14,979</td>
+</tr>
+<tr>
+  <td><strong>HIST</strong> · historical schedule (apples-to-apples to AF BAU)</td>
+  <td class="num delta-neg">51,266</td>
+  <td class="num delta-neg">-10,109</td>
+  <td class="num delta-neg">-36.8</td>
+  <td class="num">0</td>
+</tr>
+<tr>
+  <td><strong>RH</strong> · harvest probability × 0.7</td>
+  <td class="num delta-neg">54,267</td>
+  <td class="num delta-neg">-7,108</td>
+  <td class="num delta-neg">-25.9</td>
+  <td class="num delta-pos">+3,001</td>
+</tr>
+<tr>
+  <td><strong>RH_CC</strong> · clearcut probability × 0.5</td>
+  <td class="num delta-neg">56,308</td>
+  <td class="num delta-neg">-5,067</td>
+  <td class="num delta-neg">-18.4</td>
+  <td class="num delta-pos">+5,042</td>
+</tr>
+<tr>
+  <td><strong>WARM_HIST</strong> · HIST + region wildfire amplifier</td>
+  <td class="num delta-neg">50,268</td>
+  <td class="num delta-neg">-11,106</td>
+  <td class="num delta-neg">-40.4</td>
+  <td class="num delta-neg">-998</td>
+</tr>
+</tbody>
+</table>
+
+<div class="tldr">
+<h3>Three headlines from the CONUS sweep</h3>
+<p>
+<strong>1. The CONUS sign flips from sink to source between BAU and HIST.</strong>
+A 15,000 TgC swing exposes how much of PERSEUS's previously published
+BAU sink was an artifact of the no-disturbance assumption. Once realistic
+disturbance is replayed, CONUS becomes a -10,100 TgC ecosystem source
+over 50 years (-36.8 Mg/ha mean). 36 of 48 states are sources under HIST,
+vs 7 under BAU. The remaining sink is concentrated in NE Atlantic
+Maritime and Lake States.
+</p>
+<p>
+<strong>2. Reduced harvest is the highest leverage policy lever.</strong>
+RH (-30% harvest probability) recovers +3,001 TgC vs HIST over 50 years.
+RH_CC (-50% clearcut, partial harvest unchanged) recovers +5,042 TgC,
+about 1.7× more effective despite a smaller area footprint. The result
+underscores that clearcut probability is the most efficient knob to dial
+down per unit hectare in CBM-CFS3 family carbon accounting.
+</p>
+<p>
+<strong>3. Climate-amplified wildfire adds another -1,000 TgC at CONUS scale.</strong>
+WARM_HIST applies region-specific wildfire amplifiers (PNW × 1.5,
+Mountain West × 1.5, Lake States × 1.2, NE × 1.2, South + Southeast × 1.0)
+on top of HIST. PNW takes the largest additional hit (-10 Mg/ha vs HIST),
+Mountain West -10 Mg/ha, Lake States and NE near zero. The asymmetry
+matches the AF Climate Change Impacts scenario but quantifies it
+across every CONUS state under uniform conventions.
+</p>
+</div>
+
 <h2>Cross state scenario sweep · 6 AF states × 5 scenarios</h2>
 <p>
 A real end to end run of the cbm_conus scenario tooling at 30 tasks
