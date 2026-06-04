@@ -464,6 +464,24 @@
    "unit": "million USD (2020)",
    "kind": "value",
    "group": "economic"
+  },
+  "hwp_carbon_stock": {
+   "label": "Harvested wood product carbon (in-use + landfill)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "net_climate_carbon": {
+   "label": "Net climate carbon (ecosystem additionality + HWP storage)",
+   "unit": "Tg C",
+   "kind": "stock",
+   "group": "carbon"
+  },
+  "es_bundle_score": {
+   "label": "Ecosystem-service bundle score",
+   "unit": "0-1",
+   "kind": "index",
+   "group": "ecosystem_services"
   }
  },
  "buckets": [
