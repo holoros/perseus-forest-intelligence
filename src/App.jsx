@@ -42,6 +42,7 @@ const MAP_BINS = [
     layers:[["standing_value","Standing value 2022 ($/ac)"],
             ["standing_value_2020","Standing value 2020 ($/ac)"],["standing_value_2016","Standing value 2016 ($/ac)"],
             ["standing_value_cv","Value uncertainty ($/ac s.d.)"],
+            ["standing_value_change_1622","Value change 2016->2022 ($/ac)"],
             ["species_value_index","Species value index (SVI)"],
             ["sawtimber_share","Sawtimber share (%)"],
             ["hybrid_agc2022","AG carbon 2022 (Mg C/ha)"],["hybrid_dagc100","100-yr AG carbon change"]] },
@@ -274,6 +275,13 @@ const CONUS_LEGENDS = {
     ramp: ["#f7fcf5","#74c476","#238b45","#00441b"],
     lo: "0", mid: "mid", hi: "high",
     note: "TreeMap2016 volume x stumpage price; shared color breaks with 2022 for comparison",
+  },
+  standing_value_change_1622: {
+    title: "Standing value change 2016->2022 ($/ac)",
+    type: "ramp",
+    ramp: ["#8c510a","#dfc27d","#f5f5f5","#80cdc1","#01665e"],
+    lo: "loss", mid: "0", hi: "gain",
+    note: "2022 minus 2016 standing value; diverging, symmetric +/-$500/ac; national mean ~ flat (-$8/ac)",
   },
   standing_value_cv: {
     title: "Value uncertainty (s.d., $/ac)",
