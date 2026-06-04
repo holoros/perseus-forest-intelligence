@@ -481,6 +481,26 @@ function downloadCsv(aoi){
   a.click(); URL.revokeObjectURL(a.href);
 }
 
+// Collapsible detail section: a consistent uppercase header with a chevron that
+// tucks granular content away so the panel leads with the scorecard, radar, and
+// outlook instead of overwhelming a landowner with every table at once.
+function Collapsible({ title, subtitle, defaultOpen = false, children }){
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{margin:"4px 0 0"}}>
+      <button onClick={()=>setOpen(o=>!o)} style={{display:"flex",alignItems:"center",gap:7,width:"100%",
+        background:"transparent",border:"none",borderTop:"1px solid var(--line)",padding:"7px 4px 5px",
+        cursor:"pointer",font:"inherit",textAlign:"left"}}>
+        <span style={{fontSize:9,color:"#5e7180",transform:open?"rotate(90deg)":"none",
+          transition:"transform .15s",display:"inline-block"}}>▶</span>
+        <span style={{fontSize:11,fontWeight:600,letterSpacing:".03em",textTransform:"uppercase",color:"var(--mut)"}}>{title}</span>
+        {subtitle && <span style={{fontSize:10.5,color:"#5e7180",fontWeight:400,marginLeft:"auto"}}>{subtitle}</span>}
+      </button>
+      {open && <div style={{padding:"2px 2px 0"}}>{children}</div>}
+    </div>
+  );
+}
+
 export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }){
   if(!aoi) return null;
   const cv = (v, u, d=0) => { const c = conv(v, u, units); return `${c.value.toFixed(d)} ${c.unit}`; };
@@ -524,8 +544,8 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         {agb50 != null ? <Row k="AGB @50yr" v={`${cv(agb50,"ton/ac")}${agb50h!=null?` (${conv(agb50h,"ton/ac",units).value.toFixed(0)} harvested)`:""}`}/> : null}
       </div>
 
-      {plotStats && plotStats.n > 0 && (<>
-        <div className="aoi-sub">Forest attributes · {plotStats.n} FIA plots{plotStats.invYears?` (${plotStats.invYears[0]}–${plotStats.invYears[1]})`:""}</div>
+      {plotStats && plotStats.n > 0 && (
+       <Collapsible title="Forest attributes" subtitle={`${plotStats.n} FIA plots${plotStats.invYears?` · ${plotStats.invYears[0]}–${plotStats.invYears[1]}`:""}`}>
         <div className="aoi-grid">
           {plotStats.meanAge != null && <Row k="Mean stand age" v={`${plotStats.meanAge.toFixed(0)} yr`}/>}
           {plotStats.meanBA != null && <Row k="Mean live BA" v={cv(plotStats.meanBA,"sq ft/ac")}/>}
@@ -556,7 +576,8 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
             ))}
           </div>
         </>)}
-      </>)}
+       </Collapsible>
+      )}
       {plotStats && plotStats.n === 0 && (
         <div className="note" style={{margin:"2px 0 6px"}}>No FIA plots fall inside this AOI{state?` in ${state}`:""}.</div>
       )}
@@ -565,7 +586,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
       )}
 
       {landscape && (landscape.ownership || landscape.risk || landscape.habitat || landscape.biodiversity || landscape.siteProductivity || landscape.speciesValue || landscape.stumpage || landscape.index) && (<>
-        <div className="aoi-sub">Condition index · quick look</div>
+        <div className="aoi-sub">Condition &amp; future outlook</div>
         {landscape.index && (
           <div>
             <Scorecard index={landscape.index}/>
@@ -581,7 +602,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
           </div>
         )}
         {landscape.rdSeries && <RDTrajectory series={landscape.rdSeries}/>}
-        <div className="aoi-sub">Surrounding landscape · sampled from CONUS layers</div>
+        <Collapsible title="Surrounding landscape" subtitle="sampled from CONUS layers">
         {landscape.forestFrac != null && (
           <div className="aoi-grid">
             <Row k="Forest cover (area)" v={`${Math.round(landscape.forestFrac*100)}%`}/>
@@ -678,6 +699,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
           Habitat and biodiversity (<i>~</i>) are indicative composites of forest continuity, structural maturity,
           and forest-type diversity — refine with field inventory.
         </div>
+        </Collapsible>
       </>)}
 
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
