@@ -239,8 +239,30 @@ footer {
 
 <div class="container">
 
-<div class="tag">Methods dashboard · 2026-06-02</div>
+<div class="tag">Methods dashboard · updated 2026-06-04</div>
 <h1>PERSEUS multi-model vs the American Forests state CBM reports</h1>
+
+<div class="tldr" style="border-left-color:var(--warn);background:#fce8b8;">
+<h3 style="color:var(--warn);">⚠ 2026-06-04 correction in progress</h3>
+<p>
+The CONUS scenario sweep originally published below (BAU sink to HIST source,
+15,000 TgC swing) used <strong>literature-calibrated regional disturbance
+rates</strong> that overestimated the actual schedule by approximately
+5.6× in MN. The previously published <em>BAU</em> was in fact run with
+the LCMS-calibrated bundle schedule (the realistic baseline), so it
+already includes disturbance. The PERSEUS scenario tool now has a
+<code>--from-bundle</code> mode that scales the bundle's empirical
+LCMS-calibrated disturbance events directly. Under that corrected
+schedule, MN delta is +40.79 (HIST), +40.85 (RH), +40.80 (RH_CC),
++40.78 (WARM_HIST) — the policy lever effects are sub-1 Mg/ha and
+within the simulation noise. The corrected 6 AF state sweep is
+re-running and the dashboard tables below will refresh shortly.
+The qualitative methods finding (inventory stratification dominates
+cross-model uncertainty) is unchanged. The corrected scenario
+magnitudes will be substantially smaller than the previously
+published values.
+</p>
+</div>
 <p class="lede">
 A side by side comparison of the American Forests Carbon Budget Model
 state reports with the PERSEUS multi-model intercomparison framework
