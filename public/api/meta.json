@@ -1,12 +1,13 @@
 {
- "generated": "2026-06-04T13:23:54.079358+00:00",
+ "generated": "2026-06-04T19:01:20.576935+00:00",
  "schema": "perseus_api_v1",
- "db_version": "v0.61",
+ "db_version": "v0.62",
  "stats": {
   "states": 48,
   "engines": 38,
   "metrics": 70,
-  "rows": 47863
+  "rows": 47863,
+  "libcbm_b13_added": true
  },
  "metrics": {
   "agc_live_total": {
