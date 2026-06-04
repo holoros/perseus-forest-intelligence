@@ -6,13 +6,15 @@ import { useRef, useState } from "react";
 export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
                                       showBands, showInvBand, hiddenEngines, yMode,
                                       overlayNode, overlayLabel,
-                                      isolatedEngine, onIsolate }){
-  const W=560,H=320,L=48,R=14,T=14,B=30;
+                                      isolatedEngine, onIsolate, xMax }){
+  const W=560,H=320,L=48,R=70,T=14,B=30;
   const svgRef = useRef(null);
   const [hoverX, setHoverX] = useState(null);
 
-  const visible = (node||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model));
-  const visibleOverlay = (overlayNode||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model));
+  // Optional user x-axis horizon clamp (projections run to 2125).
+  const clampX = s => (xMax && s.pts) ? {...s, pts: s.pts.filter(p=>p[0]<=xMax)} : s;
+  const visible = (node||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).filter(s=>s.pts.length);
+  const visibleOverlay = (overlayNode||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).filter(s=>s.pts.length);
   // When an engine is isolated, only that engine's line draws — but keep the
   // full set in `visible` so hovers can re-display values for the others.
   const drawSet = isolatedEngine
@@ -64,7 +66,10 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     for(let v = start; v <= y1 + step*1e-6; v += step) yticks.push(+v.toFixed(6));
     if(yticks.length < 2) yticks = [y0, y1];
   }
-  const ydec = (yMode!=="log" && yticks.length>1 && (yticks[1]-yticks[0]) < 1) ? 1 : 0;
+  // Decimal places from the actual tick STEP, so narrow ranges (e.g. RD ticks
+  // 0.46/0.48/0.50) don't all collapse to the same label under toFixed(1).
+  const ystep = yticks.length>1 ? Math.abs(yticks[1]-yticks[0]) : (y1-y0)||1;
+  const ydec = ystep>=1 ? 0 : ystep>=0.1 ? 1 : ystep>=0.01 ? 2 : 3;
   yticks.forEach((v,i)=>{
     const yy=Y(v);
     grid.push(<g key={"g"+i}>
@@ -74,8 +79,13 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       </text>
     </g>);
   });
-  const xticks=[]; for(let t=Math.ceil(x0/20)*20; t<=x1; t+=20)
-    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{t}</text>);
+  // Adaptive x-axis ticks: a "nice" step from the year span, so short spans
+  // (2016-2022) show several labels instead of a lone "2020".
+  const xspan = (x1-x0)||1, xraw = xspan/5;
+  const xmag = Math.pow(10, Math.floor(Math.log10(xraw))), xnorm = xraw/xmag;
+  const xstep = Math.max(1, (xnorm<1.5?1:xnorm<3?2:xnorm<7?5:10)*xmag);
+  const xticks=[]; for(let t=Math.ceil(x0/xstep)*xstep; t<=x1+1e-6; t+=xstep)
+    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{Math.round(t)}</text>);
   const bands = showBands ? visible.filter(s=> s.pts.some(p=>p.length>=4)).map((s,i)=>{
     const col = classCol[s.cls] || "#bbb";
     const bp = s.pts.filter(p=>p.length>=4);
@@ -109,9 +119,9 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             opacity={dashed?0.7:0.92}
             strokeDasharray={dashed?"4 4":"0"}
             style={{pointerEvents:"none"}}/>
-      <text x={X(last[0])+3} y={Y(last[1])+3} fill={col} fontSize="8"
-            opacity={dashed?0.7:1} style={{pointerEvents:"none"}}>
-        {s.model.replace(/_/g," ").slice(0,16)}{dashed?"·"+overlayLabel:""}
+      <text x={W-R+4} y={Math.max(T+6, Math.min(H-B-2, Y(last[1])+3))} fill={col} fontSize="8"
+            textAnchor="start" opacity={dashed?0.7:1} style={{pointerEvents:"none"}}>
+        {s.model.replace(/_/g," ").slice(0,13)}{dashed?"·"+overlayLabel:""}
       </text>
     </g>;
   };

@@ -433,6 +433,7 @@ export default function App(){
   const [hiddenEngines,setHiddenEngines] = useState(new Set()); // per-engine hide
   const [hiddenClasses,setHiddenClasses] = useState(new Set()); // class-level hide
   const [yMode,setYMode] = useState("auto"); // v0.63: default to zoom-to-median so FVS outliers don't dominate
+  const [xHorizon,setXHorizon] = useState("all"); // user x-axis time-window clamp
   const [compareOn,setCompareOn] = useState(false);
   const [cmpState,setCmpState] = useState("IN");
   const [cmpSeries,setCmpSeries] = useState(null);
@@ -703,7 +704,11 @@ export default function App(){
   },[compareOn, cmpState, sel, states]);
 
   const cov = states && states[sel];
-  const rawNode = series && series[metric] && series[metric][bucket];
+  // Hard-drop retired wear_nh series everywhere (not just soft-hidden): they were
+  // retired in v0.52 and carry corrupt values (e.g. rd_mean_wtd ~6e7 in ME), so
+  // they must never reach the chart or the y-axis scaling, even under "show all".
+  const rawNode0 = series && series[metric] && series[metric][bucket];
+  const rawNode = rawNode0 ? rawNode0.filter(s => !/wear_nh/i.test(s.model)) : rawNode0;
   // v0.66 auto-hide noisy engines unless user opts into "show all":
   //   uncalibrated FVS variants (native/jenkins not anchored or calibrated)
   //   quarantined wear-nh series (already retired in v0.52 but may leak)
@@ -1419,6 +1424,12 @@ export default function App(){
                 <option value="auto">Y: zoom to median (q10–q90)</option>
                 <option value="log">Y: log scale</option>
               </select>
+              <select value={xHorizon} onChange={e=>setXHorizon(e.target.value)} title="Time horizon (x-axis)">
+                <option value="all">X: full horizon</option>
+                <option value="2050">X: to 2050</option>
+                <option value="2075">X: to 2075</option>
+                <option value="2100">X: to 2100</option>
+              </select>
               <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
                 <input type="checkbox" checked={showAllEngines} onChange={e=>setShowAllEngines(e.target.checked)}/> show all engines
               </label>
@@ -1456,6 +1467,7 @@ export default function App(){
                 showBands={showBands && hasBands}
                 showInvBand={showInvBand && hasInvBand}
                 hiddenEngines={hiddenEngines} yMode={yMode}
+                xMax={xHorizon==="all" ? null : +xHorizon}
                 overlayNode={overlayNode} overlayLabel={cmpState}
                 isolatedEngine={isolatedEngine} onIsolate={setIsolatedEngine}/>
             </div>
