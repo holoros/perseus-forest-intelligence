@@ -309,6 +309,47 @@ function RDTrajectory({ series }){
   );
 }
 
+// Observed structure trajectory (quadratic mean diameter, stand height, stocking)
+// over 2016 / 2020 / 2022 from the TreeMap-basis overlays. Each metric is a small
+// auto-scaled sparkline with its latest value and direction of change, giving the
+// "what is here now" read a short history beside the RD trajectory.
+function StructureTrajectory({ series }){
+  if(!series) return null;
+  const keys = Object.keys(series).filter(k => series[k] && series[k].pts);
+  if(!keys.length) return null;
+  const W=240, H=34, ml=4, mr=52, mt=5, mb=5;
+  const x0=ml, x1=W-mr, y0=mt, y1=H-mb;
+  const sx = yr => x0 + (yr-2016)/(2022-2016)*(x1-x0);
+  return (
+    <div style={{margin:"4px 6px 6px"}}>
+      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Forest structure over time · 2016 → 2022</div>
+      {keys.map(k => {
+        const { label, pts } = series[k];
+        const v = pts.filter(p=>p.v!=null);
+        if(v.length < 2) return null;
+        const vals = v.map(p=>p.v), lo=Math.min(...vals), hi=Math.max(...vals), span=(hi-lo)||1;
+        const sy = val => y1 - ((val-lo)/span)*(y1-y0);
+        const line = v.map(p=>`${sx(p.year).toFixed(1)},${sy(p.v).toFixed(1)}`).join(" ");
+        const first=v[0].v, last=v[v.length-1].v, d=last-first;
+        const thr = 0.03*Math.abs(first||1);
+        const arrow = d>thr ? "↑" : d<-thr ? "↓" : "→";
+        const col = d>thr ? "#1d7e0f" : d<-thr ? "#d9734f" : "#5e7180";
+        return (
+          <div key={k} style={{display:"flex",alignItems:"center",gap:6,margin:"1px 0"}}>
+            <span style={{fontSize:11,minWidth:86,color:"var(--ink)"}}>{label}</span>
+            <svg viewBox={`0 0 ${W} ${H}`} style={{flex:1,height:24}}>
+              <polyline points={line} fill="none" stroke="#1d7e0f" strokeWidth="1.6"/>
+              {v.map((p,i)=>(<circle key={i} cx={sx(p.year)} cy={sy(p.v)} r="2.3" fill="#1d7e0f"/>))}
+              <text x={x1+5} y={(y0+y1)/2+3.5} fontSize="10.5" fill={col}>{last} {arrow}</text>
+            </svg>
+          </div>
+        );
+      })}
+      <div className="note" style={{margin:"2px 0 0"}}>Quadratic mean diameter, stand height, and stocking from TreeMap-basis overlays.</div>
+    </div>
+  );
+}
+
 // Priorities dial. The user weights what they care about and the area's outcomes
 // combine into one region-relative "priority-fit" score, a ranked contribution
 // list, and a rule-based management leaning. All axes already read "high = good"
@@ -602,6 +643,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
           </div>
         )}
         {landscape.rdSeries && <RDTrajectory series={landscape.rdSeries}/>}
+        {landscape.structSeries && <StructureTrajectory series={landscape.structSeries}/>}
         <Collapsible title="Surrounding landscape" subtitle="sampled from CONUS layers">
         {landscape.forestFrac != null && (
           <div className="aoi-grid">
