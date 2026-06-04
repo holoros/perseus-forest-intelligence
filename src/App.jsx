@@ -711,9 +711,14 @@ export default function App(){
     /(fvs.*(native|jenkins))/i.test(eng) && !/(anchored|calibrated)/i.test(eng) ||
     /wear_nh/i.test(eng);
   const filteredByClass = rawNode ? rawNode.filter(s => !hiddenClasses.has(s.cls)) : null;
-  const filteredByOutlier = (filteredByClass && !showAllEngines)
+  let filteredByOutlier = (filteredByClass && !showAllEngines)
     ? filteredByClass.filter(s => !isOutlier(s.model))
     : filteredByClass;
+  // Never auto-hide every engine into a blank chart: if the outlier filter
+  // removed all series but some exist for this metric (e.g. rd_mean_wtd, whose
+  // only engines are uncalibrated FVS variants), fall back to showing them.
+  if(filteredByClass && filteredByClass.length && filteredByOutlier && filteredByOutlier.length === 0)
+    filteredByOutlier = filteredByClass;
   // v0.66 scenario focus: when set, replace engine view with libcbm-only trajectory
   // for that scenario, sourced from timeline.json (per-scenario per-year AGC).
   const scenarioNode = (scenarioFocus !== "all" && timeline && timeline[sel]
@@ -998,13 +1003,14 @@ export default function App(){
       idxAxes.biodiversity = bioScore==null ? null : { v:bioScore, lo:bioScore, hi:bioScore, ref:null };
       const haveIdx = Object.values(idxAxes).filter(v=>v!=null).length >= 4;
       // Observed RD trajectory from the three deployed TreeMap-basis RD overlays
-      // (2016 / 2020 / 2022). Mean relative density inside the AOI, in RD units
-      // (ramp hi label = 1.5). A real calendar-year change signal for the area.
+      // (2016 / 2020 / 2022). Mean relative density inside the AOI, in RD units.
+      // The TreeMap RD rasters (TREEMAP_restore/RD/RD_<year>.tif) are 0–1 (max
+      // 0.999), so the ramp position is RD directly — no rescaling.
       const RD_YEARS = [[2016,"conus_rd_2016.png"],[2020,"conus_rd_2020.png"],[2022,"conus_rd_2022.png"]];
       const rdSeries = await Promise.all(RD_YEARS.map(async ([yr,u]) => {
         const arr = await rampValues(R(u), FRAME, geom, RD_RAMP).catch(()=>null);
         const m = mean(arr);
-        return { year: yr, rd: m==null ? null : +(m*1.5).toFixed(3) };
+        return { year: yr, rd: m==null ? null : +Math.min(1, m).toFixed(3) };
       }));
       const haveRd = rdSeries.filter(p=>p.rd!=null).length >= 2;
       landscape = {
