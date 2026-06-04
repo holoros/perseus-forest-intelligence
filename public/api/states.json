@@ -96,9 +96,9 @@
   ]
  },
  "ME": {
-  "engines": 35,
-  "metrics": 65,
-  "rows": 28834,
+  "engines": 23,
+  "metrics": 37,
+  "rows": 4193,
   "name": "Maine",
   "centroid": [
    -69.2,

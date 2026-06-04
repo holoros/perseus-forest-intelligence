@@ -433,6 +433,7 @@ export default function App(){
   const [hiddenEngines,setHiddenEngines] = useState(new Set()); // per-engine hide
   const [hiddenClasses,setHiddenClasses] = useState(new Set()); // class-level hide
   const [yMode,setYMode] = useState("auto"); // v0.63: default to zoom-to-median so FVS outliers don't dominate
+  const [xHorizon,setXHorizon] = useState("all"); // user x-axis time-window clamp
   const [compareOn,setCompareOn] = useState(false);
   const [cmpState,setCmpState] = useState("IN");
   const [cmpSeries,setCmpSeries] = useState(null);
@@ -578,11 +579,16 @@ export default function App(){
     const show = rasterOn && LANDIS_STATES.includes(sel);
     const url = `${BASE}raster/${rasterLayer}_t${rasterT}.png`;
     if(show){
-      if(!mp.getSource("mebio")){
-        mp.addSource("mebio",{type:"image",url,coordinates:LANDIS_BOUNDS});
-        mp.addLayer({id:"mebio",type:"raster",source:"mebio",paint:{"raster-opacity":rasterOpacity}},"focalline");
-      } else { mp.getSource("mebio").updateImage({url,coordinates:LANDIS_BOUNDS}); }
-      if(mp.getLayer("mebio")) mp.setPaintProperty("mebio","raster-opacity",rasterOpacity);
+      try{
+        if(!mp.getSource("mebio")){
+          mp.addSource("mebio",{type:"image",url,coordinates:LANDIS_BOUNDS});
+          mp.addLayer({id:"mebio",type:"raster",source:"mebio",paint:{"raster-opacity":rasterOpacity}});
+        } else { mp.getSource("mebio").updateImage({url,coordinates:LANDIS_BOUNDS}); }
+        if(mp.getLayer("mebio")){
+          mp.moveLayer("mebio");   // keep on top so the forest base / state fill don't hide it
+          mp.setPaintProperty("mebio","raster-opacity",rasterOpacity);
+        }
+      }catch(e){ console.error("LANDIS biomass layer failed to add", e); }
     } else {
       if(mp.getLayer("mebio")) mp.removeLayer("mebio");
       if(mp.getSource("mebio")) mp.removeSource("mebio");
@@ -703,7 +709,11 @@ export default function App(){
   },[compareOn, cmpState, sel, states]);
 
   const cov = states && states[sel];
-  const rawNode = series && series[metric] && series[metric][bucket];
+  // Hard-drop retired wear_nh series everywhere (not just soft-hidden): they were
+  // retired in v0.52 and carry corrupt values (e.g. rd_mean_wtd ~6e7 in ME), so
+  // they must never reach the chart or the y-axis scaling, even under "show all".
+  const rawNode0 = series && series[metric] && series[metric][bucket];
+  const rawNode = rawNode0 ? rawNode0.filter(s => !/wear_nh/i.test(s.model)) : rawNode0;
   // v0.66 auto-hide noisy engines unless user opts into "show all":
   //   uncalibrated FVS variants (native/jenkins not anchored or calibrated)
   //   quarantined wear-nh series (already retired in v0.52 but may leak)
@@ -711,9 +721,14 @@ export default function App(){
     /(fvs.*(native|jenkins))/i.test(eng) && !/(anchored|calibrated)/i.test(eng) ||
     /wear_nh/i.test(eng);
   const filteredByClass = rawNode ? rawNode.filter(s => !hiddenClasses.has(s.cls)) : null;
-  const filteredByOutlier = (filteredByClass && !showAllEngines)
+  let filteredByOutlier = (filteredByClass && !showAllEngines)
     ? filteredByClass.filter(s => !isOutlier(s.model))
     : filteredByClass;
+  // Never auto-hide every engine into a blank chart: if the outlier filter
+  // removed all series but some exist for this metric (e.g. rd_mean_wtd, whose
+  // only engines are uncalibrated FVS variants), fall back to showing them.
+  if(filteredByClass && filteredByClass.length && filteredByOutlier && filteredByOutlier.length === 0)
+    filteredByOutlier = filteredByClass;
   // v0.66 scenario focus: when set, replace engine view with libcbm-only trajectory
   // for that scenario, sourced from timeline.json (per-scenario per-year AGC).
   const scenarioNode = (scenarioFocus !== "all" && timeline && timeline[sel]
@@ -998,13 +1013,14 @@ export default function App(){
       idxAxes.biodiversity = bioScore==null ? null : { v:bioScore, lo:bioScore, hi:bioScore, ref:null };
       const haveIdx = Object.values(idxAxes).filter(v=>v!=null).length >= 4;
       // Observed RD trajectory from the three deployed TreeMap-basis RD overlays
-      // (2016 / 2020 / 2022). Mean relative density inside the AOI, in RD units
-      // (ramp hi label = 1.5). A real calendar-year change signal for the area.
+      // (2016 / 2020 / 2022). Mean relative density inside the AOI, in RD units.
+      // The TreeMap RD rasters (TREEMAP_restore/RD/RD_<year>.tif) are 0–1 (max
+      // 0.999), so the ramp position is RD directly — no rescaling.
       const RD_YEARS = [[2016,"conus_rd_2016.png"],[2020,"conus_rd_2020.png"],[2022,"conus_rd_2022.png"]];
       const rdSeries = await Promise.all(RD_YEARS.map(async ([yr,u]) => {
         const arr = await rampValues(R(u), FRAME, geom, RD_RAMP).catch(()=>null);
         const m = mean(arr);
-        return { year: yr, rd: m==null ? null : +(m*1.5).toFixed(3) };
+        return { year: yr, rd: m==null ? null : +Math.min(1, m).toFixed(3) };
       }));
       const haveRd = rdSeries.filter(p=>p.rd!=null).length >= 2;
       landscape = {
@@ -1413,6 +1429,12 @@ export default function App(){
                 <option value="auto">Y: zoom to median (q10–q90)</option>
                 <option value="log">Y: log scale</option>
               </select>
+              <select value={xHorizon} onChange={e=>setXHorizon(e.target.value)} title="Time horizon (x-axis)">
+                <option value="all">X: full horizon</option>
+                <option value="2050">X: to 2050</option>
+                <option value="2075">X: to 2075</option>
+                <option value="2100">X: to 2100</option>
+              </select>
               <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:"var(--mut)"}}>
                 <input type="checkbox" checked={showAllEngines} onChange={e=>setShowAllEngines(e.target.checked)}/> show all engines
               </label>
@@ -1450,6 +1472,7 @@ export default function App(){
                 showBands={showBands && hasBands}
                 showInvBand={showInvBand && hasInvBand}
                 hiddenEngines={hiddenEngines} yMode={yMode}
+                xMax={xHorizon==="all" ? null : +xHorizon}
                 overlayNode={overlayNode} overlayLabel={cmpState}
                 isolatedEngine={isolatedEngine} onIsolate={setIsolatedEngine}/>
             </div>

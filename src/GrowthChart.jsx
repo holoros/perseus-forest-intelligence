@@ -6,13 +6,15 @@ import { useRef, useState } from "react";
 export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
                                       showBands, showInvBand, hiddenEngines, yMode,
                                       overlayNode, overlayLabel,
-                                      isolatedEngine, onIsolate }){
-  const W=560,H=320,L=48,R=14,T=14,B=30;
+                                      isolatedEngine, onIsolate, xMax }){
+  const W=560,H=320,L=48,R=70,T=14,B=30;
   const svgRef = useRef(null);
   const [hoverX, setHoverX] = useState(null);
 
-  const visible = (node||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model));
-  const visibleOverlay = (overlayNode||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model));
+  // Optional user x-axis horizon clamp (projections run to 2125).
+  const clampX = s => (xMax && s.pts) ? {...s, pts: s.pts.filter(p=>p[0]<=xMax)} : s;
+  const visible = (node||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).filter(s=>s.pts.length);
+  const visibleOverlay = (overlayNode||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).filter(s=>s.pts.length);
   // When an engine is isolated, only that engine's line draws — but keep the
   // full set in `visible` so hovers can re-display values for the others.
   const drawSet = isolatedEngine
@@ -22,6 +24,23 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
 
   if(!visible.length && !visibleOverlay.length)
     return <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}/>;
+  // Per-engine shade within a class, so several same-family lines (e.g. the 3
+  // national FVS engines, all orange) are distinguishable rather than a tangle.
+  const _shift = (hex, f) => { // f in [-1,1]: <0 darken, >0 lighten
+    const h = (hex && hex[0]==="#" && hex.length>=7) ? hex : "#bbbbbb";
+    const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
+    const adj = c => Math.round(f>=0 ? c+(255-c)*f : c*(1+f));
+    return `rgb(${adj(r)},${adj(g)},${adj(b)})`;
+  };
+  const _members = {};
+  [...drawSet, ...drawOverlay].forEach(s=>{ (_members[s.cls]=_members[s.cls]||[]); if(!_members[s.cls].includes(s.model)) _members[s.cls].push(s.model); });
+  const shadeFor = s => {
+    const base = classCol[s.cls] || "#bbb";
+    const mem = _members[s.cls] || [s.model];
+    if(mem.length < 2) return base;
+    const i = mem.indexOf(s.model);
+    return _shift(base, ((i/(mem.length-1)) - 0.5) * 0.7);  // spread ±35% lightness
+  };
   const xs=[], ys=[];
   const collectPts = (arr) => arr.forEach(s=> s.pts.forEach(p=>{
     xs.push(p[0]); ys.push(p[1]);
@@ -64,7 +83,10 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     for(let v = start; v <= y1 + step*1e-6; v += step) yticks.push(+v.toFixed(6));
     if(yticks.length < 2) yticks = [y0, y1];
   }
-  const ydec = (yMode!=="log" && yticks.length>1 && (yticks[1]-yticks[0]) < 1) ? 1 : 0;
+  // Decimal places from the actual tick STEP, so narrow ranges (e.g. RD ticks
+  // 0.46/0.48/0.50) don't all collapse to the same label under toFixed(1).
+  const ystep = yticks.length>1 ? Math.abs(yticks[1]-yticks[0]) : (y1-y0)||1;
+  const ydec = ystep>=1 ? 0 : ystep>=0.1 ? 1 : ystep>=0.01 ? 2 : 3;
   yticks.forEach((v,i)=>{
     const yy=Y(v);
     grid.push(<g key={"g"+i}>
@@ -74,8 +96,13 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       </text>
     </g>);
   });
-  const xticks=[]; for(let t=Math.ceil(x0/20)*20; t<=x1; t+=20)
-    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{t}</text>);
+  // Adaptive x-axis ticks: a "nice" step from the year span, so short spans
+  // (2016-2022) show several labels instead of a lone "2020".
+  const xspan = (x1-x0)||1, xraw = xspan/5;
+  const xmag = Math.pow(10, Math.floor(Math.log10(xraw))), xnorm = xraw/xmag;
+  const xstep = Math.max(1, (xnorm<1.5?1:xnorm<3?2:xnorm<7?5:10)*xmag);
+  const xticks=[]; for(let t=Math.ceil(x0/xstep)*xstep; t<=x1+1e-6; t+=xstep)
+    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{Math.round(t)}</text>);
   const bands = showBands ? visible.filter(s=> s.pts.some(p=>p.length>=4)).map((s,i)=>{
     const col = classCol[s.cls] || "#bbb";
     const bp = s.pts.filter(p=>p.length>=4);
@@ -95,7 +122,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     return <path d={up+" "+dn+" Z"} fill="#caa15a" opacity="0.18" stroke="none"><title>Inventory-basis range: FIA-anchored (yc_hybrid) vs TreeMap pixel</title></path>;
   })() : null);
   const drawLine = (s, i, dashed) => {
-    const col = classCol[s.cls] || "#bbb";
+    const col = shadeFor(s);
     const d = s.pts.map((p,k)=> (k? "L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
     const last = s.pts[s.pts.length-1];
     const tag = dashed ? `${s.label} · ${overlayLabel||"compare"}` : `${s.label}`;
@@ -109,9 +136,9 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             opacity={dashed?0.7:0.92}
             strokeDasharray={dashed?"4 4":"0"}
             style={{pointerEvents:"none"}}/>
-      <text x={X(last[0])+3} y={Y(last[1])+3} fill={col} fontSize="8"
-            opacity={dashed?0.7:1} style={{pointerEvents:"none"}}>
-        {s.model.replace(/_/g," ").slice(0,16)}{dashed?"·"+overlayLabel:""}
+      <text x={W-R+4} y={Math.max(T+6, Math.min(H-B-2, Y(last[1])+3))} fill={col} fontSize="8"
+            textAnchor="start" opacity={dashed?0.7:1} style={{pointerEvents:"none"}}>
+        {s.model.replace(/_/g," ").slice(0,13)}{dashed?"·"+overlayLabel:""}
       </text>
     </g>;
   };
@@ -203,7 +230,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
           {drawSet.slice(0, 8).map(s => {
             const v = valueAt(s, hoverYear);
             if(v == null) return null;
-            const col = classCol[s.cls] || "#bbb";
+            const col = shadeFor(s);
             return (
               <div key={s.model} style={{display:"flex",justifyContent:"space-between",gap:8}}>
                 <span><i style={{display:"inline-block",width:8,height:8,
