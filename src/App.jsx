@@ -881,6 +881,14 @@ export default function App(){
       const SVI_RAMP = ["#f7fcf5","#74c476","#238b45","#00441b"];
       const RD_RAMP = ["#f0f8ed","#a8dba8","#42b540","#1d7e0f","#053d04"];
       const SAW_RAMP = ["#fff7ec","#fdbb84","#ef6548","#b30000","#7f0000"];
+      // Structure-trajectory ramps + stop values. The colors match the Cardinal
+      // .clr files used to render conus_{qmd,standht,alstk}_<year>.png; rampValues
+      // returns 0..1 along the ramp and structVal maps that back to real units by
+      // piecewise interpolation over the stop values.
+      const QMD_RAMP = ["#f0f9e8","#bae4bc","#7bccc4","#43a2ca","#0868ac"], QMD_STOPS = [1,4,8,14,24];
+      const HT_RAMP  = ["#ffffcc","#c2e699","#78c679","#31a354","#006837"], HT_STOPS  = [5,25,50,80,120];
+      const STK_RAMP = ["#fff7ec","#fdd49e","#fd8d3c","#d94801","#7f2704"], STK_STOPS = [10,35,60,90,130];
+      const structVal = (t, stops) => { if(t==null) return null; const p = Math.max(0,Math.min(1,t))*(stops.length-1); const i = Math.min(stops.length-2, Math.floor(p)), f = p-i; return stops[i] + f*(stops[i+1]-stops[i]); };
       const [own, risk, ffrac, rdivers, cspi, svi, rd, saw] = await Promise.all([
         ownershipComposition(R("conus_ownership.png?v=2"), FRAME, geom).catch(()=>null),
         riskSummary(R("conus_p_disturbance_2022.png"), FRAME, geom).catch(()=>null),
@@ -983,6 +991,24 @@ export default function App(){
         return { year: yr, rd: m==null ? null : +(m*1.5).toFixed(3) };
       }));
       const haveRd = rdSeries.filter(p=>p.rd!=null).length >= 2;
+      // Observed structure trajectory (QMD, stand height, stocking) from the
+      // TreeMap-basis 2016/2020/2022 overlays. Mean ramp position -> real units.
+      const STRUCT_YEARS = [2016,2020,2022];
+      const STRUCT_DEFS = [
+        ["qmd","QMD (in)",QMD_RAMP,QMD_STOPS],
+        ["standht","Height (ft)",HT_RAMP,HT_STOPS],
+        ["alstk","Stocking (%)",STK_RAMP,STK_STOPS],
+      ];
+      const structSeries = {};
+      await Promise.all(STRUCT_DEFS.map(async ([key,label,ramp,stops]) => {
+        const pts = await Promise.all(STRUCT_YEARS.map(async yr => {
+          const arr = await rampValues(R(`conus_${key}_${yr}.png`), FRAME, geom, ramp).catch(()=>null);
+          const v = structVal(mean(arr), stops);
+          return { year: yr, v: v==null ? null : +v.toFixed(1) };
+        }));
+        if(pts.filter(p=>p.v!=null).length >= 2) structSeries[key] = { label, pts };
+      }));
+      const haveStruct = Object.keys(structSeries).length > 0;
       landscape = {
         ownership: own, risk, forestFrac: ffrac, diversity: divers,
         habitat: habScore!=null ? { score: habScore, band: band(habScore) } : null,
@@ -991,6 +1017,7 @@ export default function App(){
         relDensity: rd, sawtimberShare: saw,
         index: haveIdx ? idxAxes : null,
         rdSeries: haveRd ? rdSeries : null,
+        structSeries: haveStruct ? structSeries : null,
         stateName: stCode || null,
       };
     }catch(e){ landscape = null; }
