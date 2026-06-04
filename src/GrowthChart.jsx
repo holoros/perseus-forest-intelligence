@@ -24,6 +24,23 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
 
   if(!visible.length && !visibleOverlay.length)
     return <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}/>;
+  // Per-engine shade within a class, so several same-family lines (e.g. the 3
+  // national FVS engines, all orange) are distinguishable rather than a tangle.
+  const _shift = (hex, f) => { // f in [-1,1]: <0 darken, >0 lighten
+    const h = (hex && hex[0]==="#" && hex.length>=7) ? hex : "#bbbbbb";
+    const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
+    const adj = c => Math.round(f>=0 ? c+(255-c)*f : c*(1+f));
+    return `rgb(${adj(r)},${adj(g)},${adj(b)})`;
+  };
+  const _members = {};
+  [...drawSet, ...drawOverlay].forEach(s=>{ (_members[s.cls]=_members[s.cls]||[]); if(!_members[s.cls].includes(s.model)) _members[s.cls].push(s.model); });
+  const shadeFor = s => {
+    const base = classCol[s.cls] || "#bbb";
+    const mem = _members[s.cls] || [s.model];
+    if(mem.length < 2) return base;
+    const i = mem.indexOf(s.model);
+    return _shift(base, ((i/(mem.length-1)) - 0.5) * 0.7);  // spread ±35% lightness
+  };
   const xs=[], ys=[];
   const collectPts = (arr) => arr.forEach(s=> s.pts.forEach(p=>{
     xs.push(p[0]); ys.push(p[1]);
@@ -105,7 +122,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     return <path d={up+" "+dn+" Z"} fill="#caa15a" opacity="0.18" stroke="none"><title>Inventory-basis range: FIA-anchored (yc_hybrid) vs TreeMap pixel</title></path>;
   })() : null);
   const drawLine = (s, i, dashed) => {
-    const col = classCol[s.cls] || "#bbb";
+    const col = shadeFor(s);
     const d = s.pts.map((p,k)=> (k? "L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
     const last = s.pts[s.pts.length-1];
     const tag = dashed ? `${s.label} · ${overlayLabel||"compare"}` : `${s.label}`;
@@ -213,7 +230,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
           {drawSet.slice(0, 8).map(s => {
             const v = valueAt(s, hoverYear);
             if(v == null) return null;
-            const col = classCol[s.cls] || "#bbb";
+            const col = shadeFor(s);
             return (
               <div key={s.model} style={{display:"flex",justifyContent:"space-between",gap:8}}>
                 <span><i style={{display:"inline-block",width:8,height:8,

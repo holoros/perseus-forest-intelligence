@@ -579,11 +579,16 @@ export default function App(){
     const show = rasterOn && LANDIS_STATES.includes(sel);
     const url = `${BASE}raster/${rasterLayer}_t${rasterT}.png`;
     if(show){
-      if(!mp.getSource("mebio")){
-        mp.addSource("mebio",{type:"image",url,coordinates:LANDIS_BOUNDS});
-        mp.addLayer({id:"mebio",type:"raster",source:"mebio",paint:{"raster-opacity":rasterOpacity}},"focalline");
-      } else { mp.getSource("mebio").updateImage({url,coordinates:LANDIS_BOUNDS}); }
-      if(mp.getLayer("mebio")) mp.setPaintProperty("mebio","raster-opacity",rasterOpacity);
+      try{
+        if(!mp.getSource("mebio")){
+          mp.addSource("mebio",{type:"image",url,coordinates:LANDIS_BOUNDS});
+          mp.addLayer({id:"mebio",type:"raster",source:"mebio",paint:{"raster-opacity":rasterOpacity}});
+        } else { mp.getSource("mebio").updateImage({url,coordinates:LANDIS_BOUNDS}); }
+        if(mp.getLayer("mebio")){
+          mp.moveLayer("mebio");   // keep on top so the forest base / state fill don't hide it
+          mp.setPaintProperty("mebio","raster-opacity",rasterOpacity);
+        }
+      }catch(e){ console.error("LANDIS biomass layer failed to add", e); }
     } else {
       if(mp.getLayer("mebio")) mp.removeLayer("mebio");
       if(mp.getSource("mebio")) mp.removeSource("mebio");
