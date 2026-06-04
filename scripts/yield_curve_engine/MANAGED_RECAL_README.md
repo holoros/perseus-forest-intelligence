@@ -1,16 +1,39 @@
-# FIA managed-scenario recalibration (MUST run after every FIA series regeneration)
+# FIA managed-scenario recalibration (now baked into the fullseries CSVs)
 
-The FIA managed buckets (`yc_fia_empirical_v1`, `managed (*)`) are produced by the
-projector as a WHOLE-LANDSCAPE rotation, which is unrealistic (it harvests every acre
-and drives an implausible CONUS decline that disagrees with FIA, net +1.1%/yr, and the
-other engines). The realistic managed scenarios are produced by a post-projection step:
+The FIA projector emits the managed buckets as a WHOLE-LANDSCAPE rotation (every acre
+harvested), which is unrealistic: it drives an implausible CONUS decline that disagrees
+with the FIA record (net +1.1%/yr) and the other engines. The realistic managed scenarios
+use FIADB-derived per-state working fractions:
 
-    python3 ycx_blend_fia_datadriven.py <public/api> docs/results/fia_mgmt_shares_bystate.csv
+- managed (harvest) / (conservation): phi = harvested_share (FIA harvest treatment share)
+- managed (intensive): phi = planted_share (STDORGCD=1 plantations only)
+- reserved (RESERVCD) land is excluded by construction (never harvested or planted)
+- managed = phi * full_rotation + (1 - phi) * reserve
 
-which blends each managed bucket with reserve using FIADB-derived per-state working
-fractions (harvested_share for harvest/conservation, planted_share for intensive;
-reserved land excluded). Build `fia_mgmt_shares_bystate.csv` with `ycx_mgmt_shares.R`.
+## Durable integration (current approach)
 
-IMPORTANT: any process that regenerates the FIA series (e.g. CBM/GCBM ingests) reverts
-the managed buckets to whole-landscape rotation. This step MUST be re-run as the last
-stage of that regeneration, or the managed scenarios will show spurious declines.
+The recalibration is BAKED directly into the FIA fullseries CSVs on Cardinal, which are
+the canonical input the dashboard ingest reads:
+
+    /users/PUOM0008/crsfaaron/yield_curves_conus/treemap/recal_cell/fia_hybrid_fullseries_*.csv
+
+so any re-injection of the FIA series produces correct managed buckets with no post step.
+The original whole-landscape rotation is preserved alongside as *.full.csv.
+
+Per-state shares: docs/results/fia_mgmt_shares_bystate.csv (built by ycx_mgmt_shares.R).
+
+## When to re-run the bake
+
+The bake must be re-applied ONLY if the FIA projector is re-run (it regenerates the CSVs
+as whole-landscape rotation). After any such projector run:
+
+    cd <fullseries dir>
+    python3 ycx_bake_managed_csv.py <shares.csv> fia_hybrid_fullseries_*.csv
+
+Ingests that merely re-inject the existing CSVs (e.g. CBM/GCBM engine ingests) do NOT
+need this, because the CSVs already carry the recalibrated managed trajectories.
+
+## Fallback (operate on the JSON instead of the CSVs)
+
+If a process produces full-rotation managed JSON directly, the same recalibration can be
+applied post-injection: `ycx_blend_fia_datadriven.py <public/api> <shares.csv>`.
