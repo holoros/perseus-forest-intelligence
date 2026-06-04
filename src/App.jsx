@@ -378,6 +378,9 @@ const GCBM_LAYERS = [
 ];
 const CLASS_COL = { CBM:"#66c2a5", FVS:"#fc8d62", LANDIS:"#8da0cb", OSM:"#e78ac3",
   HCM:"#a6d854", YC:"#ffd92f", CEM:"#e5c494", FIA:"#b3b3b3", VCC:"#7570b3", "?":"#cccccc" };
+// Per-class line style (must match GrowthChart DASH) so the legend keys the chart.
+const CLASS_DASH = { CEM:"0", CBM:"7 3", FVS:"4 3", YC:"1.5 3", LANDIS:"9 3 2 3",
+  OSM:"6 2", ES:"2 2", ECON:"7 2 2 2", FIA:"0" };
 const METRIC_ORDER = ["agc_live_total","live_c_total","tree_c_total","agb_dry","vol_stem",
   "total_ecosystem_c","mean_stand_age","old_forest_share_120","standing_value_musd"];
 
@@ -1497,11 +1500,16 @@ export default function App(){
                 <span style={{color:"var(--mut)",marginRight:4}}>classes:</span>
                 {allClasses.map(c=>{
                   const off = hiddenClasses.has(c);
+                  const dash = CLASS_DASH[c] || "0";
                   return <button key={c} className="filt" onClick={()=>toggleClass(c)}
-                    style={{background:off?"transparent":CLASS_COL[c]||"#bbb",
+                    title={`${c} model family — line style: ${dash==="0"?"solid":"dashed"}`}
+                    style={{display:"inline-flex",alignItems:"center",gap:5,background:off?"transparent":CLASS_COL[c]||"#bbb",
                       color:off?"var(--mut)":"#0b1015", border:`1px solid ${CLASS_COL[c]||"#bbb"}`,
                       borderRadius:6,padding:"1px 7px",fontSize:11,cursor:"pointer",
-                      opacity:off?0.55:1}}>{c}{off?" (off)":""} · {rawNode.filter(s=>s.cls===c).length}</button>;
+                      opacity:off?0.55:1}}>
+                    <svg width="16" height="6"><line x1="0" y1="3" x2="16" y2="3"
+                      stroke={off?"var(--mut)":"#0b1015"} strokeWidth="1.6" strokeDasharray={dash}/></svg>
+                    {c}{off?" (off)":""} · {rawNode.filter(s=>s.cls===c).length}</button>;
                 })}
                 {fiaRef && <span style={{marginLeft:8}}><i style={{background:"#9fb3c0"}}></i>FIA observed</span>}
               </div>)}

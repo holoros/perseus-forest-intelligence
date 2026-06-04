@@ -121,10 +121,14 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const dn=yrs.slice().reverse().map(y=>"L"+X(y).toFixed(1)+" "+Y(Math.min(...byYr[y])).toFixed(1)).join(" ");
     return <path d={up+" "+dn+" Z"} fill="#caa15a" opacity="0.18" stroke="none"><title>Inventory-basis range: FIA-anchored (yc_hybrid) vs TreeMap pixel</title></path>;
   })() : null);
+  // Per-class line STYLE (dash pattern), so model families are distinguishable
+  // by line type as well as by the per-engine color shade.
+  const DASH = { CEM:"0", CBM:"7 3", FVS:"4 3", YC:"1.5 3", LANDIS:"9 3 2 3",
+                 OSM:"6 2", ES:"2 2", ECON:"7 2 2 2" };
+  const dashFor = s => DASH[s.cls] != null ? DASH[s.cls] : "0";
   const drawLine = (s, i, dashed) => {
     const col = shadeFor(s);
     const d = s.pts.map((p,k)=> (k? "L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
-    const last = s.pts[s.pts.length-1];
     const tag = dashed ? `${s.label} · ${overlayLabel||"compare"}` : `${s.label}`;
     return <g key={(dashed?"o":"")+i}>
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
@@ -132,16 +136,28 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             onClick={()=> !dashed && onIsolate && onIsolate(s.model)}>
         <title>{`${tag} (${s.cls}) — click to isolate`}</title>
       </path>
-      <path d={d} fill="none" stroke={col} strokeWidth={dashed?1.6:1.8}
-            opacity={dashed?0.7:0.92}
-            strokeDasharray={dashed?"4 4":"0"}
+      <path d={d} fill="none" stroke={col} strokeWidth={dashed?1.2:1.8}
+            opacity={dashed?0.55:0.95}
+            strokeDasharray={dashFor(s)}
             style={{pointerEvents:"none"}}/>
-      <text x={W-R+4} y={Math.max(T+6, Math.min(H-B-2, Y(last[1])+3))} fill={col} fontSize="8"
-            textAnchor="start" opacity={dashed?0.7:1} style={{pointerEvents:"none"}}>
-        {s.model.replace(/_/g," ").slice(0,13)}{dashed?"·"+overlayLabel:""}
-      </text>
     </g>;
   };
+  // Collision-avoided trailing labels: stack each line's end label in the right
+  // gutter, spread vertically so several converging lines don't overprint.
+  const labelItems = [...drawSet.map(s=>({s,dashed:false})), ...drawOverlay.map(s=>({s,dashed:true}))]
+    .map(({s,dashed})=>({ model:s.model, col:shadeFor(s), dash:dashFor(s), dashed,
+      y0:Math.max(T+5, Math.min(H-B-3, Y(s.pts[s.pts.length-1][1]))) }))
+    .sort((a,b)=>a.y0-b.y0);
+  { const GAP=8.4; let prev=-1e9;
+    for(const it of labelItems){ it.ly = Math.max(it.y0, prev+GAP); prev = it.ly; }
+    const overflow = labelItems.length ? labelItems[labelItems.length-1].ly - (H-B-3) : 0;
+    if(overflow>0) labelItems.forEach(it=> it.ly -= overflow); }
+  const endLabels = labelItems.map((it,k)=>(
+    <g key={"lab"+k} style={{pointerEvents:"none"}}>
+      <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} stroke={it.col} strokeWidth="1.4" strokeDasharray={it.dash}/>
+      <text x={W-R+7} y={it.ly+2.6} fill={it.col} fontSize="7.5" textAnchor="start" opacity={it.dashed?0.7:1}>
+        {it.model.replace(/_/g," ").slice(0,15)}{it.dashed?" ·"+overlayLabel:""}</text>
+    </g>));
 
   // Hover scrubber: find the year nearest the cursor x, look up each engine's
   // value at that year (linear-interpolated between bracketing pts).
@@ -210,6 +226,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
         </>}
         {drawSet.map((s,i)=> drawLine(s, i, false))}
         {drawOverlay.map((s,i)=> drawLine(s, i, true))}
+        {endLabels}
         {hoverX != null && (
           <line x1={hoverX} y1={T} x2={hoverX} y2={H-B}
                 stroke="#ffffff" strokeOpacity="0.3" strokeWidth="1"
