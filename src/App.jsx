@@ -1510,6 +1510,14 @@ export default function App(){
                 from baseline (upper) to 2× mortality (lower). Distinct from disturbance-exposed:
                 chronic competition / self-thinning mortality amplified by climate stress, not
                 episodic fire/insect events.</>}
+              {bucket.startsWith("managed (") && <>
+                {" "}<b>Managed scenarios are land-base sensitivity cases, not business-as-usual.</b> They
+                apply an owner-typical harvest regime to a working-forest fraction of the non-reserved
+                land (FIA reserved / protected plots are held at no-harvest), so the CONUS aggregate still
+                gains carbon under all three regimes (conservation &gt; harvest &gt; intensive), consistent
+                with the FIA record (net +1.1%/yr). Observed FIA landscape harvest removal is only ~0.02%/yr;
+                a whole-landscape rotation would remove ~100× that and force an unrealistic decline.
+                Persistent declines appear only in the disturbance-exposed variants, where the real downside lies.</>}
             </div>
           </>)}
           </>)}
