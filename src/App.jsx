@@ -900,6 +900,14 @@ export default function App(){
     const ring = [[lon-dLon,lat-dLat],[lon+dLon,lat-dLat],[lon+dLon,lat+dLat],
                   [lon-dLon,lat+dLat],[lon-dLon,lat-dLat]];
     const geom = { type:"Polygon", coordinates:[ring] };
+    // Broader surrounding area: a concentric box ~4x the AOI radius (capped at a
+    // ~45 km half-side) sampled the same way, so the radar can show the local
+    // area against its immediate surroundings as well as the ecoregion and state.
+    const bRad = Math.min(45, Math.max(radiusKm*4, 22));
+    const bLat = bRad / 111.0, bLon = bRad / (111.0 * Math.max(0.1, Math.cos(lat * Math.PI/180)));
+    const broadGeom = { type:"Polygon", coordinates:[[
+      [lon-bLon,lat-bLat],[lon+bLon,lat-bLat],[lon+bLon,lat+bLat],
+      [lon-bLon,lat+bLat],[lon-bLon,lat-bLat]]] };
     let eg = ecoGeo, ly = l3yields;
     if(!eg){ try{ eg = await j("geo/us_eco_l3_features.geojson"); setEcoGeo(eg); }catch(e){} }
     if(!ly){ try{ ly = await j("api/yield_curves_by_l3.json"); setL3yields(ly); }catch(e){} }
@@ -985,32 +993,35 @@ export default function App(){
       const idxAxes = {};
       const mean = a => (a && a.length) ? a.reduce((x,y)=>x+y,0)/a.length : null;
       const qAt = (a,q) => a[Math.min(a.length-1, Math.max(0, Math.floor(q*a.length)))];
-      const axisStat = (aoiArr, ecoArr, stArr) => {
+      const axisStat = (aoiArr, ecoArr, stArr, broadArr) => {
         if(!aoiArr || !aoiArr.length || !ecoArr || !ecoArr.length) return null;
         return {
           v:  percentile(mean(aoiArr), ecoArr),
           lo: percentile(qAt(aoiArr,0.25), ecoArr),
           hi: percentile(qAt(aoiArr,0.75), ecoArr),
           ref: (stArr && stArr.length) ? percentile(mean(stArr), ecoArr) : null,
+          bv:  (broadArr && broadArr.length) ? percentile(mean(broadArr), ecoArr) : null,
         };
       };
       if(ecoGeom){
         await Promise.all(Object.entries(LAY).map(async ([k,[u,ramp]]) => {
-          const [aoiArr, ecoArr, stArr] = await Promise.all([
+          const [aoiArr, ecoArr, stArr, broadArr] = await Promise.all([
             rampValues(R(u), FRAME, geom, ramp).catch(()=>null),
             rampValues(R(u), FRAME, ecoGeom, ramp).catch(()=>null),
             stGeom ? rampValues(R(u), FRAME, stGeom, ramp).catch(()=>null) : Promise.resolve(null),
+            rampValues(R(u), FRAME, broadGeom, ramp).catch(()=>null),
           ]);
-          idxAxes[k] = axisStat(aoiArr, ecoArr, stArr);
+          idxAxes[k] = axisStat(aoiArr, ecoArr, stArr, broadArr);
         }));
       }
       // Invert risk -> resilience (high = good): swap and complement the band.
       if(idxAxes.risk){
         const r = idxAxes.risk;
-        idxAxes.resilience = { v:1-r.v, lo:1-r.hi, hi:1-r.lo, ref: r.ref==null?null:1-r.ref };
+        idxAxes.resilience = { v:1-r.v, lo:1-r.hi, hi:1-r.lo, ref: r.ref==null?null:1-r.ref,
+          bv: r.bv==null?null:1-r.bv };
       }
       delete idxAxes.risk;
-      idxAxes.biodiversity = bioScore==null ? null : { v:bioScore, lo:bioScore, hi:bioScore, ref:null };
+      idxAxes.biodiversity = bioScore==null ? null : { v:bioScore, lo:bioScore, hi:bioScore, ref:null, bv:null };
       const haveIdx = Object.values(idxAxes).filter(v=>v!=null).length >= 4;
       // Observed RD trajectory from the three deployed TreeMap-basis RD overlays
       // (2016 / 2020 / 2022). Mean relative density inside the AOI, in RD units.

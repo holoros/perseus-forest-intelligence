@@ -93,10 +93,66 @@ function Scorecard({ index }){
   );
 }
 
+// ---- Current -> future projection from the ecoregion reserve/managed yield
+// curves (l3 curves: `untreated` = reserve, `harvested` = managed). Each radar
+// axis with a matching curve is nudged from its current percentile in the
+// direction and relative magnitude the chosen pathway implies over the horizon.
+// This is a scenario DIRECTION sketch grounded in the ecoregion curves, not a
+// re-ranked percentile; axes without a curve are held at current.
+const AXIS_CURVE = { carbon:"carbon_lbac", resilience:"ba_ft2ac" };
+const FUT_COL = { reserve:"#2e9e6b", managed:"#d98a3c" };
+function curveAt(series, age){
+  if(!series || !series.length) return null;
+  if(age <= series[0][0]) return series[0][1];
+  if(age >= series[series.length-1][0]) return series[series.length-1][1];
+  for(let i=1;i<series.length;i++){
+    if(age <= series[i][0]){ const [a0,v0]=series[i-1],[a1,v1]=series[i];
+      const f=(age-a0)/((a1-a0)||1); return v0+f*(v1-v0); } }
+  return series[series.length-1][1];
+}
+function projectFuture(index, allCurves, age0, horizon, pathway){
+  if(!index || !allCurves) return null;
+  const key = pathway==="managed" ? "harvested" : "untreated";
+  const a0 = (age0!=null && age0>0) ? age0 : 40, a1 = a0 + horizon;
+  const out = {};
+  for(const axk of Object.keys(index)){
+    const cur = axV(index[axk]);
+    if(cur==null){ out[axk]=null; continue; }
+    // carbon / resilience: project the pathway forward against the CURRENT
+    // (untreated, present-age) baseline, so the change is "from where it is now".
+    const cname = AXIS_CURVE[axk];
+    if(cname && allCurves[cname] && allCurves[cname].untreated && allCurves[cname][key]){
+      const v0 = curveAt(allCurves[cname].untreated, a0), v1 = curveAt(allCurves[cname][key], a1);
+      if(v0!=null && v1!=null && v0>0){
+        const frac = (v1-v0)/v0, dir = axk==="resilience" ? -1 : 1;   // denser than now -> less resilience
+        out[axk] = { v: Math.max(0,Math.min(1, cur + 0.42*Math.tanh(2*frac)*dir)), held:false };
+        continue;
+      }
+    }
+    // value: managed realizes income (up, scaled by merchantable share); reserve defers (held)
+    if(axk==="value"){
+      if(pathway==="managed" && allCurves.merchvol_cuftac && allCurves.voltot_cuftac){
+        const mv = curveAt(allCurves.merchvol_cuftac.harvested, a1),
+              tv = curveAt(allCurves.voltot_cuftac.harvested, a1);
+        const share = (mv!=null && tv>0) ? Math.max(0,Math.min(1, mv/tv)) : 0.4;
+        out[axk] = { v: Math.max(0,Math.min(1, cur + 0.30*share)), held:false };
+        continue;
+      }
+    }
+    out[axk] = { v: cur, held:true };
+  }
+  return out;
+}
+
 // Interactive 6-axis radar. Each percentile axis = this area's rank within its
-// ecoregion (50% ring = regional median). Hover a point for its value.
-function ConditionRadar({ index }){
+// ecoregion (50% ring = regional median). "Compare to" chips overlay the
+// surrounding area and state average; the "Outlook" row morphs the radar to a
+// reserve or managed future. Hover a point for its value.
+function ConditionRadar({ index, allCurves, age0 }){
   const [hi, setHi] = useState(null);
+  const [ctx, setCtx] = useState({ surrounding:false, state:true });
+  const [pathway, setPathway] = useState(null);   // null | "reserve" | "managed"
+  const [horizon, setHorizon] = useState(30);
   if(!index) return null;
   const N = AXES6.length, C = 110, R = 74;
   const ang = i => (-90 + i*360/N) * Math.PI/180;
@@ -105,6 +161,9 @@ function ConditionRadar({ index }){
   const ax = i => index[AXES6[i][0]];
   const val = i => { const v = clamp(axV(ax(i))); return v==null ? 0 : v; };
   const hasRef = AXES6.some((_,i)=>{ const a=ax(i); return a && a.ref!=null; });
+  const hasBroad = AXES6.some((_,i)=>{ const a=ax(i); return a && a.bv!=null; });
+  const canFuture = !!allCurves;
+  const future = (pathway && canFuture) ? projectFuture(index, allCurves, age0, horizon, pathway) : null;
   const rings = [0.25,0.5,0.75,1].map((f,k) =>
     <circle key={k} cx={C} cy={C} r={R*f} fill="none"
       stroke={f===0.5?"#6a8190":"var(--line)"} strokeWidth={f===0.5?1:0.6}
@@ -112,8 +171,15 @@ function ConditionRadar({ index }){
   const spokes = AXES6.map((_,i) => { const [x,y]=pt(i,R);
     return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="var(--line)" strokeWidth="0.6"/>; });
   // comparison polygon (encompassing state mean within the ecoregion)
-  const refPoly = hasRef ? AXES6.map((_,i) => { const a=ax(i); const r=a&&a.ref!=null?clamp(a.ref):0;
+  const refPoly = (ctx.state && hasRef) ? AXES6.map((_,i) => { const a=ax(i); const r=a&&a.ref!=null?clamp(a.ref):0;
     return pt(i, R*r).map(n=>n.toFixed(1)).join(","); }).join(" ") : null;
+  // surrounding-area polygon (broader concentric AOI, percentile within ecoregion)
+  const broadPoly = (ctx.surrounding && hasBroad) ? AXES6.map((_,i) => { const a=ax(i); const r=a&&a.bv!=null?clamp(a.bv):0;
+    return pt(i, R*r).map(n=>n.toFixed(1)).join(","); }).join(" ") : null;
+  // future polygon (chosen pathway + horizon)
+  const futPoly = future ? AXES6.map(([k],i) => { const f=future[k]; const r=f?clamp(f.v):0;
+    return pt(i, R*r).map(n=>n.toFixed(1)).join(","); }).join(" ") : null;
+  const futMoved = future ? AXES6.map(([k],i) => (future[k] && !future[k].held) ? i : null).filter(i=>i!=null) : [];
   const poly = AXES6.map((_,i) => pt(i, R*val(i)).map(n=>n.toFixed(1)).join(",")).join(" ");
   // error bars: radial segment from lo to hi percentile on each spoke
   const ebars = AXES6.map((_,i) => { const a=ax(i);
@@ -145,18 +211,52 @@ function ConditionRadar({ index }){
       <rect x={tx} y={y-22} width={w} height="15" rx="3" fill="rgba(15,20,25,0.94)" stroke="var(--line)"/>
       <text x={tx+5} y={y-11} fontSize="9" fill="#e8eef2">{txt}</text></g>;
   }
+  const chip = (on, col) => ({ fontSize:11, padding:"2px 8px", borderRadius:9, cursor:"pointer",
+    border:`1px solid ${on?(col||"#3fb68b"):"var(--line)"}`, background:on?((col||"#3fb68b")+"22"):"transparent",
+    color:on?(col||"#3fb68b"):"var(--mut)", whiteSpace:"nowrap", userSelect:"none" });
+  const futCol = pathway ? FUT_COL[pathway] : "#3fb68b";
+  const legend = [
+    ["this area", "#3fb68b", false],
+    (ctx.surrounding && hasBroad) && ["surrounding", "#7a9bd6", true],
+    (ctx.state && hasRef) && ["state avg", "#9aa7b0", true],
+    future && [`${pathway} +${horizon}y`, futCol, true],
+  ].filter(Boolean);
   return (
-    <svg viewBox="0 0 220 240" style={{width:"100%",maxWidth:290,display:"block",margin:"2px auto 0"}}>
-      {rings}{spokes}
-      {refPoly && <polygon points={refPoly} fill="none" stroke="#9aa7b0" strokeWidth="1.1" strokeDasharray="4 3" opacity="0.85"/>}
-      <polygon points={poly} fill="#3fb68b" fillOpacity="0.20" stroke="#3fb68b" strokeWidth="1.8"/>
-      {ebars}{dots}{labels}{hits}{tip}
-      {hasRef && <g>
-        <line x1={C-46} y1={236} x2={C-34} y2={236} stroke="#3fb68b" strokeWidth="1.8"/>
-        <text x={C-31} y={239} fontSize="8" fill="#5e7180">this area</text>
-        <line x1={C+8} y1={236} x2={C+20} y2={236} stroke="#9aa7b0" strokeWidth="1.1" strokeDasharray="4 3"/>
-        <text x={C+23} y={239} fontSize="8" fill="#5e7180">state avg</text></g>}
-    </svg>
+    <div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 2px"}}>
+        <span style={{fontSize:10.5,color:"#5e7180"}}>Compare to:</span>
+        {hasBroad && <span style={chip(ctx.surrounding,"#7a9bd6")} onClick={()=>setCtx(c=>({...c,surrounding:!c.surrounding}))}>Surrounding</span>}
+        {hasRef && <span style={chip(ctx.state,"#9aa7b0")} onClick={()=>setCtx(c=>({...c,state:!c.state}))}>State avg</span>}
+      </div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 2px"}}>
+        <span style={{fontSize:10.5,color:"#5e7180"}}>Outlook:</span>
+        <span style={chip(pathway===null)} onClick={()=>setPathway(null)}>Now</span>
+        <span style={chip(pathway==="reserve",FUT_COL.reserve)} title={canFuture?"":"ecoregion curves unavailable here"}
+          onClick={()=>canFuture&&setPathway(pathway==="reserve"?null:"reserve")}>Reserve</span>
+        <span style={chip(pathway==="managed",FUT_COL.managed)} title={canFuture?"":"ecoregion curves unavailable here"}
+          onClick={()=>canFuture&&setPathway(pathway==="managed"?null:"managed")}>Managed</span>
+        {pathway && <>
+          <span style={chip(horizon===30)} onClick={()=>setHorizon(30)}>+30y</span>
+          <span style={chip(horizon===50)} onClick={()=>setHorizon(50)}>+50y</span>
+        </>}
+      </div>
+      <svg viewBox="0 0 220 228" style={{width:"100%",maxWidth:290,display:"block",margin:"0 auto"}}>
+        {rings}{spokes}
+        {refPoly && <polygon points={refPoly} fill="none" stroke="#9aa7b0" strokeWidth="1.1" strokeDasharray="4 3" opacity="0.85"/>}
+        {broadPoly && <polygon points={broadPoly} fill="none" stroke="#7a9bd6" strokeWidth="1.2" strokeDasharray="2 2" opacity="0.9"/>}
+        {futPoly && <polygon points={futPoly} fill={futCol} fillOpacity="0.10" stroke={futCol} strokeWidth="1.5" strokeDasharray="5 3"/>}
+        <polygon points={poly} fill="#3fb68b" fillOpacity={future?"0.10":"0.20"} stroke="#3fb68b" strokeWidth="1.8"/>
+        {futPoly && futMoved.map(i => { const [x,y]=pt(i, R*clamp(future[AXES6[i][0]].v));
+          return <circle key={"f"+i} cx={x} cy={y} r="2.6" fill={futCol} stroke="#0b1015" strokeWidth="0.5"/>; })}
+        {ebars}{dots}{labels}{hits}{tip}
+      </svg>
+      <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 10px",margin:"1px 0 0"}}>
+        {legend.map(([lab,col,dash],k)=>(
+          <span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:8.5,color:"#5e7180"}}>
+            <svg width="14" height="6"><line x1="0" y1="3" x2="14" y2="3" stroke={col} strokeWidth={dash?"1.2":"1.8"} strokeDasharray={dash?"3 2":"0"}/></svg>{lab}</span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -381,6 +481,26 @@ function downloadCsv(aoi){
   a.click(); URL.revokeObjectURL(a.href);
 }
 
+// Collapsible detail section: a consistent uppercase header with a chevron that
+// tucks granular content away so the panel leads with the scorecard, radar, and
+// outlook instead of overwhelming a landowner with every table at once.
+function Collapsible({ title, subtitle, defaultOpen = false, children }){
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{margin:"4px 0 0"}}>
+      <button onClick={()=>setOpen(o=>!o)} style={{display:"flex",alignItems:"center",gap:7,width:"100%",
+        background:"transparent",border:"none",borderTop:"1px solid var(--line)",padding:"7px 4px 5px",
+        cursor:"pointer",font:"inherit",textAlign:"left"}}>
+        <span style={{fontSize:9,color:"#5e7180",transform:open?"rotate(90deg)":"none",
+          transition:"transform .15s",display:"inline-block"}}>▶</span>
+        <span style={{fontSize:11,fontWeight:600,letterSpacing:".03em",textTransform:"uppercase",color:"var(--mut)"}}>{title}</span>
+        {subtitle && <span style={{fontSize:10.5,color:"#5e7180",fontWeight:400,marginLeft:"auto"}}>{subtitle}</span>}
+      </button>
+      {open && <div style={{padding:"2px 2px 0"}}>{children}</div>}
+    </div>
+  );
+}
+
 export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }){
   if(!aoi) return null;
   const cv = (v, u, d=0) => { const c = conv(v, u, units); return `${c.value.toFixed(d)} ${c.unit}`; };
@@ -424,8 +544,8 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         {agb50 != null ? <Row k="AGB @50yr" v={`${cv(agb50,"ton/ac")}${agb50h!=null?` (${conv(agb50h,"ton/ac",units).value.toFixed(0)} harvested)`:""}`}/> : null}
       </div>
 
-      {plotStats && plotStats.n > 0 && (<>
-        <div className="aoi-sub">Forest attributes · {plotStats.n} FIA plots{plotStats.invYears?` (${plotStats.invYears[0]}–${plotStats.invYears[1]})`:""}</div>
+      {plotStats && plotStats.n > 0 && (
+       <Collapsible title="Forest attributes" subtitle={`${plotStats.n} FIA plots${plotStats.invYears?` · ${plotStats.invYears[0]}–${plotStats.invYears[1]}`:""}`}>
         <div className="aoi-grid">
           {plotStats.meanAge != null && <Row k="Mean stand age" v={`${plotStats.meanAge.toFixed(0)} yr`}/>}
           {plotStats.meanBA != null && <Row k="Mean live BA" v={cv(plotStats.meanBA,"sq ft/ac")}/>}
@@ -456,7 +576,8 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
             ))}
           </div>
         </>)}
-      </>)}
+       </Collapsible>
+      )}
       {plotStats && plotStats.n === 0 && (
         <div className="note" style={{margin:"2px 0 6px"}}>No FIA plots fall inside this AOI{state?` in ${state}`:""}.</div>
       )}
@@ -465,22 +586,23 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
       )}
 
       {landscape && (landscape.ownership || landscape.risk || landscape.habitat || landscape.biodiversity || landscape.siteProductivity || landscape.speciesValue || landscape.stumpage || landscape.index) && (<>
-        <div className="aoi-sub">Condition index · quick look</div>
+        <div className="aoi-sub">Condition &amp; future outlook</div>
         {landscape.index && (
           <div>
             <Scorecard index={landscape.index}/>
-            <ConditionRadar index={landscape.index}/>
+            <ConditionRadar index={landscape.index} allCurves={aoi.allCurves}
+              age0={aoi.plotStats && aoi.plotStats.meanAge}/>
             {radarNarrative(landscape.index) && (
               <div style={{margin:"2px 6px 4px",fontSize:12.5,color:"var(--ink)"}}>{radarNarrative(landscape.index)}</div>
             )}
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
-              Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Whiskers show the within-area spread; the grey dashed polygon is the state average. Hover a point for values. Resilience = low disturbance risk; biodiversity is a stand diversity index.
+              Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Use <b>Compare to</b> to overlay the surrounding area and state average, and <b>Outlook</b> to morph the radar to a reserve or managed future. Whiskers show the within-area spread. The future is a scenario direction from the ecoregion reserve/managed yield curves (carbon, resilience, timber value move; other axes held), not a re-ranked percentile. Resilience = low disturbance risk; biodiversity is a stand diversity index.
             </div>
             <PriorityDial index={landscape.index}/>
           </div>
         )}
         {landscape.rdSeries && <RDTrajectory series={landscape.rdSeries}/>}
-        <div className="aoi-sub">Surrounding landscape · sampled from CONUS layers</div>
+        <Collapsible title="Surrounding landscape" subtitle="sampled from CONUS layers">
         {landscape.forestFrac != null && (
           <div className="aoi-grid">
             <Row k="Forest cover (area)" v={`${Math.round(landscape.forestFrac*100)}%`}/>
@@ -577,6 +699,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
           Habitat and biodiversity (<i>~</i>) are indicative composites of forest continuity, structural maturity,
           and forest-type diversity — refine with field inventory.
         </div>
+        </Collapsible>
       </>)}
 
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
