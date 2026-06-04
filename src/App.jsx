@@ -403,7 +403,8 @@ function ftGroupName(code){
   return name;
 }
 
-async function j(path){ const r = await fetch(BASE + path); if(!r.ok) throw new Error(path); return r.json(); }
+async function j(path){ const sep = path.includes("?") ? "&" : "?";
+  const r = await fetch(BASE + path + sep + "v=" + (typeof __BUILDID__!=="undefined"?__BUILDID__:"")); if(!r.ok) throw new Error(path); return r.json(); }
 function parseHash(){ const p = new URLSearchParams(window.location.hash.replace(/^#/,""));
   return { state:p.get("state"), metric:p.get("metric"), mgmt:p.get("mgmt") }; }
 
