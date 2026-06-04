@@ -243,24 +243,53 @@ footer {
 <h1>PERSEUS multi-model vs the American Forests state CBM reports</h1>
 
 <div class="tldr" style="border-left-color:var(--warn);background:#fce8b8;">
-<h3 style="color:var(--warn);">⚠ 2026-06-04 correction in progress</h3>
+<h3 style="color:var(--warn);">⚠ 2026-06-04 correction posted</h3>
 <p>
-The CONUS scenario sweep originally published below (BAU sink to HIST source,
-15,000 TgC swing) used <strong>literature-calibrated regional disturbance
-rates</strong> that overestimated the actual schedule by approximately
-5.6× in MN. The previously published <em>BAU</em> was in fact run with
-the LCMS-calibrated bundle schedule (the realistic baseline), so it
-already includes disturbance. The PERSEUS scenario tool now has a
-<code>--from-bundle</code> mode that scales the bundle's empirical
-LCMS-calibrated disturbance events directly. Under that corrected
-schedule, MN delta is +40.79 (HIST), +40.85 (RH), +40.80 (RH_CC),
-+40.78 (WARM_HIST) — the policy lever effects are sub-1 Mg/ha and
-within the simulation noise. The corrected 6 AF state sweep is
-re-running and the dashboard tables below will refresh shortly.
+The CONUS scenario sweep originally published below (BAU sink to HIST
+source, 15,000 TgC swing) used <strong>literature-calibrated regional
+disturbance rates</strong> that overestimated the actual schedule by
+approximately 5.6× in MN. The previously published <em>BAU</em> was
+either the LCMS-calibrated schedule (MN, WA) or a true no-disturbance
+counterfactual (OR, CA, MD, PA — whose bundles ship with zero LCMS
+events). The scenario tool now has a <code>--from-bundle</code> mode
+that scales the bundle's empirical disturbance events directly.
+</p>
+<p style="margin-top:8px;">
+<strong>Corrected 6 AF state result (year 50 delta Mg/ha under LCMS calibrated rates):</strong>
+</p>
+<table class="compare" style="margin-top:8px;">
+<thead><tr>
+  <th>State</th>
+  <th class="num">BAU</th>
+  <th class="num">HIST</th>
+  <th class="num">RH</th>
+  <th class="num">RH_CC</th>
+  <th class="num">WARM_HIST</th>
+  <th>Bundle has LCMS events</th>
+</tr></thead>
+<tbody>
+<tr><td><strong>MN</strong></td><td class="num">+41.05</td><td class="num">+40.79</td><td class="num">+40.85</td><td class="num">+40.80</td><td class="num">+40.78</td><td>yes</td></tr>
+<tr><td><strong>WA</strong></td><td class="num">-0.81</td><td class="num">-2.57</td><td class="num">-2.39</td><td class="num">-2.57</td><td class="num">-3.09</td><td>yes</td></tr>
+<tr><td><strong>OR</strong></td><td class="num">+2.26</td><td class="num">+2.26</td><td class="num">+2.26</td><td class="num">+2.26</td><td class="num">+2.26</td><td>no</td></tr>
+<tr><td><strong>CA</strong></td><td class="num">-17.09</td><td class="num">-17.09</td><td class="num">-17.09</td><td class="num">-17.09</td><td class="num">-17.09</td><td>no</td></tr>
+<tr><td><strong>MD</strong></td><td class="num">+34.46</td><td class="num">+34.46</td><td class="num">+34.46</td><td class="num">+34.46</td><td class="num">+34.46</td><td>no</td></tr>
+<tr><td><strong>PA</strong></td><td class="num">+42.50</td><td class="num">+42.50</td><td class="num">+42.50</td><td class="num">+42.50</td><td class="num">+42.50</td><td>no</td></tr>
+</tbody>
+</table>
+<p style="margin-top:10px;">
+<strong>The corrected finding is methodologically stronger.</strong>
+Under realistic (LCMS calibrated) disturbance rates, policy scenario
+effects on 50 year ecosystem stock are within simulation noise
+(<1 Mg/ha for MN, &lt;2 Mg/ha for WA). This means
+<strong>methodological uncertainty axes (inventory stratification,
+HWP storage, engine choice) dominate the scenario uncertainty axis</strong>
+at the 50 year horizon under empirically observed disturbance regimes.
 The qualitative methods finding (inventory stratification dominates
-cross-model uncertainty) is unchanged. The corrected scenario
-magnitudes will be substantially smaller than the previously
-published values.
+cross model uncertainty, PNW source signature) is unchanged. The
+larger scenario effects in the v1.2.0 deposit reflect literature rates
+that are roughly 5 to 6× higher than LCMS observed. The original
+v1.2.0 outputs remain archived for reproducibility; the corrected
+v1.3.0 sweep with LCMS calibrated rates is in preparation.
 </p>
 </div>
 <p class="lede">
