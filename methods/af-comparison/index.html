@@ -242,8 +242,36 @@ footer {
 <div class="tag">Methods dashboard · updated 2026-06-04</div>
 <h1>PERSEUS multi-model vs the American Forests state CBM reports</h1>
 
+<div class="tldr" style="border-left-color:var(--good);background:#d4e5d8;">
+<h3 style="color:var(--good);">✓ 2026-06-04 corrected CONUS v2 sweep posted</h3>
+<p>
+Full 48-state corrected sweep ran on Cardinal SLURM array 11295550 in
+~10 minutes wall. CONUS-wide year-50 delta under LCMS-anchored
+disturbance rates (--from-bundle mode):
+</p>
+<table class="compare" style="margin-top:8px;">
+<thead><tr><th>Scenario</th><th class="num">y50 (TgC)</th><th class="num">Δ vs BAU (TgC)</th><th class="num">Δ vs BAU (Mg/ha)</th></tr></thead>
+<tbody>
+<tr><td>BAU</td><td class="num">66,245</td><td class="num">0</td><td class="num">0.00</td></tr>
+<tr><td>HIST</td><td class="num">66,245</td><td class="num">0</td><td class="num">0.00</td></tr>
+<tr><td>RH (-30% harvest)</td><td class="num">66,262</td><td class="num delta-pos">+17</td><td class="num delta-pos">+0.06</td></tr>
+<tr><td>RH_CC (-50% clearcut)</td><td class="num">66,247</td><td class="num delta-pos">+2</td><td class="num delta-pos">+0.01</td></tr>
+<tr><td>WARM_HIST</td><td class="num">66,221</td><td class="num delta-neg">-24</td><td class="num delta-neg">-0.08</td></tr>
+</tbody>
+</table>
+<p style="margin-top:10px;">
+<strong>Scenario uncertainty is ~25 TgC at CONUS scale. Inventory
+stratification uncertainty is ~6,760 TgC.</strong> The methodological
+uncertainty axis (B1.1 vs B1.3 EXPNS) is roughly <strong>270× larger</strong>
+than the scenario uncertainty axis under empirical disturbance rates.
+This is the primary finding. The qualitative story is unchanged from
+the v1.0 methods note: inventory stratification dominates cross-model
+uncertainty for this generation of CBM-CFS3 carbon models.
+</p>
+</div>
+
 <div class="tldr" style="border-left-color:var(--warn);background:#fce8b8;">
-<h3 style="color:var(--warn);">⚠ 2026-06-04 correction posted</h3>
+<h3 style="color:var(--warn);">⚠ Earlier 2026-06-04 literature-rate correction (archived)</h3>
 <p>
 The CONUS scenario sweep originally published below (BAU sink to HIST
 source, 15,000 TgC swing) used <strong>literature-calibrated regional
