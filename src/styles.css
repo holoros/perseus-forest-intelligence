@@ -11,7 +11,12 @@ header.top{padding:7px 14px;border-bottom:1px solid var(--line);
   display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 header.top h1{font-size:15px;margin:0;font-weight:700}
 header.top .sub{color:var(--mut);font-size:11.5px}
-header.top .stat{margin-left:auto;color:var(--accent);font-size:12.5px;font-variant-numeric:tabular-nums}
+header.top .brandbar{margin-left:auto;display:flex;align-items:center;gap:9px;
+  background:#fff;border-radius:8px;padding:3px 10px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+header.top .brandbar a{display:flex;align-items:center}
+header.top .brandbar img{height:26px;width:auto;display:block;transition:opacity .15s,transform .15s;cursor:pointer}
+header.top .brandbar a:hover img{opacity:.75;transform:scale(1.06)}
+header.top .stat{margin-left:18px;color:var(--accent);font-size:12.5px;font-variant-numeric:tabular-nums}
 header.top .state-pick{background:var(--panel);color:var(--ink);border:1px solid var(--line);
   border-radius:7px;padding:5px 8px;font-size:12.5px;max-width:380px}
 header.top .state-pick:hover{border-color:var(--accent)}
@@ -22,11 +27,23 @@ header.top .state-pick:hover{border-color:var(--accent)}
 #map canvas{outline:none}
 .maptitle{position:absolute;top:8px;left:12px;z-index:2;font-size:11px;text-transform:uppercase;
   letter-spacing:.06em;color:var(--mut);background:rgba(15,20,25,.7);padding:4px 8px;border-radius:6px}
-.map-ctrl{position:absolute;top:8px;right:12px;z-index:2;display:flex;gap:6px;align-items:center;
-  background:rgba(15,20,25,.75);padding:5px 8px;border-radius:6px;border:1px solid var(--line)}
+.map-ctrl{position:absolute;top:8px;right:12px;z-index:2;display:flex;gap:5px;align-items:center;
+  flex-wrap:wrap;max-width:calc(100% - 24px);justify-content:flex-end;
+  background:rgba(15,20,25,.82);padding:5px 8px;border-radius:8px;border:1px solid var(--line)}
 .map-ctrl select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
   border-radius:5px;padding:3px 6px;font-size:11.5px}
 .map-ctrl input[type=range]{accent-color:var(--accent)}
+.ctrl-grp-lab{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:#5e7180;
+  font-weight:700;align-self:center;margin-right:1px}
+.ctrl-sep{width:1px;align-self:stretch;background:var(--line);margin:0 2px;min-height:18px}
+.mc-coord{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:5px;
+  padding:3px 7px;font-size:11.5px;width:84px;font-variant-numeric:tabular-nums}
+.mc-coord:focus{outline:none;border-color:var(--accent)}
+.mc-coord::placeholder{color:#5e7180}
+.mc-locate{background:var(--accent);color:#0b1015;border:none;border-radius:6px;
+  padding:3px 9px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+.mc-locate:hover:not(:disabled){filter:brightness(1.1)}
+.mc-locate:disabled{opacity:.6;cursor:default}
 .legend{position:absolute;bottom:12px;left:12px;z-index:2;font-size:11px;color:var(--mut);
   background:rgba(23,32,41,.9);padding:8px 10px;border:1px solid var(--line);border-radius:8px;line-height:1.7}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:middle}
@@ -76,17 +93,35 @@ select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
 .aoi-bar-track{height:9px;background:var(--bg);border-radius:3px;overflow:hidden}
 .aoi-bar-fill{display:block;height:100%;border-radius:3px}
 .aoi-bar-pct{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut)}
-.linkbtn{background:var(--panel);color:var(--mut);border:1px solid var(--line);border-radius:6px;
-  padding:3px 8px;font-size:11.5px;cursor:pointer}
-.linkbtn:hover{border-color:var(--accent);color:var(--ink)}
-.maploading{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:4;
-  background:rgba(23,32,41,.92);border:1px solid var(--line);border-radius:8px;
-  padding:5px 12px;font-size:11.5px;color:var(--mut)}
-@media (max-width: 760px){
-  .main{grid-template-columns:1fr;grid-template-rows:46vh auto}
-  .mapwrap{border-right:none;border-bottom:1px solid var(--line);min-height:300px}
-  header.top{gap:6px}
-  header.top .stat{margin-left:0;flex-basis:100%}
-  header.top .state-pick{max-width:100%}
-  .aoi-bar-row{grid-template-columns:96px 1fr 30px}
-}
+/* Stand Outlook — analytics core */
+.stand-outlook{background:linear-gradient(180deg,rgba(63,182,139,.06),rgba(23,32,41,0));
+  border:1px solid var(--line);border-radius:12px;padding:8px 10px 10px;margin:8px 2px 2px}
+.so-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.so-head b{font-size:13px;letter-spacing:.02em}
+.so-head select{font-size:11.5px;padding:2px 6px}
+.so-ctrl{display:flex;flex-direction:column;gap:2px;margin:7px 0 2px}
+.so-ctrl label{font-size:11px;color:var(--mut)}
+.so-ctrl label b{color:var(--ink)}
+.so-now{margin:7px 0 2px;font-size:12.5px;color:var(--ink);background:rgba(244,196,48,.08);
+  border-left:2px solid #f4c430;border-radius:4px;padding:4px 8px}
+.so-trade-head{margin:12px 0 4px;font-size:12px;font-weight:600;color:var(--ink);
+  display:flex;justify-content:space-between;align-items:baseline}
+.so-trade-head span{font-size:10.5px;font-weight:400;color:var(--mut)}
+.so-trade{display:flex;flex-direction:column;gap:4px}
+.so-trow{display:grid;grid-template-columns:140px 1fr;align-items:center;gap:8px;font-size:11px}
+.so-tlab{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.so-tlab i{color:#8aa0b0;font-style:normal;opacity:.7;margin-left:2px}
+.so-tbars{display:flex;flex-direction:column;gap:2px}
+.so-tbar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.so-tbar i{display:block;height:100%;border-radius:3px}
+.so-fia{color:var(--accent)}
+.so-ctrl input[type=range]{accent-color:#f4c430;width:100%}
+.so-num{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;
+  padding:3px 7px;font-size:12px;width:130px;font-variant-numeric:tabular-nums}
+.so-num:focus{outline:none;border-color:var(--accent)}
+.so-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:11.5px;font-variant-numeric:tabular-nums}
+.so-table th{text-align:right;color:var(--mut);font-weight:600;padding:3px 6px;border-bottom:1px solid var(--line)}
+.so-table th:first-child{text-align:left}
+.so-table td{text-align:right;padding:3px 6px;border-bottom:1px solid rgba(42,58,71,.5)}
+.so-table td:first-child{text-align:left;color:var(--ink)}
+.so-table tr:first-child td{font-weight:600}
