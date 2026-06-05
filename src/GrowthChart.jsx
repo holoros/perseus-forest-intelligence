@@ -79,6 +79,9 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const mag = Math.pow(10, Math.floor(Math.log10(raw)));
     const norm = raw / mag;
     const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+    // round the top up to a clean tick so the tallest lines have a labeled tick
+    // above them (axis visibly spans the full data, no lines jammed at the edge)
+    y1 = Math.ceil(y1 / step - 1e-9) * step;
     const start = Math.ceil(y0 / step) * step;
     for(let v = start; v <= y1 + step*1e-6; v += step) yticks.push(+v.toFixed(6));
     if(yticks.length < 2) yticks = [y0, y1];
@@ -148,10 +151,16 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     .map(({s,dashed})=>({ model:s.model, col:shadeFor(s), dash:dashFor(s), dashed,
       y0:Math.max(T+5, Math.min(H-B-3, Y(s.pts[s.pts.length-1][1]))) }))
     .sort((a,b)=>a.y0-b.y0);
-  { const GAP=8.4; let prev=-1e9;
-    for(const it of labelItems){ it.ly = Math.max(it.y0, prev+GAP); prev = it.ly; }
-    const overflow = labelItems.length ? labelItems[labelItems.length-1].ly - (H-B-3) : 0;
-    if(overflow>0) labelItems.forEach(it=> it.ly -= overflow); }
+  { const top=T+4, bot=H-B-3, GAP=9.5;
+    // pass 1: top-down, never overlapping
+    let prev = top - GAP;
+    for(const it of labelItems){ it.ly = Math.max(it.y0, prev + GAP); prev = it.ly; }
+    // pass 2: if the stack ran past the bottom, clamp from the bottom up so the
+    // lower cluster (many converging lines) spreads cleanly instead of piling up
+    if(labelItems.length && labelItems[labelItems.length-1].ly > bot){
+      let next = bot + GAP;
+      for(let i=labelItems.length-1;i>=0;i--){ labelItems[i].ly = Math.min(labelItems[i].ly, next - GAP); next = labelItems[i].ly; }
+    } }
   const endLabels = labelItems.map((it,k)=>(
     <g key={"lab"+k} style={{pointerEvents:"none"}}>
       <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} stroke={it.col} strokeWidth="1.4" strokeDasharray={it.dash}/>
