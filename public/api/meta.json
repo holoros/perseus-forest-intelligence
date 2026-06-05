@@ -1,7 +1,7 @@
 {
- "generated": "2026-06-04T19:10:03.850706+00:00",
+ "generated": "2026-06-05T02:26:47.961025+00:00",
  "schema": "perseus_api_v1",
- "db_version": "v0.64",
+ "db_version": "v0.65",
  "stats": {
   "states": 48,
   "engines": 38,
@@ -9,7 +9,15 @@
   "rows": 59623,
   "libcbm_b13_added": true,
   "gcbm_moja_v6_added": true,
-  "gcbm_moja_v6_states": 6
+  "gcbm_moja_v6_states": 6,
+  "libcbm_b13_lcms_states": [
+   "GA",
+   "ID",
+   "IN",
+   "ME",
+   "MN",
+   "WA"
+  ]
  },
  "metrics": {
   "agc_live_total": {
