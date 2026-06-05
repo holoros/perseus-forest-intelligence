@@ -199,7 +199,8 @@ function ftGroupName(code){
 
 async function j(path){ const r = await fetch(BASE + path); if(!r.ok) throw new Error(path); return r.json(); }
 function parseHash(){ const p = new URLSearchParams(window.location.hash.replace(/^#/,""));
-  return { state:p.get("state"), metric:p.get("metric"), mgmt:p.get("mgmt") }; }
+  return { state:p.get("state"), metric:p.get("metric"), mgmt:p.get("mgmt"),
+           tab:p.get("tab"), conus:p.get("conus") }; }
 
 export default function App(){
   const mapEl = useRef(null), map = useRef(null);
@@ -241,13 +242,13 @@ export default function App(){
   const [scenarioFocus,setScenarioFocus] = useState("all"); // all | harvest_baseline | libcbm_reduced | ...
   const [showAllEngines,setShowAllEngines] = useState(false); // false = auto-hide noisy variants
   // v0.67 CONUS-wide overlays
-  const [conusLayer,setConusLayer] = useState("none"); // none | lcms_2022 | fortype_2022 | site_productivity | climate_stress
+  const [conusLayer,setConusLayer] = useState(initRef.current.conus || "none"); // none | lcms_2022 | ...
   const [conusOpacity,setConusOpacity] = useState(0.7);
   const [conusBounds,setConusBounds] = useState({}); // layer -> {x0,x1,y0,y1}
   // v0.70 chart interactions
   const [isolatedEngine,setIsolatedEngine] = useState(null);
   // v1.3 reconstruction: detail-panel tabs + their datasets
-  const [tab,setTab] = useState("engines"); // engines | rd | divergence | stumpage
+  const [tab,setTab] = useState(initRef.current.tab || "engines"); // engines | rd | divergence | stumpage | ...
   const [divergence,setDivergence] = useState(null);
   const [stumpage,setStumpage] = useState(null);
   const [landis,setLandis] = useState(null);
@@ -262,6 +263,7 @@ export default function App(){
   const [aoi,setAoi] = useState(null);
   const [playing,setPlaying] = useState(false);
   const [fiaPlots,setFiaPlots] = useState({}); // state -> fia_plots json (cache)
+  const [linkCopied,setLinkCopied] = useState(false);
 
   // ---- initial data + map ----
   useEffect(()=>{ (async()=>{
@@ -429,11 +431,16 @@ export default function App(){
     if(!bks.includes(bucket)) setBucket(bks[0]);
   },[series,metric]);
 
-  // ---- write deep-link to the URL hash ----
-  useEffect(()=>{ if(sel && metric && bucket){
-    const p = new URLSearchParams({state:sel, metric, mgmt:bucket});
+  // ---- write deep-link to the URL hash (shareable views) ----
+  useEffect(()=>{
+    const p = new URLSearchParams();
+    if(sel) p.set("state", sel);
+    if(metric) p.set("metric", metric);
+    if(bucket) p.set("mgmt", bucket);
+    if(tab && tab !== "engines") p.set("tab", tab);
+    if(conusLayer && conusLayer !== "none") p.set("conus", conusLayer);
     window.history.replaceState(null, "", `#${p.toString()}`);
-  }},[sel,metric,bucket]);
+  },[sel,metric,bucket,tab,conusLayer]);
 
   // ---- RD tab pins the relative-density metric on entry ----
   useEffect(()=>{ if(tab==="rd" && series && series.rd_mean_wtd) setMetric("rd_mean_wtd"); },[tab,series]);
@@ -630,9 +637,14 @@ export default function App(){
             })}
           </select>)}
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
+        <button className="linkbtn" title="copy a shareable link to this exact view"
+          onClick={()=>{ try{ navigator.clipboard.writeText(window.location.href);
+            setLinkCopied(true); setTimeout(()=>setLinkCopied(false),1500); }catch(e){} }}>
+          {linkCopied ? "link copied ✓" : "⧉ copy link"}</button>
       </header>
       <div className="main">
         <div className="mapwrap">
+          {ecoOn && !ecoGeo && <div className="maploading">loading ecoregions…</div>}
           <div className="maptitle">{mapMode === "coverage"
             ? "Coverage — engines per state"
             : `Carbon — libcbm AGC (Tg), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
