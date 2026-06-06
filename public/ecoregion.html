@@ -30,16 +30,10 @@
   <p>CONUS multi-model layer (cbm_conus). EPA Level III ecoregions, managed-harvest
      scenario, allocated from state results by EXPNS-exact forest area and weighted
      by forest-type composition.</p>
-  <div style="background:#3a2a14;border:1px solid #6b4d1e;border-radius:6px;padding:8px 10px;font-size:11px;color:#f0d9b8;margin:4px 0 10px;line-height:1.4;">
-    <strong style="color:#fce8b8;">⚠ NPV layer under validation (2026-06-04).</strong>
-    NPV values were flagged by the pipeline owner as not production-ready
-    (uniformly negative across all ecoregions, managed/reserve collapse to
-    zero in some cells, inconsistent model counts). The metric is hidden
-    from this viewer until the underlying calculation is revalidated.
-    Carbon and area metrics remain available.
-  </div>
+  <div style="background:#15351f;border:1px solid #1b5e3a;border-radius:6px;padding:8px 10px;font-size:11px;color:#cfe8d6;margin:4px 0 10px;line-height:1.4;"><strong style="color:#9fe0b5;">✓ NPV corrected (2026-06-06).</strong> Rebuilt with BAU = managed (harvest), carbon credited on annual sequestration increment, per-hectare normalized, ensemble across the yield-curve engines. Values now span positive and negative ($/ha, primary carbon price $8.29/tCO2e); see cbm_maine/HANDOFF_20260606_npv_fixes.md.</div>
   <label for="metric">Metric</label>
   <select id="metric">
+    <option value="npv_per_ha">NPV per hectare (USD/ha)</option>
     <option value="hwp_carbon">Wood-product carbon stock (tC)</option>
     <option value="net_climate_carbon">Net climate carbon (tC)</option>
     <option value="area_ha">Forest area (ha)</option>
@@ -84,7 +78,7 @@ map.addControl(new maplibregl.NavigationControl({showCompass:false}),"top-right"
 map.on("load", async ()=>{
   const gj=await (await fetch(GEOJSON)).json();
   map.addSource("eco",{type:"geojson",data:gj});
-  let metric="hwp_carbon";  // NPV temporarily masked, default to HWP carbon
+  let metric="npv_per_ha";  // NPV unmasked 2026-06-06 (corrected pipeline)
   const vals=()=>gj.features.map(f=>f.properties[metric]);
   function apply(){
     const breaks=quantileBreaks(vals(),PALETTE.length);
