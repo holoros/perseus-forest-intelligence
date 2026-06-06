@@ -29,7 +29,7 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
       ))}
       {xticks.map(t => <text key={t} x={sx(t)} y={H-8} textAnchor="middle" fontSize="9" fill="var(--mut)">{t}</text>)}
       <text x={(P.l+W-P.r)/2} y={H-0.5} textAnchor="middle" fontSize="9" fill="var(--mut)">{xlabel}</text>
-      {unit && <text x={4} y={P.t+4} fontSize="9" fill="var(--mut)">{unit}</text>}
+      {unit && <text x={W-P.r} y={P.t+1} textAnchor="end" fontSize="9" fill="var(--mut)">{unit}</text>}
       {present.map(s => {
         const band = s.pts.filter(p => p[1]!=null && p[3]!=null);
         const bandD = band.length
