@@ -409,7 +409,8 @@ function ftGroupName(code){
 async function j(path){ const sep = path.includes("?") ? "&" : "?";
   const r = await fetch(BASE + path + sep + "v=" + (typeof __BUILDID__!=="undefined"?__BUILDID__:"")); if(!r.ok) throw new Error(path); return r.json(); }
 function parseHash(){ const p = new URLSearchParams(window.location.hash.replace(/^#/,""));
-  return { state:p.get("state"), metric:p.get("metric"), mgmt:p.get("mgmt") }; }
+  return { state:p.get("state"), metric:p.get("metric"), mgmt:p.get("mgmt"),
+           tab:p.get("tab"), conus:p.get("conus") }; }
 
 export default function App(){
   const mapEl = useRef(null), map = useRef(null);
@@ -453,13 +454,14 @@ export default function App(){
   const [scenarioFocus,setScenarioFocus] = useState("all"); // all | harvest_baseline | libcbm_reduced | ...
   const [showAllEngines,setShowAllEngines] = useState(false); // false = auto-hide noisy variants
   // v0.67 CONUS-wide overlays
-  const [conusLayer,setConusLayer] = useState("none"); // none | lcms_2022 | fortype_2022 | site_productivity | climate_stress
+  const [conusLayer,setConusLayer] = useState(initRef.current.conus || "none"); // none | lcms_2022 | ...
+  const [linkCopied,setLinkCopied] = useState(false);
   const [conusOpacity,setConusOpacity] = useState(0.7);
   const [conusBounds,setConusBounds] = useState({}); // layer -> {x0,x1,y0,y1}
   // v0.70 chart interactions
   const [isolatedEngine,setIsolatedEngine] = useState(null);
   // v1.3 reconstruction: detail-panel tabs + their datasets
-  const [tab,setTab] = useState("engines"); // engines | rd | divergence | stumpage
+  const [tab,setTab] = useState(initRef.current.tab || "engines"); // engines | rd | divergence | stumpage
   // Progressive disclosure: when a landowner summarizes an AOI, the dense
   // research surface (engine tabs + multi-model chart) collapses behind a
   // reveal so the radar / trajectory / priorities lead. Power users reopen it.
@@ -656,11 +658,16 @@ export default function App(){
     if(!bks.includes(bucket)) setBucket(bks[0]);
   },[series,metric]);
 
-  // ---- write deep-link to the URL hash ----
-  useEffect(()=>{ if(sel && metric && bucket){
-    const p = new URLSearchParams({state:sel, metric, mgmt:bucket});
+  // ---- write deep-link to the URL hash (shareable views) ----
+  useEffect(()=>{
+    const p = new URLSearchParams();
+    if(sel) p.set("state", sel);
+    if(metric) p.set("metric", metric);
+    if(bucket) p.set("mgmt", bucket);
+    if(tab && tab !== "engines") p.set("tab", tab);
+    if(conusLayer && conusLayer !== "none") p.set("conus", conusLayer);
     window.history.replaceState(null, "", `#${p.toString()}`);
-  }},[sel,metric,bucket]);
+  },[sel,metric,bucket,tab,conusLayer]);
 
   // ---- RD tab pins the relative-density metric on entry ----
   useEffect(()=>{ if(tab==="rd" && series && series.rd_mean_wtd) setMetric("rd_mean_wtd"); },[tab,series]);
@@ -1156,11 +1163,16 @@ export default function App(){
         <nav className="topnav" style={{display:"flex",gap:14,fontSize:13,marginLeft:4}}>
           <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Methods notes">Methods</a>
           <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Ecoregion economics viewer">Ecoregion</a>
+          <button className="linkbtn" title="copy a shareable link to this exact view"
+            onClick={()=>{ try{ navigator.clipboard.writeText(window.location.href);
+              setLinkCopied(true); setTimeout(()=>setLinkCopied(false),1500); }catch(e){} }}>
+            {linkCopied ? "link copied ✓" : "⧉ copy link"}</button>
         </nav>
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
       </header>
       <div className="main">
         <div className="mapwrap">
+          {ecoOn && !ecoGeo && <div className="maploading">loading ecoregions…</div>}
           <div className="maptitle">{mapMode === "coverage"
             ? "Coverage — engines per state"
             : `Carbon — libcbm AGC (Tg), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
