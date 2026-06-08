@@ -80,15 +80,19 @@ map.addControl(new maplibregl.NavigationControl({showCompass:false}),"top-right"
 
 map.on("load", async ()=>{
   const gj=await (await fetch(GEOJSON)).json();
-  map.addSource("eco",{type:"geojson",data:gj});
   let trev={}; try{ trev=await (await fetch("geo/ecoregion_timber_rev.json")).json(); }catch(e){}
   gj.features.forEach(f=>{ f.properties.timber_rev_per_ha = (trev[f.properties.NA_L3CODE]!=null)?trev[f.properties.NA_L3CODE]:null; });
   let metric="npv_timber"; let rate=0.05;
+  const computeTimber=()=>gj.features.forEach(f=>{ f.properties._npv_timber=(f.properties.timber_rev_per_ha!=null)?Math.round(f.properties.timber_rev_per_ha/rate):null; });
+  computeTimber();
+  map.addSource("eco",{type:"geojson",data:gj});
+  let firstApply=true;
   function apply(){
     let prop=metric;
     if(metric==="npv_timber"){ prop="_npv_timber";
-      gj.features.forEach(f=>{ f.properties._npv_timber=(f.properties.timber_rev_per_ha!=null)?Math.round(f.properties.timber_rev_per_ha/rate):null; });
-      map.getSource("eco").setData(gj); }
+      computeTimber();
+      if(!firstApply) map.getSource("eco").setData(gj); }
+    firstApply=false;
     const breaks=quantileBreaks(gj.features.map(f=>f.properties[prop]),PALETTE.length);
     map.setPaintProperty("ecofill","fill-color",colorExpr(prop,breaks));
     renderLegend(breaks,metric);
