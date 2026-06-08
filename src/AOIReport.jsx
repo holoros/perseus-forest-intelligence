@@ -435,26 +435,26 @@ function recommendPathway(rows){
   return { lean, why };
 }
 
-function PriorityDial({ index, state }){
+function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 }){
   const init = {}; PRIO.forEach(([k])=>{ init[k]=1; });
   const [w, setW] = useState(init);
-  const [mspread, setMspread] = useState(null);
+  const [pSeries, setPSeries] = useState(null);
   useEffect(() => {
-    if(!state){ setMspread(null); return; }
+    if(!state){ setPSeries(null); return; }
     let alive = true;
     fetch(import.meta.env.BASE_URL + `api/series/${state}.json`)
       .then(r => r.ok ? r.json() : null)
-      .then(sj => { if(!alive || !sj) return;
-        const c = ensembleStats(sj, "agc_live_total", "managed (harvest)", 2050);
-        const v = ensembleStats(sj, "standing_value_musd", "managed (harvest)", 2050);
-        setMspread({
-          carbon: (c && c.mean) ? { fracLo: c.lo/c.mean - 1, fracHi: c.hi/c.mean - 1 } : null,
-          value:  (v && v.mean) ? { fracLo: v.lo/v.mean - 1, fracHi: v.hi/v.mean - 1 } : null,
-        });
-      }).catch(()=>{});
+      .then(sj => { if(alive) setPSeries(sj); }).catch(()=>{});
     return () => { alive = false; };
   }, [state]);
   if(!index) return null;
+  // ensemble spread for the model-projected axes at the shared pathway/year
+  const cE = pSeries ? ensembleStats(pSeries, "agc_live_total", bucket, year) : null;
+  const vE = pSeries ? ensembleStats(pSeries, "standing_value_musd", bucket, year) : null;
+  const mspread = pSeries ? {
+    carbon: (cE && cE.mean) ? { fracLo: cE.lo/cE.mean - 1, fracHi: cE.hi/cE.mean - 1 } : null,
+    value:  (vE && vE.mean) ? { fracLo: vE.lo/vE.mean - 1, fracHi: vE.hi/vE.mean - 1 } : null,
+  } : null;
   const avail = PRIO.filter(([k]) => axV(index[k])!=null);
   if(avail.length < 2) return null;
   let num=0, den=0; const rows=[];
@@ -540,7 +540,7 @@ function PriorityDial({ index, state }){
                 Model uncertainty: across the engine ensemble{mspread && mspread.value && axV(index.value)!=null ? " (carbon and timber value)" : " (carbon)"},
                 your priority-fit spans <b style={{color:"var(--ink)"}}>{ord(Math.round(fitLo*100))}</b> to <b style={{color:"var(--ink)"}}>{ord(Math.round(fitHi*100))}</b> percentile,
                 <b style={{color: bandRobust ? "#3fb68b" : "#e6ab02"}}> {bandRobust ? "robust to model choice" : "sensitive to which model you trust"}</b>.
-                <i style={{opacity:.7,fontStyle:"normal"}}> Projected axes at 2050, managed harvest; observed axes held.</i>
+                <i style={{opacity:.7,fontStyle:"normal"}}> Projected axes at {year}, {bucket}; observed axes held.</i>
               </div>
             </div>
           )}
@@ -588,12 +588,9 @@ function ensembleStats(series, metric, bucket, yr){
   if(!mean) return null;
   return { mean, lo: Math.min(...vals), hi: Math.max(...vals), n: vals.length };
 }
-function ModelAgreement({ state }){
+function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, setYear }){
   const [series, setSeries] = useState(null);
   const [meta, setMeta] = useState(null);
-  const [metric, setMetric] = useState("agc_live_total");
-  const [bucket, setBucket] = useState("managed (harvest)");
-  const [year, setYear] = useState(2050);
   useEffect(() => {
     if(!state){ setSeries(null); return; }
     let alive = true;
@@ -758,6 +755,9 @@ function Collapsible({ title, subtitle, defaultOpen = false, children }){
 }
 
 export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }){
+  const [mmMetric, setMmMetric] = useState("agc_live_total");
+  const [mmBucket, setMmBucket] = useState("managed (harvest)");
+  const [mmYear, setMmYear] = useState(2050);
   if(!aoi) return null;
   const cv = (v, u, d=0) => { const c = conv(v, u, units); return `${c.value.toFixed(d)} ${c.unit}`; };
   const price = (v, u) => { const c = conv(v, u, units); return `$${Math.round(c.value)}/${c.unit.replace("$/","")}`; };
@@ -854,7 +854,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
               Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Use <b>Compare to</b> to overlay the surrounding area and state average, and <b>Outlook</b> to morph the radar to a reserve or managed future. Whiskers show the within-area spread. The future is a scenario direction from the ecoregion reserve/managed yield curves (carbon, resilience, timber value move; other axes held), not a re-ranked percentile. Resilience = low disturbance risk; biodiversity is a stand diversity index.
             </div>
-            <PriorityDial index={landscape.index} state={state}/>
+            <PriorityDial index={landscape.index} state={state} bucket={mmBucket} year={mmYear}/>
           </div>
         )}
         {landscape.rdSeries && <RDTrajectory series={landscape.rdSeries}/>}
@@ -959,7 +959,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         </Collapsible>
       </>)}
 
-      <ModelAgreement state={state}/>
+      <ModelAgreement state={state} metric={mmMetric} setMetric={setMmMetric} bucket={mmBucket} setBucket={setMmBucket} year={mmYear} setYear={setMmYear}/>
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
       <div className="note" style={{marginTop:6}}>
         Sources: FIA plots (attributes, ownership), yield_curves_by_l3 (projection),
