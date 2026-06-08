@@ -33,11 +33,14 @@
   <div style="background:#15351f;border:1px solid #1b5e3a;border-radius:6px;padding:8px 10px;font-size:11px;color:#cfe8d6;margin:4px 0 10px;line-height:1.4;"><strong style="color:#9fe0b5;">✓ NPV corrected (2026-06-06).</strong> Rebuilt with BAU = managed (harvest), carbon credited on annual sequestration increment, per-hectare normalized, ensemble across the yield-curve engines. Values span positive and negative ($/ha, primary carbon price $8.29/tCO2e).</div>
   <label for="metric">Metric</label>
   <select id="metric">
-    <option value="npv_per_ha">NPV per hectare (USD/ha)</option>
+    <option value="npv_timber">NPV — timber land value, net of mgmt cost (A/r)</option>
+    <option value="npv_per_ha">NPV per hectare — CBM net (USD/ha)</option>
     <option value="hwp_carbon">Wood-product carbon stock (tC)</option>
     <option value="net_climate_carbon">Net climate carbon (tC)</option>
     <option value="area_ha">Forest area (ha)</option>
   </select>
+  <label for="rate">Discount rate (timber NPV = net annual revenue / r)</label>
+  <select id="rate"><option value="0.03">3%</option><option value="0.05" selected>5%</option><option value="0.07">7%</option><option value="0.10">10%</option></select>
   <div id="legend"></div>
   <div class="foot">Source: holoros/cbm_conus · ecoregion_layer.geojson</div>
 </div>
@@ -45,7 +48,7 @@
 <script>
 const GEOJSON = "geo/ecoregion_layer.geojson";   // co-located static asset
 const PALETTE = ["#5b1a18","#a6442e","#d98c5f","#f0d9b8","#bcd9c5","#6fae8f","#2f7d63","#15513f"];
-const fmt = (v,m)=> v==null?"n/a": m==="npv_per_ha"?("$"+Math.round(v).toLocaleString())
+const fmt = (v,m)=> v==null?"n/a": (m==="npv_per_ha"||m==="npv_timber")?("$"+Math.round(v).toLocaleString())
   : (Math.round(v).toLocaleString());
 
 function quantileBreaks(vals, n){
@@ -78,11 +81,16 @@ map.addControl(new maplibregl.NavigationControl({showCompass:false}),"top-right"
 map.on("load", async ()=>{
   const gj=await (await fetch(GEOJSON)).json();
   map.addSource("eco",{type:"geojson",data:gj});
-  let metric="npv_per_ha";  // NPV unmasked 2026-06-06 (corrected pipeline)
-  const vals=()=>gj.features.map(f=>f.properties[metric]);
+  let trev={}; try{ trev=await (await fetch("geo/ecoregion_timber_rev.json")).json(); }catch(e){}
+  gj.features.forEach(f=>{ f.properties.timber_rev_per_ha = (trev[f.properties.NA_L3CODE]!=null)?trev[f.properties.NA_L3CODE]:null; });
+  let metric="npv_timber"; let rate=0.05;
   function apply(){
-    const breaks=quantileBreaks(vals(),PALETTE.length);
-    map.setPaintProperty("ecofill","fill-color",colorExpr(metric,breaks));
+    let prop=metric;
+    if(metric==="npv_timber"){ prop="_npv_timber";
+      gj.features.forEach(f=>{ f.properties._npv_timber=(f.properties.timber_rev_per_ha!=null)?Math.round(f.properties.timber_rev_per_ha/rate):null; });
+      map.getSource("eco").setData(gj); }
+    const breaks=quantileBreaks(gj.features.map(f=>f.properties[prop]),PALETTE.length);
+    map.setPaintProperty("ecofill","fill-color",colorExpr(prop,breaks));
     renderLegend(breaks,metric);
   }
   map.addLayer({id:"ecofill",type:"fill",source:"eco",
@@ -90,13 +98,14 @@ map.on("load", async ()=>{
   map.addLayer({id:"ecoline",type:"line",source:"eco",paint:{"line-color":"#0e1419","line-width":0.3}});
   apply();
   document.getElementById("metric").addEventListener("change",e=>{metric=e.target.value;apply();});
+  document.getElementById("rate").addEventListener("change",e=>{rate=parseFloat(e.target.value);apply();});
 
   const tip=document.getElementById("tip");
   map.on("mousemove","ecofill",e=>{
     const p=e.features[0].properties; tip.style.display="block";
     tip.style.left=(e.point.x+12)+"px"; tip.style.top=(e.point.y+12)+"px";
     tip.innerHTML="<b>"+(p.NA_L3NAME||p.NA_L3CODE)+"</b><br>"+
-      "NPV/ha: "+fmt(p.npv_per_ha,"npv_per_ha")+"<br>"+
+      "Timber NPV/ha, net (A/r): "+(p.timber_rev_per_ha!=null?("$"+Math.round(p.timber_rev_per_ha/rate).toLocaleString()):"n/a")+"<br>CBM-net NPV/ha: "+fmt(p.npv_per_ha,"npv_per_ha")+"<br>"+
       "HWP carbon: "+fmt(p.hwp_carbon)+" tC<br>"+
       "Net climate C: "+fmt(p.net_climate_carbon)+" tC<br>"+
       "Forest area: "+fmt(p.area_ha)+" ha";
