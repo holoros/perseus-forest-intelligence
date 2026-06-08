@@ -3,7 +3,7 @@
 // FIA-derived forest attributes and landowner composition for plots inside the
 // polygon (where available), and the ycx yield trajectory (untreated vs
 // harvested) from yield_curves_by_l3.
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MiniChart from "./MiniChart.jsx";
 import StandOutlook from "./StandOutlook.jsx";
 import { openReport } from "./report.js";
@@ -498,6 +498,91 @@ function PriorityDial({ index }){
   );
 }
 
+// ---- Multi-model agreement. The AOI's encompassing state carries a cross-engine
+// ensemble for above-ground live carbon at the divergence target year. Instead of
+// one projection, show the ensemble mean, the across-model range, and how the model
+// families (CBM, CEM, FVS, LANDIS, yield curves) place along it, so the structural
+// uncertainty is explicit. Data: api/engine_divergence.json.
+const FAMILY_COL = { CBM:"#3fb68b", CEM:"#6baed6", FVS:"#e6ab02", LANDIS:"#d95f02", YC:"#8da0cb" };
+const FAMILY_LAB = { CBM:"CBM", CEM:"CEM", FVS:"FVS", LANDIS:"LANDIS", YC:"Yield curves" };
+function ModelAgreement({ state }){
+  const [div, setDiv] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    fetch(import.meta.env.BASE_URL + "api/engine_divergence.json")
+      .then(r => r.ok ? r.json() : null).then(d => { if(alive) setDiv(d); }).catch(()=>{});
+    return () => { alive = false; };
+  }, []);
+  if(!div || !state) return null;
+  const s = div.states[state];
+  if(!s){
+    return (
+      <div style={{margin:"4px 0 0"}}>
+        <div className="aoi-sub">Multi-model agreement</div>
+        <div className="note" style={{margin:"2px 0 4px"}}>
+          Cross-engine ensemble available for {Object.keys(div.states).join(", ")}. This AOI's state is not yet in the inter-comparison.
+        </div>
+      </div>
+    );
+  }
+  const meta = div.meta;
+  const [lo, hi] = s.range, span = (hi - lo) || 1;
+  const X = v => Math.max(0, Math.min(100, (v - lo) / span * 100));
+  const byFam = {};
+  Object.entries(s.engines).forEach(([eng, val]) => {
+    const fam = meta.classes[eng] || "other";
+    (byFam[fam] = byFam[fam] || []).push(val);
+  });
+  const fams = Object.entries(byFam).map(([fam, vals]) => ({
+    fam, n: vals.length, mean: vals.reduce((a,b)=>a+b,0)/vals.length,
+    lo: Math.min(...vals), hi: Math.max(...vals),
+  })).sort((a,b) => b.mean - a.mean);
+  const W = 280, H = 58, ml = 6, mr = 6, axY = 34;
+  const px = pct => ml + pct/100 * (W - ml - mr);
+  const fmtV = v => Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : v.toFixed(1);
+  const agree = s.cv < 0.20 ? "strong agreement" : s.cv < 0.45 ? "moderate divergence" : "wide divergence";
+  const agreeCol = s.cv < 0.20 ? "#3fb68b" : s.cv < 0.45 ? "#e6ab02" : "#d9534f";
+  const metricName = meta.metric_label ? meta.metric_label.split("(")[0].trim() : "carbon";
+  return (
+    <div style={{margin:"4px 0 0"}}>
+      <div className="aoi-sub">Multi-model agreement · {metricName}</div>
+      <div className="note" style={{margin:"0 6px 2px"}}>
+        {s.n_engines} models, {meta.bucket}, year {s.year_used}. Ensemble mean <b style={{color:"var(--ink)"}}>{fmtV(s.mean)}</b>,
+        across-model range {fmtV(lo)} to {fmtV(hi)} (spread {Math.round(s.spread_pct)}% of the low estimate; CV {s.cv.toFixed(2)},
+        <b style={{color:agreeCol}}> {agree}</b>).
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:330,display:"block",margin:"0 auto"}}>
+        <line x1={px(0)} y1={axY} x2={px(100)} y2={axY} stroke="var(--line)" strokeWidth="2"/>
+        <line x1={px(X(s.mean))} y1={axY-9} x2={px(X(s.mean))} y2={axY+9} stroke="#cdd6dd" strokeWidth="1.4"/>
+        <text x={px(X(s.mean))} y={axY+20} fontSize="8" textAnchor="middle" fill="#9fb0ba">ens. mean</text>
+        {fams.map((f) => {
+          const col = FAMILY_COL[f.fam] || "#888";
+          return (
+            <g key={f.fam}>
+              <line x1={px(X(f.lo))} y1={axY} x2={px(X(f.hi))} y2={axY} stroke={col} strokeWidth="1.2" opacity="0.5"/>
+              <circle cx={px(X(f.mean))} cy={axY} r="4" fill={col} stroke="#0b1015" strokeWidth="0.5"/>
+              <title>{`${FAMILY_LAB[f.fam]||f.fam}: mean ${fmtV(f.mean)} (n=${f.n}${f.n>1?`, ${fmtV(f.lo)} to ${fmtV(f.hi)}`:""})`}</title>
+            </g>
+          );
+        })}
+        <text x={px(0)} y={axY-13} fontSize="8" textAnchor="start" fill="#5e7180">{fmtV(lo)}</text>
+        <text x={px(100)} y={axY-13} fontSize="8" textAnchor="end" fill="#5e7180">{fmtV(hi)}</text>
+      </svg>
+      <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 10px",margin:"1px 0 0"}}>
+        {fams.map(f => (
+          <span key={f.fam} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:9,color:"#5e7180"}}>
+            <i style={{width:9,height:9,borderRadius:"50%",background:FAMILY_COL[f.fam]||"#888",display:"inline-block"}}/>
+            {FAMILY_LAB[f.fam]||f.fam}{f.n>1?` (${f.n})`:""}
+          </span>
+        ))}
+      </div>
+      <div className="note" style={{margin:"3px 6px 2px"}}>
+        Each dot is a model family's mean for this state; the colored bar is its within-family range. Wide spread across families means the projection carries high structural uncertainty for this area, so single-model numbers should be treated with caution. Source: api/engine_divergence.json.
+      </div>
+    </div>
+  );
+}
+
 function downloadCsv(aoi){
   const rows = [["field","value"]];
   rows.push(["name", aoi.name||""]);
@@ -744,6 +829,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         </Collapsible>
       </>)}
 
+      <ModelAgreement state={state}/>
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
       <div className="note" style={{marginTop:6}}>
         Sources: FIA plots (attributes, ownership), yield_curves_by_l3 (projection),
