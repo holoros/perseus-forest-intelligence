@@ -51,7 +51,7 @@ const fmt = (v,m)=> v==null?"n/a": m==="npv_per_ha"?("$"+Math.round(v).toLocaleS
 function quantileBreaks(vals, n){
   const v=vals.filter(x=>x!=null&&isFinite(x)).sort((a,b)=>a-b);
   if(!v.length) return [0];
-  const qs=[]; for(let i=1;i<n;i++) qs.push(v[Math.floor(i/n*(v.length-1))]);
+  const qs=[]; for(let i=1;i<n;i++){ const _b=v[Math.floor(i/n*(v.length-1))]; if(!qs.length || _b>qs[qs.length-1]) qs.push(_b); } // dedupe -> strictly ascending for step expr
   return qs;
 }
 function colorExpr(prop, breaks){
