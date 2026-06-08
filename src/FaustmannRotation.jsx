@@ -28,7 +28,7 @@ function Scatter({ rows }){
       </g>))}
       {xt.map(t => <text key={t} x={sx(t)} y={H-9} textAnchor="middle" fontSize="9" fill="var(--mut)">{t}</text>)}
       <text x={(P.l+W-P.r)/2} y={H-0.5} textAnchor="middle" fontSize="9" fill="var(--mut)">Optimal rotation R_opt (yr)</text>
-      <text x={4} y={P.t+4} fontSize="9" fill="var(--mut)">SEV ($/ac)</text>
+      <text x={W-P.r} y={P.t+1} textAnchor="end" fontSize="9" fill="var(--mut)">SEV ($/ac)</text>
       {rows.map((r,i) => (
         <circle key={i} cx={sx(r.R_opt)} cy={sy(r.sev_opt)} r={r.carbon_floor>0?5:3.4}
           fill={col(r.ft)} fillOpacity={r.carbon_floor>0?0.55:0.9}
