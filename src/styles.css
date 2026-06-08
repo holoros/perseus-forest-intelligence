@@ -125,3 +125,18 @@ select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
 .so-table td{text-align:right;padding:3px 6px;border-bottom:1px solid rgba(42,58,71,.5)}
 .so-table td:first-child{text-align:left;color:var(--ink)}
 .so-table tr:first-child td{font-weight:600}
+/* shareable-link button + ecoregion loading hint (added) */
+.linkbtn{background:var(--panel);color:var(--mut);border:1px solid var(--line);border-radius:6px;
+  padding:2px 8px;font-size:12px;cursor:pointer}
+.linkbtn:hover{border-color:var(--accent);color:var(--ink)}
+.maploading{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:4;
+  background:rgba(23,32,41,.92);border:1px solid var(--line);border-radius:8px;
+  padding:5px 12px;font-size:11.5px;color:var(--mut)}
+/* responsive: stack to one column on narrow screens */
+@media (max-width:760px){
+  .main{grid-template-columns:1fr;grid-template-rows:46vh auto}
+  .mapwrap{border-right:none;border-bottom:1px solid var(--line);min-height:300px}
+  header.top{gap:8px}
+  header.top .stat{margin-left:0}
+  header.top .state-pick{max-width:100%}
+}
