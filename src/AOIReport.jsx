@@ -498,65 +498,130 @@ function PriorityDial({ index }){
   );
 }
 
-// ---- Multi-model agreement. The AOI's encompassing state carries a cross-engine
-// ensemble for above-ground live carbon at the divergence target year. Instead of
-// one projection, show the ensemble mean, the across-model range, and how the model
-// families (CBM, CEM, FVS, LANDIS, yield curves) place along it, so the structural
-// uncertainty is explicit. Data: api/engine_divergence.json.
+// ---- Multi-model agreement. The AOI's encompassing state carries per-engine
+// trajectories for many metrics and management pathways (api/series/<ST>.json).
+// Instead of one projection, compute the cross-engine ensemble at a chosen
+// metric / pathway / year client-side and show the ensemble mean, the across-
+// model range, and how the model families (CBM, CEM, FVS, LANDIS, yield curves)
+// place along it, so structural uncertainty is explicit. Engines are filtered to
+// the same default view as the Engine-compare tab (uncalibrated FVS variants and
+// retired wear_nh series dropped).
 const FAMILY_COL = { CBM:"#3fb68b", CEM:"#6baed6", FVS:"#e6ab02", LANDIS:"#d95f02", YC:"#8da0cb" };
 const FAMILY_LAB = { CBM:"CBM", CEM:"CEM", FVS:"FVS", LANDIS:"LANDIS", YC:"Yield curves" };
-function ModelAgreement({ state }){
-  const [div, setDiv] = useState(null);
-  useEffect(() => {
-    let alive = true;
-    fetch(import.meta.env.BASE_URL + "api/engine_divergence.json")
-      .then(r => r.ok ? r.json() : null).then(d => { if(alive) setDiv(d); }).catch(()=>{});
-    return () => { alive = false; };
-  }, []);
-  if(!div || !state) return null;
-  const s = div.states[state];
-  if(!s){
-    return (
-      <div style={{margin:"4px 0 0"}}>
-        <div className="aoi-sub">Multi-model agreement</div>
-        <div className="note" style={{margin:"2px 0 4px"}}>
-          Cross-engine ensemble available for {Object.keys(div.states).join(", ")}. This AOI's state is not yet in the inter-comparison.
-        </div>
-      </div>
-    );
+const MM_YEARS = [2030, 2050, 2075, 2100];
+const MM_GROUP_ORDER = ["carbon", "economic", "timber"];
+const isEngineOutlier = m =>
+  (/(fvs.*(native|jenkins))/i.test(m) && !/(anchored|calibrated)/i.test(m)) || /wear_nh/i.test(m);
+function mmInterp(pts, yr){
+  if(!pts || !pts.length) return null;
+  if(yr < pts[0][0] || yr > pts[pts.length-1][0]) return null;   // no extrapolation
+  for(let i=1;i<pts.length;i++){
+    if(yr <= pts[i][0]){ const [a0,v0]=pts[i-1], [a1,v1]=pts[i];
+      const f=(yr-a0)/((a1-a0)||1); return v0 + f*(v1-v0); }
   }
-  const meta = div.meta;
-  const [lo, hi] = s.range, span = (hi - lo) || 1;
-  const X = v => Math.max(0, Math.min(100, (v - lo) / span * 100));
-  const byFam = {};
-  Object.entries(s.engines).forEach(([eng, val]) => {
-    const fam = meta.classes[eng] || "other";
-    (byFam[fam] = byFam[fam] || []).push(val);
+  return pts[pts.length-1][1];
+}
+function mmEngines(series, metric, bucket){
+  const arr = series && series[metric] && series[metric][bucket];
+  return arr ? arr.filter(s => !isEngineOutlier(s.model)) : [];
+}
+function ModelAgreement({ state }){
+  const [series, setSeries] = useState(null);
+  const [meta, setMeta] = useState(null);
+  const [metric, setMetric] = useState("agc_live_total");
+  const [bucket, setBucket] = useState("managed (harvest)");
+  const [year, setYear] = useState(2050);
+  useEffect(() => {
+    if(!state){ setSeries(null); return; }
+    let alive = true;
+    const B = import.meta.env.BASE_URL;
+    Promise.all([
+      fetch(`${B}api/series/${state}.json`).then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch(`${B}api/meta.json`).then(r=>r.ok?r.json():null).catch(()=>null),
+    ]).then(([s,m]) => { if(!alive) return; setSeries(s); if(m) setMeta(m); });
+    return () => { alive = false; };
+  }, [state]);
+  if(!state || series === null) return null;
+
+  const ml_ = (k) => (meta && meta.metrics && meta.metrics[k]) ? meta.metrics[k].label : k;
+  const grp_ = (k) => (meta && meta.metrics && meta.metrics[k]) ? meta.metrics[k].group : "";
+  let metricKeys = Object.keys(series).filter(mk =>
+    Object.keys(series[mk]).some(bk => mmEngines(series, mk, bk).length >= 3));
+  metricKeys.sort((a,b) => {
+    const oa = MM_GROUP_ORDER.indexOf(grp_(a)), ob = MM_GROUP_ORDER.indexOf(grp_(b));
+    if(oa !== ob) return (oa<0?99:oa) - (ob<0?99:ob);
+    return ml_(a).localeCompare(ml_(b));
   });
-  const fams = Object.entries(byFam).map(([fam, vals]) => ({
-    fam, n: vals.length, mean: vals.reduce((a,b)=>a+b,0)/vals.length,
-    lo: Math.min(...vals), hi: Math.max(...vals),
-  })).sort((a,b) => b.mean - a.mean);
-  const W = 280, H = 58, ml = 6, mr = 6, axY = 34;
-  const px = pct => ml + pct/100 * (W - ml - mr);
-  const fmtV = v => Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : v.toFixed(1);
-  const agree = s.cv < 0.20 ? "strong agreement" : s.cv < 0.45 ? "moderate divergence" : "wide divergence";
-  const agreeCol = s.cv < 0.20 ? "#3fb68b" : s.cv < 0.45 ? "#e6ab02" : "#d9534f";
-  const metricName = meta.metric_label ? meta.metric_label.split("(")[0].trim() : "carbon";
+  if(!metricKeys.length){
+    return (<div style={{margin:"4px 0 0"}}>
+      <div className="aoi-sub">Multi-model agreement</div>
+      <div className="note" style={{margin:"2px 0 4px"}}>No multi-engine ensemble available for this area.</div></div>);
+  }
+  const mk = metricKeys.includes(metric) ? metric
+    : (metricKeys.includes("agc_live_total") ? "agc_live_total" : metricKeys[0]);
+  const bucketKeys = Object.keys(series[mk]).filter(bk => mmEngines(series, mk, bk).length >= 3);
+  const bk = bucketKeys.includes(bucket) ? bucket
+    : (bucketKeys.includes("managed (harvest)") ? "managed (harvest)" : bucketKeys[0]);
+  const engines = mmEngines(series, mk, bk);
+  const yearsAvail = MM_YEARS.filter(y => engines.filter(s => mmInterp(s.pts, y) != null).length >= 3);
+  const yr = yearsAvail.includes(year) ? year
+    : (yearsAvail.includes(2050) ? 2050 : yearsAvail[yearsAvail.length-1]);
+
+  const obs = [];
+  engines.forEach(s => { const v = mmInterp(s.pts, yr); if(v != null) obs.push({ v, cls: s.cls }); });
+  if(obs.length < 2){
+    return (<div style={{margin:"4px 0 0"}}>
+      <div className="aoi-sub">Multi-model agreement</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 3px"}}>
+        <select value={mk} onChange={e=>setMetric(e.target.value)} style={MM_SEL} title="metric">
+          {metricKeys.map(k => <option key={k} value={k}>{ml_(k)}</option>)}</select>
+      </div>
+      <div className="note" style={{margin:"2px 6px 4px"}}>Not enough engines resolve for this selection.</div></div>);
+  }
+  const vals = obs.map(o=>o.v), n = vals.length;
+  const mean = vals.reduce((a,b)=>a+b,0)/n;
+  const lo = Math.min(...vals), hi = Math.max(...vals), span = (hi-lo)||1;
+  const sd = Math.sqrt(vals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/n);
+  const cv = mean ? sd/Math.abs(mean) : 0;
+  const spreadPct = lo ? (hi-lo)/Math.abs(lo)*100 : 0;
+  const byFam = {};
+  obs.forEach(o => { (byFam[o.cls]=byFam[o.cls]||[]).push(o.v); });
+  const fams = Object.entries(byFam).map(([fam,vs]) => ({
+    fam, n: vs.length, mean: vs.reduce((a,b)=>a+b,0)/vs.length,
+    lo: Math.min(...vs), hi: Math.max(...vs),
+  })).sort((a,b)=>b.mean-a.mean);
+
+  const unit = (meta && meta.metrics && meta.metrics[mk]) ? meta.metrics[mk].unit : "";
+  const label = ml_(mk);
+  const X = v => Math.max(0, Math.min(100, (v-lo)/span*100));
+  const W = 280, mlp = 6, mrp = 6, axY = 34, H = 58;
+  const px = pct => mlp + pct/100 * (W-mlp-mrp);
+  const fmtV = v => Math.abs(v) >= 100 ? Math.round(v).toLocaleString()
+    : (Math.abs(v) >= 1 ? v.toFixed(1) : v.toFixed(2));
+  const agree = cv < 0.20 ? "strong agreement" : cv < 0.45 ? "moderate divergence" : "wide divergence";
+  const agreeCol = cv < 0.20 ? "#3fb68b" : cv < 0.45 ? "#e6ab02" : "#d9534f";
+
   return (
     <div style={{margin:"4px 0 0"}}>
-      <div className="aoi-sub">Multi-model agreement · {metricName}</div>
+      <div className="aoi-sub">Multi-model agreement</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 3px"}}>
+        <select value={mk} onChange={e=>setMetric(e.target.value)} style={MM_SEL} title="metric">
+          {metricKeys.map(k => <option key={k} value={k}>{ml_(k)}</option>)}</select>
+        <select value={bk} onChange={e=>setBucket(e.target.value)} style={MM_SEL} title="management pathway">
+          {bucketKeys.map(k => <option key={k} value={k}>{k}</option>)}</select>
+        <select value={yr} onChange={e=>setYear(+e.target.value)} style={MM_SEL} title="target year">
+          {yearsAvail.map(y => <option key={y} value={y}>{y}</option>)}</select>
+      </div>
       <div className="note" style={{margin:"0 6px 2px"}}>
-        {s.n_engines} models, {meta.bucket}, year {s.year_used}. Ensemble mean <b style={{color:"var(--ink)"}}>{fmtV(s.mean)}</b>,
-        across-model range {fmtV(lo)} to {fmtV(hi)} (spread {Math.round(s.spread_pct)}% of the low estimate; CV {s.cv.toFixed(2)},
+        {n} models{unit?`, ${unit}`:""}. Ensemble mean <b style={{color:"var(--ink)"}}>{fmtV(mean)}</b>,
+        across-model range {fmtV(lo)} to {fmtV(hi)} (spread {Math.round(spreadPct)}% of the low estimate; CV {cv.toFixed(2)},
         <b style={{color:agreeCol}}> {agree}</b>).
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:330,display:"block",margin:"0 auto"}}>
         <line x1={px(0)} y1={axY} x2={px(100)} y2={axY} stroke="var(--line)" strokeWidth="2"/>
-        <line x1={px(X(s.mean))} y1={axY-9} x2={px(X(s.mean))} y2={axY+9} stroke="#cdd6dd" strokeWidth="1.4"/>
-        <text x={px(X(s.mean))} y={axY+20} fontSize="8" textAnchor="middle" fill="#9fb0ba">ens. mean</text>
-        {fams.map((f) => {
-          const col = FAMILY_COL[f.fam] || "#888";
+        <line x1={px(X(mean))} y1={axY-9} x2={px(X(mean))} y2={axY+9} stroke="#cdd6dd" strokeWidth="1.4"/>
+        <text x={px(X(mean))} y={axY+20} fontSize="8" textAnchor="middle" fill="#9fb0ba">ens. mean</text>
+        {fams.map(f => { const col = FAMILY_COL[f.fam] || "#888";
           return (
             <g key={f.fam}>
               <line x1={px(X(f.lo))} y1={axY} x2={px(X(f.hi))} y2={axY} stroke={col} strokeWidth="1.2" opacity="0.5"/>
@@ -577,11 +642,13 @@ function ModelAgreement({ state }){
         ))}
       </div>
       <div className="note" style={{margin:"3px 6px 2px"}}>
-        Each dot is a model family's mean for this state; the colored bar is its within-family range. Wide spread across families means the projection carries high structural uncertainty for this area, so single-model numbers should be treated with caution. Source: api/engine_divergence.json.
+        State-level cross-engine ensemble for {label} under {bk} at {yr}. Each dot is a model family's mean; the colored bar is its within-family range. Wide spread across families means high structural uncertainty, so single-model numbers should be treated with caution. Uncalibrated FVS variants are excluded, matching the engine-comparison default. Source: api/series/{state}.json.
       </div>
     </div>
   );
 }
+const MM_SEL = { background:"var(--panel)", color:"var(--ink)", border:"1px solid var(--line)",
+  borderRadius:6, padding:"2px 5px", fontSize:11 };
 
 function downloadCsv(aoi){
   const rows = [["field","value"]];
