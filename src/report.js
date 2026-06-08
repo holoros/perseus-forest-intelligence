@@ -18,7 +18,50 @@ const esc = (s) => String(s==null?"":s).replace(/[&<>]/g, c => ({"&":"&amp;","<"
 import { conv, unitLabel, fmtArea as fmtAreaU } from "./units.js";
 const num = (v,d=0) => v==null?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:d});
 
-function buildReportHTML(aoi, stumpage, system = "imperial"){
+// ---- multi-model ensemble helpers (mirror the Engine-compare default filter) ----
+const REP_OUTLIER = m => (/(fvs.*(native|jenkins))/i.test(m) && !/(anchored|calibrated)/i.test(m)) || /wear_nh/i.test(m);
+function repAtYear(pts, yr){
+  if(!pts || !pts.length) return null;
+  if(yr < pts[0][0] || yr > pts[pts.length-1][0]) return null;
+  for(let i=1;i<pts.length;i++){ if(yr <= pts[i][0]){ const [a0,v0]=pts[i-1],[a1,v1]=pts[i];
+    const f=(yr-a0)/((a1-a0)||1); return v0+f*(v1-v0); } }
+  return pts[pts.length-1][1];
+}
+function repEnsemble(series, metric, bucket, yr){
+  const arr = series && series[metric] && series[metric][bucket];
+  if(!arr) return null;
+  const obs=[];
+  arr.filter(e=>!REP_OUTLIER(e.model)).forEach(e=>{ const v=repAtYear(e.pts,yr); if(v!=null) obs.push({v,cls:e.cls}); });
+  if(obs.length < 3) return null;
+  const vals=obs.map(o=>o.v), n=vals.length, mean=vals.reduce((a,b)=>a+b,0)/n;
+  const lo=Math.min(...vals), hi=Math.max(...vals);
+  const sd=Math.sqrt(vals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/n);
+  const cv=mean?sd/Math.abs(mean):0, spreadPct=lo?(hi-lo)/Math.abs(lo)*100:0;
+  const byFam={}; obs.forEach(o=>{ (byFam[o.cls]=byFam[o.cls]||[]).push(o.v); });
+  const fams=Object.entries(byFam).map(([fam,vs])=>({fam,n:vs.length,mean:vs.reduce((a,b)=>a+b,0)/vs.length})).sort((a,b)=>b.mean-a.mean);
+  return { n, mean, lo, hi, cv, spreadPct, fams };
+}
+async function fetchModelSummary(state){
+  if(!state) return null;
+  const B = import.meta.env.BASE_URL;
+  try{
+    const [s,m] = await Promise.all([
+      fetch(`${B}api/series/${state}.json`).then(r=>r.ok?r.json():null),
+      fetch(`${B}api/meta.json`).then(r=>r.ok?r.json():null),
+    ]);
+    if(!s) return null;
+    const lab = k => (m && m.metrics && m.metrics[k]) ? m.metrics[k].label : k;
+    const unit = k => (m && m.metrics && m.metrics[k]) ? m.metrics[k].unit : "";
+    return {
+      carbon: repEnsemble(s, "agc_live_total", "managed (harvest)", 2050),
+      value:  repEnsemble(s, "standing_value_musd", "managed (harvest)", 2050),
+      lab:  { carbon: lab("agc_live_total"), value: lab("standing_value_musd") },
+      unit: { carbon: unit("agc_live_total"), value: unit("standing_value_musd") },
+    };
+  }catch(e){ return null; }
+}
+
+function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
   const { name, l3code, l3name, l1, centroid, area_m2, state, plotStats, landscape, allCurves } = aoi || {};
   const today = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
   const ps = plotStats, ls = landscape || {};
@@ -154,6 +197,23 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
       <p class="note">Reserve = unharvested trajectory; managed = working-forest (harvest) trajectory, both from the ycX yield curves for the encompassing ecoregion.</p>`;
   }
 
+  // ---- multi-model agreement section ----
+  let modelSec = "";
+  if(model && (model.carbon || model.value)){
+    const FAM = { CBM:"CBM", CEM:"CEM", FVS:"FVS", LANDIS:"LANDIS", YC:"Yield curves" };
+    const fmtv = v => Math.abs(v)>=100 ? Math.round(v).toLocaleString() : (Math.abs(v)>=1 ? v.toFixed(1) : v.toFixed(2));
+    const block = (e, label, unit) => {
+      if(!e) return "";
+      const agree = e.cv<0.20 ? "strong agreement" : e.cv<0.45 ? "moderate divergence" : "wide divergence";
+      const col = e.cv<0.20 ? "#2e9e6b" : e.cv<0.45 ? "#b8860b" : "#c0392b";
+      const fams = e.fams.map(f=>`${esc(FAM[f.fam]||f.fam)} ${fmtv(f.mean)}${f.n>1?` (n=${f.n})`:""}`).join(" &middot; ");
+      return row(esc(label), `ensemble <b>${fmtv(e.mean)}</b> ${esc(unit||"")}, range ${fmtv(e.lo)}&ndash;${fmtv(e.hi)} &middot; spread ${Math.round(e.spreadPct)}% &middot; CV ${e.cv.toFixed(2)} <b style="color:${col}">${agree}</b><div class="note" style="margin:2px 0 0">${fams}</div>`);
+    };
+    const mrows = block(model.carbon, model.lab.carbon||"Carbon", model.unit.carbon)
+                + block(model.value,  model.lab.value||"Timber value", model.unit.value);
+    if(mrows) modelSec = `<h2>Multi-model agreement <span class="sub">cross-engine ensemble &middot; managed (harvest) &middot; 2050</span></h2><table class="kv">${mrows}</table><p class="note">State-level ensemble across model families (CBM, CEM, FVS, LANDIS, yield curves); uncalibrated FVS variants excluded to match the engine-comparison default. Wide spread means high structural uncertainty &mdash; treat single-model numbers with caution.</p>`;
+  }
+
   return `<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Area Report</title>
 <style>
   body{font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1a2530;margin:0;background:#f4f6f7}
@@ -185,7 +245,7 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
     <h1>PERSEUS Forest Intelligence — Area Report</h1>
     <div class="meta">${esc(name||"Area of interest")} · generated ${esc(today)}</div>
   </header>
-  ${html}${radar}${attrs}${owners}${land}${stump}${outlook}
+  ${html}${radar}${attrs}${owners}${land}${stump}${outlook}${modelSec}
   <footer>
     Center for Research on Sustainable Forests · Center for Advanced Forestry Systems · PERSEUS (USDA NIFA SAS).
     Sources: FIA plots, TreeMap 2022, yield_curves_by_l3, CONUS overlays. Habitat and biodiversity are indicative
@@ -194,20 +254,31 @@ function buildReportHTML(aoi, stumpage, system = "imperial"){
 </div></body></html>`;
 }
 
-export function downloadReport(aoi, stumpage, system = "imperial"){
-  const html = buildReportHTML(aoi, stumpage, system);
-  const blob = new Blob([html], { type: "text/html" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  const tag = (aoi && aoi.l3code ? String(aoi.l3code).replace(/\./g,"_") : (aoi && aoi.state) || "aoi");
-  a.download = `perseus_area_report_${tag}.html`;
-  a.click(); URL.revokeObjectURL(a.href);
+export function downloadReport(aoi, stumpage, system = "imperial", model){
+  const finish = (m) => {
+    const html = buildReportHTML(aoi, stumpage, system, m);
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    const tag = (aoi && aoi.l3code ? String(aoi.l3code).replace(/\./g,"_") : (aoi && aoi.state) || "aoi");
+    a.download = `perseus_area_report_${tag}.html`;
+    a.click(); URL.revokeObjectURL(a.href);
+  };
+  if(model !== undefined) finish(model);
+  else fetchModelSummary(aoi && aoi.state).then(finish).catch(()=>finish(null));
 }
 
-// Open the report in a new tab (better for print-to-PDF).
+// Open the report in a new tab (better for print-to-PDF). Opens synchronously to
+// avoid popup blocking, then fills in once the multi-model ensemble has loaded.
 export function openReport(aoi, stumpage, system = "imperial"){
-  const html = buildReportHTML(aoi, stumpage, system);
   const w = window.open("", "_blank");
-  if(w){ w.document.write(html); w.document.close(); }
-  else downloadReport(aoi, stumpage, system);
+  if(w) w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Area Report</title></head><body style="font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#5e7180;padding:48px">Generating area report\u2026</body></html>');
+  fetchModelSummary(aoi && aoi.state).then(model => {
+    const html = buildReportHTML(aoi, stumpage, system, model);
+    if(w){ w.document.open(); w.document.write(html); w.document.close(); }
+    else downloadReport(aoi, stumpage, system, model);
+  }).catch(() => {
+    const html = buildReportHTML(aoi, stumpage, system, null);
+    if(w){ w.document.open(); w.document.write(html); w.document.close(); }
+  });
 }
