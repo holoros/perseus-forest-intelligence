@@ -435,9 +435,25 @@ function recommendPathway(rows){
   return { lean, why };
 }
 
-function PriorityDial({ index }){
+function PriorityDial({ index, state }){
   const init = {}; PRIO.forEach(([k])=>{ init[k]=1; });
   const [w, setW] = useState(init);
+  const [mspread, setMspread] = useState(null);
+  useEffect(() => {
+    if(!state){ setMspread(null); return; }
+    let alive = true;
+    fetch(import.meta.env.BASE_URL + `api/series/${state}.json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(sj => { if(!alive || !sj) return;
+        const c = ensembleStats(sj, "agc_live_total", "managed (harvest)", 2050);
+        const v = ensembleStats(sj, "standing_value_musd", "managed (harvest)", 2050);
+        setMspread({
+          carbon: (c && c.mean) ? { fracLo: c.lo/c.mean - 1, fracHi: c.hi/c.mean - 1 } : null,
+          value:  (v && v.mean) ? { fracLo: v.lo/v.mean - 1, fracHi: v.hi/v.mean - 1 } : null,
+        });
+      }).catch(()=>{});
+    return () => { alive = false; };
+  }, [state]);
   if(!index) return null;
   const avail = PRIO.filter(([k]) => axV(index[k])!=null);
   if(avail.length < 2) return null;
@@ -452,6 +468,28 @@ function PriorityDial({ index }){
   const active = rows.filter(r=>r.wt>0).slice().sort((a,b)=> (b.g*b.wt)-(a.g*a.wt));
   const rec = den>0 ? recommendPathway(rows.filter(r=>r.wt>0)) : null;
   const setk = (k,val) => setW(p=>({...p,[k]:val}));
+  // Model-uncertainty band on the priority-fit: perturb the model-projected axes
+  // (carbon, timber value) across the engine ensemble low/high and recompute,
+  // holding the observed axes. Reuses the projectFuture percentile-nudge form.
+  const NUDGE = (pp, frac) => Math.max(0, Math.min(1, pp + 0.42*Math.tanh(2*frac)));
+  const fitWith = (ov) => { let nu=0, de=0;
+    for(const [k] of avail){ let g = axV(index[k]); if(g==null) continue;
+      if(ov[k]!=null) g = ov[k]; const wt = w[k]; nu += g*wt; de += wt; }
+    return de>0 ? nu/de : null; };
+  let fitLo=null, fitHi=null;
+  if(mspread && den>0){
+    const oLo={}, oHi={};
+    if(mspread.carbon && axV(index.carbon)!=null){
+      oLo.carbon = NUDGE(axV(index.carbon), mspread.carbon.fracLo);
+      oHi.carbon = NUDGE(axV(index.carbon), mspread.carbon.fracHi); }
+    if(mspread.value && axV(index.value)!=null){
+      oLo.value = NUDGE(axV(index.value), mspread.value.fracLo);
+      oHi.value = NUDGE(axV(index.value), mspread.value.fracHi); }
+    if(Object.keys(oLo).length){ const a=fitWith(oLo), b=fitWith(oHi);
+      if(a!=null && b!=null){ fitLo=Math.min(a,b); fitHi=Math.max(a,b); } }
+  }
+  const hasBand = fitLo!=null && fitHi!=null && (fitHi-fitLo) > 0.004;
+  const bandRobust = hasBand && (fitHi-fitLo) < 0.10;
   return (
     <div style={{margin:"4px 6px 6px"}}>
       <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>What do you value? · priorities</div>
@@ -491,6 +529,21 @@ function PriorityDial({ index }){
               For your priorities, lean <b style={{color:"var(--ink)"}}>{rec.lean}</b> — {rec.why}
             </div>
           )}
+          {hasBand && (
+            <div style={{margin:"6px 0 0"}}>
+              <div style={{position:"relative",height:8,background:"var(--bg)",borderRadius:3,margin:"2px 0"}}>
+                <div style={{position:"absolute",left:`${fitLo*100}%`,width:`${(fitHi-fitLo)*100}%`,top:0,bottom:0,
+                  background:(FIT_COL[band]||"#888")+"55",borderRadius:3}}/>
+                <div style={{position:"absolute",left:`calc(${fit*100}% - 1px)`,top:-2,bottom:-2,width:2,background:"var(--ink)"}}/>
+              </div>
+              <div className="note" style={{margin:"2px 0 0"}}>
+                Model uncertainty: across the engine ensemble{mspread && mspread.value && axV(index.value)!=null ? " (carbon and timber value)" : " (carbon)"},
+                your priority-fit spans <b style={{color:"var(--ink)"}}>{ord(Math.round(fitLo*100))}</b> to <b style={{color:"var(--ink)"}}>{ord(Math.round(fitHi*100))}</b> percentile,
+                <b style={{color: bandRobust ? "#3fb68b" : "#e6ab02"}}> {bandRobust ? "robust to model choice" : "sensitive to which model you trust"}</b>.
+                <i style={{opacity:.7,fontStyle:"normal"}}> Projected axes at 2050, managed harvest; observed axes held.</i>
+              </div>
+            </div>
+          )}
         </div>
       )}
       {den===0 && <div className="note" style={{margin:"2px 0 0"}}>Set a weight above to see your priority fit and recommendation.</div>}
@@ -524,6 +577,16 @@ function mmInterp(pts, yr){
 function mmEngines(series, metric, bucket){
   const arr = series && series[metric] && series[metric][bucket];
   return arr ? arr.filter(s => !isEngineOutlier(s.model)) : [];
+}
+// Ensemble {mean,lo,hi} across default-filtered engines at a year (>=3 required).
+function ensembleStats(series, metric, bucket, yr){
+  const engines = mmEngines(series, metric, bucket);
+  const vals = [];
+  engines.forEach(s => { const v = mmInterp(s.pts, yr); if(v != null) vals.push(v); });
+  if(vals.length < 3) return null;
+  const mean = vals.reduce((a,b)=>a+b,0)/vals.length;
+  if(!mean) return null;
+  return { mean, lo: Math.min(...vals), hi: Math.max(...vals), n: vals.length };
 }
 function ModelAgreement({ state }){
   const [series, setSeries] = useState(null);
@@ -791,7 +854,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
               Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Use <b>Compare to</b> to overlay the surrounding area and state average, and <b>Outlook</b> to morph the radar to a reserve or managed future. Whiskers show the within-area spread. The future is a scenario direction from the ecoregion reserve/managed yield curves (carbon, resilience, timber value move; other axes held), not a re-ranked percentile. Resilience = low disturbance risk; biodiversity is a stand diversity index.
             </div>
-            <PriorityDial index={landscape.index}/>
+            <PriorityDial index={landscape.index} state={state}/>
           </div>
         )}
         {landscape.rdSeries && <RDTrajectory series={landscape.rdSeries}/>}
