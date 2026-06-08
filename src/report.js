@@ -41,7 +41,8 @@ function repEnsemble(series, metric, bucket, yr){
   const fams=Object.entries(byFam).map(([fam,vs])=>({fam,n:vs.length,mean:vs.reduce((a,b)=>a+b,0)/vs.length})).sort((a,b)=>b.mean-a.mean);
   return { n, mean, lo, hi, cv, spreadPct, fams };
 }
-async function fetchModelSummary(state){
+const REPORT_METRICS = ["agc_live_total","total_ecosystem_c","dead_wood_c","standing_value_musd","merch_vol_mcf","vol_stem"];
+async function fetchModelSummary(state, bucket = "managed (harvest)", year = 2050){
   if(!state) return null;
   const B = import.meta.env.BASE_URL;
   try{
@@ -52,12 +53,10 @@ async function fetchModelSummary(state){
     if(!s) return null;
     const lab = k => (m && m.metrics && m.metrics[k]) ? m.metrics[k].label : k;
     const unit = k => (m && m.metrics && m.metrics[k]) ? m.metrics[k].unit : "";
-    return {
-      carbon: repEnsemble(s, "agc_live_total", "managed (harvest)", 2050),
-      value:  repEnsemble(s, "standing_value_musd", "managed (harvest)", 2050),
-      lab:  { carbon: lab("agc_live_total"), value: lab("standing_value_musd") },
-      unit: { carbon: unit("agc_live_total"), value: unit("standing_value_musd") },
-    };
+    const metrics = REPORT_METRICS
+      .map(k => { const ens = repEnsemble(s, k, bucket, year); return ens ? { key:k, label:lab(k), unit:unit(k), ens } : null; })
+      .filter(Boolean);
+    return { bucket, year, metrics };
   }catch(e){ return null; }
 }
 
@@ -199,7 +198,7 @@ function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
 
   // ---- multi-model agreement section ----
   let modelSec = "";
-  if(model && (model.carbon || model.value)){
+  if(model && model.metrics && model.metrics.length){
     const FAM = { CBM:"CBM", CEM:"CEM", FVS:"FVS", LANDIS:"LANDIS", YC:"Yield curves" };
     const fmtv = v => Math.abs(v)>=100 ? Math.round(v).toLocaleString() : (Math.abs(v)>=1 ? v.toFixed(1) : v.toFixed(2));
     const block = (e, label, unit) => {
@@ -209,9 +208,8 @@ function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
       const fams = e.fams.map(f=>`${esc(FAM[f.fam]||f.fam)} ${fmtv(f.mean)}${f.n>1?` (n=${f.n})`:""}`).join(" &middot; ");
       return row(esc(label), `ensemble <b>${fmtv(e.mean)}</b> ${esc(unit||"")}, range ${fmtv(e.lo)}&ndash;${fmtv(e.hi)} &middot; spread ${Math.round(e.spreadPct)}% &middot; CV ${e.cv.toFixed(2)} <b style="color:${col}">${agree}</b><div class="note" style="margin:2px 0 0">${fams}</div>`);
     };
-    const mrows = block(model.carbon, model.lab.carbon||"Carbon", model.unit.carbon)
-                + block(model.value,  model.lab.value||"Timber value", model.unit.value);
-    if(mrows) modelSec = `<h2>Multi-model agreement <span class="sub">cross-engine ensemble &middot; managed (harvest) &middot; 2050</span></h2><table class="kv">${mrows}</table><p class="note">State-level ensemble across model families (CBM, CEM, FVS, LANDIS, yield curves); uncalibrated FVS variants excluded to match the engine-comparison default. Wide spread means high structural uncertainty &mdash; treat single-model numbers with caution.</p>`;
+    const mrows = model.metrics.map(mm => block(mm.ens, mm.label, mm.unit)).join("");
+    if(mrows) modelSec = `<h2>Multi-model agreement <span class="sub">cross-engine ensemble &middot; ${esc(model.bucket)} &middot; ${esc(String(model.year))}</span></h2><table class="kv">${mrows}</table><p class="note">State-level ensemble across model families (CBM, CEM, FVS, LANDIS, yield curves); uncalibrated FVS variants excluded to match the engine-comparison default. Wide spread means high structural uncertainty &mdash; treat single-model numbers with caution.</p>`;
   }
 
   return `<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Area Report</title>
@@ -254,9 +252,9 @@ function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
 </div></body></html>`;
 }
 
-export function downloadReport(aoi, stumpage, system = "imperial", model){
-  const finish = (m) => {
-    const html = buildReportHTML(aoi, stumpage, system, m);
+export function downloadReport(aoi, stumpage, system = "imperial", mm){
+  const finish = (model) => {
+    const html = buildReportHTML(aoi, stumpage, system, model);
     const blob = new Blob([html], { type: "text/html" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -264,16 +262,16 @@ export function downloadReport(aoi, stumpage, system = "imperial", model){
     a.download = `perseus_area_report_${tag}.html`;
     a.click(); URL.revokeObjectURL(a.href);
   };
-  if(model !== undefined) finish(model);
-  else fetchModelSummary(aoi && aoi.state).then(finish).catch(()=>finish(null));
+  if(mm && mm.metrics) finish(mm);
+  else fetchModelSummary(aoi && aoi.state, mm && mm.bucket, mm && mm.year).then(finish).catch(()=>finish(null));
 }
 
 // Open the report in a new tab (better for print-to-PDF). Opens synchronously to
 // avoid popup blocking, then fills in once the multi-model ensemble has loaded.
-export function openReport(aoi, stumpage, system = "imperial"){
+export function openReport(aoi, stumpage, system = "imperial", mm){
   const w = window.open("", "_blank");
   if(w) w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Area Report</title></head><body style="font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#5e7180;padding:48px">Generating area report\u2026</body></html>');
-  fetchModelSummary(aoi && aoi.state).then(model => {
+  fetchModelSummary(aoi && aoi.state, mm && mm.bucket, mm && mm.year).then(model => {
     const html = buildReportHTML(aoi, stumpage, system, model);
     if(w){ w.document.open(); w.document.write(html); w.document.close(); }
     else downloadReport(aoi, stumpage, system, model);

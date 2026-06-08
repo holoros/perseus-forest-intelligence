@@ -777,7 +777,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
         <b>AOI summary{name ? ` · ${name}` : ""}</b>
         <span>
           <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",fontWeight:600}}
-            onClick={()=>openReport(aoi, stumpage, units)} title="open a full printable area report (save or print to PDF)">Report ↗</button>
+            onClick={()=>openReport(aoi, stumpage, units, {bucket:mmBucket, year:mmYear})} title="open a full printable area report (save or print to PDF)">Report ↗</button>
           <button className="mini-btn" style={{marginTop:0,marginRight:6}}
             onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV ↓</button>
           {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
