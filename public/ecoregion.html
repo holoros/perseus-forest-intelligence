@@ -33,13 +33,13 @@
   <div style="background:#15351f;border:1px solid #1b5e3a;border-radius:6px;padding:8px 10px;font-size:11px;color:#cfe8d6;margin:4px 0 10px;line-height:1.4;"><strong style="color:#9fe0b5;">✓ NPV corrected (2026-06-06).</strong> Rebuilt with BAU = managed (harvest), carbon credited on annual sequestration increment, per-hectare normalized, ensemble across the yield-curve engines. Values span positive and negative ($/ha, primary carbon price $8.29/tCO2e).</div>
   <label for="metric">Metric</label>
   <select id="metric">
-    <option value="npv_timber">NPV — timber land value, A/r (USD/ha)</option>
+    <option value="npv_timber">NPV — timber land value, net of mgmt cost (A/r)</option>
     <option value="npv_per_ha">NPV per hectare — CBM net (USD/ha)</option>
     <option value="hwp_carbon">Wood-product carbon stock (tC)</option>
     <option value="net_climate_carbon">Net climate carbon (tC)</option>
     <option value="area_ha">Forest area (ha)</option>
   </select>
-  <label for="rate">Discount rate (timber NPV = annual revenue / r)</label>
+  <label for="rate">Discount rate (timber NPV = net annual revenue / r)</label>
   <select id="rate"><option value="0.03">3%</option><option value="0.05" selected>5%</option><option value="0.07">7%</option><option value="0.10">10%</option></select>
   <div id="legend"></div>
   <div class="foot">Source: holoros/cbm_conus · ecoregion_layer.geojson</div>
@@ -105,7 +105,7 @@ map.on("load", async ()=>{
     const p=e.features[0].properties; tip.style.display="block";
     tip.style.left=(e.point.x+12)+"px"; tip.style.top=(e.point.y+12)+"px";
     tip.innerHTML="<b>"+(p.NA_L3NAME||p.NA_L3CODE)+"</b><br>"+
-      "Timber NPV/ha (A/r): "+(p.timber_rev_per_ha!=null?("$"+Math.round(p.timber_rev_per_ha/rate).toLocaleString()):"n/a")+"<br>CBM-net NPV/ha: "+fmt(p.npv_per_ha,"npv_per_ha")+"<br>"+
+      "Timber NPV/ha, net (A/r): "+(p.timber_rev_per_ha!=null?("$"+Math.round(p.timber_rev_per_ha/rate).toLocaleString()):"n/a")+"<br>CBM-net NPV/ha: "+fmt(p.npv_per_ha,"npv_per_ha")+"<br>"+
       "HWP carbon: "+fmt(p.hwp_carbon)+" tC<br>"+
       "Net climate C: "+fmt(p.net_climate_carbon)+" tC<br>"+
       "Forest area: "+fmt(p.area_ha)+" ha";
