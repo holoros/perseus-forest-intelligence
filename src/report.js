@@ -200,16 +200,28 @@ function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
   let modelSec = "";
   if(model && model.metrics && model.metrics.length){
     const FAM = { CBM:"CBM", CEM:"CEM", FVS:"FVS", LANDIS:"LANDIS", YC:"Yield curves" };
+    const FCOL = { CBM:"#2e9e6b", CEM:"#3b7fb8", FVS:"#c08a1e", LANDIS:"#b5562a", YC:"#6b6fae" };
     const fmtv = v => Math.abs(v)>=100 ? Math.round(v).toLocaleString() : (Math.abs(v)>=1 ? v.toFixed(1) : v.toFixed(2));
+    const barSvg = (e) => {
+      const W=300, H=22, ml=5, mr=5, ax=12, span=(e.hi-e.lo)||1;
+      const X = v => (ml + (v-e.lo)/span*(W-ml-mr)).toFixed(1);
+      const dots = e.fams.map(f=>`<circle cx="${X(f.mean)}" cy="${ax}" r="3.6" fill="${FCOL[f.fam]||"#888"}" stroke="#fff" stroke-width="0.6"></circle>`).join("");
+      return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:330px;display:block;margin:2px 0 1px"><line x1="${X(e.lo)}" y1="${ax}" x2="${X(e.hi)}" y2="${ax}" stroke="#cfd8db" stroke-width="2"/><line x1="${X(e.mean)}" y1="${ax-7}" x2="${X(e.mean)}" y2="${ax+7}" stroke="#5e7180" stroke-width="1.3"/>${dots}<text x="${X(e.lo)}" y="${ax-9}" font-size="8" fill="#8aa0b0">${fmtv(e.lo)}</text><text x="${X(e.hi)}" y="${ax-9}" font-size="8" text-anchor="end" fill="#8aa0b0">${fmtv(e.hi)}</text></svg>`;
+    };
     const block = (e, label, unit) => {
       if(!e) return "";
       const agree = e.cv<0.20 ? "strong agreement" : e.cv<0.45 ? "moderate divergence" : "wide divergence";
       const col = e.cv<0.20 ? "#2e9e6b" : e.cv<0.45 ? "#b8860b" : "#c0392b";
       const fams = e.fams.map(f=>`${esc(FAM[f.fam]||f.fam)} ${fmtv(f.mean)}${f.n>1?` (n=${f.n})`:""}`).join(" &middot; ");
-      return row(esc(label), `ensemble <b>${fmtv(e.mean)}</b> ${esc(unit||"")}, range ${fmtv(e.lo)}&ndash;${fmtv(e.hi)} &middot; spread ${Math.round(e.spreadPct)}% &middot; CV ${e.cv.toFixed(2)} <b style="color:${col}">${agree}</b><div class="note" style="margin:2px 0 0">${fams}</div>`);
+      return `<div style="margin:7px 0 0;border-bottom:1px solid #eef2f3;padding-bottom:5px">`
+        + `<div style="font-size:12.5px"><b>${esc(label)}</b> &mdash; ensemble <b>${fmtv(e.mean)}</b> ${esc(unit||"")}, range ${fmtv(e.lo)}&ndash;${fmtv(e.hi)} &middot; spread ${Math.round(e.spreadPct)}% &middot; CV ${e.cv.toFixed(2)} <b style="color:${col}">${agree}</b></div>`
+        + barSvg(e)
+        + `<div class="note" style="margin:1px 0 0">${fams}</div></div>`;
     };
     const mrows = model.metrics.map(mm => block(mm.ens, mm.label, mm.unit)).join("");
-    if(mrows) modelSec = `<h2>Multi-model agreement <span class="sub">cross-engine ensemble &middot; ${esc(model.bucket)} &middot; ${esc(String(model.year))}</span></h2><table class="kv">${mrows}</table><p class="note">State-level ensemble across model families (CBM, CEM, FVS, LANDIS, yield curves); uncalibrated FVS variants excluded to match the engine-comparison default. Wide spread means high structural uncertainty &mdash; treat single-model numbers with caution.</p>`;
+    const famsUsed = [...new Set([].concat(...model.metrics.map(mm => mm.ens ? mm.ens.fams.map(f=>f.fam) : [])))];
+    const legend = famsUsed.map(f=>`<span style="display:inline-block;margin-right:10px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${FCOL[f]||"#888"};vertical-align:middle;margin-right:3px"></span>${esc(FAM[f]||f)}</span>`).join("");
+    if(mrows) modelSec = `<h2>Multi-model agreement <span class="sub">cross-engine ensemble &middot; ${esc(model.bucket)} &middot; ${esc(String(model.year))}</span></h2><p class="note" style="margin:0 0 2px">${legend}</p>${mrows}<p class="note">Each dot is a model family's mean; the bar is the across-model range and the tick is the ensemble mean. State-level ensemble; uncalibrated FVS variants excluded to match the engine-comparison default. Wide spread means high structural uncertainty &mdash; treat single-model numbers with caution.</p>`;
   }
 
   return `<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Area Report</title>
