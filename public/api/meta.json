@@ -1,10 +1,10 @@
 {
- "generated": "2026-06-05T10:43:32.314823+00:00",
+ "generated": "2026-06-09T12:53:19.574668+00:00",
  "schema": "perseus_api_v1",
  "db_version": "v0.66",
  "stats": {
   "states": 48,
-  "engines": 38,
+  "engines": 42,
   "metrics": 70,
   "rows": 59623,
   "libcbm_b13_added": true,
@@ -18,7 +18,14 @@
    "MN",
    "WA"
   ],
-  "libcbm_b13_scenarios_v2_added": true
+  "libcbm_b13_scenarios_v2_added": true,
+  "yc_canonical_rcp_added": true,
+  "yc_canonical_rcp_models": [
+   "yc_fiadb_rcp45",
+   "yc_fiadb_rcp85",
+   "yc_treemap_rcp45",
+   "yc_treemap_rcp85"
+  ]
  },
  "metrics": {
   "agc_live_total": {
