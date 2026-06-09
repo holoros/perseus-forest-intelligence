@@ -161,12 +161,21 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       let next = bot + GAP;
       for(let i=labelItems.length-1;i>=0;i--){ labelItems[i].ly = Math.min(labelItems[i].ly, next - GAP); next = labelItems[i].ly; }
     } }
-  const endLabels = labelItems.map((it,k)=>(
-    <g key={"lab"+k} style={{pointerEvents:"none"}}>
-      <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} stroke={it.col} strokeWidth="1.4" strokeDasharray={it.dash}/>
-      <text x={W-R+7} y={it.ly+2.6} fill={it.col} fontSize="7.5" textAnchor="start" opacity={it.dashed?0.7:1}>
-        {it.model.replace(/_/g," ").slice(0,15)}{it.dashed?" ·"+overlayLabel:""}</text>
-    </g>));
+  // Beyond ~12 lines the gutter labels become unreadable noise — drop them and
+  // show a short hint instead (color + line style still distinguish families,
+  // and hover/click identifies any line). When isolating, always label.
+  const DENSE = labelItems.length > 12 && !isolatedEngine;
+  const endLabels = DENSE
+    ? [<text key="hint" x={W-R+4} y={T+6} fill="#5e7180" fontSize="8" style={{pointerEvents:"none"}}>
+         {labelItems.length} engines</text>,
+       <text key="hint2" x={W-R+4} y={T+16} fill="#5e7180" fontSize="7" style={{pointerEvents:"none"}}>
+         hover / click to ID</text>]
+    : labelItems.map((it,k)=>(
+        <g key={"lab"+k} style={{pointerEvents:"none"}}>
+          <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} stroke={it.col} strokeWidth="1.4" strokeDasharray={it.dash}/>
+          <text x={W-R+7} y={it.ly+2.6} fill={it.col} fontSize="7.5" textAnchor="start" opacity={it.dashed?0.7:1}>
+            {it.model.replace(/_/g," ").slice(0,15)}{it.dashed?" ·"+overlayLabel:""}</text>
+        </g>));
 
   // Hover scrubber: find the year nearest the cursor x, look up each engine's
   // value at that year (linear-interpolated between bracketing pts).
