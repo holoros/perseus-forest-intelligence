@@ -2,7 +2,7 @@
  "GA": {
   "engines": 10,
   "metrics": 42,
-  "rows": 1355,
+  "rows": 1475,
   "name": "Georgia",
   "centroid": [
    -83.4,
@@ -45,7 +45,7 @@
  "ID": {
   "engines": 9,
   "metrics": 35,
-  "rows": 1324,
+  "rows": 1444,
   "name": "Idaho",
   "centroid": [
    -114.6,
@@ -83,7 +83,7 @@
  "IN": {
   "engines": 9,
   "metrics": 35,
-  "rows": 1336,
+  "rows": 1456,
   "name": "Indiana",
   "centroid": [
    -86.3,
@@ -122,7 +122,7 @@
  "ME": {
   "engines": 35,
   "metrics": 40,
-  "rows": 5010,
+  "rows": 5130,
   "name": "Maine",
   "centroid": [
    -69.2,
@@ -176,7 +176,7 @@
  "MN": {
   "engines": 10,
   "metrics": 42,
-  "rows": 1355,
+  "rows": 1475,
   "name": "Minnesota",
   "centroid": [
    -94.3,
@@ -219,7 +219,7 @@
  "NH": {
   "engines": 5,
   "metrics": 5,
-  "rows": 647,
+  "rows": 767,
   "name": "New Hampshire",
   "centroid": [
    -71.6,
@@ -245,7 +245,7 @@
  "NY": {
   "engines": 5,
   "metrics": 5,
-  "rows": 647,
+  "rows": 767,
   "name": "New York",
   "centroid": [
    -75.5,
@@ -271,7 +271,7 @@
  "OR": {
   "engines": 8,
   "metrics": 29,
-  "rows": 1314,
+  "rows": 1434,
   "name": "Oregon",
   "centroid": [
    -120.5,
@@ -340,7 +340,7 @@
  "VT": {
   "engines": 5,
   "metrics": 5,
-  "rows": 647,
+  "rows": 767,
   "name": "Vermont",
   "centroid": [
    -72.7,
@@ -366,7 +366,7 @@
  "WA": {
   "engines": 11,
   "metrics": 43,
-  "rows": 1579,
+  "rows": 1699,
   "name": "Washington",
   "centroid": [
    -120.4,
@@ -407,7 +407,7 @@
  "AL": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Alabama",
   "centroid": [
    -86.8,
@@ -433,7 +433,7 @@
  "AR": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Arkansas",
   "centroid": [
    -92.4,
@@ -459,7 +459,7 @@
  "AZ": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Arizona",
   "centroid": [
    -111.7,
@@ -485,7 +485,7 @@
  "CA": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "California",
   "centroid": [
    -119.7,
@@ -511,7 +511,7 @@
  "CO": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Colorado",
   "centroid": [
    -105.5,
@@ -537,7 +537,7 @@
  "CT": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Connecticut",
   "centroid": [
    -72.7,
@@ -563,7 +563,7 @@
  "DE": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Delaware",
   "centroid": [
    -75.5,
@@ -589,7 +589,7 @@
  "FL": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Florida",
   "centroid": [
    -81.7,
@@ -615,7 +615,7 @@
  "IA": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Iowa",
   "centroid": [
    -93.5,
@@ -641,7 +641,7 @@
  "IL": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Illinois",
   "centroid": [
    -89.2,
@@ -667,7 +667,7 @@
  "KS": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Kansas",
   "centroid": [
    -98.3,
@@ -693,7 +693,7 @@
  "KY": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Kentucky",
   "centroid": [
    -85.3,
@@ -719,7 +719,7 @@
  "LA": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Louisiana",
   "centroid": [
    -92.0,
@@ -745,7 +745,7 @@
  "MA": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Massachusetts",
   "centroid": [
    -71.8,
@@ -771,7 +771,7 @@
  "MD": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Maryland",
   "centroid": [
    -76.8,
@@ -797,7 +797,7 @@
  "MI": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Michigan",
   "centroid": [
    -85.0,
@@ -823,7 +823,7 @@
  "MO": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Missouri",
   "centroid": [
    -92.5,
@@ -849,7 +849,7 @@
  "MS": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Mississippi",
   "centroid": [
    -89.7,
@@ -875,7 +875,7 @@
  "MT": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Montana",
   "centroid": [
    -109.6,
@@ -901,7 +901,7 @@
  "NC": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "North Carolina",
   "centroid": [
    -79.4,
@@ -927,7 +927,7 @@
  "ND": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "North Dakota",
   "centroid": [
    -100.5,
@@ -953,7 +953,7 @@
  "NE": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Nebraska",
   "centroid": [
    -99.8,
@@ -979,7 +979,7 @@
  "NJ": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "New Jersey",
   "centroid": [
    -74.7,
@@ -1005,7 +1005,7 @@
  "NM": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "New Mexico",
   "centroid": [
    -106.1,
@@ -1031,7 +1031,7 @@
  "NV": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Nevada",
   "centroid": [
    -116.9,
@@ -1057,7 +1057,7 @@
  "OH": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Ohio",
   "centroid": [
    -82.8,
@@ -1083,7 +1083,7 @@
  "OK": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Oklahoma",
   "centroid": [
    -97.5,
@@ -1109,7 +1109,7 @@
  "PA": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Pennsylvania",
   "centroid": [
    -77.8,
@@ -1135,7 +1135,7 @@
  "RI": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Rhode Island",
   "centroid": [
    -71.5,
@@ -1161,7 +1161,7 @@
  "SC": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "South Carolina",
   "centroid": [
    -80.9,
@@ -1187,7 +1187,7 @@
  "SD": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "South Dakota",
   "centroid": [
    -100.2,
@@ -1213,7 +1213,7 @@
  "TN": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Tennessee",
   "centroid": [
    -86.4,
@@ -1239,7 +1239,7 @@
  "TX": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Texas",
   "centroid": [
    -99.3,
@@ -1265,7 +1265,7 @@
  "UT": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Utah",
   "centroid": [
    -111.7,
@@ -1291,7 +1291,7 @@
  "VA": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Virginia",
   "centroid": [
    -78.8,
@@ -1317,7 +1317,7 @@
  "WI": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Wisconsin",
   "centroid": [
    -89.9,
@@ -1343,7 +1343,7 @@
  "WV": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "West Virginia",
   "centroid": [
    -80.6,
@@ -1369,7 +1369,7 @@
  "WY": {
   "engines": 4,
   "metrics": 4,
-  "rows": 617,
+  "rows": 737,
   "name": "Wyoming",
   "centroid": [
    -107.5,
