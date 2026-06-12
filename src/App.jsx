@@ -16,6 +16,7 @@ const WoodProducts = lazy(() => import("./WoodProducts.jsx"));
 const AgbYieldCurves = lazy(() => import("./AgbYieldCurves.jsx"));
 const RdThresholds = lazy(() => import("./RdThresholds.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
+const MyStands = lazy(() => import("./MyStands.jsx"));
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
 import ScenarioRunner from "./ScenarioRunner.jsx";
@@ -1462,7 +1463,8 @@ export default function App(){
               ["ecoharvest","Ecoregion harvest"],
               ["permanence","Permanence / risk"],
               ["hwp","Wood products"],
-              ["agbyc","FIA AGB yield curves"]]
+              ["agbyc","FIA AGB yield curves"],
+              ["mystands","My stands"]]
               .filter(([k])=> k==="compare" || k==="runbuilder" || k==="health" || toolsOpen || tab===k)
               .map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
@@ -1477,7 +1479,7 @@ export default function App(){
                 || (k==="compare" && !(hrr && hrr.states))
                 || (k==="ecoharvest" && !ecoHarvest)
                 || (k==="agbyc" && !(agbYc && agbYc.states && agbYc.states[sel]))
-                || ((k==="engines"||k==="rd"||k==="permanence") && !series);
+                || ((k==="engines"||k==="rd"||k==="permanence"||k==="mystands") && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
             })}
@@ -1513,6 +1515,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
           {(!aoi || researchOpen) && tab==="runbuilder" && <RunBuilder initState={sel} units={units} simple={simple}/>}
+          {(!aoi || researchOpen) && tab==="mystands" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><MyStands series={series} metric={metric} bucket={bucket} unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} stateName={cov && cov.name}/></Suspense>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
