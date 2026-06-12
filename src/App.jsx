@@ -7,6 +7,7 @@ import StumpagePanel from "./StumpagePanel.jsx";
 import LandisStratified from "./LandisStratified.jsx";
 import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
+import PermanenceRisk from "./PermanenceRisk.jsx";
 import AOIReport from "./AOIReport.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
@@ -1403,13 +1404,14 @@ export default function App(){
           {(!aoi || researchOpen) && <div className="tabs">
             {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["stumpage","Stumpage"],["landis","LANDIS stratified"],
-              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]].map(([k,lbl])=>{
+              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],["permanence","Permanence / risk"]].map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
                 || (k==="landis" && !(landis && landis[sel]))
                 || (k==="landowner" && !(landowner && landowner[sel]))
                 || (k==="faustmann" && !(faustmann && faustmann[sel]))
-                || ((k==="engines"||k==="rd") && !series);
+                || ((k==="engines"||k==="rd") && !series)
+                || (k==="permanence" && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
             })}
@@ -1426,6 +1428,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
           {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
+          {(!aoi || researchOpen) && tab==="permanence" && <PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
