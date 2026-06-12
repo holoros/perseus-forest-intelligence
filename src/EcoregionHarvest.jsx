@@ -13,6 +13,7 @@ const SCOLS = [
   ["stand_height_ft","Height (ft)"],
   ["stocking_pct","Stocking (%)"],
   ["qmd_in","QMD (in)"],
+  ["cspi_productivity","Productivity (CSPI)"],
 ];
 // blue(low)->amber->red(high) cell shade for a 0..1 probability
 const shade = v => {
@@ -50,7 +51,7 @@ export default function EcoregionHarvest({ data }){
     <div style={{margin:"4px 4px 8px"}}>
       <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap",marginBottom:5}}>
         <b style={{fontSize:13}}>Forest summary by ecoregion</b>
-        <span style={{color:"var(--mut)",fontSize:11}}>{rows.length} EPA Level III ecoregions · ~3.1 km zonal mean · harvest probability + forest structure</span>
+        <span style={{color:"var(--mut)",fontSize:11}}>{rows.length} EPA Level III ecoregions · ~3.1 km zonal mean · harvest probability + structure + productivity</span>
       </div>
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="filter by ecoregion or biome…"
         style={{width:"min(320px,90%)",padding:"4px 8px",marginBottom:6,fontSize:12,
@@ -78,7 +79,7 @@ export default function EcoregionHarvest({ data }){
         </table>
       </div>
       <div style={{color:"var(--mut)",fontSize:10.5,marginTop:5,maxWidth:600,lineHeight:1.45}}>
-        Mean modeled harvest probability per EPA Level III ecoregion, zonal-averaged from the CONUS harvest-probability rasters. P(any) is the chance a forested pixel is harvested in the window; the stand-replacement vs partial split shows the silvicultural character — high stand-replacement with low partial means clearcut-dominated regions, the reverse means selection/partial systems. Forest structure (stand height, all-live stocking, quadratic mean diameter) is the TreeMap 2022 zonal mean. Click a column to sort.
+        Mean modeled harvest probability per EPA Level III ecoregion, zonal-averaged from the CONUS harvest-probability rasters. P(any) is the chance a forested pixel is harvested in the window; the stand-replacement vs partial split shows the silvicultural character — high stand-replacement with low partial means clearcut-dominated regions, the reverse means selection/partial systems. Forest structure is the TreeMap 2022 zonal mean; productivity is the climate-sensitive productivity index (CSPI, 0-100) warped to the same grid. Click a column to sort.
       </div>
     </div>
   );
