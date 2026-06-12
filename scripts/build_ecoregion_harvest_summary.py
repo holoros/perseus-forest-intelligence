@@ -27,11 +27,12 @@ shapes=[(reproj(f["geometry"]),codes[f["properties"]["NA_L3CODE"]]) for f in fea
         if f["properties"].get("NA_L3CODE") and f.get("geometry")]
 with rasterio.open("ph_any.tif") as r: transform=r.transform; H,W=r.height,r.width
 zone=rasterize(shapes,out_shape=(H,W),transform=transform,fill=0,dtype="int32"); K=len(codes)+1
-fields={"p_harvest_any":"ph_any.tif","p_harvest_clearcut":"ph_clearcut.tif","p_harvest_partial":"ph_partial.tif"}
+fields={"p_harvest_any":"ph_any.tif","p_harvest_clearcut":"ph_clearcut.tif","p_harvest_partial":"ph_partial.tif",
+        "stand_height_ft":"standht_2022.tif","stocking_pct":"alstk_2022.tif","qmd_in":"qmd_2022.tif"}
 band={}
 for key,fn in fields.items():
     with rasterio.open(fn) as r: a=r.read(1).astype("float64"); nod=r.nodata
-    valid=np.isfinite(a)&(zone>0)
+    valid=np.isfinite(a)&(zone>0)&(a>-9990)
     if nod is not None: valid&=(a!=nod)
     band[key]=(np.bincount(zone[valid],weights=a[valid],minlength=K),np.bincount(zone[valid],minlength=K))
 inv={v:k for k,v in codes.items()}; out={}
@@ -39,7 +40,7 @@ for i in range(1,K):
     if band["p_harvest_any"][1][i]<5: continue
     code=inv[i]; rec={"name":meta[code]["name"],"l1":meta[code]["l1"],"npix":int(band["p_harvest_any"][1][i])}
     for key in fields:
-        s,cc=band[key]; rec[key]=round(float(s[i]/cc[i]),4) if cc[i]>0 else None
+        s,cc=band[key]; rec[key]=round(float(s[i]/cc[i]), 3 if key.startswith('p_') else 1) if cc[i]>0 else None
     out[code]=rec
 json.dump({"meta":{"source":"conus_render ph_*.tif harvest probability (TreeMap-based, ~3.1km Albers) zonal mean by EPA L3 ecoregion","n_ecoregions":len(out),"fields":list(fields.keys()),"note":"Per-EPA-Level-III-ecoregion mean harvest probability. P(any), P(stand-replacement), P(partial)."},"ecoregions":out},open("public/api/ecoregion_harvest_summary.json","w"))
 print("wrote", len(out), "ecoregions")

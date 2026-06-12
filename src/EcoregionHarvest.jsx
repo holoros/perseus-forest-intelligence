@@ -4,10 +4,15 @@
 // "summarize by ecoregion" companion to the per-pixel raster overlays.
 import { useMemo, useState } from "react";
 
-const COLS = [
+const PCOLS = [
   ["p_harvest_any","P(any harvest)"],
-  ["p_harvest_clearcut","P(stand replacement)"],
+  ["p_harvest_clearcut","P(stand repl.)"],
   ["p_harvest_partial","P(partial)"],
+];
+const SCOLS = [
+  ["stand_height_ft","Height (ft)"],
+  ["stocking_pct","Stocking (%)"],
+  ["qmd_in","QMD (in)"],
 ];
 // blue(low)->amber->red(high) cell shade for a 0..1 probability
 const shade = v => {
@@ -44,8 +49,8 @@ export default function EcoregionHarvest({ data }){
   return (
     <div style={{margin:"4px 4px 8px"}}>
       <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap",marginBottom:5}}>
-        <b style={{fontSize:13}}>Harvest probability by ecoregion</b>
-        <span style={{color:"var(--mut)",fontSize:11}}>{rows.length} EPA Level III ecoregions · mean P(harvest) · {data.meta && data.meta.source && data.meta.source.includes("3.1km")?"~3.1 km zonal mean":"zonal mean"}</span>
+        <b style={{fontSize:13}}>Forest summary by ecoregion</b>
+        <span style={{color:"var(--mut)",fontSize:11}}>{rows.length} EPA Level III ecoregions · ~3.1 km zonal mean · harvest probability + forest structure</span>
       </div>
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="filter by ecoregion or biome…"
         style={{width:"min(320px,90%)",padding:"4px 8px",marginBottom:6,fontSize:12,
@@ -54,7 +59,7 @@ export default function EcoregionHarvest({ data }){
         <table style={{borderCollapse:"collapse",fontSize:11,width:"100%",fontVariantNumeric:"tabular-nums"}}>
           <thead><tr style={{color:"var(--mut)",position:"sticky",top:0,background:"var(--panel,#172029)"}}>
             {th("code","L3")}{th("name","Ecoregion")}{th("l1","Biome (L1)")}
-            {COLS.map(([k,l])=>th(k,l))}
+            {PCOLS.map(([k,l])=>th(k,l))}{SCOLS.map(([k,l])=>th(k,l))}
           </tr></thead>
           <tbody>
             {rows.map(r=>(
@@ -62,15 +67,18 @@ export default function EcoregionHarvest({ data }){
                 <td style={{padding:"2px 7px",color:"var(--mut)"}}>{r.code}</td>
                 <td style={{padding:"2px 7px"}}>{r.name}</td>
                 <td style={{padding:"2px 7px",color:"var(--mut)",fontSize:10}}>{(r.l1||"").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}</td>
-                {COLS.map(([k])=>(
+                {PCOLS.map(([k])=>(
                   <td key={k} style={{padding:"2px 7px",textAlign:"right",background:shade(r[k])}}>
                     {r[k]!=null?r[k].toFixed(2):"—"}</td>))}
+                {SCOLS.map(([k])=>(
+                  <td key={k} style={{padding:"2px 7px",textAlign:"right",color:"var(--fg,#dfe7ec)"}}>
+                    {r[k]!=null?r[k].toFixed(k==="qmd_in"?1:0):"—"}</td>))}
               </tr>))}
           </tbody>
         </table>
       </div>
       <div style={{color:"var(--mut)",fontSize:10.5,marginTop:5,maxWidth:600,lineHeight:1.45}}>
-        Mean modeled harvest probability per EPA Level III ecoregion, zonal-averaged from the CONUS harvest-probability rasters. P(any) is the chance a forested pixel is harvested in the window; the stand-replacement vs partial split shows the silvicultural character — high stand-replacement with low partial means clearcut-dominated regions, the reverse means selection/partial systems. Click a column to sort.
+        Mean modeled harvest probability per EPA Level III ecoregion, zonal-averaged from the CONUS harvest-probability rasters. P(any) is the chance a forested pixel is harvested in the window; the stand-replacement vs partial split shows the silvicultural character — high stand-replacement with low partial means clearcut-dominated regions, the reverse means selection/partial systems. Forest structure (stand height, all-live stocking, quadratic mean diameter) is the TreeMap 2022 zonal mean. Click a column to sort.
       </div>
     </div>
   );
