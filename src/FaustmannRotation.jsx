@@ -52,9 +52,21 @@ export default function FaustmannRotation({ data, state }){
       <div className="note">Faustmann optimal-rotation runs cover {data.meta.state} only.</div></div>;
 
   const rows = rowsAll.filter(r => (owner==="all"||r.owner===owner) && (treatment==="all"||r.treatment===treatment));
-  // carbon-floor effect: mean R_opt with vs without a floor, same filter
+  // carbon-floor effect: rotation, soil expectation value (SEV) and standing
+  // biomass with vs without a carbon floor, same filter. The floor is the cost
+  // of carbon made legible: how much soil expectation value a landowner forgoes
+  // to carry extra standing carbon, and how much longer the rotation runs.
   const noFloor = rows.filter(r=>r.carbon_floor===0), floor = rows.filter(r=>r.carbon_floor>0);
-  const meanR = a => a.length ? (a.reduce((s,r)=>s+r.R_opt,0)/a.length) : null;
+  const meanOf = (a,k) => a.length ? (a.reduce((s,r)=>s+(r[k]||0),0)/a.length) : null;
+  const meanR = a => meanOf(a,"R_opt");
+  const sev0 = meanOf(noFloor,"sev_opt"), sevF = meanOf(floor,"sev_opt");
+  const agb0 = meanOf(noFloor,"mean_agb"), agbF = meanOf(floor,"mean_agb");
+  const sevForegone = (sev0!=null && sevF!=null) ? (sev0 - sevF) : null;
+  const pctForegone = (sevForegone!=null && sev0) ? sevForegone/sev0*100 : null;
+  const agbGain = (agb0!=null && agbF!=null) ? (agbF - agb0) : null;
+  // implied cost per Mg of extra standing biomass ($/ac forgone per Mg/ha gained);
+  // labeled as a rough ratio, not a market carbon price.
+  const costPerAGB = (sevForegone!=null && agbGain) ? sevForegone/agbGain : null;
 
   return (
     <div>
@@ -76,11 +88,24 @@ export default function FaustmannRotation({ data, state }){
         {[...new Set(rows.map(r=>r.ft))].map(ft =>
           <span key={ft}><i style={{background:col(ft),width:11,height:11,borderRadius:"50%"}}/>{ft}</span>)}
       </div>
-      {meanR(noFloor)!=null && meanR(floor)!=null && (
-        <div className="note">
-          Carbon-floor effect: mean optimal rotation rises from
-          <b> {meanR(noFloor).toFixed(0)} yr</b> (no floor) to
-          <b> {meanR(floor).toFixed(0)} yr</b> with a carbon floor (filled, white-edged points).
+      {sev0!=null && sevF!=null && (
+        <div className="chartcard" style={{padding:"7px 9px",marginTop:8,borderLeft:"3px solid #caa15a"}}>
+          <div style={{fontSize:12.5,fontWeight:600,color:"#caa15a",marginBottom:5}}>Cost of the carbon floor</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {[["Rotation", `${meanR(noFloor).toFixed(0)} → ${meanR(floor).toFixed(0)} yr`, `+${(meanR(floor)-meanR(noFloor)).toFixed(0)} yr longer`],
+              ["Soil expectation value", `$${sev0.toFixed(0)} → $${sevF.toFixed(0)}/ac`, sevForegone!=null?`−$${sevForegone.toFixed(0)}/ac forgone${pctForegone!=null?` (${pctForegone.toFixed(0)}%)`:""}`:""],
+              ["Standing biomass", `${agb0!=null?agb0.toFixed(1):"—"} → ${agbF!=null?agbF.toFixed(1):"—"} Mg/ha`, agbGain!=null?`+${agbGain.toFixed(1)} Mg/ha carried`:""]
+             ].map((c,i)=>(
+              <div key={i} style={{minWidth:140}}>
+                <div style={{color:"var(--mut)",fontSize:10.5}}>{c[1]}</div>
+                <div style={{fontSize:12,fontWeight:600}}>{c[0]}</div>
+                <div style={{fontSize:10.5,color:"#caa15a"}}>{c[2]}</div>
+              </div>))}
+          </div>
+          {costPerAGB!=null && isFinite(costPerAGB) && (
+            <div className="note" style={{marginTop:5}}>
+              Implied tradeoff: roughly <b>${costPerAGB.toFixed(0)}/ac of soil expectation value forgone per additional Mg/ha</b> of standing biomass carried under the floor (a within-model ratio for this owner/treatment, not a market carbon price).
+            </div>)}
         </div>
       )}
       <div className="chartcard" style={{padding:"4px 8px",marginTop:8,maxHeight:200,overflow:"auto"}}>
