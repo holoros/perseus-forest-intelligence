@@ -7,6 +7,7 @@
 // disturbance / mortality, and where does a no-harvest reserve plateau or
 // turn into a net source?
 import { useMemo, useState } from "react";
+import PermanenceMap from "./PermanenceMap.jsx";
 
 const BUCKETS = {
   base:  "reserve (no harvest)",
@@ -42,7 +43,7 @@ const valAt = (line, yr) => {
 };
 const peak = line => line.reduce((m,p)=>p[1]>m?p[1]:m, -Infinity);
 
-export default function PermanenceRisk({ series, state, meta, stateName }){
+export default function PermanenceRisk({ series, state, meta, stateName, geo, risk, onPick }){
   // choose a carbon-stock metric that actually has the reserve buckets
   const metric = useMemo(()=>{
     if(!series) return null;
@@ -113,7 +114,9 @@ export default function PermanenceRisk({ series, state, meta, stateName }){
     gapPoly=up+" "+dn+" Z";
   }
 
+  const sparse = data.bEnd < 25 || (data.distPct!=null && data.distPct < -5);
   const verdict = (()=>{
+    if(sparse) return { t:"Reversal risk: not characterized", d:`This state's forested carbon base is small (${data.bEnd!=null?data.bEnd.toFixed(0):"—"} ${unit}), so the cross-engine reserve median is noisy and the reversal signal is not reliable here (sparse-woodland edge case).`, c:"#8aa0b0" };
     const dp=data.distPct, ds=data.distSource;
     const hi = (dp!=null && dp>=50) || (ds!=null && ds>=25);
     const mod = (dp!=null && dp>=20) || (ds!=null && ds>=8);
@@ -129,6 +132,12 @@ export default function PermanenceRisk({ series, state, meta, stateName }){
 
   return (
     <div style={{margin:"4px 4px 8px"}}>
+      {geo && risk && (
+        <div style={{marginBottom:10}}>
+          <div style={{fontSize:12.5,fontWeight:600,marginBottom:3}}>CONUS reversal risk</div>
+          <PermanenceMap geo={geo} risk={risk} selected={state} onPick={onPick}/>
+        </div>
+      )}
       <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap",marginBottom:4}}>
         <b style={{fontSize:13}}>Permanence &amp; reversal risk — {stateName||state}</b>
         <span style={{color:"var(--mut)",fontSize:11}}>{label} · ensemble median of {data.nEng} reserve engine{data.nEng===1?"":"s"} · {unit}</span>

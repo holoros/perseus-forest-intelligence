@@ -472,6 +472,7 @@ export default function App(){
   const [landis,setLandis] = useState(null);
   const [landowner,setLandowner] = useState(null);
   const [faustmann,setFaustmann] = useState(null);
+  const [permRisk,setPermRisk] = useState(null);
   // v1.3 map/AOI tools
   const [ecoOn,setEcoOn] = useState(false);
   const [ecoGeo,setEcoGeo] = useState(null);
@@ -500,6 +501,7 @@ export default function App(){
     j("api/landis_stratified.json").then(setLandis).catch(()=>{});
     j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
+    j("api/permanence_risk.json").then(d=>setPermRisk(d && d.states)).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -1428,7 +1430,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
           {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
-          {(!aoi || researchOpen) && tab==="permanence" && <PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta}/>}
+          {(!aoi || researchOpen) && tab==="permanence" && <PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta} geo={geoData} risk={permRisk} onPick={st=>setSel(st)}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
