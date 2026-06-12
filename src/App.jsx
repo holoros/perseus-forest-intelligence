@@ -513,6 +513,7 @@ export default function App(){
   const [mmSum,setMmSum] = useState(null);   // multimodel state summary (2100 carbon + NPV)
   const [landowner,setLandowner] = useState(null);
   const [faustmann,setFaustmann] = useState(null);
+  const [permRisk,setPermRisk] = useState(null);
   const [hrr,setHrr] = useState(null);
   const [hrrGrid,setHrrGrid] = useState(null);
   const [hrrDetail,setHrrDetail] = useState(null); // per-state drill-down: top species, agents, dead/live
@@ -570,6 +571,7 @@ export default function App(){
     j("api/landowner_by_hex.json").then(setLandHex).catch(()=>{});
     j("geo/us_counties.geojson").then(setCountyGeo).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
+    j("api/permanence_risk.json").then(d=>setPermRisk(d && d.states)).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -1585,7 +1587,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="ensemble" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><CrossModelEnsemble traj={mmTraj} summary={mmSum} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
-          {(!aoi || researchOpen) && tab==="permanence" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="permanence" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta} geo={geoData} risk={permRisk} onPick={st=>setSel(st)}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}

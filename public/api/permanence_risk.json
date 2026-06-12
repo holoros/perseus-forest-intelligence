@@ -1,0 +1,499 @@
+{
+ "meta": {
+  "generated": "2026-06-12T01:34:09.036Z",
+  "note": "Per-state reversal risk: cross-engine median reserve carbon, passive vs disturbance-exposed vs mortality-stressed. distPct = % shortfall of disturbance-exposed reserve vs passive reserve at horizon; distSource = peak-to-end drawdown of the disturbance-exposed reserve.",
+  "n_states": 49
+ },
+ "states": {
+  "AL": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1205.5,
+   "dist": 540.6,
+   "mort": 708.1,
+   "distPct": 55.2,
+   "mortPct": 41.3,
+   "distSource": 11.3
+  },
+  "AR": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1086.5,
+   "dist": 159.1,
+   "mort": 309.5,
+   "distPct": 85.4,
+   "mortPct": 71.5,
+   "distSource": 45.8
+  },
+  "AZ": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 165.3,
+   "dist": 140.6,
+   "mort": 188.9,
+   "distPct": 14.9,
+   "mortPct": -14.3,
+   "distSource": 12.2
+  },
+  "CA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 726.4,
+   "dist": 116.4,
+   "mort": 365.2,
+   "distPct": 84,
+   "mortPct": 49.7,
+   "distSource": 66.9
+  },
+  "CO": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 158.8,
+   "dist": 26.3,
+   "mort": 101.1,
+   "distPct": 83.5,
+   "mortPct": 36.3,
+   "distSource": 79.7
+  },
+  "CT": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 65.5,
+   "dist": 18.2,
+   "mort": 27,
+   "distPct": 72.3,
+   "mortPct": 58.8,
+   "distSource": 23.4
+  },
+  "DE": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 27.6,
+   "dist": 8.9,
+   "mort": 12.5,
+   "distPct": 67.9,
+   "mortPct": 54.7,
+   "distSource": 12.5
+  },
+  "FL": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 950.6,
+   "dist": 238.4,
+   "mort": 452,
+   "distPct": 74.9,
+   "mortPct": 52.5,
+   "distSource": 28
+  },
+  "GA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1157.5,
+   "dist": 606,
+   "mort": 868.9,
+   "distPct": 47.6,
+   "mortPct": 24.9,
+   "distSource": 17.6
+  },
+  "IA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 125,
+   "dist": 8.6,
+   "mort": 39.9,
+   "distPct": 93.1,
+   "mortPct": 68.1,
+   "distSource": 80.3
+  },
+  "ID": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1714.7,
+   "dist": 285.1,
+   "mort": 463.2,
+   "distPct": 83.4,
+   "mortPct": 73,
+   "distSource": 24.5
+  },
+  "IL": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 280.9,
+   "dist": 79.9,
+   "mort": 148,
+   "distPct": 71.5,
+   "mortPct": 47.3,
+   "distSource": 30.8
+  },
+  "IN": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 359.6,
+   "dist": 56.2,
+   "mort": 137,
+   "distPct": 84.4,
+   "mortPct": 61.9,
+   "distSource": 51.4
+  },
+  "KS": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 191.5,
+   "dist": 33.3,
+   "mort": 81.3,
+   "distPct": 82.6,
+   "mortPct": 57.5,
+   "distSource": 39.9
+  },
+  "KY": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 496.9,
+   "dist": 136.6,
+   "mort": 223.1,
+   "distPct": 72.5,
+   "mortPct": 55.1,
+   "distSource": 28
+  },
+  "LA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 553.2,
+   "dist": 366.3,
+   "mort": 445.9,
+   "distPct": 33.8,
+   "mortPct": 19.4,
+   "distSource": 5.3
+  },
+  "MA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 104.9,
+   "dist": 48.5,
+   "mort": 65.6,
+   "distPct": 53.7,
+   "mortPct": 37.4,
+   "distSource": 11.4
+  },
+  "MD": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 100.9,
+   "dist": 40.7,
+   "mort": 60.8,
+   "distPct": 59.6,
+   "mortPct": 39.8,
+   "distSource": 24.2
+  },
+  "ME": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 567.8,
+   "dist": 192.4,
+   "mort": 280.4,
+   "distPct": 66.1,
+   "mortPct": 50.6,
+   "distSource": 18.3
+  },
+  "MI": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1794.1,
+   "dist": 1025.1,
+   "mort": 1325.3,
+   "distPct": 42.9,
+   "mortPct": 26.1,
+   "distSource": 7.1
+  },
+  "MN": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 445.6,
+   "dist": 255.1,
+   "mort": 319.3,
+   "distPct": 42.8,
+   "mortPct": 28.3,
+   "distSource": 8.5
+  },
+  "MO": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 891.6,
+   "dist": 517.5,
+   "mort": 671.4,
+   "distPct": 42,
+   "mortPct": 24.7,
+   "distSource": 12.4
+  },
+  "MS": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 603,
+   "dist": 229.3,
+   "mort": 397.7,
+   "distPct": 62,
+   "mortPct": 34.1,
+   "distSource": 30.1
+  },
+  "MT": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 320.8,
+   "dist": 67.3,
+   "mort": 269.6,
+   "distPct": 79,
+   "mortPct": 16,
+   "distSource": 75.9
+  },
+  "NC": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1286.6,
+   "dist": 225.5,
+   "mort": 606.7,
+   "distPct": 82.5,
+   "mortPct": 52.8,
+   "distSource": 52.5
+  },
+  "ND": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 28.8,
+   "dist": 4.9,
+   "mort": 8,
+   "distPct": 83,
+   "mortPct": 72.1,
+   "distSource": 22.2
+  },
+  "NE": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 56.3,
+   "dist": 8.7,
+   "mort": 14.7,
+   "distPct": 84.5,
+   "mortPct": 73.9,
+   "distSource": 27
+  },
+  "NH": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 241.2,
+   "dist": 70.6,
+   "mort": 89.6,
+   "distPct": 70.7,
+   "mortPct": 62.8,
+   "distSource": 19
+  },
+  "NJ": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 112.4,
+   "dist": 20.4,
+   "mort": 45.7,
+   "distPct": 81.9,
+   "mortPct": 59.4,
+   "distSource": 55.8
+  },
+  "NM": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 122.4,
+   "dist": 84.9,
+   "mort": 132.4,
+   "distPct": 30.7,
+   "mortPct": -8.1,
+   "distSource": 21.3
+  },
+  "NV": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 15,
+   "dist": 41.9,
+   "mort": 55.9,
+   "distPct": -179.2,
+   "mortPct": -272.4,
+   "distSource": 9.6
+  },
+  "NY": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 624.4,
+   "dist": 172.3,
+   "mort": 425.9,
+   "distPct": 72.4,
+   "mortPct": 31.8,
+   "distSource": 43
+  },
+  "OH": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 301.4,
+   "dist": 63.7,
+   "mort": 154.2,
+   "distPct": 78.9,
+   "mortPct": 48.8,
+   "distSource": 38.4
+  },
+  "OK": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 382.5,
+   "dist": 80.9,
+   "mort": 118.9,
+   "distPct": 78.9,
+   "mortPct": 68.9,
+   "distSource": 16.3
+  },
+  "OR": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 4326.4,
+   "dist": 529.5,
+   "mort": 1216.5,
+   "distPct": 87.8,
+   "mortPct": 71.9,
+   "distSource": 41.8
+  },
+  "PA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 657.6,
+   "dist": 251.9,
+   "mort": 395.3,
+   "distPct": 61.7,
+   "mortPct": 39.9,
+   "distSource": 21.4
+  },
+  "RI": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 24.4,
+   "dist": 7.5,
+   "mort": 9.9,
+   "distPct": 69.3,
+   "mortPct": 59.4,
+   "distSource": 30.4
+  },
+  "SC": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1091,
+   "dist": 385.6,
+   "mort": 539.4,
+   "distPct": 64.7,
+   "mortPct": 50.6,
+   "distSource": 14.6
+  },
+  "SD": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 56.5,
+   "dist": 7.9,
+   "mort": 26.9,
+   "distPct": 86,
+   "mortPct": 52.4,
+   "distSource": 66.3
+  },
+  "TN": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 829.4,
+   "dist": 340.6,
+   "mort": 460.8,
+   "distPct": 58.9,
+   "mortPct": 44.4,
+   "distSource": 8.6
+  },
+  "TX": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1151.6,
+   "dist": 331.9,
+   "mort": 413.5,
+   "distPct": 71.2,
+   "mortPct": 64.1,
+   "distSource": 11.3
+  },
+  "US": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 17997.3,
+   "dist": 9408.5,
+   "mort": 15690.9,
+   "distPct": 47.7,
+   "mortPct": 12.8,
+   "distSource": 21.8
+  },
+  "UT": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 90.2,
+   "dist": 53.7,
+   "mort": 100.4,
+   "distPct": 40.4,
+   "mortPct": -11.3,
+   "distSource": 46.9
+  },
+  "VA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1202.1,
+   "dist": 326.7,
+   "mort": 570.2,
+   "distPct": 72.8,
+   "mortPct": 52.6,
+   "distSource": 31.4
+  },
+  "VT": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 213.2,
+   "dist": 100.5,
+   "mort": 131.5,
+   "distPct": 52.9,
+   "mortPct": 38.3,
+   "distSource": 8.4
+  },
+  "WA": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 3289.2,
+   "dist": 378.9,
+   "mort": 962.3,
+   "distPct": 88.5,
+   "mortPct": 70.7,
+   "distSource": 50.3
+  },
+  "WI": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 1535.3,
+   "dist": 448.2,
+   "mort": 799.9,
+   "distPct": 70.8,
+   "mortPct": 47.9,
+   "distSource": 28.5
+  },
+  "WV": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 480.6,
+   "dist": 258.7,
+   "mort": 352.8,
+   "distPct": 46.2,
+   "mortPct": 26.6,
+   "distSource": 10.9
+  },
+  "WY": {
+   "metric": "agc_live_total",
+   "endYr": 2125,
+   "base": 113.2,
+   "dist": 17,
+   "mort": 97.9,
+   "distPct": 85,
+   "mortPct": 13.5,
+   "distSource": 81.7
+  }
+ }
+}
