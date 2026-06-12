@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated": "2026-06-12T01:34:09.036Z",
+  "generated": "2026-06-12T08:44:58.157Z",
   "note": "Per-state reversal risk: cross-engine median reserve carbon, passive vs disturbance-exposed vs mortality-stressed. distPct = % shortfall of disturbance-exposed reserve vs passive reserve at horizon; distSource = peak-to-end drawdown of the disturbance-exposed reserve.",
   "n_states": 49
  },
@@ -8,6 +8,7 @@
   "AL": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1205.5,
    "dist": 540.6,
    "mort": 708.1,
@@ -18,6 +19,7 @@
   "AR": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1086.5,
    "dist": 159.1,
    "mort": 309.5,
@@ -28,6 +30,7 @@
   "AZ": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 165.3,
    "dist": 140.6,
    "mort": 188.9,
@@ -38,6 +41,7 @@
   "CA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 726.4,
    "dist": 116.4,
    "mort": 365.2,
@@ -48,6 +52,7 @@
   "CO": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 158.8,
    "dist": 26.3,
    "mort": 101.1,
@@ -58,6 +63,7 @@
   "CT": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 65.5,
    "dist": 18.2,
    "mort": 27,
@@ -68,6 +74,7 @@
   "DE": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 27.6,
    "dist": 8.9,
    "mort": 12.5,
@@ -78,6 +85,7 @@
   "FL": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 950.6,
    "dist": 238.4,
    "mort": 452,
@@ -88,6 +96,7 @@
   "GA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1157.5,
    "dist": 606,
    "mort": 868.9,
@@ -98,6 +107,7 @@
   "IA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 125,
    "dist": 8.6,
    "mort": 39.9,
@@ -108,6 +118,7 @@
   "ID": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1714.7,
    "dist": 285.1,
    "mort": 463.2,
@@ -118,6 +129,7 @@
   "IL": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 280.9,
    "dist": 79.9,
    "mort": 148,
@@ -128,6 +140,7 @@
   "IN": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 359.6,
    "dist": 56.2,
    "mort": 137,
@@ -138,6 +151,7 @@
   "KS": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 191.5,
    "dist": 33.3,
    "mort": 81.3,
@@ -148,6 +162,7 @@
   "KY": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 496.9,
    "dist": 136.6,
    "mort": 223.1,
@@ -158,6 +173,7 @@
   "LA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 553.2,
    "dist": 366.3,
    "mort": 445.9,
@@ -168,6 +184,7 @@
   "MA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 104.9,
    "dist": 48.5,
    "mort": 65.6,
@@ -178,6 +195,7 @@
   "MD": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 100.9,
    "dist": 40.7,
    "mort": 60.8,
@@ -188,6 +206,7 @@
   "ME": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 567.8,
    "dist": 192.4,
    "mort": 280.4,
@@ -198,6 +217,7 @@
   "MI": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1794.1,
    "dist": 1025.1,
    "mort": 1325.3,
@@ -208,6 +228,7 @@
   "MN": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 445.6,
    "dist": 255.1,
    "mort": 319.3,
@@ -218,6 +239,7 @@
   "MO": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 891.6,
    "dist": 517.5,
    "mort": 671.4,
@@ -228,6 +250,7 @@
   "MS": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 603,
    "dist": 229.3,
    "mort": 397.7,
@@ -238,6 +261,7 @@
   "MT": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 320.8,
    "dist": 67.3,
    "mort": 269.6,
@@ -248,6 +272,7 @@
   "NC": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1286.6,
    "dist": 225.5,
    "mort": 606.7,
@@ -258,6 +283,7 @@
   "ND": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 28.8,
    "dist": 4.9,
    "mort": 8,
@@ -268,6 +294,7 @@
   "NE": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 56.3,
    "dist": 8.7,
    "mort": 14.7,
@@ -278,6 +305,7 @@
   "NH": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 241.2,
    "dist": 70.6,
    "mort": 89.6,
@@ -288,6 +316,7 @@
   "NJ": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 112.4,
    "dist": 20.4,
    "mort": 45.7,
@@ -298,6 +327,7 @@
   "NM": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 122.4,
    "dist": 84.9,
    "mort": 132.4,
@@ -308,6 +338,7 @@
   "NV": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": false,
    "base": 15,
    "dist": 41.9,
    "mort": 55.9,
@@ -318,6 +349,7 @@
   "NY": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 624.4,
    "dist": 172.3,
    "mort": 425.9,
@@ -328,6 +360,7 @@
   "OH": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 301.4,
    "dist": 63.7,
    "mort": 154.2,
@@ -338,6 +371,7 @@
   "OK": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 382.5,
    "dist": 80.9,
    "mort": 118.9,
@@ -348,6 +382,7 @@
   "OR": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 4326.4,
    "dist": 529.5,
    "mort": 1216.5,
@@ -358,6 +393,7 @@
   "PA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 657.6,
    "dist": 251.9,
    "mort": 395.3,
@@ -368,6 +404,7 @@
   "RI": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": false,
    "base": 24.4,
    "dist": 7.5,
    "mort": 9.9,
@@ -378,6 +415,7 @@
   "SC": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1091,
    "dist": 385.6,
    "mort": 539.4,
@@ -388,6 +426,7 @@
   "SD": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 56.5,
    "dist": 7.9,
    "mort": 26.9,
@@ -398,6 +437,7 @@
   "TN": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 829.4,
    "dist": 340.6,
    "mort": 460.8,
@@ -408,6 +448,7 @@
   "TX": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1151.6,
    "dist": 331.9,
    "mort": 413.5,
@@ -418,6 +459,7 @@
   "US": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 17997.3,
    "dist": 9408.5,
    "mort": 15690.9,
@@ -428,6 +470,7 @@
   "UT": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 90.2,
    "dist": 53.7,
    "mort": 100.4,
@@ -438,6 +481,7 @@
   "VA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1202.1,
    "dist": 326.7,
    "mort": 570.2,
@@ -448,6 +492,7 @@
   "VT": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 213.2,
    "dist": 100.5,
    "mort": 131.5,
@@ -458,6 +503,7 @@
   "WA": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 3289.2,
    "dist": 378.9,
    "mort": 962.3,
@@ -468,6 +514,7 @@
   "WI": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 1535.3,
    "dist": 448.2,
    "mort": 799.9,
@@ -478,6 +525,7 @@
   "WV": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 480.6,
    "dist": 258.7,
    "mort": 352.8,
@@ -488,6 +536,7 @@
   "WY": {
    "metric": "agc_live_total",
    "endYr": 2125,
+   "reliable": true,
    "base": 113.2,
    "dist": 17,
    "mort": 97.9,
