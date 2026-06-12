@@ -114,7 +114,9 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
     gapPoly=up+" "+dn+" Z";
   }
 
+  const sparse = data.bEnd < 25 || (data.distPct!=null && data.distPct < -5);
   const verdict = (()=>{
+    if(sparse) return { t:"Reversal risk: not characterized", d:`This state's forested carbon base is small (${data.bEnd!=null?data.bEnd.toFixed(0):"—"} ${unit}), so the cross-engine reserve median is noisy and the reversal signal is not reliable here (sparse-woodland edge case).`, c:"#8aa0b0" };
     const dp=data.distPct, ds=data.distSource;
     const hi = (dp!=null && dp>=50) || (ds!=null && ds>=25);
     const mod = (dp!=null && dp>=20) || (ds!=null && ds>=8);

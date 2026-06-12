@@ -50,7 +50,8 @@ for(const f of readdirSync(DIR).filter(f=>f.endsWith(".json"))){
   const mortPct=(mEnd!=null&&bEnd)?(bEnd-mEnd)/bEnd*100:null;
   const distPk=dist.length?Math.max(...dist.map(p=>p[1])):null;
   const distSource=(distPk!=null&&dEnd!=null&&distPk)?(distPk-dEnd)/distPk*100:null;
-  out[st]={ metric, endYr,
+  const reliable = bEnd>=25 && (distPct==null || distPct>=-5);
+  out[st]={ metric, endYr, reliable,
     base:+bEnd.toFixed(1), dist:dEnd!=null?+dEnd.toFixed(1):null, mort:mEnd!=null?+mEnd.toFixed(1):null,
     distPct:distPct!=null?+distPct.toFixed(1):null, mortPct:mortPct!=null?+mortPct.toFixed(1):null,
     distSource:distSource!=null?+distSource.toFixed(1):null };

@@ -39,15 +39,15 @@ export default function PermanenceMap({ geo, risk, field="distPct", selected, on
         <rect x="0" y="0" width={W} height={H} fill="#101820"/>
         {feats.map(ft=>{
           const st=ft.properties.state, r=risk[st];
-          const v=r?r[field]:null;
-          const fill=rampRisk(v);
+          const v=(r && r.reliable!==false)?r[field]:null;
+          const fill=(r && r.reliable===false)?"#3a4654":rampRisk(v);
           const isSel=st===selected;
           return <path key={st} d={geomToD(ft.geometry)} fill={fill}
             fillOpacity={v!=null?0.92:0.3}
             stroke={isSel?"#fff":"#0b1015"} strokeWidth={isSel?2:0.5}
             style={{cursor:r?"pointer":"default"}}
             onClick={()=>{ if(r && onPick) onPick(st); }}>
-            <title>{`${st}${r?` · disturbance-exposed reserve ${v!=null?v.toFixed(0)+"% below passive":"—"} at ${r.endYr}`:" · no permanence data"}`}</title>
+            <title>{`${st}${r?(r.reliable===false?` · sparse forest base — reversal not characterized`:` · disturbance-exposed reserve ${v!=null?v.toFixed(0)+"% below passive":"—"} at ${r.endYr}`):" · no permanence data"}`}</title>
           </path>;
         })}
         {/* legend */}
