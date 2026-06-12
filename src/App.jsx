@@ -11,6 +11,7 @@ const CrossModelEnsemble = lazy(() => import("./CrossModelEnsemble.jsx"));
 const SpatialAnchored = lazy(() => import("./SpatialAnchored.jsx"));
 const LandownerYields = lazy(() => import("./LandownerYields.jsx"));
 const FaustmannRotation = lazy(() => import("./FaustmannRotation.jsx"));
+const PermanenceRisk = lazy(() => import("./PermanenceRisk.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
@@ -752,6 +753,7 @@ export default function App(){
       spatialbio: !!(spatialAnch && spatialAnch.states && spatialAnch.states[sel]),
       landowner: !!(landowner && landowner[sel]),
       faustmann: !!(faustmann && faustmann[sel]),
+      permanence: !!series,
       health: !!(hrr && hrr.national),
       compare: !!(hrr && hrr.states),
     };
@@ -1542,7 +1544,8 @@ export default function App(){
             {[["compare","Compare areas"],["runbuilder","Build a run"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["ensemble","Cross-model ensemble"],["stumpage","Stumpage"],["landis","LANDIS stratified"],
               ["spatialbio","Spatial biomass"],
-              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]]
+              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],
+              ["permanence","Permanence / risk"]]
               .filter(([k])=> k==="compare" || k==="runbuilder" || k==="health" || toolsOpen || tab===k)
               .map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
@@ -1554,13 +1557,13 @@ export default function App(){
                 || (k==="faustmann" && !(faustmann && faustmann[sel]))
                 || (k==="health" && !(hrr && hrr.national))
                 || (k==="compare" && !(hrr && hrr.states))
-                || ((k==="engines"||k==="rd") && !series);
+                || ((k==="engines"||k==="rd"||k==="permanence") && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
             })}
             {!simple && (
             <button className="tab" style={{marginLeft:6,opacity:0.85}} onClick={()=>setToolsOpen(o=>!o)}
-              title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation">
+              title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation, permanence / reversal risk">
               {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>)}
             {simple && cov && (
             <button className="tab" style={{marginLeft:6,borderColor:"var(--accent)",color:"var(--accent)"}}
@@ -1582,6 +1585,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="ensemble" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><CrossModelEnsemble traj={mmTraj} summary={mmSum} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="permanence" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
