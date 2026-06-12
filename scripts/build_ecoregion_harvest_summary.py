@@ -28,7 +28,8 @@ shapes=[(reproj(f["geometry"]),codes[f["properties"]["NA_L3CODE"]]) for f in fea
 with rasterio.open("ph_any.tif") as r: transform=r.transform; H,W=r.height,r.width
 zone=rasterize(shapes,out_shape=(H,W),transform=transform,fill=0,dtype="int32"); K=len(codes)+1
 fields={"p_harvest_any":"ph_any.tif","p_harvest_clearcut":"ph_clearcut.tif","p_harvest_partial":"ph_partial.tif",
-        "stand_height_ft":"standht_2022.tif","stocking_pct":"alstk_2022.tif","qmd_in":"qmd_2022.tif"}
+        "stand_height_ft":"standht_2022.tif","stocking_pct":"alstk_2022.tif","qmd_in":"qmd_2022.tif",
+        "cspi_productivity":"cspi_canon.tif"}  # cspi warped from v2_cspi_conus_1km.tif to the canonical grid
 band={}
 for key,fn in fields.items():
     with rasterio.open(fn) as r: a=r.read(1).astype("float64"); nod=r.nodata
