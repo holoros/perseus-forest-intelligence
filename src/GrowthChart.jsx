@@ -7,9 +7,10 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
                                       showBands, showInvBand, hiddenEngines, yMode,
                                       overlayNode, overlayLabel,
                                       isolatedEngine, onIsolate, xMax }){
-  const W=560,H=320,L=48,R=70,T=14,B=30;
+  const W=560,H=344,L=56,R=86,T=22,B=38;
   const svgRef = useRef(null);
   const [hoverX, setHoverX] = useState(null);
+  const [hoverModel, setHoverModel] = useState(null);
 
   // Optional user x-axis horizon clamp (projections run to 2125).
   const clampX = s => (xMax && s.pts) ? {...s, pts: s.pts.filter(p=>p[0]<=xMax)} : s;
@@ -94,7 +95,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const yy=Y(v);
     grid.push(<g key={"g"+i}>
       <line x1={L} y1={yy} x2={W-R} y2={yy} stroke="#2a3a47" strokeWidth="1"/>
-      <text x={L-6} y={yy+3} textAnchor="end" fill="#8aa0b0" fontSize="10">
+      <text x={L-7} y={yy+4} textAnchor="end" fill="#b6c6d0" fontSize="12">
         {v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(ydec)}
       </text>
     </g>);
@@ -105,7 +106,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   const xmag = Math.pow(10, Math.floor(Math.log10(xraw))), xnorm = xraw/xmag;
   const xstep = Math.max(1, (xnorm<1.5?1:xnorm<3?2:xnorm<7?5:10)*xmag);
   const xticks=[]; for(let t=Math.ceil(x0/xstep)*xstep; t<=x1+1e-6; t+=xstep)
-    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{Math.round(t)}</text>);
+    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+18} textAnchor="middle" fill="#b6c6d0" fontSize="12">{Math.round(t)}</text>);
   const bands = showBands ? visible.filter(s=> s.pts.some(p=>p.length>=4)).map((s,i)=>{
     const col = classCol[s.cls] || "#bbb";
     const bp = s.pts.filter(p=>p.length>=4);
@@ -133,16 +134,25 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const col = shadeFor(s);
     const d = s.pts.map((p,k)=> (k? "L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
     const tag = dashed ? `${s.label} · ${overlayLabel||"compare"}` : `${s.label}`;
+    // A few engines are short anchor stubs (e.g. gcbm_moja_v6 spans only
+    // 2022-2026) rather than full trajectories. Drawn as a line on a full-
+    // horizon chart they read as a stray floating segment, so render them as a
+    // few dots instead — clearly measured anchor points, no phantom line.
+    const spanFrac = s.pts.length>1 ? (s.pts[s.pts.length-1][0]-s.pts[0][0])/((x1-x0)||1) : 0;
+    const stub = s.pts.length<=3 || spanFrac < 0.25;
+    const dim = hoverModel && hoverModel!==s.model;   // hover-to-highlight
     return <g key={(dashed?"o":"")+i}>
-      <path d={d} fill="none" stroke="transparent" strokeWidth="9"
+      <path d={d} fill="none" stroke="transparent" strokeWidth="10"
             style={{cursor:"pointer"}}
+            onMouseEnter={()=> setHoverModel(s.model)} onMouseLeave={()=> setHoverModel(null)}
             onClick={()=> !dashed && onIsolate && onIsolate(s.model)}>
-        <title>{`${tag} (${s.cls}) — click to isolate`}</title>
+        <title>{`${tag} (${s.cls}) — ${stub?"short anchor series · ":""}hover to highlight, click to isolate`}</title>
       </path>
-      <path d={d} fill="none" stroke={col} strokeWidth={dashed?1.2:1.8}
-            opacity={dashed?0.55:0.95}
-            strokeDasharray={dashFor(s)}
-            style={{pointerEvents:"none"}}/>
+      {stub
+        ? s.pts.map((p,k)=>(<circle key={"d"+k} cx={X(p[0]).toFixed(1)} cy={Y(p[1]).toFixed(1)}
+            r={dashed?1.9:2.5} fill={col} opacity={dim?0.12:(dashed?0.6:0.95)} style={{pointerEvents:"none"}}/>))
+        : <path d={d} fill="none" stroke={col} strokeWidth={dashed?1.4:2.0}
+            opacity={dim?0.12:(dashed?0.6:0.95)} strokeDasharray={dashFor(s)} style={{pointerEvents:"none"}}/>}
     </g>;
   };
   // Collision-avoided trailing labels: stack each line's end label in the right
@@ -151,7 +161,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     .map(({s,dashed})=>({ model:s.model, col:shadeFor(s), dash:dashFor(s), dashed,
       y0:Math.max(T+5, Math.min(H-B-3, Y(s.pts[s.pts.length-1][1]))) }))
     .sort((a,b)=>a.y0-b.y0);
-  { const top=T+4, bot=H-B-3, GAP=9.5;
+  { const top=T+4, bot=H-B-3, GAP=11.5;
     // pass 1: top-down, never overlapping
     let prev = top - GAP;
     for(const it of labelItems){ it.ly = Math.max(it.y0, prev + GAP); prev = it.ly; }
@@ -166,14 +176,14 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   // and hover/click identifies any line). When isolating, always label.
   const DENSE = labelItems.length > 12 && !isolatedEngine;
   const endLabels = DENSE
-    ? [<text key="hint" x={W-R+4} y={T+6} fill="#5e7180" fontSize="8" style={{pointerEvents:"none"}}>
+    ? [<text key="hint" x={W-R+5} y={T+8} fill="#8aa0b0" fontSize="11" style={{pointerEvents:"none"}}>
          {labelItems.length} engines</text>,
-       <text key="hint2" x={W-R+4} y={T+16} fill="#5e7180" fontSize="7" style={{pointerEvents:"none"}}>
+       <text key="hint2" x={W-R+5} y={T+20} fill="#73879a" fontSize="9.5" style={{pointerEvents:"none"}}>
          hover / click to ID</text>]
     : labelItems.map((it,k)=>(
         <g key={"lab"+k} style={{pointerEvents:"none"}}>
-          <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} stroke={it.col} strokeWidth="1.4" strokeDasharray={it.dash}/>
-          <text x={W-R+7} y={it.ly+2.6} fill={it.col} fontSize="7.5" textAnchor="start" opacity={it.dashed?0.7:1}>
+          <line x1={W-R+1} y1={it.ly} x2={W-R+6} y2={it.ly} stroke={it.col} strokeWidth="1.8" strokeDasharray={it.dash}/>
+          <text x={W-R+9} y={it.ly+3} fill={it.col} fontSize="9.5" textAnchor="start" opacity={it.dashed?0.78:1}>
             {it.model.replace(/_/g," ").slice(0,15)}{it.dashed?" ·"+overlayLabel:""}</text>
         </g>));
 
@@ -232,16 +242,32 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(data)));
   };
 
+  // Download the visible engine series as CSV (year column + one per engine).
+  const downloadCsv = () => {
+    const ser = [...drawSet, ...drawOverlay];
+    if(!ser.length) return;
+    const yrs = [...new Set(ser.flatMap(s=>s.pts.map(p=>p[0])))].sort((a,b)=>a-b);
+    const seen={}; const head=["year", ...ser.map(s=>{ let n=s.model; if(seen[n]!=null){n=n+"_"+(++seen[s.model]);} else seen[s.model]=0; return n; })];
+    const rows=yrs.map(y=>[y, ...ser.map(s=>{ const v=valueAt(s,y); return v==null?"":(+v).toFixed(4); })]);
+    const csv=[head.join(","), ...rows.map(r=>r.join(","))].join("\n");
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download=`perseus_series_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(a.href);
+  };
+
   return (
     <div style={{position:"relative"}}>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
            style={{width:"100%",height:"auto",display:"block"}}
            onMouseMove={onMouseMove} onMouseLeave={()=> setHoverX(null)}>
         {grid}{xticks}{invBand}{bands}
-        {fiaRef!=null && fiaRef >= y0 && fiaRef <= y1 && <>
-          <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="5 4" strokeWidth="1"/>
-          <text x={L+4} y={Y(fiaRef)-4} fill="#8aa0b0" fontSize="10">FIA observed {fiaRef} Tg{fiaYear?` (${fiaYear})`:""}</text>
-        </>}
+        {fiaRef!=null && fiaRef >= y0 && fiaRef <= y1 && (()=>{
+          const t=`FIA observed ${fiaRef} Tg${fiaYear?` (${fiaYear})`:""}`;
+          const w=t.length*5.7+12;
+          return <g style={{pointerEvents:"none"}}>
+            <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="6 4" strokeWidth="1.2"/>
+            <rect x={L+4} y={Y(fiaRef)-16} width={w} height={14} rx={3} fill="#0c1217" fillOpacity="0.85" stroke="#364956" strokeWidth="0.6"/>
+            <text x={L+8} y={Y(fiaRef)-5.5} fill="#cddbe4" fontSize="11">{t}</text>
+          </g>; })()}
         {drawSet.map((s,i)=> drawLine(s, i, false))}
         {drawOverlay.map((s,i)=> drawLine(s, i, true))}
         {endLabels}
@@ -250,7 +276,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
                 stroke="#ffffff" strokeOpacity="0.3" strokeWidth="1"
                 strokeDasharray="3 3" style={{pointerEvents:"none"}}/>
         )}
-        <text x={L} y={T} fill="#8aa0b0" fontSize="10">{unit||""}</text>
+        <text x={L} y={T-6} fill="#cddbe4" fontSize="12.5" fontWeight="600">{unit||""}</text>
       </svg>
       {hoverX != null && hoverYear != null && (
         <div style={{
@@ -290,6 +316,12 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             border:"1px solid var(--line)", borderRadius:5,
             padding:"1px 7px", fontSize:10, cursor:"pointer"}}>
           ↓ PNG
+        </button>
+        <button onClick={downloadCsv} title="download the visible engine series as CSV"
+          style={{background:"var(--panel)", color:"var(--mut)",
+            border:"1px solid var(--line)", borderRadius:5,
+            padding:"1px 7px", fontSize:10, cursor:"pointer"}}>
+          ↓ CSV
         </button>
       </div>
     </div>
