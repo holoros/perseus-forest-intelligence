@@ -96,6 +96,35 @@ bj<-sprintf('{"x0": %s, "y1": %s, "x1": %s, "y0": %s}',X0,Y1,X1,Y0)
 for(nm in c("conus_hybrid_agc2022","conus_hybrid_dagc100","conus_sawtimber_share"))
   writeLines(bj, file.path(OUT,paste0(nm,"_bounds.json")))
 cat("[rast] wrote 3 PNGs + bounds to",OUT,"\n")
+
+## ---- DRAFT (unrun) ADDITION: emit VALUE outputs so carbon can be summarized
+## by ecoregion downstream, not just shown as a PNG. Faithful to the existing
+## agc0/dagc computation above — saves the same values, fabricates nothing.
+##   (a) per-plot AGC + lat/lon  -> dependency-free point-in-polygon zonal stats
+##   (b) georeferenced GeoTIFFs of the binned grids when terra is available
+## CRS NOTE: this grid uses the explorer's spherical Albers (lat_0=38, +R sphere),
+## which differs ~0.5 deg from the lat_0=37.5 ellipsoidal grid of the TreeMap
+## ph_*/structure rasters. Keep each raster in its OWN CRS when zonal-summarizing;
+## verify alignment against a state outline before trusting the spatial join.
+write.csv(
+  data.frame(LON=m$LON, LAT=m$LAT, state=m$state,
+             agc2022_MgCha=round(agc0,3), agc2122_MgCha=round(agc100,3),
+             sawtimber_frac=round(saw,4)),
+  file.path(OUT,"hybrid_agc_perplot.csv"), row.names=FALSE)
+cat(sprintf("[rast] wrote per-plot AGC table hybrid_agc_perplot.csv (%d finite plots)\n",
+            sum(is.finite(agc0))))
+
+if(requireNamespace("terra", quietly=TRUE)){
+  agc_grid<-binmean(agc0); dagc_grid<-binmean(dagc)
+  CRS_SPH<-"+proj=aea +lat_0=38 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +R=6378137 +units=m +no_defs"
+  mkr<-function(mat) terra::rast(nrows=nrow, ncols=ncol, xmin=X0, xmax=X1, ymin=Y0, ymax=Y1,
+                                 crs=CRS_SPH, vals=as.vector(t(mat)))   # row 1 = north
+  terra::writeRaster(mkr(agc_grid),  file.path(OUT,"conus_hybrid_agc2022.tif"), overwrite=TRUE)
+  terra::writeRaster(mkr(dagc_grid), file.path(OUT,"conus_hybrid_dagc100.tif"), overwrite=TRUE)
+  cat("[rast] wrote value GeoTIFFs conus_hybrid_agc2022.tif + conus_hybrid_dagc100.tif\n")
+} else {
+  cat("[rast] terra not installed; emitted per-plot AGC CSV only (GeoTIFFs skipped)\n")
+}
 ## quick stats
 cat(sprintf("[rast] agc2022 mean %.0f Mg/ha; dagc mean %.1f; sawtimber mean %.0f%%\n",
   mean(agc0,na.rm=TRUE),mean(dagc,na.rm=TRUE),100*mean(saw,na.rm=TRUE)))
