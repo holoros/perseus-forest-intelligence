@@ -689,10 +689,10 @@ export default function App(){
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
   useEffect(()=>{
-    if(!(ecoOn || inspectMode || aoi)) return;
-    if(!ecoGeo) j("geo/us_eco_l3_features.geojson").then(setEcoGeo).catch(()=>{});
+    if(!(ecoOn || inspectMode || aoi || tab==="ecoharvest")) return;
+    if((ecoOn||inspectMode||aoi||tab==="ecoharvest") && !ecoGeo) j("geo/us_eco_l3_features.geojson").then(setEcoGeo).catch(()=>{});
     if(!l3yields) j("api/yield_curves_by_l3.json").then(setL3yields).catch(()=>{});
-  },[ecoOn,inspectMode,aoi,ecoGeo,l3yields]);
+  },[ecoOn,inspectMode,aoi,ecoGeo,l3yields,tab]);
 
   // ---- carbon-map year animation (play/pause) ----
   useEffect(()=>{
@@ -1430,7 +1430,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
           {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
-          {(!aoi || researchOpen) && tab==="ecoharvest" && <EcoregionHarvest data={ecoHarvest}/>}
+          {(!aoi || researchOpen) && tab==="ecoharvest" && <EcoregionHarvest data={ecoHarvest} geo={ecoGeo}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>

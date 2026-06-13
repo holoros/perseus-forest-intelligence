@@ -3,6 +3,7 @@
 // the CONUS harvest-probability rasters. A sortable, searchable table — the
 // "summarize by ecoregion" companion to the per-pixel raster overlays.
 import { useMemo, useState } from "react";
+import EcoregionMap from "./EcoregionMap.jsx";
 
 const PCOLS = [
   ["p_harvest_any","P(any harvest)"],
@@ -27,7 +28,14 @@ const shade = v => {
   return `rgba(${c[0]},${c[1]},${c[2]},0.55)`;
 };
 
-export default function EcoregionHarvest({ data }){
+export default function EcoregionHarvest({ data, geo }){
+  const MAPFLDS=[["p_harvest_clearcut","P(stand replacement)",v=>v.toFixed(2)],
+    ["p_harvest_any","P(any harvest)",v=>v.toFixed(2)],
+    ["stand_height_ft","Stand height (ft)",v=>v.toFixed(0)],
+    ["cspi_productivity","Productivity (CSPI)",v=>v.toFixed(0)],
+    ["qmd_in","QMD (in)",v=>v.toFixed(1)]];
+  const [mapField,setMapField]=useState("p_harvest_clearcut");
+  const mf=MAPFLDS.find(x=>x[0]===mapField)||MAPFLDS[0];
   const [sortKey,setSortKey]=useState("p_harvest_any");
   const [asc,setAsc]=useState(false);
   const [q,setQ]=useState("");
@@ -53,6 +61,19 @@ export default function EcoregionHarvest({ data }){
         <b style={{fontSize:13}}>Forest summary by ecoregion</b>
         <span style={{color:"var(--mut)",fontSize:11}}>{rows.length} EPA Level III ecoregions · ~3.1 km zonal mean · harvest probability + structure + productivity</span>
       </div>
+      {data && data.ecoregions && geo && (
+        <div style={{marginBottom:8}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
+            <span style={{fontSize:11,color:"var(--mut)"}}>map:</span>
+            <select value={mapField} onChange={e=>setMapField(e.target.value)}
+              style={{background:"var(--panel,#172029)",color:"var(--fg,#e8eef2)",border:"1px solid var(--line,#2a3a47)",borderRadius:5,fontSize:11.5,padding:"2px 6px"}}>
+              {MAPFLDS.filter(x=>Object.values(data.ecoregions).some(v=>v[x[0]]!=null)).map(x=>
+                <option key={x[0]} value={x[0]}>{x[1]}</option>)}
+            </select>
+          </div>
+          <EcoregionMap geo={geo} eco={data.ecoregions} field={mapField} label={mf[1]} fmt={mf[2]}/>
+        </div>
+      )}
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="filter by ecoregion or biome…"
         style={{width:"min(320px,90%)",padding:"4px 8px",marginBottom:6,fontSize:12,
           background:"var(--panel,#172029)",color:"var(--fg,#e8eef2)",border:"1px solid var(--line,#2a3a47)",borderRadius:5}}/>
