@@ -1510,12 +1510,12 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="ecoharvest" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><EcoregionHarvest data={ecoHarvest} geo={ecoGeo}/></Suspense>}
           {(!aoi || researchOpen) && tab==="permanence" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta} geo={geoData} risk={permRisk} onPick={st=>setSel(st)}/></Suspense>}
           {(!aoi || researchOpen) && tab==="hwp" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><WoodProducts series={series} meta={meta} state={sel} units={units}/></Suspense>}
-          {(!aoi || researchOpen) && tab==="agbyc" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><AgbYieldCurves data={agbYc} state={sel} stateName={cov && cov.name}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="agbyc" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><AgbYieldCurves data={agbYc} state={sel} stateName={cov && cov.name} landowner={landowner} stateCode={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
           {(!aoi || researchOpen) && tab==="runbuilder" && <RunBuilder initState={sel} units={units} simple={simple}/>}
-          {(!aoi || researchOpen) && tab==="mystands" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><MyStands series={series} metric={metric} bucket={bucket} unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} stateName={cov && cov.name}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="mystands" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><MyStands series={series} metric={metric} bucket={bucket} unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} stateName={cov && cov.name} landowner={landowner} stateCode={sel}/></Suspense>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
