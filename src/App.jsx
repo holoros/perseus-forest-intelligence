@@ -764,7 +764,7 @@ export default function App(){
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
   useEffect(()=>{
-    const needEco = ecoOn || inspectMode || aoi || tab==="scenario" || (tab==="health" && hrrUnit==="ecoregion");
+    const needEco = ecoOn || inspectMode || aoi || tab==="scenario" || tab==="ecoharvest" || (tab==="health" && hrrUnit==="ecoregion");
     if(!needEco) return;
     if(!ecoGeo) j("geo/us_eco_l3_features.geojson").then(setEcoGeo).catch(()=>{});
     if(!l3yields) j("api/yield_curves_by_l3.json").then(setL3yields).catch(()=>{});
@@ -1588,7 +1588,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="ensemble" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><CrossModelEnsemble traj={mmTraj} summary={mmSum} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
-          {(!aoi || researchOpen) && tab==="ecoharvest" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><EcoregionHarvest data={ecoHarvest}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="ecoharvest" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><EcoregionHarvest data={ecoHarvest} geo={ecoGeo}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
