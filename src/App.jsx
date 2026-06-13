@@ -1428,7 +1428,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
           {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
-          {(!aoi || researchOpen) && tab==="mystands" && <MyStands series={series} metric={metric} bucket={bucket} unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} stateName={cov && cov.name}/>}
+          {(!aoi || researchOpen) && tab==="mystands" && <MyStands series={series} metric={metric} bucket={bucket} unit={meta && meta.metrics[metric] && meta.metrics[metric].unit} stateName={cov && cov.name} landowner={landowner} stateCode={sel}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>

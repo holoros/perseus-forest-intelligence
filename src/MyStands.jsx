@@ -55,37 +55,56 @@ function parseCsv(text){
   return {rows, err: rows.length?null:"no numeric rows parsed", ycol: yi, vcol: vi};
 }
 
-export default function MyStands({ series, metric, bucket, unit, stateName }){
+export default function MyStands({ series, metric, bucket, unit, stateName, landowner, stateCode }){
   const [rows,setRows]=useState([]);
+  const [xmode,setXmode]=useState("year");  // year | age
   const [err,setErr]=useState(null);
   const [fname,setFname]=useState("");
   const fileRef=useRef(null);
 
+  // Age-axis reference: aggregate the landowner yield curves for this state
+  // across owner x forest type into a per-age band (min q10 .. max q90) + median q50.
+  const ageEnv=useMemo(()=>{
+    const st=landowner && (landowner[stateCode]||landowner[stateName]);
+    if(!st || typeof st!=="object") return [];
+    const byAge={};
+    Object.values(st).forEach(byFt=>{ if(byFt&&typeof byFt==="object")
+      Object.values(byFt).forEach(arr=>{ if(Array.isArray(arr)) arr.forEach(p=>{
+        if(p&&p.age!=null){ (byAge[p.age]=byAge[p.age]||[]).push(p); } }); }); });
+    return Object.keys(byAge).map(Number).sort((a,b)=>a-b).map(age=>{
+      const ps=byAge[age]; const q50=ps.map(p=>p.q50).filter(v=>v!=null).sort((a,b)=>a-b);
+      const med=q50.length?(q50.length%2?q50[(q50.length-1)/2]:(q50[q50.length/2-1]+q50[q50.length/2])/2):null;
+      return {y:age, lo:Math.min(...ps.map(p=>p.q10!=null?p.q10:p.q50)), hi:Math.max(...ps.map(p=>p.q90!=null?p.q90:p.q50)), med};
+    });
+  },[landowner,stateCode,stateName]);
   const env=useMemo(()=>{
     const node=series && series[metric] && series[metric][bucket];
     return envelope(node);
   },[series,metric,bucket]);
+  const activeEnv = xmode==="age" ? ageEnv : env;
 
   const onFile=e=>{
     const f=e.target.files && e.target.files[0]; if(!f) return;
     setFname(f.name);
     const rd=new FileReader();
-    rd.onload=()=>{ const {rows,err}=parseCsv(String(rd.result)); setRows(rows); setErr(err); };
+    rd.onload=()=>{ const p=parseCsv(String(rd.result)); setRows(p.rows); setErr(p.err);
+      // if the detected x values are small (typical stand ages) default to age mode
+      if(p.rows.length){ const mx=Math.max(...p.rows.map(r=>r.year)); setXmode(mx<=200?"age":"year"); } };
     rd.readAsText(f);
   };
 
   // comparison stats: user point vs regional median at same year
   const stats=useMemo(()=>{
-    if(!rows.length||!env.length) return null;
+    if(!rows.length||!activeEnv.length) return null;
     let above=0, n=0, sumDev=0;
-    rows.forEach(r=>{ const m=medAt(env,r.year); if(m!=null){ n++; if(r.value>=m) above++; sumDev+=(r.value-m)/(m||1)*100; } });
+    rows.forEach(r=>{ const m=medAt(activeEnv,r.year); if(m!=null){ n++; if(r.value>=m) above++; sumDev+=(r.value-m)/(m||1)*100; } });
     return n? {n, above, pctAbove: above/n*100, meanDev: sumDev/n}: null;
-  },[rows,env]);
+  },[rows,activeEnv]);
 
   // chart geometry
   const W=560,H=320,L=56,R=20,T=22,B=38;
-  const all=[...env.flatMap(e=>[e.lo,e.hi,e.med]), ...rows.map(r=>r.value)].filter(v=>v!=null&&isFinite(v));
-  const yrs=[...env.map(e=>e.y), ...rows.map(r=>r.year)].filter(v=>isFinite(v));
+  const all=[...activeEnv.flatMap(e=>[e.lo,e.hi,e.med]), ...rows.map(r=>r.value)].filter(v=>v!=null&&isFinite(v));
+  const yrs=[...activeEnv.map(e=>e.y), ...rows.map(r=>r.year)].filter(v=>isFinite(v));
   const haveChart = all.length && yrs.length;
   let svg=null;
   if(haveChart){
@@ -93,9 +112,9 @@ export default function MyStands({ series, metric, bucket, unit, stateName }){
     let y0=Math.min(0,...all), y1=Math.max(...all)*1.05||1;
     const step=Math.pow(10,Math.floor(Math.log10((y1-y0)/4||1)))* ( ((y1-y0)/4)/Math.pow(10,Math.floor(Math.log10((y1-y0)/4||1)))<2?1:5 );
     const X=v=>L+(v-x0)/((x1-x0)||1)*(W-L-R), Y=v=>(H-B)-(v-y0)/((y1-y0)||1)*(H-T-B);
-    const band = env.length? env.map((e,k)=>(k?"L":"M")+X(e.y).toFixed(1)+" "+Y(e.hi).toFixed(1)).join(" ")
-      +" "+env.slice().reverse().map(e=>"L"+X(e.y).toFixed(1)+" "+Y(e.lo).toFixed(1)).join(" ")+" Z" : null;
-    const medLine = env.length? env.map((e,k)=>(k?"L":"M")+X(e.y).toFixed(1)+" "+Y(e.med).toFixed(1)).join(" ") : null;
+    const band = activeEnv.length? activeEnv.map((e,k)=>(k?"L":"M")+X(e.y).toFixed(1)+" "+Y(e.hi).toFixed(1)).join(" ")
+      +" "+activeEnv.slice().reverse().map(e=>"L"+X(e.y).toFixed(1)+" "+Y(e.lo).toFixed(1)).join(" ")+" Z" : null;
+    const medLine = activeEnv.length? activeEnv.map((e,k)=>(k?"L":"M")+X(e.y).toFixed(1)+" "+Y(e.med).toFixed(1)).join(" ") : null;
     const yt=[]; for(let v=Math.ceil(y0/step)*step; v<=y1; v+=step) yt.push(v);
     svg=(
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
@@ -105,9 +124,9 @@ export default function MyStands({ series, metric, bucket, unit, stateName }){
         <text x={L} y={T-6} fill="#cddbe4" fontSize="12.5" fontWeight="600">{unit||""}</text>
         {band && <path d={band} fill="#6aa9c0" opacity="0.15"/>}
         {medLine && <path d={medLine} fill="none" stroke="#6aa9c0" strokeWidth="1.8" strokeDasharray="5 3"/>}
-        {rows.map((r,i)=>{ const m=medAt(env,r.year); const c=m==null?"#e8eef2":(r.value>=m?"#7bdca0":"#e6a23c");
+        {rows.map((r,i)=>{ const m=medAt(activeEnv,r.year); const c=m==null?"#e8eef2":(r.value>=m?"#7bdca0":"#e6a23c");
           return <g key={i}><circle cx={X(r.year)} cy={Y(r.value)} r="3.4" fill={c} stroke="#0c1217" strokeWidth="0.8"><title>{`${r.label?r.label+" · ":""}${r.year}: ${r.value} ${unit||""}${m!=null?` (regional median ${m.toFixed(1)})`:""}`}</title></circle></g>; })}
-        <text x={W-R} y={H-B+18} textAnchor="end" fill="#73879a" fontSize="10">your stands vs {stateName} model median (dashed) + full engine range (band)</text>
+        <text x={W-R} y={H-B+18} textAnchor="end" fill="#73879a" fontSize="10">{xmode==="age"?"stand age (yr)":"year"} · your stands vs {xmode==="age"?"landowner yield":stateName+" model"} median (dashed) + range (band)</text>
       </svg>);
   }
 
@@ -125,10 +144,18 @@ export default function MyStands({ series, metric, bucket, unit, stateName }){
         </button>
         <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" onChange={onFile} style={{display:"none"}}/>
         {fname && <span style={{color:"var(--mut)",fontSize:11}}>{fname} · {rows.length} rows</span>}
+        <span style={{display:"inline-flex",border:"1px solid var(--line,#2a3a47)",borderRadius:6,overflow:"hidden"}}>
+          {["year","age"].map(m=>(
+            <button key={m} onClick={()=>setXmode(m)}
+              style={{background:xmode===m?"#2f6f5e":"transparent",color:xmode===m?"#eafff6":"var(--mut)",
+                border:"none",padding:"4px 10px",fontSize:11.5,cursor:"pointer"}}>
+              {m==="year"?"by year":"by age"}</button>))}
+        </span>
         <span style={{color:"var(--mut)",fontSize:10.5}}>columns: a year (or age) column and a value column ({unit||"metric units"}); an optional stand id/label.</span>
       </div>
       {err && <div className="note" style={{color:"#e6a23c"}}>Could not read that file: {err}. Expecting a CSV with a year/age column and a value column.</div>}
-      {!node && <div className="empty">No multi-model series for {stateName} in the current metric/management — pick a state and carbon metric to get a comparison envelope.</div>}
+      {xmode==="year" && !node && <div className="empty">No multi-model series for {stateName} in the current metric/management — pick a state and carbon metric to get a comparison envelope.</div>}
+      {xmode==="age" && !ageEnv.length && <div className="note" style={{color:"#8aa0b0"}}>No landowner yield curves for {stateName} yet (currently Maine), so age-mode shows your stands without a reference band. The points still plot on a stand-age axis.</div>}
 
       {stats && (
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
