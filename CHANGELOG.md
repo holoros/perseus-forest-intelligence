@@ -5,6 +5,19 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.8 — 2026-06-18 (deployed)
+* **Forest Health / Risk / Resilience (HRR) tab.** New `Forest health` view
+  (`src/HealthRiskResilience.jsx`) surfaces the national HRR data product
+  (`api/hrr_states.json`, schema hrr_states_v2): 48-state results from 219,130
+  FIA plots. Stress = biomass-weighted Potter (2017) species VCC + observed FIA
+  disturbance; resilience = structure + VCC adaptive capacity; priority = high
+  stress, low resilience. Shows the national priority share with its 90%
+  sampling band and 7–18% structural-uncertainty range, a Current / RCP4.5 /
+  RCP8.5 scenario toggle, a ranked per-state priority bar chart, the selected
+  state's readout, and the scoring-weight caveat. The data product was already
+  in the API (commit 8dcb2357); this wires the UI to it. Self-contained, no new
+  dependencies; non-regressive Vite build.
+
 ### v1.4 — 2026-06-02 (deployed)
 * **Chronosequence growth recalibration** (ADR 0002). The YC empirical engine's
   near-term growth is recalibrated to the FIA longitudinal remeasurement record

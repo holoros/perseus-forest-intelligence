@@ -8,6 +8,7 @@ import LandisStratified from "./LandisStratified.jsx";
 import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
+import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
 
@@ -471,6 +472,7 @@ export default function App(){
   const [landis,setLandis] = useState(null);
   const [landowner,setLandowner] = useState(null);
   const [faustmann,setFaustmann] = useState(null);
+  const [hrr,setHrr] = useState(null);
   // v1.3 map/AOI tools
   const [ecoOn,setEcoOn] = useState(false);
   const [ecoGeo,setEcoGeo] = useState(null);
@@ -498,6 +500,7 @@ export default function App(){
     j("api/stumpage.json").then(setStumpage).catch(()=>{});
     j("api/landis_stratified.json").then(setLandis).catch(()=>{});
     j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
+    j("api/hrr_states.json").then(setHrr).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
@@ -680,9 +683,10 @@ export default function App(){
       landis: !!(landis && landis[sel]),
       landowner: !!(landowner && landowner[sel]),
       faustmann: !!(faustmann && faustmann[sel]),
+      health: !!(hrr && hrr.national),
     };
     if(!ok[tab]) setTab("engines");
-  },[sel,series,divergence,stumpage,landis,landowner,faustmann]);
+  },[sel,series,divergence,stumpage,landis,landowner,faustmann,hrr]);
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
   useEffect(()=>{
@@ -1403,12 +1407,14 @@ export default function App(){
           {(!aoi || researchOpen) && <div className="tabs">
             {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["stumpage","Stumpage"],["landis","LANDIS stratified"],
-              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]].map(([k,lbl])=>{
+              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],
+              ["health","Forest health"]].map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
                 || (k==="landis" && !(landis && landis[sel]))
                 || (k==="landowner" && !(landowner && landowner[sel]))
                 || (k==="faustmann" && !(faustmann && faustmann[sel]))
+                || (k==="health" && !(hrr && hrr.national))
                 || ((k==="engines"||k==="rd") && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
@@ -1426,6 +1432,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
           {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
+          {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} state={sel}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
