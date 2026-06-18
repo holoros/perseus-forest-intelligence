@@ -113,6 +113,27 @@ function rampCarbon(v){
   return rgbHex(stops[0][1]);
 }
 function rgbHex(rgb){ return "#" + rgb.map(v=> v.toString(16).padStart(2, "0")).join(""); }
+// HRR priority-share ramp (% of forest that is high-stress, low-resilience).
+// Sequential green -> yellow -> red, anchored at the national max (~75%, KS).
+function rampHealth(v){
+  if(v == null || isNaN(v)) return null;
+  const stops = [
+    [0,   [43, 138, 99]],
+    [10,  [154, 217, 184]],
+    [25,  [230, 210, 74]],
+    [45,  [224, 138, 30]],
+    [75,  [204, 59, 34]],
+  ];
+  if(v >= stops[stops.length - 1][0]) return rgbHex(stops[stops.length - 1][1]);
+  for(let i = 0; i < stops.length - 1; i++){
+    const [a, ca] = stops[i], [b, cb] = stops[i+1];
+    if(v <= b){
+      const t = (v - a) / (b - a);
+      return rgbHex([0,1,2].map(k => Math.round(ca[k] + t * (cb[k] - ca[k]))));
+    }
+  }
+  return rgbHex(stops[0][1]);
+}
 
 export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   timeline, mapYear, mapScenario, selected, onPick,
@@ -121,7 +142,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   ecoData, ecoFill, ecoOpacity = 0.75,
                                   inspectMode = false, onInspect, userLoc = null,
                                   baseLayer = null, baseBounds = null, baseOpacity = 0.6,
-                                  focusGeom = null }){
+                                  focusGeom = null, hrr = null }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -368,8 +389,13 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         const cov = states[st] || {};
         const isFocal = focal.includes(st);
         const hasSeries = !!cov.has_series;
+        const hrrSt = hrr && hrr[st];
         let fill, opacity;
-        if(mode === "carbon"){
+        if(mode === "health"){
+          const col = hrrSt ? rampHealth(hrrSt.priority_pct) : null;
+          fill = col || "#2a3a47";
+          opacity = col ? 0.92 : 0.30;
+        } else if(mode === "carbon"){
           const v = (timeline && timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]);
           const col = rampCarbon(v != null ? v : -1);
           fill = col || "#2a3a47";
@@ -381,7 +407,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         // When a CONUS overlay is active, dim non-focal state fills so the
         // raster pattern beneath is visible. Keep focal states + selected
         // state outlined / opaque so they remain anchors.
-        if(conusOverlay || ecoData || baseLayer){
+        if((conusOverlay || ecoData || baseLayer) && mode !== "health"){
           // overlay/base active: drop state fills back so the layer beneath reads
           // clearly; keep focal/selected legible via their strokes.
           opacity = isFocal ? 0.30 : 0.06;
@@ -390,15 +416,20 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         const isSel = st === selected;
         const stroke = isFocal ? "#f4c430" : (isSel ? "#ffffff" : "#0b1015");
         const sw = isSel ? 2.0 : (isFocal ? 1.5 : 0.5);
-        const title = `${st}${cov.name?" · "+cov.name:""}${cov.engines?` · ${cov.engines} engines`:" · no model data"}`;
+        // In health mode any state with an HRR score is pickable so the readout
+        // updates on click; elsewhere only states with model series are pickable.
+        const pickable = mode === "health" ? !!hrrSt : hasSeries;
+        const title = mode === "health"
+          ? `${st}${cov.name?" · "+cov.name:""}${hrrSt?` · priority ${hrrSt.priority_pct.toFixed(1)}% of forest`:" · no HRR score"}`
+          : `${st}${cov.name?" · "+cov.name:""}${cov.engines?` · ${cov.engines} engines`:" · no model data"}`;
         return (
           <path key={st} d={d} fill={fill} fillOpacity={opacity}
                 stroke={stroke} strokeWidth={sw}
-                style={{cursor: hasSeries ? "pointer" : "default"}}
+                style={{cursor: pickable ? "pointer" : "default"}}
                 onClick={()=>{
                   if(inspectMode || movedRef.current) return;
                   fitFeature(ft.geometry);                 // click-to-zoom (#1)
-                  if(hasSeries && onPick) onPick(st);
+                  if(pickable && onPick) onPick(st);
                 }}>
             <title>{title}</title>
           </path>

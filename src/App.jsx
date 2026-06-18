@@ -1177,7 +1177,9 @@ export default function App(){
       <div className="main">
         <div className="mapwrap">
           {ecoOn && !ecoGeo && <div className="maploading">loading ecoregions…</div>}
-          <div className="maptitle">{mapMode === "coverage"
+          <div className="maptitle">{tab==="health" && hrr && hrr.states
+            ? "Forest health — priority forest area (% of forest, current)"
+            : mapMode === "coverage"
             ? "Coverage — engines per state"
             : `Carbon — libcbm AGC (Tg), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
           {mapEngine === "maplibre"
@@ -1196,7 +1198,8 @@ export default function App(){
                 return (
                 <div id="map" style={{position:"absolute",inset:0,padding:"6px"}}>
                   <SVGMap geo={geoData} states={states} focal={FOCAL}
-                          mode={mapMode} timeline={timeline}
+                          mode={tab==="health" && hrr && hrr.states ? "health" : mapMode}
+                          hrr={hrr && hrr.states} timeline={timeline}
                           mapYear={mapYear} mapScenario={mapScenario}
                           selected={sel} onPick={st=>setSel(st)}
                           conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]
@@ -1342,14 +1345,24 @@ export default function App(){
                 <span>0</span><span>75</span><span>150+</span>
               </div>
             </div>)}
-          {mapMode === "coverage" && (
+          {tab==="health" && hrr && hrr.states && (
+            <div className="legend">
+              <div style={{marginBottom:4}}>Priority forest area (% of forest)</div>
+              <div style={{height:10,width:160,borderRadius:2,
+                background:"linear-gradient(90deg,#2b8a63,#9ad9b8,#e6d24a,#e08a1e,#cc3b22)"}}></div>
+              <div style={{display:"flex",justifyContent:"space-between",width:160,fontSize:10.5}}>
+                <span>0</span><span>25</span><span>75%+</span>
+              </div>
+              <div style={{marginTop:4,color:"var(--mut)",fontSize:10}}>high stress, low resilience · click a state for its readout</div>
+            </div>)}
+          {tab!=="health" && mapMode === "coverage" && (
             <div className="legend">
               <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
               <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
               <div><i style={{background:"#2a3a47"}}></i>no model data yet</div>
               {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest cover</div>}
             </div>)}
-          {mapMode === "carbon" && (
+          {tab!=="health" && mapMode === "carbon" && (
             <div className="legend">
               <div style={{marginBottom:4}}>libcbm AGC (Tg, state total)</div>
               <div style={{height:10,width:160,borderRadius:2,

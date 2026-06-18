@@ -5,6 +5,16 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.9 — 2026-06-18 (deployed)
+* **Forest health map coloring (refinement T1).** When the Forest health tab is
+  active, the state choropleth now colors each state by its HRR priority forest
+  area (current scenario) on a green-to-red sequential ramp, with a matching
+  legend and a per-state hover readout. Any state with an HRR score is now
+  clickable to drive the tab's selected-state readout. Surfaces the spatial
+  gradient (climate-stressed Plains high, Pacific Northwest and northern New
+  England low) that the ranked bars alone do not convey. Reuses the existing
+  dependency-free SVG map; no new data or dependencies; non-regressive build.
+
 ### v1.8 — 2026-06-18 (deployed)
 * **Forest Health / Risk / Resilience (HRR) tab.** New `Forest health` view
   (`src/HealthRiskResilience.jsx`) surfaces the national HRR data product
