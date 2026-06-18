@@ -133,6 +133,17 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const col = shadeFor(s);
     const d = s.pts.map((p,k)=> (k? "L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
     const tag = dashed ? `${s.label} · ${overlayLabel||"compare"}` : `${s.label}`;
+    // A few engines are short anchor stubs (e.g. gcbm_moja_v6 spans only
+    // 2022-2026) rather than full trajectories. On a chart that runs to 2125
+    // they render as a short floating segment that reads like a glitch. Mark
+    // such short-span series with endpoint dots so they read as the measured
+    // anchor points they are — no data is dropped, the line still draws.
+    const spanFrac = (s.pts.length>1) ? (s.pts[s.pts.length-1][0]-s.pts[0][0])/((x1-x0)||1) : 0;
+    const stub = s.pts.length<=3 || spanFrac < 0.25;
+    const dots = stub ? s.pts.map((p,k)=>(
+      <circle key={"dot"+k} cx={X(p[0]).toFixed(1)} cy={Y(p[1]).toFixed(1)} r={dashed?1.6:2.1}
+              fill={col} opacity={dashed?0.6:0.95} style={{pointerEvents:"none"}}/>
+    )) : null;
     return <g key={(dashed?"o":"")+i}>
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
             style={{cursor:"pointer"}}
@@ -143,6 +154,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             opacity={dashed?0.55:0.95}
             strokeDasharray={dashFor(s)}
             style={{pointerEvents:"none"}}/>
+      {dots}
     </g>;
   };
   // Collision-avoided trailing labels: stack each line's end label in the right
