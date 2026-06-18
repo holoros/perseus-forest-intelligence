@@ -5,6 +5,20 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.10 — 2026-06-18 (deployed)
+* **Deep-linkable health scenario (refinement T2).** The Forest health scenario
+  (Current / RCP4.5 / RCP8.5) now round-trips through the URL hash as `hscen`,
+  alongside the existing `tab` and `state` params, so a specific health view
+  (state plus scenario) is fully shareable by copying the link. Scenario state
+  was lifted from the component into App so it survives reload and sharing.
+* **Stress vs resilience scatter (refinement T3).** The Forest health tab gains
+  a state scatter on the stress (x) and resilience (y) axes, with the priority
+  quadrant (high stress, low resilience) shaded and median guide lines. Points
+  are colored by priority share and clickable; the selected state is labeled.
+  Makes the two underlying axes legible rather than only the derived priority.
+* Ranked bars, scatter points, and map states are now all click-to-select,
+  driving the shared selected-state readout.
+
 ### v1.9 — 2026-06-18 (deployed)
 * **Forest health map coloring (refinement T1).** When the Forest health tab is
   active, the state choropleth now colors each state by its HRR priority forest

@@ -23,8 +23,10 @@ function rampColor(pct) {
 
 const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
 
-export default function HealthRiskResilience({ data, state }) {
-  const [scenario, setScenario] = useState("current");
+export default function HealthRiskResilience({ data, state, scenario: scenarioProp, onScenario, onPickState }) {
+  const [scenarioLocal, setScenarioLocal] = useState("current");
+  const scenario = scenarioProp || scenarioLocal;
+  const setScenario = onScenario || setScenarioLocal;
   if (!data || !data.national || !data.states)
     return <div className="empty">Forest health / risk / resilience data not loaded.</div>;
 
@@ -107,6 +109,61 @@ export default function HealthRiskResilience({ data, state }) {
         </div>
       )}
 
+      {/* Stress vs resilience scatter (the two axes behind the priority class) */}
+      <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
+        <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
+          Stress vs resilience by state — priority is high stress, low resilience (shaded, lower right)
+        </div>
+        {(() => {
+          const sw = 320, sh = 210, m = { l: 30, r: 10, t: 10, b: 24 };
+          const xs = rows.map((r) => r.stress_mean);
+          const ys = rows.map((r) => r.resil_mean);
+          const xmin = Math.min(...xs), xmax = Math.max(...xs);
+          const ymin = Math.min(...ys), ymax = Math.max(...ys);
+          const padx = (xmax - xmin) * 0.08 || 0.05;
+          const pady = (ymax - ymin) * 0.08 || 0.05;
+          const x0 = xmin - padx, x1 = xmax + padx, y0 = ymin - pady, y1 = ymax + pady;
+          const px = (v) => m.l + ((v - x0) / (x1 - x0)) * (sw - m.l - m.r);
+          const py = (v) => m.t + (1 - (v - y0) / (y1 - y0)) * (sh - m.t - m.b);
+          const med = (a) => { const s = [...a].sort((p, q) => p - q); const n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
+          const mx = med(xs), my = med(ys);
+          return (
+            <svg width="100%" viewBox={`0 0 ${sw} ${sh}`} style={{ fontSize: 9, fontVariantNumeric: "tabular-nums" }}>
+              {/* priority quadrant: high stress (x > mx), low resilience (y < my) */}
+              <rect x={px(mx)} y={py(y1)} width={px(x1) - px(mx)} height={py(my) - py(y1)} fill="#cc3b22" opacity={0.08} />
+              {/* median dividers */}
+              <line x1={px(mx)} y1={py(y0)} x2={px(mx)} y2={py(y1)} stroke="var(--mut,#8a93a0)" strokeWidth={0.5} strokeDasharray="3 3" />
+              <line x1={px(x0)} y1={py(my)} x2={px(x1)} y2={py(my)} stroke="var(--mut,#8a93a0)" strokeWidth={0.5} strokeDasharray="3 3" />
+              {/* axes */}
+              <line x1={m.l} y1={py(y0)} x2={sw - m.r} y2={py(y0)} stroke="var(--mut,#8a93a0)" strokeWidth={0.6} />
+              <line x1={m.l} y1={m.t} x2={m.l} y2={py(y0)} stroke="var(--mut,#8a93a0)" strokeWidth={0.6} />
+              {/* points */}
+              {rows.map((r) => {
+                const on = r.st === state;
+                return (
+                  <g key={r.st} style={{ cursor: onPickState ? "pointer" : "default" }}
+                    onClick={() => onPickState && onPickState(r.st)}>
+                    <circle cx={px(r.stress_mean)} cy={py(r.resil_mean)} r={on ? 4 : 2.6}
+                      fill={rampColor(r.priority_pct)} stroke={on ? "var(--fg,#fff)" : "#0b1015"}
+                      strokeWidth={on ? 1.2 : 0.3}>
+                      <title>{`${r.st} · priority ${fmt(r.priority_pct, 1)}% · stress ${fmt(r.stress_mean, 3)} · resilience ${fmt(r.resil_mean, 3)}`}</title>
+                    </circle>
+                    {on && <text x={px(r.stress_mean) + 5} y={py(r.resil_mean) - 5} fill="var(--fg,#e8edf2)" fontWeight={700}>{r.st}</text>}
+                  </g>
+                );
+              })}
+              {/* axis labels */}
+              <text x={(m.l + sw - m.r) / 2} y={sh - 4} textAnchor="middle" fill="var(--mut,#8a93a0)">stress &#8594;</text>
+              <text x={9} y={(m.t + py(y0)) / 2} textAnchor="middle" fill="var(--mut,#8a93a0)"
+                transform={`rotate(-90 9 ${(m.t + py(y0)) / 2})`}>resilience &#8594;</text>
+            </svg>
+          );
+        })()}
+        <div className="note" style={{ marginTop: 2 }}>
+          Dashed lines are the median state stress and resilience (a visual guide; the published class uses shared national tertile breaks).
+        </div>
+      </div>
+
       {/* Ranked per-state priority bars */}
       <div className="chartcard" style={{ padding: "8px 10px" }}>
         <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
@@ -122,7 +179,8 @@ export default function HealthRiskResilience({ data, state }) {
             const w = (r.priority_pct / maxP) * barW;
             const on = r.st === state;
             return (
-              <g key={r.st}>
+              <g key={r.st} style={{ cursor: onPickState ? "pointer" : "default" }}
+                onClick={() => onPickState && onPickState(r.st)}>
                 <text x={labW - 4} y={y + rowH - 4} textAnchor="end"
                   fill={on ? "var(--fg,#e8edf2)" : "var(--mut,#8a93a0)"}
                   fontWeight={on ? 700 : 400}>

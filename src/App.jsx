@@ -411,7 +411,7 @@ async function j(path){ const sep = path.includes("?") ? "&" : "?";
   const r = await fetch(BASE + path + sep + "v=" + (typeof __BUILDID__!=="undefined"?__BUILDID__:"")); if(!r.ok) throw new Error(path); return r.json(); }
 function parseHash(){ const p = new URLSearchParams(window.location.hash.replace(/^#/,""));
   return { state:p.get("state"), metric:p.get("metric"), mgmt:p.get("mgmt"),
-           tab:p.get("tab"), conus:p.get("conus") }; }
+           tab:p.get("tab"), conus:p.get("conus"), hscen:p.get("hscen") }; }
 
 export default function App(){
   const mapEl = useRef(null), map = useRef(null);
@@ -462,7 +462,8 @@ export default function App(){
   // v0.70 chart interactions
   const [isolatedEngine,setIsolatedEngine] = useState(null);
   // v1.3 reconstruction: detail-panel tabs + their datasets
-  const [tab,setTab] = useState(initRef.current.tab || "engines"); // engines | rd | divergence | stumpage
+  const [tab,setTab] = useState(initRef.current.tab || "engines"); // engines | rd | divergence | stumpage | ... | health
+  const [hrrScenario,setHrrScenario] = useState(initRef.current.hscen || "current"); // health tab scenario (deep-linkable)
   // Progressive disclosure: when a landowner summarizes an AOI, the dense
   // research surface (engine tabs + multi-model chart) collapses behind a
   // reveal so the radar / trajectory / priorities lead. Power users reopen it.
@@ -669,8 +670,9 @@ export default function App(){
     if(bucket) p.set("mgmt", bucket);
     if(tab && tab !== "engines") p.set("tab", tab);
     if(conusLayer && conusLayer !== "none") p.set("conus", conusLayer);
+    if(tab === "health" && hrrScenario && hrrScenario !== "current") p.set("hscen", hrrScenario);
     window.history.replaceState(null, "", `#${p.toString()}`);
-  },[sel,metric,bucket,tab,conusLayer]);
+  },[sel,metric,bucket,tab,conusLayer,hrrScenario]);
 
   // ---- RD tab pins the relative-density metric on entry ----
   useEffect(()=>{ if(tab==="rd" && series && series.rd_mean_wtd) setMetric("rd_mean_wtd"); },[tab,series]);
@@ -1445,7 +1447,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
           {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
-          {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} state={sel}/>}
+          {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
