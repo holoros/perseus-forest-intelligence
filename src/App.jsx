@@ -475,6 +475,7 @@ export default function App(){
   const [landowner,setLandowner] = useState(null);
   const [faustmann,setFaustmann] = useState(null);
   const [hrr,setHrr] = useState(null);
+  const [hrrGrid,setHrrGrid] = useState(null);
   // v1.3 map/AOI tools
   const [ecoOn,setEcoOn] = useState(false);
   const [ecoGeo,setEcoGeo] = useState(null);
@@ -503,6 +504,7 @@ export default function App(){
     j("api/landis_stratified.json").then(setLandis).catch(()=>{});
     j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
     j("api/hrr_states.json").then(setHrr).catch(()=>{});
+    j("api/hrr_grid.json").then(setHrrGrid).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
@@ -1203,7 +1205,7 @@ export default function App(){
                 <div id="map" style={{position:"absolute",inset:0,padding:"6px"}}>
                   <SVGMap geo={geoData} states={states} focal={FOCAL}
                           mode={tab==="health" && hrr && hrr.states ? "health" : mapMode}
-                          hrr={hrr && hrr.states} timeline={timeline}
+                          hrr={hrr && hrr.states} hrrGrid={tab==="health" ? hrrGrid : null} timeline={timeline}
                           mapYear={mapYear} mapScenario={mapScenario}
                           selected={sel} onPick={st=>setSel(st)}
                           conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]
@@ -1439,7 +1441,7 @@ export default function App(){
             })}
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
-          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} onClose={()=>setAoi(null)}/>}
+          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} onClose={()=>setAoi(null)}/>}
           {aoi && <button className="mini-btn" style={{margin:"6px 4px 2px",borderStyle:"solid"}}
             onClick={()=>setResearchOpen(o=>!o)}
             title="show or hide the multi-model research tools (engine comparison, scenarios, stumpage, rotation)">

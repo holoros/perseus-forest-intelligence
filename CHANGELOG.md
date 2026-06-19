@@ -5,6 +5,17 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.14 — 2026-06-18 (deployed)
+* **Sub-state HRR surface + true AOI-level health.** Shipped the CONUS 0.5-degree
+  HRR grid as a compact API product (api/hrr_grid.json, 2,919 cells: priority
+  index, stress, resilience, climate exposure). The Forest health map now renders
+  this grid as a sub-state surface (state fills drop to outline-only when the grid
+  is shown), so the within-state pattern is visible, not just per-state values.
+  The draw-your-own-AOI report now samples the grid near the area to report the
+  area's own stress, resilience, climate exposure, and priority index with a
+  national percentile, upgrading the earlier home-state proxy. Self-contained;
+  non-regressive build.
+
 ### v1.13 — 2026-06-18 (deployed)
 * **Similar-areas peer comparison in the draw-your-own-AOI report.** When an AOI
   is drawn or selected, the AOI report now adds a "Similar areas" section: it

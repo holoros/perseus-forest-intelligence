@@ -142,7 +142,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   ecoData, ecoFill, ecoOpacity = 0.75,
                                   inspectMode = false, onInspect, userLoc = null,
                                   baseLayer = null, baseBounds = null, baseOpacity = 0.6,
-                                  focusGeom = null, hrr = null }){
+                                  focusGeom = null, hrr = null, hrrGrid = null }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -384,6 +384,19 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                  stroke="#0b1015" strokeWidth={0.15}
                  style={{pointerEvents:"none"}}/>;
       })}
+      {mode === "health" && hrrGrid && hrrGrid.cells && (
+        <g style={{pointerEvents:"none"}}>
+          {hrrGrid.cells.map((c, i) => {
+            const lat = c[0], lon = c[1], idx = c[2];
+            const [x0, y0] = projPath(lon - 0.25, lat + 0.25);
+            const [x1, y1] = projPath(lon + 0.25, lat - 0.25);
+            const x = Math.min(x0, x1), y = Math.min(y0, y1);
+            const w = Math.abs(x1 - x0) * 1.18, h = Math.abs(y1 - y0) * 1.18;
+            return <rect key={"g" + i} x={x} y={y} width={w} height={h}
+              fill={rampHealth(idx * 100)} opacity={0.9} />;
+          })}
+        </g>
+      )}
       {features.map(ft=>{
         const st = ft.properties.state;
         const cov = states[st] || {};
@@ -394,7 +407,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         if(mode === "health"){
           const col = hrrSt ? rampHealth(hrrSt.priority_pct) : null;
           fill = col || "#2a3a47";
-          opacity = col ? 0.92 : 0.30;
+          // when the 0.5deg grid surface is shown, drop state fills to outline-only
+          opacity = hrrGrid ? 0 : (col ? 0.92 : 0.30);
         } else if(mode === "carbon"){
           const v = (timeline && timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]);
           const col = rampCarbon(v != null ? v : -1);

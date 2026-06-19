@@ -811,7 +811,45 @@ function SimilarAreas({ state, hrr }){
   );
 }
 
-export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr }){
+// True AOI-level HRR: sample the 0.5deg grid near the AOI and average to the
+// area's own stress, resilience, climate exposure, and priority index, with a
+// national percentile. Uses the centroid neighborhood (a within-polygon sample
+// is the next refinement).
+function aoiGridSample(hrrGrid, centroid){
+  if(!hrrGrid || !hrrGrid.cells || !centroid) return null;
+  const lon = centroid[0], lat = centroid[1];
+  let near = hrrGrid.cells.filter(c => Math.abs(c[0]-lat)<=0.6 && Math.abs(c[1]-lon)<=0.6);
+  if(!near.length){ let best=null, bd=1e9;
+    hrrGrid.cells.forEach(c => { const d=(c[0]-lat)**2+(c[1]-lon)**2; if(d<bd){bd=d;best=c;} });
+    if(best) near=[best]; }
+  if(!near.length) return null;
+  const mean = k => near.reduce((a,c)=>a+c[k],0)/near.length;
+  const idx = mean(2);
+  const all = hrrGrid.cells.map(c=>c[2]).sort((a,b)=>a-b);
+  let lo=0; while(lo<all.length && all[lo]<idx) lo++;
+  return { n: near.length, idx, stress: mean(3), resil: mean(4), ce: mean(5), pct: Math.round(lo/all.length*100) };
+}
+function AOIHealth({ hrrGrid, centroid }){
+  const s = aoiGridSample(hrrGrid, centroid);
+  if(!s) return null;
+  const f3 = v => v.toFixed(3);
+  return (
+    <div style={{margin:"4px 0 0"}}>
+      <div className="aoi-sub">This area's forest health · sampled from the 0.5° HRR grid</div>
+      <div className="aoi-grid">
+        <div className="aoi-row"><span className="aoi-k">Priority index</span><span className="aoi-v">{f3(s.idx)} · {ord(s.pct)} pct nationally</span></div>
+        <div className="aoi-row"><span className="aoi-k">Stress</span><span className="aoi-v">{f3(s.stress)}</span></div>
+        <div className="aoi-row"><span className="aoi-k">Resilience</span><span className="aoi-v">{f3(s.resil)}</span></div>
+        <div className="aoi-row"><span className="aoi-k">Climate exposure</span><span className="aoi-v">{f3(s.ce)}</span></div>
+      </div>
+      <div className="note" style={{margin:"2px 6px 2px"}}>
+        Priority index = stress × (1 − resilience), averaged over {s.n} grid cell{s.n>1?"s":""} near this area; percentile is among all CONUS grid cells. A within-polygon sample is the next refinement.
+      </div>
+    </div>
+  );
+}
+
+export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid }){
   const [mmMetric, setMmMetric] = useState("agc_live_total");
   const [mmBucket, setMmBucket] = useState("managed (harvest)");
   const [mmYear, setMmYear] = useState(2050);
@@ -1017,6 +1055,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
       </>)}
 
       <ModelAgreement state={state} metric={mmMetric} setMetric={setMmMetric} bucket={mmBucket} setBucket={setMmBucket} year={mmYear} setYear={setMmYear}/>
+      <AOIHealth hrrGrid={hrrGrid} centroid={centroid}/>
       <SimilarAreas state={state} hrr={hrr}/>
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
       <div className="note" style={{marginTop:6}}>
