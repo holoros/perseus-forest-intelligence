@@ -9,6 +9,7 @@ import LandownerYields from "./LandownerYields.jsx";
 import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
+import CompareAreas from "./CompareAreas.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
 
@@ -686,6 +687,7 @@ export default function App(){
       landowner: !!(landowner && landowner[sel]),
       faustmann: !!(faustmann && faustmann[sel]),
       health: !!(hrr && hrr.national),
+      compare: !!(hrr && hrr.states),
     };
     if(!ok[tab]) setTab("engines");
   },[sel,series,divergence,stumpage,landis,landowner,faustmann,hrr]);
@@ -1420,7 +1422,7 @@ export default function App(){
         <div className="detail">
           {/* When an AOI is active, the research surface is collapsed by default. */}
           {(!aoi || researchOpen) && <div className="tabs">
-            {[["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
+            {[["compare","Compare areas"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["stumpage","Stumpage"],["landis","LANDIS stratified"],
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],
               ["health","Forest health"]].map(([k,lbl])=>{
@@ -1430,6 +1432,7 @@ export default function App(){
                 || (k==="landowner" && !(landowner && landowner[sel]))
                 || (k==="faustmann" && !(faustmann && faustmann[sel]))
                 || (k==="health" && !(hrr && hrr.national))
+                || (k==="compare" && !(hrr && hrr.states))
                 || ((k==="engines"||k==="rd") && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
@@ -1448,6 +1451,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
           {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
+          {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
