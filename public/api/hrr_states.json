@@ -18,7 +18,25 @@
     "scenario_note": "RCP4.5 central case; RCP8.5 high-end bound, now considered unlikely. Severities representative; spatial pattern CE-driven.",
     "structural_uncertainty_note": "Absolute share sensitive to scoring weights and threshold; quote as a range. Spatial pattern and state ranking stable.",
     "priority_share_basis": "FIA plots (per-state priority_pct values are also plot-level)",
-    "scenario_basis": "0.5-degree grid forest area; the current/baseline grid share (~5%) is lower than the plot-level national priority (~12%) because cell-mean averaging rarely places a cell in both extremes once the axes are independent. Read the scenario series for the GROWTH under warming, not as the same basis as the plot-level share."
+    "scenario_basis": "0.5-degree grid forest area; the current/baseline grid share (~5%) is lower than the plot-level national priority (~12%) because cell-mean averaging rarely places a cell in both extremes once the axes are independent. Read the scenario series for the GROWTH under warming, not as the same basis as the plot-level share.",
+    "scenario_90pct_band": {
+      "current": [
+        4.1,
+        5.5
+      ],
+      "rcp45": [
+        17.4,
+        21.2
+      ],
+      "rcp85": [
+        30.1,
+        34.5
+      ]
+    },
+    "structural_uncertainty_pct_range": [
+      7,
+      18
+    ]
   },
   "states": {
     "KS": {
