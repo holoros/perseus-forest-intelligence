@@ -23,7 +23,7 @@ function rampColor(pct) {
 
 const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
 
-export default function HealthRiskResilience({ data, detail, state, scenario: scenarioProp, onScenario, onPickState }) {
+export default function HealthRiskResilience({ data, detail, ecoData, state, scenario: scenarioProp, onScenario, onPickState }) {
   const [scenarioLocal, setScenarioLocal] = useState("current");
   const scenario = scenarioProp || scenarioLocal;
   const setScenario = onScenario || setScenarioLocal;
@@ -162,6 +162,32 @@ export default function HealthRiskResilience({ data, detail, state, scenario: sc
           <text x="14" y="64" fill="var(--mut)" transform="rotate(-90 14 64)">resilience →</text>
         </svg>
       </div>
+
+      {/* Ecoregion view: priority by EPA Level III ecoregion (selectable unit). */}
+      {ecoData && ecoData.ecoregions && (() => {
+        const rowsE = Object.values(ecoData.ecoregions).sort((a, b) => b.priority_pct - a.priority_pct);
+        const maxE = rowsE.length ? rowsE[0].priority_pct : 100;
+        const top = rowsE.slice(0, 8);
+        return (
+          <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
+            <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
+              By EPA Level III ecoregion — highest priority share ({rowsE.length} ecoregions)
+            </div>
+            {top.map((e) => (
+              <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
+                <span style={{ width: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
+                <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
+                  <span style={{ display: "block", height: "100%", width: `${Math.min(100, e.priority_pct / maxE * 100)}%`, background: rampColor(e.priority_pct) }} />
+                </span>
+                <span style={{ width: 32, textAlign: "right" }}>{fmt(e.priority_pct, 0)}%</span>
+              </div>
+            ))}
+            <div style={{ fontSize: 9.5, color: "var(--mut)", marginTop: 3 }}>
+              Dry-edge and prairie ecoregions rank highest; productive forested ecoregions lowest.
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Per-state drill-down: top vulnerable species, observed agents, dead/live. */}
       {(() => {
