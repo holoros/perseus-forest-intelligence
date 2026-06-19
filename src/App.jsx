@@ -898,7 +898,7 @@ export default function App(){
     const SVI = ["#f7fcf5","#74c476","#238b45","#00441b"];
     const [risk, ffrac, cspi, svi, divers] = await Promise.all([
       riskSummary(R("conus_p_disturbance_2022.png"), FRAME, geom).catch(()=>null),
-      forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, geom).catch(()=>null),
+      forestFraction(R("conus_forest_nonforest_2023.png?v=1"), FRAME, geom).catch(()=>null),
       rampRelative(R("conus_climate_stress.png"), FRAME, geom, CSPI).catch(()=>null),
       rampRelative(R("conus_species_value_index.png"), FRAME, geom, SVI).catch(()=>null),
       forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, geom).catch(()=>null),
@@ -968,7 +968,7 @@ export default function App(){
       const [own, risk, ffrac, rdivers, cspi, svi, rd, saw] = await Promise.all([
         ownershipComposition(R("conus_ownership.png?v=2"), FRAME, geom).catch(()=>null),
         riskSummary(R("conus_p_disturbance_2022.png"), FRAME, geom).catch(()=>null),
-        forestFraction(R("conus_forest_nonforest.png?v=3"), FRAME, geom).catch(()=>null),
+        forestFraction(R("conus_forest_nonforest_2023.png?v=1"), FRAME, geom).catch(()=>null),
         forestTypeDiversity(R("conus_fortype_2022.png?v=2"), FRAME, geom).catch(()=>null),
         rampRelative(R("conus_climate_stress.png"), FRAME, geom, CSPI_RAMP).catch(()=>null),
         rampRelative(R("conus_species_value_index.png"), FRAME, geom, SVI_RAMP).catch(()=>null),
@@ -1230,7 +1230,7 @@ export default function App(){
                           inspectMode={inspectMode}
                           onInspect={handleInspect}
                           userLoc={userLoc}
-                          baseLayer={baseOn && conusLayer === "none" ? `${BASE}raster/conus_forest_nonforest.png?v=3` : null}
+                          baseLayer={baseOn && conusLayer === "none" ? `${BASE}raster/conus_forest_nonforest_2023.png?v=1` : null}
                           baseBounds={baseBounds}
                           baseOpacity={0.82}
                           focusGeom={focusGeom}/>
@@ -1376,7 +1376,7 @@ export default function App(){
               <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
               <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
               <div><i style={{background:"#2a3a47"}}></i>no model data yet</div>
-              {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest cover</div>}
+              {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest cover (NLCD 2023)</div>}
             </div>)}
           {tab!=="health" && mapMode === "carbon" && (
             <div className="legend">
