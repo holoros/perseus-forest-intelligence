@@ -8,6 +8,7 @@ import MiniChart from "./MiniChart.jsx";
 import StandOutlook from "./StandOutlook.jsx";
 import { openReport } from "./report.js";
 import { conv, fmtArea as fmtAreaU } from "./units.js";
+import { pointInGeometry } from "./geo.js";
 
 const valAt = (curve, age) => { const h = (curve||[]).find(([a])=>a===age); return h?h[1]:null; };
 const fmtArea = (m2) => {
@@ -815,22 +816,30 @@ function SimilarAreas({ state, hrr }){
 // area's own stress, resilience, climate exposure, and priority index, with a
 // national percentile. Uses the centroid neighborhood (a within-polygon sample
 // is the next refinement).
-function aoiGridSample(hrrGrid, centroid){
-  if(!hrrGrid || !hrrGrid.cells || !centroid) return null;
-  const lon = centroid[0], lat = centroid[1];
-  let near = hrrGrid.cells.filter(c => Math.abs(c[0]-lat)<=0.6 && Math.abs(c[1]-lon)<=0.6);
-  if(!near.length){ let best=null, bd=1e9;
-    hrrGrid.cells.forEach(c => { const d=(c[0]-lat)**2+(c[1]-lon)**2; if(d<bd){bd=d;best=c;} });
-    if(best) near=[best]; }
-  if(!near.length) return null;
+function aoiGridSample(hrrGrid, centroid, geom){
+  if(!hrrGrid || !hrrGrid.cells) return null;
+  let near = null, mode = "neighborhood";
+  if(geom){
+    const inside = hrrGrid.cells.filter(c => pointInGeometry(c[1], c[0], geom)); // (lon,lat,geom)
+    if(inside.length){ near = inside; mode = "polygon"; }
+  }
+  if(!near){
+    if(!centroid) return null;
+    const lon = centroid[0], lat = centroid[1];
+    near = hrrGrid.cells.filter(c => Math.abs(c[0]-lat)<=0.6 && Math.abs(c[1]-lon)<=0.6);
+    if(!near.length){ let best=null, bd=1e9;
+      hrrGrid.cells.forEach(c => { const d=(c[0]-lat)**2+(c[1]-lon)**2; if(d<bd){bd=d;best=c;} });
+      if(best) near=[best]; }
+  }
+  if(!near || !near.length) return null;
   const mean = k => near.reduce((a,c)=>a+c[k],0)/near.length;
   const idx = mean(2);
   const all = hrrGrid.cells.map(c=>c[2]).sort((a,b)=>a-b);
   let lo=0; while(lo<all.length && all[lo]<idx) lo++;
-  return { n: near.length, idx, stress: mean(3), resil: mean(4), ce: mean(5), pct: Math.round(lo/all.length*100) };
+  return { n: near.length, mode, idx, stress: mean(3), resil: mean(4), ce: mean(5), pct: Math.round(lo/all.length*100) };
 }
-function AOIHealth({ hrrGrid, centroid }){
-  const s = aoiGridSample(hrrGrid, centroid);
+function AOIHealth({ hrrGrid, centroid, geom }){
+  const s = aoiGridSample(hrrGrid, centroid, geom);
   if(!s) return null;
   const f3 = v => v.toFixed(3);
   return (
@@ -843,7 +852,7 @@ function AOIHealth({ hrrGrid, centroid }){
         <div className="aoi-row"><span className="aoi-k">Climate exposure</span><span className="aoi-v">{f3(s.ce)}</span></div>
       </div>
       <div className="note" style={{margin:"2px 6px 2px"}}>
-        Priority index = stress × (1 − resilience), averaged over {s.n} grid cell{s.n>1?"s":""} near this area; percentile is among all CONUS grid cells. A within-polygon sample is the next refinement.
+        Priority index = stress × (1 − resilience), averaged over {s.n} grid cell{s.n>1?"s":""} {s.mode==="polygon"?"inside":"near"} this area; percentile is among all CONUS grid cells.{s.mode==="polygon"?"":" Draw a polygon AOI for a within-area sample."}
       </div>
     </div>
   );
@@ -856,7 +865,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
   if(!aoi) return null;
   const cv = (v, u, d=0) => { const c = conv(v, u, units); return `${c.value.toFixed(d)} ${c.unit}`; };
   const price = (v, u) => { const c = conv(v, u, units); return `$${Math.round(c.value)}/${c.unit.replace("$/","")}`; };
-  const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats, landscape } = aoi;
+  const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats, landscape, geom } = aoi;
   const unt = (curves && curves.untreated) || [];
   const har = (curves && curves.harvested) || [];
   const agb50 = valAt(unt, 50), agb50h = valAt(har, 50);
@@ -1055,7 +1064,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
       </>)}
 
       <ModelAgreement state={state} metric={mmMetric} setMetric={setMmMetric} bucket={mmBucket} setBucket={setMmBucket} year={mmYear} setYear={setMmYear}/>
-      <AOIHealth hrrGrid={hrrGrid} centroid={centroid}/>
+      <AOIHealth hrrGrid={hrrGrid} centroid={centroid} geom={geom}/>
       <SimilarAreas state={state} hrr={hrr}/>
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
       <div className="note" style={{marginTop:6}}>

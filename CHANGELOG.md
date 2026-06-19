@@ -5,6 +5,19 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.16 — 2026-06-18 (deployed) — accessibility refinements
+* **First-run guidance.** A dismissible intro banner explains the tool in one
+  sentence and points new users to Compare areas, the AOI draw tool, the Research
+  tools toggle, and the Glossary.
+* **Plain-language glossary and sources.** A new Glossary link (top nav) opens a
+  panel with plain-language definitions (AGC, VCC, relative density, stress,
+  resilience, priority area, scenarios, model families, uncertainty) and the data
+  and model sources (FIA, Potter 2017, the model families), lowering the jargon
+  barrier and making methods visible for skeptical audiences.
+* **Within-polygon AOI health.** A drawn polygon AOI now samples the HRR grid
+  cells inside the polygon (area-weighted), not just the centroid neighborhood,
+  with the readout noting which sampling was used.
+
 ### v1.15 — 2026-06-18 (deployed) — interface tidy-up
 * **Simplified interface.** The tab bar now leads with the accessible Compare
   areas and Forest health views; the dense research tabs (engine compare, RD

@@ -10,6 +10,7 @@ import FaustmannRotation from "./FaustmannRotation.jsx";
 import AOIReport from "./AOIReport.jsx";
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
+import GlossaryPanel from "./GlossaryPanel.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
 
@@ -465,6 +466,8 @@ export default function App(){
   // v1.3 reconstruction: detail-panel tabs + their datasets
   const [tab,setTab] = useState(initRef.current.tab || "compare"); // lead with the accessible Compare areas view
   const [toolsOpen,setToolsOpen] = useState(false); // research tabs hidden by default (simplified interface)
+  const [glossaryOpen,setGlossaryOpen] = useState(false);
+  const [introOpen,setIntroOpen] = useState(true); // first-run guidance banner
   const [hrrScenario,setHrrScenario] = useState(initRef.current.hscen || "current"); // health tab scenario (deep-linkable)
   // Progressive disclosure: when a landowner summarizes an AOI, the dense
   // research surface (engine tabs + multi-model chart) collapses behind a
@@ -844,7 +847,7 @@ export default function App(){
       const stCode = geoData && (findFeature(geoData.features, c[0], c[1]) || {}).properties
         ? findFeature(geoData.features, c[0], c[1]).properties.state : null;
       const plotStats = await aggregatePlots(poly.geometry, stCode);
-      setAoi({ name:file.name, centroid:c, nVerts, l3code:code,
+      setAoi({ name:file.name, centroid:c, nVerts, l3code:code, geom: poly.geometry,
         l3name: ef && ef.properties.NA_L3NAME, l1: ef && ef.properties.NA_L1NAME,
         curves: l3e && l3e.curves && l3e.curves.agb_tonac,
         allCurves: l3e && l3e.curves,
@@ -1174,6 +1177,7 @@ export default function App(){
         <nav className="topnav" style={{display:"flex",gap:14,fontSize:13,marginLeft:4}}>
           <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Methods notes">Methods</a>
           <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Ecoregion economics viewer">Ecoregion</a>
+          <button className="linkbtn" title="plain-language glossary and data sources" onClick={()=>setGlossaryOpen(true)}>Glossary</button>
           <button className="linkbtn" title="copy a shareable link to this exact view"
             onClick={()=>{ try{ navigator.clipboard.writeText(window.location.href);
               setLinkCopied(true); setTimeout(()=>setLinkCopied(false),1500); }catch(e){} }}>
@@ -1181,6 +1185,7 @@ export default function App(){
         </nav>
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
       </header>
+      {glossaryOpen && <GlossaryPanel onClose={()=>setGlossaryOpen(false)}/>}
       <div className="main">
         <div className="mapwrap">
           {ecoOn && !ecoGeo && <div className="maploading">loading ecoregions…</div>}
@@ -1423,6 +1428,19 @@ export default function App(){
             </div>);})()}
         </div>
         <div className="detail">
+          {introOpen && (
+            <div style={{margin:"0 4px 8px",padding:"8px 11px",borderRadius:7,
+              background:"rgba(63,182,139,0.10)",border:"1px solid var(--line,#2a3a47)",
+              fontSize:12.5,lineHeight:1.45,color:"var(--ink,#e8edf2)",display:"flex",gap:8,alignItems:"flex-start"}}>
+              <span style={{flex:1}}>
+                <b>New here?</b> This tool compares forest carbon, health, and management outcomes across the US.
+                Start in <b>Compare areas</b>: pick a state on the map (or draw your own area with <b>AOI&nbsp;↑</b>) to see how it stacks up against similar places.
+                The <b>Research tools</b> toggle reveals the full multi-model detail. Unsure of a term? See <b>Glossary</b> up top.
+              </span>
+              <button onClick={()=>setIntroOpen(false)} aria-label="dismiss"
+                style={{background:"transparent",border:"none",color:"var(--mut,#8a93a0)",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button>
+            </div>
+          )}
           {/* When an AOI is active, the research surface is collapsed by default. */}
           {(!aoi || researchOpen) && <div className="tabs">
             {[["compare","Compare areas"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
