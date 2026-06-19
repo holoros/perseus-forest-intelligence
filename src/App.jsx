@@ -463,7 +463,8 @@ export default function App(){
   // v0.70 chart interactions
   const [isolatedEngine,setIsolatedEngine] = useState(null);
   // v1.3 reconstruction: detail-panel tabs + their datasets
-  const [tab,setTab] = useState(initRef.current.tab || "engines"); // engines | rd | divergence | stumpage | ... | health
+  const [tab,setTab] = useState(initRef.current.tab || "compare"); // lead with the accessible Compare areas view
+  const [toolsOpen,setToolsOpen] = useState(false); // research tabs hidden by default (simplified interface)
   const [hrrScenario,setHrrScenario] = useState(initRef.current.hscen || "current"); // health tab scenario (deep-linkable)
   // Progressive disclosure: when a landowner summarizes an AOI, the dense
   // research surface (engine tabs + multi-model chart) collapses behind a
@@ -691,7 +692,7 @@ export default function App(){
       health: !!(hrr && hrr.national),
       compare: !!(hrr && hrr.states),
     };
-    if(!ok[tab]) setTab("engines");
+    if(!ok[tab]) setTab(ok.compare ? "compare" : "engines");
   },[sel,series,divergence,stumpage,landis,landowner,faustmann,hrr]);
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
@@ -1424,10 +1425,11 @@ export default function App(){
         <div className="detail">
           {/* When an AOI is active, the research surface is collapsed by default. */}
           {(!aoi || researchOpen) && <div className="tabs">
-            {[["compare","Compare areas"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
+            {[["compare","Compare areas"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["stumpage","Stumpage"],["landis","LANDIS stratified"],
-              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],
-              ["health","Forest health"]].map(([k,lbl])=>{
+              ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]]
+              .filter(([k])=> k==="compare" || k==="health" || toolsOpen || tab===k)
+              .map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
                 || (k==="landis" && !(landis && landis[sel]))
@@ -1439,6 +1441,9 @@ export default function App(){
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
             })}
+            <button className="tab" style={{marginLeft:6,opacity:0.85}} onClick={()=>setToolsOpen(o=>!o)}
+              title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation">
+              {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
           {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} onClose={()=>setAoi(null)}/>}

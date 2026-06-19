@@ -85,11 +85,12 @@ function geomToD(geom){
 }
 
 function pickColorCoverage(engines, focal, hasSeries){
-  let fill = "#2a3a47";
-  if(engines >= 20) fill = "#1b7a4d";
-  else if(engines >= 6) fill = "#2f9e6a";
-  else if(engines >= 4) fill = "#54b88a";
-  else if(engines >= 1) fill = "#9ad9b8";
+  // Punchier, higher-contrast emerald ramp for more visual pop.
+  let fill = "#26323c";
+  if(engines >= 20) fill = "#0e8a4d";
+  else if(engines >= 6) fill = "#22b56e";
+  else if(engines >= 4) fill = "#5bd699";
+  else if(engines >= 1) fill = "#a9ecca";
   return fill;
 }
 // Linear interpolation between hex colors at stops
@@ -428,8 +429,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         }
         const d = geomToD(ft.geometry);
         const isSel = st === selected;
-        const stroke = isFocal ? "#f4c430" : (isSel ? "#ffffff" : "#0b1015");
-        const sw = isSel ? 2.0 : (isFocal ? 1.5 : 0.5);
+        const stroke = isFocal ? "#ffd23a" : (isSel ? "#ffffff" : "#0b1015");
+        const sw = isSel ? 2.6 : (isFocal ? 2.2 : 0.5);
         // In health mode any state with an HRR score is pickable so the readout
         // updates on click; elsewhere only states with model series are pickable.
         const pickable = mode === "health" ? !!hrrSt : hasSeries;

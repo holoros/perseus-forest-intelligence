@@ -5,6 +5,20 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.15 — 2026-06-18 (deployed) — interface tidy-up
+* **Simplified interface.** The tab bar now leads with the accessible Compare
+  areas and Forest health views; the dense research tabs (engine compare, RD
+  trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann) are tucked
+  behind a "Research tools" toggle, collapsed by default. Default view is now
+  Compare areas.
+* **Engine-compare chart labeling.** When many engines are shown, the chart now
+  labels each model FAMILY (CBM, CEM, FVS, YC, LANDIS) directly at its end value
+  with a count, instead of dropping all labels to a "hover to ID" hint. Every
+  family of simulations is named on the chart; hover/click still identifies
+  individual engines.
+* **Map pop.** Higher-contrast emerald coverage palette and a brighter, thicker
+  focal/selected state outline for more visual punch.
+
 ### v1.14 — 2026-06-18 (deployed)
 * **Sub-state HRR surface + true AOI-level health.** Shipped the CONUS 0.5-degree
   HRR grid as a compact API product (api/hrr_grid.json, 2,919 cells: priority

@@ -165,11 +165,29 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   // show a short hint instead (color + line style still distinguish families,
   // and hover/click identifies any line). When isolating, always label.
   const DENSE = labelItems.length > 12 && !isolatedEngine;
+  // When dense, label by model FAMILY (one tag per class at its median end value)
+  // instead of dropping all labels — so every family of simulations is named on
+  // the chart, with hover/click still identifying individual engines.
+  let famLabels = null;
+  if(DENSE){
+    const famMap = {};
+    drawSet.forEach(s => { (famMap[s.cls]=famMap[s.cls]||[]).push(Y(s.pts[s.pts.length-1][1])); });
+    famLabels = Object.entries(famMap).map(([cls,ys]) => { ys.sort((a,b)=>a-b);
+      return { cls, n: ys.length, col: classCol[cls] || "#bbb", dash: DASH[cls]!=null?DASH[cls]:"0",
+        y0: Math.max(T+5, Math.min(H-B-3, ys[Math.floor(ys.length/2)])) }; })
+      .sort((a,b)=>a.y0-b.y0);
+    let prev = T+4-13; for(const it of famLabels){ it.ly = Math.max(it.y0, prev+13); prev = it.ly; }
+    if(famLabels.length && famLabels[famLabels.length-1].ly > H-B-3){ let next = H-B-3+13;
+      for(let i=famLabels.length-1;i>=0;i--){ famLabels[i].ly = Math.min(famLabels[i].ly, next-13); next = famLabels[i].ly; } }
+  }
   const endLabels = DENSE
-    ? [<text key="hint" x={W-R+4} y={T+6} fill="#5e7180" fontSize="8" style={{pointerEvents:"none"}}>
-         {labelItems.length} engines</text>,
-       <text key="hint2" x={W-R+4} y={T+16} fill="#5e7180" fontSize="7" style={{pointerEvents:"none"}}>
-         hover / click to ID</text>]
+    ? [<text key="hint" x={W-R+4} y={T+6} fill="#5e7180" fontSize="7" style={{pointerEvents:"none"}}>
+         {labelItems.length} engines · hover to ID</text>,
+       ...famLabels.map((it,k)=>(
+         <g key={"fam"+k} style={{pointerEvents:"none"}}>
+           <line x1={W-R+1} y1={it.ly} x2={W-R+6} y2={it.ly} stroke={it.col} strokeWidth="2.4" strokeDasharray={it.dash}/>
+           <text x={W-R+9} y={it.ly+3} fill={it.col} fontSize="9" fontWeight="600" textAnchor="start">{it.cls} ({it.n})</text>
+         </g>))]
     : labelItems.map((it,k)=>(
         <g key={"lab"+k} style={{pointerEvents:"none"}}>
           <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} stroke={it.col} strokeWidth="1.4" strokeDasharray={it.dash}/>
