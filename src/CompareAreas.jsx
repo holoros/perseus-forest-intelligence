@@ -77,6 +77,11 @@ export default function CompareAreas({ data, state, onPickState }) {
         {stance ? <> {me.st} sits <b>{stance}</b> its peers.</> : null}
       </div>
 
+      {/* plain-language uncertainty note (item 7) */}
+      <div className="note" style={{ margin: "0 2px 8px" }}>
+        Read these as estimates, not exact figures. The national priority share is best quoted as a range (about 7 to 18%) because it shifts with the scoring weights; the spatial pattern and ranking are stable.
+      </div>
+
       {/* controls */}
       <div className="controls" style={{ marginBottom: 8 }}>
         <button className={"tab" + (!sameRegion ? " on" : "")} onClick={() => setSameRegion(false)}>Similar anywhere</button>

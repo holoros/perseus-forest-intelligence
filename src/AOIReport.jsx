@@ -589,7 +589,7 @@ function ensembleStats(series, metric, bucket, yr){
   if(!mean) return null;
   return { mean, lo: Math.min(...vals), hi: Math.max(...vals), n: vals.length };
 }
-function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, setYear }){
+function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, setYear, fia }){
   const [series, setSeries] = useState(null);
   const [meta, setMeta] = useState(null);
   useEffect(() => {
@@ -662,6 +662,15 @@ function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, set
   const agree = cv < 0.20 ? "strong agreement" : cv < 0.45 ? "moderate divergence" : "wide divergence";
   const agreeCol = cv < 0.20 ? "#3fb68b" : cv < 0.45 ? "#e6ab02" : "#d9534f";
 
+  // FIA reconciliation (item 6): compare the ensemble at the FIA inventory year
+  // to the published FIA observed stock, where an anchor exists for this state.
+  const fiaRec = (fia && fia[state] && mk === "agc_live_total") ? (() => {
+    const oy = fia[state].year, obs = fia[state].tg_agc;
+    const e = ensembleStats(series, mk, bk, oy);
+    if(!e || !obs) return null;
+    return { obs, oy, mean: e.mean, lo: e.lo, hi: e.hi, diff: (e.mean - obs) / obs * 100 };
+  })() : null;
+
   return (
     <div style={{margin:"4px 0 0"}}>
       <div className="aoi-sub">Multi-model agreement</div>
@@ -705,6 +714,11 @@ function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, set
       <div className="note" style={{margin:"3px 6px 2px"}}>
         State-level cross-engine ensemble for {label} under {bk} at {yr}. Each dot is a model family's mean; the colored bar is its within-family range. Wide spread across families means high structural uncertainty, so single-model numbers should be treated with caution. Uncalibrated FVS variants are excluded, matching the engine-comparison default. Source: api/series/{state}.json.
       </div>
+      {fiaRec && (
+        <div className="note" style={{margin:"0 6px 3px",color:"var(--ink)"}}>
+          <b>FIA cross-check:</b> observed AGC {fiaRec.obs} Tg ({fiaRec.oy}); tool ensemble at {fiaRec.oy} {fmtV(fiaRec.mean)} Tg (range {fmtV(fiaRec.lo)} to {fmtV(fiaRec.hi)}), {fiaRec.diff>=0?"+":""}{Math.round(fiaRec.diff)}% vs observed.
+        </div>
+      )}
     </div>
   );
 }
@@ -858,7 +872,51 @@ function AOIHealth({ hrrGrid, centroid, geom }){
   );
 }
 
-export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid }){
+// Area briefing: foregrounds the decision (item 4), a reserve-vs-managed outlook
+// (item 10), and an illustrative carbon economics figure (item 9), all from data
+// already computed for the AOI. Draft for feedback; the carbon price is illustrative.
+function AreaBriefing({ aoi }){
+  const ls = aoi.landscape;
+  const unt = (aoi.curves && aoi.curves.untreated) || [];
+  const har = (aoi.curves && aoi.curves.harvested) || [];
+  const agb50 = valAt(unt, 50), agb50h = valAt(har, 50);
+  let rec = null;
+  if(ls && ls.index){
+    const rows = Object.entries(ls.index).filter(([k,v])=>axV(v)!=null).map(([k,v])=>({ k, lab:k, g:axV(v), wt:1 }));
+    if(rows.length >= 2) rec = recommendPathway(rows);
+  }
+  const PRICE = 15; // $/tCO2e, illustrative only
+  const cVal = (agb50!=null) ? Math.round(agb50 * 0.47 * 3.667 * PRICE) : null;
+  if(!rec && agb50==null && agb50h==null) return null;
+  return (
+    <div style={{margin:"0 6px 8px"}}>
+      {rec && (
+        <div style={{padding:"7px 10px",borderRadius:6,background:"rgba(63,182,139,0.13)",
+          border:"1px solid var(--line)",fontSize:13,lineHeight:1.4,marginBottom:6}}>
+          <b>Suggested direction (equal priorities): {rec.lean}.</b> {rec.why}{" "}
+          <i style={{opacity:.7,fontStyle:"normal"}}>Adjust the priorities dial below to tailor this.</i>
+        </div>
+      )}
+      {(agb50!=null && agb50h!=null) && (
+        <div style={{marginBottom:4}}>
+          <div className="aoi-sub" style={{borderTop:"none",marginTop:0}}>Reserve vs managed at 50 years</div>
+          <div className="aoi-grid">
+            <div className="aoi-row"><span className="aoi-k">Reserve (no harvest)</span><span className="aoi-v">{agb50.toFixed(0)} ton/ac AGB</span></div>
+            <div className="aoi-row"><span className="aoi-k">Managed (harvest)</span><span className="aoi-v">{agb50h.toFixed(0)} ton/ac standing + harvest income</span></div>
+          </div>
+          <div className="note" style={{margin:"2px 0 0"}}>Reserve keeps about {Math.max(0,Math.round(agb50-agb50h))} ton/ac more standing biomass at 50 yr; managed realizes periodic harvest income instead.</div>
+        </div>
+      )}
+      {cVal!=null && (
+        <div className="note" style={{margin:"2px 0 0"}}>
+          Illustrative carbon asset value of standing biomass at age 50: about ${cVal.toLocaleString()}/ac (AGB × 0.47 C × 3.667 CO2e × $15/tCO2e; price illustrative, not a quote).
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid, fia }){
   const [mmMetric, setMmMetric] = useState("agc_live_total");
   const [mmBucket, setMmBucket] = useState("managed (harvest)");
   const [mmYear, setMmYear] = useState(2050);
@@ -895,6 +953,8 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
           {plainHeadline(aoi)}
         </div>
       )}
+
+      <AreaBriefing aoi={aoi}/>
 
       <div className="aoi-grid">
         {area_m2 ? <Row k="Area" v={fmtAreaU(area_m2, units)}/> : null}
@@ -1063,7 +1123,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
         </Collapsible>
       </>)}
 
-      <ModelAgreement state={state} metric={mmMetric} setMetric={setMmMetric} bucket={mmBucket} setBucket={setMmBucket} year={mmYear} setYear={setMmYear}/>
+      <ModelAgreement state={state} metric={mmMetric} setMetric={setMmMetric} bucket={mmBucket} setBucket={setMmBucket} year={mmYear} setYear={setMmYear} fia={fia}/>
       <AOIHealth hrrGrid={hrrGrid} centroid={centroid} geom={geom}/>
       <SimilarAreas state={state} hrr={hrr}/>
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>

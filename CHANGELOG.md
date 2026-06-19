@@ -5,6 +5,25 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.17 — 2026-06-18 (deployed) — decision, credibility, economics, performance (draft for feedback)
+* **Foreground the decision (item 4).** The AOI report now leads with a "Suggested
+  direction" line (reserve / managed / climate-smart) from the area's outcomes,
+  with a note to tailor it in the priorities dial.
+* **FIA reconciliation (item 6).** Where an FIA AGC anchor exists (ME, GA, IN, ID,
+  MN, OR, WA), the model-agreement panel shows observed AGC vs the tool ensemble
+  at the inventory year with a percent difference, an in-tool credibility check.
+* **Uncertainty in plain language (item 7).** Compare areas now states the
+  estimates should be read as ranges (national share ~7 to 18%).
+* **Per-area economics (item 9).** The AOI report adds a reserve-vs-managed
+  outlook and an illustrative carbon-asset value per acre (clearly labeled
+  illustrative, with an assumed CO2e price).
+* **Performance (item 11, client side).** Lazy-load the heavy single-use research
+  and AOI components (AOIReport, stumpage, LANDIS, landowner yields, Faustmann);
+  initial bundle drops ~90 KB. The larger cost lever (precomputing rasters to cut
+  the monthly compute bill) remains server-side infrastructure work.
+* These are drafts for the team to react to; the carbon price and the equal-weight
+  default recommendation are placeholders pending input.
+
 ### v1.16 — 2026-06-18 (deployed) — accessibility refinements
 * **First-run guidance.** A dismissible intro banner explains the tool in one
   sentence and points new users to Compare areas, the AOI draw tool, the Research

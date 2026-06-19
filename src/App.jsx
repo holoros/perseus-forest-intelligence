@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import maplibregl from "maplibre-gl";
 import GrowthChart from "./GrowthChart.jsx";
 import SVGMap from "./SVGMap.jsx";
 import DivergenceHeatmap from "./DivergenceHeatmap.jsx";
-import StumpagePanel from "./StumpagePanel.jsx";
-import LandisStratified from "./LandisStratified.jsx";
-import LandownerYields from "./LandownerYields.jsx";
-import FaustmannRotation from "./FaustmannRotation.jsx";
-import AOIReport from "./AOIReport.jsx";
+// Lazy-load the heavy, single-use research/AOI components so they are fetched
+// on demand rather than in the initial bundle (item 11, client-side portion).
+const StumpagePanel = lazy(() => import("./StumpagePanel.jsx"));
+const LandisStratified = lazy(() => import("./LandisStratified.jsx"));
+const LandownerYields = lazy(() => import("./LandownerYields.jsx"));
+const FaustmannRotation = lazy(() => import("./FaustmannRotation.jsx"));
+const AOIReport = lazy(() => import("./AOIReport.jsx"));
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
 import GlossaryPanel from "./GlossaryPanel.jsx";
@@ -1464,17 +1466,17 @@ export default function App(){
               {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
-          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} onClose={()=>setAoi(null)}/>}
+          {aoi && <Suspense fallback={<div className="note" style={{padding:8}}>Loading area report…</div>}><AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} fia={fia} onClose={()=>setAoi(null)}/></Suspense>}
           {aoi && <button className="mini-btn" style={{margin:"6px 4px 2px",borderStyle:"solid"}}
             onClick={()=>setResearchOpen(o=>!o)}
             title="show or hide the multi-model research tools (engine comparison, scenarios, stumpage, rotation)">
             {researchOpen ? "Hide research tools ▴" : "Model comparison & research tools ▾"}</button>}
           {(!aoi || researchOpen) && tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
             onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
-          {(!aoi || researchOpen) && tab==="stumpage" && <StumpagePanel data={stumpage} state={sel}/>}
-          {(!aoi || researchOpen) && tab==="landis" && <LandisStratified data={landis} state={sel}/>}
-          {(!aoi || researchOpen) && tab==="landowner" && <LandownerYields data={landowner} state={sel}/>}
-          {(!aoi || researchOpen) && tab==="faustmann" && <FaustmannRotation data={faustmann} state={sel}/>}
+          {(!aoi || researchOpen) && tab==="stumpage" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><StumpagePanel data={stumpage} state={sel}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="landis" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandisStratified data={landis} state={sel}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
