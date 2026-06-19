@@ -331,5 +331,6 @@
   "caveats": [
     "Independent-axis formulation (v5) replaces the earlier shared-exposure version; removes artificial axis correlation.",
     "Per-state climate severities not yet calibrated (CEM warming params exist for focal states only)."
-  ]
+  ],
+  "method_locked": "v5 (locked 2026-06-19); see perseus_hrr_scoring_spec_LOCKED_v5.md"
 }
