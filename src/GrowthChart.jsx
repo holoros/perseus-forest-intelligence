@@ -10,6 +10,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   const W=560,H=320,L=48,R=70,T=14,B=30;
   const svgRef = useRef(null);
   const [hoverX, setHoverX] = useState(null);
+  const [hoverModel, setHoverModel] = useState(null);
 
   // Optional user x-axis horizon clamp (projections run to 2125).
   const clampX = s => (xMax && s.pts) ? {...s, pts: s.pts.filter(p=>p[0]<=xMax)} : s;
@@ -136,11 +137,12 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     return <g key={(dashed?"o":"")+i}>
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
             style={{cursor:"pointer"}}
+            onMouseEnter={()=> setHoverModel(s.model)} onMouseLeave={()=> setHoverModel(null)}
             onClick={()=> !dashed && onIsolate && onIsolate(s.model)}>
-        <title>{`${tag} (${s.cls}) — click to isolate`}</title>
+        <title>{`${tag} (${s.cls}) — hover to highlight, click to isolate`}</title>
       </path>
       <path d={d} fill="none" stroke={col} strokeWidth={dashed?1.2:1.8}
-            opacity={dashed?0.55:0.95}
+            opacity={(hoverModel && hoverModel!==s.model) ? 0.12 : (dashed?0.55:0.95)}
             strokeDasharray={dashFor(s)}
             style={{pointerEvents:"none"}}/>
     </g>;
@@ -232,6 +234,23 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(data)));
   };
 
+  // Download the visible series as CSV (year column + one column per engine).
+  const downloadCsv = () => {
+    const ser = [...drawSet, ...drawOverlay];
+    if(!ser.length) return;
+    const yrs = [...new Set(ser.flatMap(s=>s.pts.map(p=>p[0])))].sort((a,b)=>a-b);
+    const seen = {};
+    const head = ["year", ...ser.map((s,i)=>{ let n=s.model; if(seen[n]!=null){n=n+"_"+(++seen[s.model]);} else seen[s.model]=0; return n; })];
+    const rows = yrs.map(y => [y, ...ser.map(s=>{ const v=valueAt(s,y); return v==null?"":(+v).toFixed(4); })]);
+    const csv = [head.join(","), ...rows.map(r=>r.join(","))].join("\n");
+    const blob = new Blob([csv], {type:"text/csv"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `perseus_series_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   return (
     <div style={{position:"relative"}}>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
@@ -290,6 +309,12 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             border:"1px solid var(--line)", borderRadius:5,
             padding:"1px 7px", fontSize:10, cursor:"pointer"}}>
           ↓ PNG
+        </button>
+        <button onClick={downloadCsv} title="download the visible engine series as CSV"
+          style={{background:"var(--panel)", color:"var(--mut)",
+            border:"1px solid var(--line)", borderRadius:5,
+            padding:"1px 7px", fontSize:10, cursor:"pointer"}}>
+          ↓ CSV
         </button>
       </div>
     </div>
