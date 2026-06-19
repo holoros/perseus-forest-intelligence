@@ -23,7 +23,7 @@ function rampColor(pct) {
 
 const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
 
-export default function HealthRiskResilience({ data, state, scenario: scenarioProp, onScenario, onPickState }) {
+export default function HealthRiskResilience({ data, detail, state, scenario: scenarioProp, onScenario, onPickState }) {
   const [scenarioLocal, setScenarioLocal] = useState("current");
   const scenario = scenarioProp || scenarioLocal;
   const setScenario = onScenario || setScenarioLocal;
@@ -162,6 +162,40 @@ export default function HealthRiskResilience({ data, state, scenario: scenarioPr
           <text x="14" y="64" fill="var(--mut)" transform="rotate(-90 14 64)">resilience →</text>
         </svg>
       </div>
+
+      {/* Per-state drill-down: top vulnerable species, observed agents, dead/live. */}
+      {(() => {
+        const dd = detail && detail.states && detail.states[state];
+        if (!dd) return null;
+        const ag = dd.agents || {};
+        const agentRows = [["insect", ag.insect], ["disease", ag.disease], ["weather", ag.weather],
+          ["animal", ag.animal], ["fire", ag.fire]].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+        return (
+          <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
+            <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
+              {state} detail — what drives the score
+            </div>
+            <div style={{ fontSize: 10.5, marginBottom: 3 }}><b>Top species by biomass</b> (VCC = Potter vulnerability, higher = more vulnerable)</div>
+            {dd.top_species && dd.top_species.map((sp) => (
+              <div key={sp.spcd} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
+                <span style={{ width: 116, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sp.common}</span>
+                <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
+                  <span style={{ display: "block", height: "100%", width: `${Math.min(100, sp.share_pct * 3)}%`,
+                    background: sp.vcc != null && sp.vcc >= 42 ? "#c85a5a" : sp.vcc != null && sp.vcc >= 38 ? "#e08a1e" : "#64acbe" }} />
+                </span>
+                <span style={{ width: 30, textAlign: "right" }}>{fmt(sp.share_pct, 0)}%</span>
+                <span style={{ width: 28, textAlign: "right", color: "var(--mut)" }}>{sp.vcc == null ? "–" : fmt(sp.vcc, 0)}</span>
+              </div>
+            ))}
+            <div style={{ fontSize: 10, marginTop: 6, color: "var(--mut)" }}>
+              <b style={{ color: "var(--fg,#ddd)" }}>Observed disturbance:</b>{" "}
+              {ag.disturbed_pct != null ? `${fmt(ag.disturbed_pct, 0)}% of plots` : "–"}
+              {agentRows.length ? " · " + agentRows.map(([k, v]) => `${k} ${fmt(v, 0)}%`).join(", ") : ""}
+              {dd.dead_live_pct != null && <> · dead/live biomass {fmt(dd.dead_live_pct, 0)}%</>}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Stress vs resilience scatter (the two axes behind the priority class) */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>

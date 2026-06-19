@@ -482,6 +482,7 @@ export default function App(){
   const [faustmann,setFaustmann] = useState(null);
   const [hrr,setHrr] = useState(null);
   const [hrrGrid,setHrrGrid] = useState(null);
+  const [hrrDetail,setHrrDetail] = useState(null); // per-state drill-down: top species, agents, dead/live
   // v1.3 map/AOI tools
   const [ecoOn,setEcoOn] = useState(false);
   const [ecoGeo,setEcoGeo] = useState(null);
@@ -511,6 +512,7 @@ export default function App(){
     j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
     j("api/hrr_states.json").then(setHrr).catch(()=>{});
     j("api/hrr_grid.json").then(setHrrGrid).catch(()=>{});
+    j("api/hrr_state_detail.json").then(setHrrDetail).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
@@ -1477,7 +1479,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandisStratified data={landis} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
-          {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
+          {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (

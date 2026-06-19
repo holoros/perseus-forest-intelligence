@@ -1,0 +1,2407 @@
+{
+ "schema": "hrr_state_detail_v1",
+ "generated": "2026-06-19",
+ "note": "Per-state drill-down: top species by live biomass with Potter overall vulnerability (higher=more vulnerable), observed disturbance-agent composition (% of plots), and dead/live biomass ratio as a realized-mortality corroboration.",
+ "states": {
+  "AL": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 26.9
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 6.8
+    },
+    {
+     "spcd": 827,
+     "common": "water oak",
+     "vcc": 17.3,
+     "share_pct": 6.7
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 5.5
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 4.4
+    },
+    {
+     "spcd": 812,
+     "common": "southern red oak",
+     "vcc": 36.2,
+     "share_pct": 3.4
+    }
+   ],
+   "agents": {
+    "insect": 0.3,
+    "disease": 0.5,
+    "fire": 2.8,
+    "animal": 0.6,
+    "weather": 1.0,
+    "other": 0.4,
+    "disturbed_pct": 5.6
+   },
+   "dead_live_pct": 1.3
+  },
+  "AR": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 17.8
+    },
+    {
+     "spcd": 110,
+     "common": "shortleaf pine",
+     "vcc": 30.2,
+     "share_pct": 10.9
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 10.2
+    },
+    {
+     "spcd": 835,
+     "common": "post oak",
+     "vcc": 37.9,
+     "share_pct": 5.9
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 5.8
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 4.0
+    }
+   ],
+   "agents": {
+    "insect": 0.1,
+    "disease": 0.1,
+    "fire": 0.7,
+    "animal": 0.2,
+    "weather": 1.4,
+    "other": 0.1,
+    "disturbed_pct": 2.5
+   },
+   "dead_live_pct": 1.3
+  },
+  "AZ": {
+   "top_species": [
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 39.2
+    },
+    {
+     "spcd": 65,
+     "common": "Utah juniper",
+     "vcc": 21.7,
+     "share_pct": 12.6
+    },
+    {
+     "spcd": 106,
+     "common": "common or two-needle pinyon",
+     "vcc": 26.5,
+     "share_pct": 7.1
+    },
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 6.1
+    },
+    {
+     "spcd": 69,
+     "common": "oneseed juniper",
+     "vcc": 23.8,
+     "share_pct": 5.0
+    },
+    {
+     "spcd": 63,
+     "common": "alligator juniper",
+     "vcc": 35.1,
+     "share_pct": 4.7
+    }
+   ],
+   "agents": {
+    "insect": 0.6,
+    "disease": 1.0,
+    "fire": 2.7,
+    "animal": 0.2,
+    "weather": 0.3,
+    "other": 0.8,
+    "disturbed_pct": 5.5
+   },
+   "dead_live_pct": 8.8
+  },
+  "CA": {
+   "top_species": [
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 26.5
+    },
+    {
+     "spcd": 15,
+     "common": "white fir",
+     "vcc": 32.0,
+     "share_pct": 14.3
+    },
+    {
+     "spcd": 211,
+     "common": "redwood",
+     "vcc": 46.1,
+     "share_pct": 8.6
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 8.4
+    },
+    {
+     "spcd": 20,
+     "common": "California red fir",
+     "vcc": 48.6,
+     "share_pct": 7.2
+    },
+    {
+     "spcd": 117,
+     "common": "sugar pine",
+     "vcc": 27.1,
+     "share_pct": 4.9
+    }
+   ],
+   "agents": {
+    "insect": 0.4,
+    "disease": 1.9,
+    "fire": 2.3,
+    "animal": 1.8,
+    "weather": 0.8,
+    "other": 0.1,
+    "disturbed_pct": 7.3
+   },
+   "dead_live_pct": 9.8
+  },
+  "CO": {
+   "top_species": [
+    {
+     "spcd": 93,
+     "common": "Engelmann spruce",
+     "vcc": 26.8,
+     "share_pct": 25.9
+    },
+    {
+     "spcd": 746,
+     "common": "quaking aspen",
+     "vcc": 27.8,
+     "share_pct": 16.9
+    },
+    {
+     "spcd": 108,
+     "common": "lodgepole pine",
+     "vcc": 25.9,
+     "share_pct": 10.9
+    },
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 9.6
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 8.5
+    },
+    {
+     "spcd": 19,
+     "common": "subalpine fir",
+     "vcc": 30.0,
+     "share_pct": 8.2
+    }
+   ],
+   "agents": {
+    "insect": 3.7,
+    "disease": 2.0,
+    "fire": 0.9,
+    "animal": 0.2,
+    "weather": 0.2,
+    "other": 0.2,
+    "disturbed_pct": 7.3
+   },
+   "dead_live_pct": 16.3
+  },
+  "CT": {
+   "top_species": [
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 19.4
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 17.0
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 8.8
+    },
+    {
+     "spcd": 372,
+     "common": "sweet birch",
+     "vcc": 37.5,
+     "share_pct": 7.7
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 6.8
+    },
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 4.9
+    }
+   ],
+   "agents": {
+    "insect": 2.1,
+    "disease": 1.1,
+    "fire": 0.0,
+    "animal": 0.3,
+    "weather": 0.4,
+    "other": 1.0,
+    "disturbed_pct": 4.8
+   },
+   "dead_live_pct": 2.6
+  },
+  "DE": {
+   "top_species": [
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 19.9
+    },
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 12.9
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 11.3
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 10.7
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 9.3
+    },
+    {
+     "spcd": 831,
+     "common": "willow oak",
+     "vcc": 38.4,
+     "share_pct": 5.2
+    }
+   ],
+   "agents": {
+    "insect": 0.1,
+    "disease": 0.0,
+    "fire": 0.0,
+    "animal": 0.0,
+    "weather": 0.4,
+    "other": 0.4,
+    "disturbed_pct": 1.0
+   },
+   "dead_live_pct": 4.9
+  },
+  "FL": {
+   "top_species": [
+    {
+     "spcd": 111,
+     "common": "slash pine",
+     "vcc": 32.2,
+     "share_pct": 15.8
+    },
+    {
+     "spcd": 838,
+     "common": "live oak",
+     "vcc": 45.7,
+     "share_pct": 15.4
+    },
+    {
+     "spcd": 820,
+     "common": "laurel oak",
+     "vcc": 28.9,
+     "share_pct": 8.7
+    },
+    {
+     "spcd": 694,
+     "common": "swamp tupelo",
+     "vcc": 27.1,
+     "share_pct": 7.7
+    },
+    {
+     "spcd": 222,
+     "common": "pondcypress",
+     "vcc": null,
+     "share_pct": 7.5
+    },
+    {
+     "spcd": 121,
+     "common": "longleaf pine",
+     "vcc": 30.1,
+     "share_pct": 5.1
+    }
+   ],
+   "agents": {
+    "insect": 0.2,
+    "disease": 0.6,
+    "fire": 4.6,
+    "animal": 1.2,
+    "weather": 1.3,
+    "other": 0.9,
+    "disturbed_pct": 8.9
+   },
+   "dead_live_pct": 1.9
+  },
+  "GA": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 19.7
+    },
+    {
+     "spcd": 111,
+     "common": "slash pine",
+     "vcc": 32.2,
+     "share_pct": 9.5
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 6.0
+    },
+    {
+     "spcd": 694,
+     "common": "swamp tupelo",
+     "vcc": 27.1,
+     "share_pct": 5.3
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 5.2
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 5.1
+    }
+   ],
+   "agents": {
+    "insect": 1.5,
+    "disease": 2.1,
+    "fire": 4.8,
+    "animal": 1.2,
+    "weather": 1.1,
+    "other": 1.0,
+    "disturbed_pct": 11.6
+   },
+   "dead_live_pct": 2.4
+  },
+  "IA": {
+   "top_species": [
+    {
+     "spcd": 317,
+     "common": "silver maple",
+     "vcc": 60.8,
+     "share_pct": 11.1
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 10.8
+    },
+    {
+     "spcd": 823,
+     "common": "bur oak",
+     "vcc": 54.2,
+     "share_pct": 10.7
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 9.7
+    },
+    {
+     "spcd": 742,
+     "common": "eastern cottonwood",
+     "vcc": 51.5,
+     "share_pct": 7.3
+    },
+    {
+     "spcd": 602,
+     "common": "black walnut",
+     "vcc": 54.8,
+     "share_pct": 5.8
+    }
+   ],
+   "agents": {
+    "insect": 0.3,
+    "disease": 0.3,
+    "fire": 0.0,
+    "animal": 0.8,
+    "weather": 0.2,
+    "other": 0.1,
+    "disturbed_pct": 1.6
+   },
+   "dead_live_pct": 6.3
+  },
+  "ID": {
+   "top_species": [
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 37.7
+    },
+    {
+     "spcd": 17,
+     "common": "grand fir",
+     "vcc": 30.2,
+     "share_pct": 15.6
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 8.5
+    },
+    {
+     "spcd": 108,
+     "common": "lodgepole pine",
+     "vcc": 25.9,
+     "share_pct": 8.3
+    },
+    {
+     "spcd": 93,
+     "common": "Engelmann spruce",
+     "vcc": 26.8,
+     "share_pct": 7.1
+    },
+    {
+     "spcd": 19,
+     "common": "subalpine fir",
+     "vcc": 30.0,
+     "share_pct": 7.1
+    }
+   ],
+   "agents": {
+    "insect": 2.5,
+    "disease": 4.0,
+    "fire": 5.8,
+    "animal": 0.6,
+    "weather": 0.8,
+    "other": 0.7,
+    "disturbed_pct": 14.5
+   },
+   "dead_live_pct": 14.8
+  },
+  "IL": {
+   "top_species": [
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 16.3
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 9.4
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 7.1
+    },
+    {
+     "spcd": 317,
+     "common": "silver maple",
+     "vcc": 60.8,
+     "share_pct": 5.6
+    },
+    {
+     "spcd": 403,
+     "common": "pignut hickory",
+     "vcc": 42.2,
+     "share_pct": 3.7
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 3.7
+    }
+   ],
+   "agents": {
+    "insect": 0.3,
+    "disease": 0.1,
+    "fire": 0.0,
+    "animal": 0.3,
+    "weather": 0.5,
+    "other": 0.1,
+    "disturbed_pct": 1.2
+   },
+   "dead_live_pct": 6.4
+  },
+  "IN": {
+   "top_species": [
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 12.2
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 10.3
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 7.4
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 7.3
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 6.6
+    },
+    {
+     "spcd": 541,
+     "common": "white ash",
+     "vcc": 35.6,
+     "share_pct": 4.2
+    }
+   ],
+   "agents": {
+    "insect": 1.2,
+    "disease": 0.1,
+    "fire": 0.0,
+    "animal": 0.4,
+    "weather": 0.4,
+    "other": 0.5,
+    "disturbed_pct": 2.6
+   },
+   "dead_live_pct": 6.2
+  },
+  "KS": {
+   "top_species": [
+    {
+     "spcd": 742,
+     "common": "eastern cottonwood",
+     "vcc": 51.5,
+     "share_pct": 12.7
+    },
+    {
+     "spcd": 462,
+     "common": "hackberry",
+     "vcc": 45.0,
+     "share_pct": 12.1
+    },
+    {
+     "spcd": 823,
+     "common": "bur oak",
+     "vcc": 54.2,
+     "share_pct": 9.3
+    },
+    {
+     "spcd": 641,
+     "common": "Osage-orange",
+     "vcc": 46.4,
+     "share_pct": 6.8
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 6.1
+    },
+    {
+     "spcd": 544,
+     "common": "green ash",
+     "vcc": 37.3,
+     "share_pct": 5.9
+    }
+   ],
+   "agents": {
+    "insect": 0.0,
+    "disease": 0.0,
+    "fire": 0.1,
+    "animal": 0.7,
+    "weather": 0.1,
+    "other": 0.0,
+    "disturbed_pct": 0.9
+   },
+   "dead_live_pct": 10.2
+  },
+  "KY": {
+   "top_species": [
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 12.0
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 9.0
+    },
+    {
+     "spcd": 832,
+     "common": "chestnut oak",
+     "vcc": 49.3,
+     "share_pct": 7.6
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 6.5
+    },
+    {
+     "spcd": 531,
+     "common": "American beech",
+     "vcc": 28.8,
+     "share_pct": 5.7
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 5.1
+    }
+   ],
+   "agents": {
+    "insect": 2.7,
+    "disease": 0.1,
+    "fire": 0.8,
+    "animal": 1.2,
+    "weather": 2.3,
+    "other": 1.2,
+    "disturbed_pct": 8.3
+   },
+   "dead_live_pct": 3.0
+  },
+  "LA": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 28.4
+    },
+    {
+     "spcd": 827,
+     "common": "water oak",
+     "vcc": 17.3,
+     "share_pct": 7.8
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 6.9
+    },
+    {
+     "spcd": 221,
+     "common": "baldcypress",
+     "vcc": 42.6,
+     "share_pct": 6.8
+    },
+    {
+     "spcd": 691,
+     "common": "water tupelo",
+     "vcc": 53.0,
+     "share_pct": 3.1
+    },
+    {
+     "spcd": 831,
+     "common": "willow oak",
+     "vcc": 38.4,
+     "share_pct": 2.9
+    }
+   ],
+   "agents": {
+    "insect": 0.1,
+    "disease": 0.1,
+    "fire": 1.6,
+    "animal": 0.2,
+    "weather": 2.5,
+    "other": 0.5,
+    "disturbed_pct": 4.9
+   },
+   "dead_live_pct": 1.0
+  },
+  "MA": {
+   "top_species": [
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 18.5
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 17.8
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 14.5
+    },
+    {
+     "spcd": 261,
+     "common": "eastern hemlock",
+     "vcc": 39.3,
+     "share_pct": 8.8
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 5.1
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 4.9
+    }
+   ],
+   "agents": {
+    "insect": 1.2,
+    "disease": 1.7,
+    "fire": 0.0,
+    "animal": 0.5,
+    "weather": 0.9,
+    "other": 0.7,
+    "disturbed_pct": 5.0
+   },
+   "dead_live_pct": 2.7
+  },
+  "MD": {
+   "top_species": [
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 12.8
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 11.4
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 9.8
+    },
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 9.6
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 6.3
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 5.8
+    }
+   ],
+   "agents": {
+    "insect": 0.2,
+    "disease": 0.1,
+    "fire": 0.0,
+    "animal": 0.3,
+    "weather": 0.3,
+    "other": 0.6,
+    "disturbed_pct": 1.5
+   },
+   "dead_live_pct": 3.8
+  },
+  "ME": {
+   "top_species": [
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 14.2
+    },
+    {
+     "spcd": 97,
+     "common": "red spruce",
+     "vcc": 38.0,
+     "share_pct": 11.9
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 9.1
+    },
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 8.9
+    },
+    {
+     "spcd": 12,
+     "common": "balsam fir",
+     "vcc": 36.1,
+     "share_pct": 8.5
+    },
+    {
+     "spcd": 371,
+     "common": "yellow birch",
+     "vcc": 30.8,
+     "share_pct": 6.9
+    }
+   ],
+   "agents": {
+    "insect": 2.2,
+    "disease": 2.8,
+    "fire": 0.0,
+    "animal": 1.3,
+    "weather": 0.8,
+    "other": 0.4,
+    "disturbed_pct": 7.5
+   },
+   "dead_live_pct": 4.9
+  },
+  "MI": {
+   "top_species": [
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 20.1
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 13.0
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 7.2
+    },
+    {
+     "spcd": 746,
+     "common": "quaking aspen",
+     "vcc": 27.8,
+     "share_pct": 5.3
+    },
+    {
+     "spcd": 125,
+     "common": "red pine",
+     "vcc": 44.2,
+     "share_pct": 4.6
+    },
+    {
+     "spcd": 241,
+     "common": "northern white-cedar",
+     "vcc": 39.6,
+     "share_pct": 4.5
+    }
+   ],
+   "agents": {
+    "insect": 1.4,
+    "disease": 0.6,
+    "fire": 0.1,
+    "animal": 0.4,
+    "weather": 0.3,
+    "other": 0.3,
+    "disturbed_pct": 3.0
+   },
+   "dead_live_pct": 4.3
+  },
+  "MN": {
+   "top_species": [
+    {
+     "spcd": 746,
+     "common": "quaking aspen",
+     "vcc": 27.8,
+     "share_pct": 20.6
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 8.8
+    },
+    {
+     "spcd": 375,
+     "common": "paper birch",
+     "vcc": 23.0,
+     "share_pct": 7.4
+    },
+    {
+     "spcd": 823,
+     "common": "bur oak",
+     "vcc": 54.2,
+     "share_pct": 6.7
+    },
+    {
+     "spcd": 543,
+     "common": "black ash",
+     "vcc": 43.0,
+     "share_pct": 4.8
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 4.7
+    }
+   ],
+   "agents": {
+    "insect": 0.4,
+    "disease": 0.2,
+    "fire": 0.1,
+    "animal": 0.5,
+    "weather": 0.4,
+    "other": 0.4,
+    "disturbed_pct": 1.9
+   },
+   "dead_live_pct": 6.5
+  },
+  "MO": {
+   "top_species": [
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 21.7
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 15.5
+    },
+    {
+     "spcd": 835,
+     "common": "post oak",
+     "vcc": 37.9,
+     "share_pct": 10.3
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 5.3
+    },
+    {
+     "spcd": 806,
+     "common": "scarlet oak",
+     "vcc": 35.7,
+     "share_pct": 4.1
+    },
+    {
+     "spcd": 110,
+     "common": "shortleaf pine",
+     "vcc": 30.2,
+     "share_pct": 4.1
+    }
+   ],
+   "agents": {
+    "insect": 0.4,
+    "disease": 0.1,
+    "fire": 0.6,
+    "animal": 2.9,
+    "weather": 1.0,
+    "other": 0.5,
+    "disturbed_pct": 5.5
+   },
+   "dead_live_pct": 4.2
+  },
+  "MS": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 28.8
+    },
+    {
+     "spcd": 827,
+     "common": "water oak",
+     "vcc": 17.3,
+     "share_pct": 8.2
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 7.1
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 5.1
+    },
+    {
+     "spcd": 110,
+     "common": "shortleaf pine",
+     "vcc": 30.2,
+     "share_pct": 4.0
+    },
+    {
+     "spcd": 812,
+     "common": "southern red oak",
+     "vcc": 36.2,
+     "share_pct": 3.8
+    }
+   ],
+   "agents": {
+    "insect": 0.2,
+    "disease": 0.0,
+    "fire": 2.4,
+    "animal": 0.3,
+    "weather": 1.4,
+    "other": 0.3,
+    "disturbed_pct": 4.7
+   },
+   "dead_live_pct": 1.2
+  },
+  "MT": {
+   "top_species": [
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 34.6
+    },
+    {
+     "spcd": 108,
+     "common": "lodgepole pine",
+     "vcc": 25.9,
+     "share_pct": 16.5
+    },
+    {
+     "spcd": 93,
+     "common": "Engelmann spruce",
+     "vcc": 26.8,
+     "share_pct": 12.0
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 9.6
+    },
+    {
+     "spcd": 73,
+     "common": "western larch",
+     "vcc": 25.6,
+     "share_pct": 9.4
+    },
+    {
+     "spcd": 19,
+     "common": "subalpine fir",
+     "vcc": 30.0,
+     "share_pct": 7.4
+    }
+   ],
+   "agents": {
+    "insect": 2.1,
+    "disease": 2.1,
+    "fire": 2.9,
+    "animal": 0.3,
+    "weather": 0.7,
+    "other": 0.4,
+    "disturbed_pct": 8.6
+   },
+   "dead_live_pct": 14.8
+  },
+  "NC": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 16.6
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 9.7
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 7.0
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 6.9
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 6.0
+    },
+    {
+     "spcd": 694,
+     "common": "swamp tupelo",
+     "vcc": 27.1,
+     "share_pct": 5.5
+    }
+   ],
+   "agents": {
+    "insect": 1.1,
+    "disease": 0.5,
+    "fire": 2.2,
+    "animal": 0.9,
+    "weather": 2.1,
+    "other": 1.1,
+    "disturbed_pct": 7.8
+   },
+   "dead_live_pct": 1.6
+  },
+  "ND": {
+   "top_species": [
+    {
+     "spcd": 823,
+     "common": "bur oak",
+     "vcc": 54.2,
+     "share_pct": 22.9
+    },
+    {
+     "spcd": 544,
+     "common": "green ash",
+     "vcc": 37.3,
+     "share_pct": 19.8
+    },
+    {
+     "spcd": 742,
+     "common": "eastern cottonwood",
+     "vcc": 51.5,
+     "share_pct": 16.9
+    },
+    {
+     "spcd": 746,
+     "common": "quaking aspen",
+     "vcc": 27.8,
+     "share_pct": 10.5
+    },
+    {
+     "spcd": 972,
+     "common": "American elm",
+     "vcc": 33.9,
+     "share_pct": 10.2
+    },
+    {
+     "spcd": 313,
+     "common": "boxelder",
+     "vcc": 50.1,
+     "share_pct": 8.4
+    }
+   ],
+   "agents": {
+    "insect": 0.0,
+    "disease": 0.0,
+    "fire": 0.0,
+    "animal": 0.3,
+    "weather": 0.0,
+    "other": 0.0,
+    "disturbed_pct": 0.4
+   },
+   "dead_live_pct": 10.5
+  },
+  "NE": {
+   "top_species": [
+    {
+     "spcd": 742,
+     "common": "eastern cottonwood",
+     "vcc": 51.5,
+     "share_pct": 33.0
+    },
+    {
+     "spcd": 823,
+     "common": "bur oak",
+     "vcc": 54.2,
+     "share_pct": 16.0
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 11.7
+    },
+    {
+     "spcd": 544,
+     "common": "green ash",
+     "vcc": 37.3,
+     "share_pct": 6.2
+    },
+    {
+     "spcd": 68,
+     "common": "eastern redcedar",
+     "vcc": 41.5,
+     "share_pct": 5.6
+    },
+    {
+     "spcd": 462,
+     "common": "hackberry",
+     "vcc": 45.0,
+     "share_pct": 4.9
+    }
+   ],
+   "agents": {
+    "insect": 0.0,
+    "disease": 0.0,
+    "fire": 0.0,
+    "animal": 0.9,
+    "weather": 0.1,
+    "other": 0.0,
+    "disturbed_pct": 1.1
+   },
+   "dead_live_pct": 5.8
+  },
+  "NH": {
+   "top_species": [
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 15.1
+    },
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 14.7
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 12.2
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 10.0
+    },
+    {
+     "spcd": 261,
+     "common": "eastern hemlock",
+     "vcc": 39.3,
+     "share_pct": 8.9
+    },
+    {
+     "spcd": 371,
+     "common": "yellow birch",
+     "vcc": 30.8,
+     "share_pct": 7.4
+    }
+   ],
+   "agents": {
+    "insect": 0.4,
+    "disease": 6.6,
+    "fire": 0.0,
+    "animal": 0.4,
+    "weather": 0.9,
+    "other": 0.2,
+    "disturbed_pct": 8.5
+   },
+   "dead_live_pct": 3.9
+  },
+  "NJ": {
+   "top_species": [
+    {
+     "spcd": 126,
+     "common": "pitch pine",
+     "vcc": 50.6,
+     "share_pct": 14.7
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 11.5
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 7.9
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 7.7
+    },
+    {
+     "spcd": 832,
+     "common": "chestnut oak",
+     "vcc": 49.3,
+     "share_pct": 5.9
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 5.6
+    }
+   ],
+   "agents": {
+    "insect": 2.0,
+    "disease": 0.3,
+    "fire": 0.7,
+    "animal": 0.1,
+    "weather": 0.4,
+    "other": 0.4,
+    "disturbed_pct": 3.9
+   },
+   "dead_live_pct": 3.9
+  },
+  "NM": {
+   "top_species": [
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 30.1
+    },
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 14.0
+    },
+    {
+     "spcd": 106,
+     "common": "common or two-needle pinyon",
+     "vcc": 26.5,
+     "share_pct": 11.9
+    },
+    {
+     "spcd": 69,
+     "common": "oneseed juniper",
+     "vcc": 23.8,
+     "share_pct": 11.2
+    },
+    {
+     "spcd": 93,
+     "common": "Engelmann spruce",
+     "vcc": 26.8,
+     "share_pct": 5.5
+    },
+    {
+     "spcd": 15,
+     "common": "white fir",
+     "vcc": 32.0,
+     "share_pct": 5.5
+    }
+   ],
+   "agents": {
+    "insect": 0.8,
+    "disease": 0.8,
+    "fire": 2.2,
+    "animal": 0.4,
+    "weather": 0.5,
+    "other": 0.7,
+    "disturbed_pct": 5.4
+   },
+   "dead_live_pct": 9.2
+  },
+  "NV": {
+   "top_species": [
+    {
+     "spcd": 133,
+     "common": "singleleaf pinyon",
+     "vcc": 37.2,
+     "share_pct": 35.9
+    },
+    {
+     "spcd": 65,
+     "common": "Utah juniper",
+     "vcc": 21.7,
+     "share_pct": 33.8
+    },
+    {
+     "spcd": 475,
+     "common": "curlleaf mountain-mahogany",
+     "vcc": null,
+     "share_pct": 10.4
+    },
+    {
+     "spcd": 15,
+     "common": "white fir",
+     "vcc": 32.0,
+     "share_pct": 4.2
+    },
+    {
+     "spcd": 116,
+     "common": "Jeffrey pine",
+     "vcc": 30.4,
+     "share_pct": 2.0
+    },
+    {
+     "spcd": 113,
+     "common": "limber pine",
+     "vcc": 40.0,
+     "share_pct": 1.9
+    }
+   ],
+   "agents": {
+    "insect": 0.4,
+    "disease": 0.6,
+    "fire": 0.8,
+    "animal": 0.2,
+    "weather": 0.2,
+    "other": 0.2,
+    "disturbed_pct": 2.3
+   },
+   "dead_live_pct": 8.3
+  },
+  "NY": {
+   "top_species": [
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 18.5
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 16.2
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 7.0
+    },
+    {
+     "spcd": 261,
+     "common": "eastern hemlock",
+     "vcc": 39.3,
+     "share_pct": 6.4
+    },
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 6.1
+    },
+    {
+     "spcd": 531,
+     "common": "American beech",
+     "vcc": 28.8,
+     "share_pct": 6.1
+    }
+   ],
+   "agents": {
+    "insect": 1.8,
+    "disease": 4.0,
+    "fire": 0.0,
+    "animal": 0.5,
+    "weather": 1.0,
+    "other": 0.6,
+    "disturbed_pct": 7.9
+   },
+   "dead_live_pct": 3.5
+  },
+  "OH": {
+   "top_species": [
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 9.8
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 9.4
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 8.7
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 7.3
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 6.8
+    },
+    {
+     "spcd": 762,
+     "common": "black cherry",
+     "vcc": 25.8,
+     "share_pct": 5.5
+    }
+   ],
+   "agents": {
+    "insect": 2.9,
+    "disease": 0.1,
+    "fire": 0.0,
+    "animal": 1.1,
+    "weather": 0.7,
+    "other": 3.4,
+    "disturbed_pct": 8.1
+   },
+   "dead_live_pct": 2.4
+  },
+  "OK": {
+   "top_species": [
+    {
+     "spcd": 835,
+     "common": "post oak",
+     "vcc": 37.9,
+     "share_pct": 22.3
+    },
+    {
+     "spcd": 110,
+     "common": "shortleaf pine",
+     "vcc": 30.2,
+     "share_pct": 13.9
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 6.7
+    },
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 6.5
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 4.3
+    },
+    {
+     "spcd": 824,
+     "common": "blackjack oak",
+     "vcc": 46.5,
+     "share_pct": 3.4
+    }
+   ],
+   "agents": {
+    "insect": 0.1,
+    "disease": 0.4,
+    "fire": 2.4,
+    "animal": 1.3,
+    "weather": 1.9,
+    "other": 0.3,
+    "disturbed_pct": 6.5
+   },
+   "dead_live_pct": 2.8
+  },
+  "OR": {
+   "top_species": [
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 60.4
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 11.0
+    },
+    {
+     "spcd": 263,
+     "common": "western hemlock",
+     "vcc": 30.0,
+     "share_pct": 4.8
+    },
+    {
+     "spcd": 17,
+     "common": "grand fir",
+     "vcc": 30.2,
+     "share_pct": 3.7
+    },
+    {
+     "spcd": 15,
+     "common": "white fir",
+     "vcc": 32.0,
+     "share_pct": 3.6
+    },
+    {
+     "spcd": 242,
+     "common": "western redcedar",
+     "vcc": 28.8,
+     "share_pct": 1.6
+    }
+   ],
+   "agents": {
+    "insect": 2.6,
+    "disease": 5.7,
+    "fire": 2.9,
+    "animal": 1.9,
+    "weather": 0.9,
+    "other": 0.4,
+    "disturbed_pct": 14.4
+   },
+   "dead_live_pct": 9.1
+  },
+  "PA": {
+   "top_species": [
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 18.3
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 12.0
+    },
+    {
+     "spcd": 762,
+     "common": "black cherry",
+     "vcc": 25.8,
+     "share_pct": 10.2
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 8.5
+    },
+    {
+     "spcd": 832,
+     "common": "chestnut oak",
+     "vcc": 49.3,
+     "share_pct": 7.5
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 5.3
+    }
+   ],
+   "agents": {
+    "insect": 2.4,
+    "disease": 1.1,
+    "fire": 0.1,
+    "animal": 0.4,
+    "weather": 0.5,
+    "other": 1.4,
+    "disturbed_pct": 5.9
+   },
+   "dead_live_pct": 2.6
+  },
+  "RI": {
+   "top_species": [
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 21.6
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 17.5
+    },
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 12.8
+    },
+    {
+     "spcd": 806,
+     "common": "scarlet oak",
+     "vcc": 35.7,
+     "share_pct": 11.4
+    },
+    {
+     "spcd": 837,
+     "common": "black oak",
+     "vcc": 34.3,
+     "share_pct": 10.5
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 9.1
+    }
+   ],
+   "agents": {
+    "insect": 2.6,
+    "disease": 0.1,
+    "fire": 0.1,
+    "animal": 0.1,
+    "weather": 0.1,
+    "other": 0.7,
+    "disturbed_pct": 3.6
+   },
+   "dead_live_pct": 3.1
+  },
+  "SC": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 25.4
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 9.1
+    },
+    {
+     "spcd": 694,
+     "common": "swamp tupelo",
+     "vcc": 27.1,
+     "share_pct": 6.5
+    },
+    {
+     "spcd": 820,
+     "common": "laurel oak",
+     "vcc": 28.9,
+     "share_pct": 5.6
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 4.1
+    },
+    {
+     "spcd": 827,
+     "common": "water oak",
+     "vcc": 17.3,
+     "share_pct": 4.0
+    }
+   ],
+   "agents": {
+    "insect": 0.6,
+    "disease": 1.1,
+    "fire": 3.7,
+    "animal": 0.8,
+    "weather": 3.6,
+    "other": 0.7,
+    "disturbed_pct": 10.4
+   },
+   "dead_live_pct": 1.5
+  },
+  "SD": {
+   "top_species": [
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 59.5
+    },
+    {
+     "spcd": 742,
+     "common": "eastern cottonwood",
+     "vcc": 51.5,
+     "share_pct": 10.7
+    },
+    {
+     "spcd": 823,
+     "common": "bur oak",
+     "vcc": 54.2,
+     "share_pct": 6.9
+    },
+    {
+     "spcd": 544,
+     "common": "green ash",
+     "vcc": 37.3,
+     "share_pct": 5.8
+    },
+    {
+     "spcd": 94,
+     "common": "white spruce",
+     "vcc": 49.2,
+     "share_pct": 4.7
+    },
+    {
+     "spcd": 972,
+     "common": "American elm",
+     "vcc": 33.9,
+     "share_pct": 2.6
+    }
+   ],
+   "agents": {
+    "insect": 0.1,
+    "disease": 0.0,
+    "fire": 0.1,
+    "animal": 0.7,
+    "weather": 0.0,
+    "other": 0.1,
+    "disturbed_pct": 1.0
+   },
+   "dead_live_pct": 8.1
+  },
+  "TN": {
+   "top_species": [
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 11.4
+    },
+    {
+     "spcd": 832,
+     "common": "chestnut oak",
+     "vcc": 49.3,
+     "share_pct": 10.6
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 8.1
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 5.1
+    },
+    {
+     "spcd": 806,
+     "common": "scarlet oak",
+     "vcc": 35.7,
+     "share_pct": 4.6
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 4.0
+    }
+   ],
+   "agents": {
+    "insect": 1.2,
+    "disease": 0.2,
+    "fire": 0.6,
+    "animal": 0.9,
+    "weather": 0.8,
+    "other": 0.5,
+    "disturbed_pct": 4.2
+   },
+   "dead_live_pct": 2.0
+  },
+  "TX": {
+   "top_species": [
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 33.7
+    },
+    {
+     "spcd": 110,
+     "common": "shortleaf pine",
+     "vcc": 30.2,
+     "share_pct": 7.7
+    },
+    {
+     "spcd": 827,
+     "common": "water oak",
+     "vcc": 17.3,
+     "share_pct": 6.9
+    },
+    {
+     "spcd": 835,
+     "common": "post oak",
+     "vcc": 37.9,
+     "share_pct": 6.5
+    },
+    {
+     "spcd": 611,
+     "common": "sweetgum",
+     "vcc": 23.1,
+     "share_pct": 5.7
+    },
+    {
+     "spcd": 812,
+     "common": "southern red oak",
+     "vcc": 36.2,
+     "share_pct": 4.0
+    }
+   ],
+   "agents": {
+    "insect": 0.1,
+    "disease": 0.1,
+    "fire": 1.0,
+    "animal": 0.1,
+    "weather": 1.6,
+    "other": 0.3,
+    "disturbed_pct": 3.2
+   },
+   "dead_live_pct": 1.9
+  },
+  "UT": {
+   "top_species": [
+    {
+     "spcd": 65,
+     "common": "Utah juniper",
+     "vcc": 21.7,
+     "share_pct": 22.3
+    },
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 12.5
+    },
+    {
+     "spcd": 746,
+     "common": "quaking aspen",
+     "vcc": 27.8,
+     "share_pct": 11.1
+    },
+    {
+     "spcd": 93,
+     "common": "Engelmann spruce",
+     "vcc": 26.8,
+     "share_pct": 11.1
+    },
+    {
+     "spcd": 106,
+     "common": "common or two-needle pinyon",
+     "vcc": 26.5,
+     "share_pct": 8.8
+    },
+    {
+     "spcd": 19,
+     "common": "subalpine fir",
+     "vcc": 30.0,
+     "share_pct": 6.8
+    }
+   ],
+   "agents": {
+    "insect": 1.2,
+    "disease": 1.1,
+    "fire": 1.7,
+    "animal": 0.3,
+    "weather": 0.4,
+    "other": 0.7,
+    "disturbed_pct": 5.4
+   },
+   "dead_live_pct": 13.6
+  },
+  "VA": {
+   "top_species": [
+    {
+     "spcd": 832,
+     "common": "chestnut oak",
+     "vcc": 49.3,
+     "share_pct": 12.3
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 11.8
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 11.4
+    },
+    {
+     "spcd": 131,
+     "common": "loblolly pine",
+     "vcc": 29.2,
+     "share_pct": 9.1
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 7.1
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 6.0
+    }
+   ],
+   "agents": {
+    "insect": 1.7,
+    "disease": 0.5,
+    "fire": 0.7,
+    "animal": 1.8,
+    "weather": 1.1,
+    "other": 1.1,
+    "disturbed_pct": 6.8
+   },
+   "dead_live_pct": 1.8
+  },
+  "VT": {
+   "top_species": [
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 27.8
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 12.5
+    },
+    {
+     "spcd": 371,
+     "common": "yellow birch",
+     "vcc": 30.8,
+     "share_pct": 9.1
+    },
+    {
+     "spcd": 261,
+     "common": "eastern hemlock",
+     "vcc": 39.3,
+     "share_pct": 8.4
+    },
+    {
+     "spcd": 531,
+     "common": "American beech",
+     "vcc": 28.8,
+     "share_pct": 6.6
+    },
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 6.3
+    }
+   ],
+   "agents": {
+    "insect": 0.6,
+    "disease": 8.1,
+    "fire": 0.0,
+    "animal": 0.3,
+    "weather": 0.4,
+    "other": 0.2,
+    "disturbed_pct": 9.6
+   },
+   "dead_live_pct": 3.3
+  },
+  "WA": {
+   "top_species": [
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 41.7
+    },
+    {
+     "spcd": 263,
+     "common": "western hemlock",
+     "vcc": 30.0,
+     "share_pct": 19.7
+    },
+    {
+     "spcd": 11,
+     "common": "Pacific silver fir",
+     "vcc": 38.5,
+     "share_pct": 9.1
+    },
+    {
+     "spcd": 242,
+     "common": "western redcedar",
+     "vcc": 28.8,
+     "share_pct": 7.4
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 4.9
+    },
+    {
+     "spcd": 264,
+     "common": "mountain hemlock",
+     "vcc": 36.9,
+     "share_pct": 3.1
+    }
+   ],
+   "agents": {
+    "insect": 3.7,
+    "disease": 6.2,
+    "fire": 2.7,
+    "animal": 1.0,
+    "weather": 1.3,
+    "other": 0.8,
+    "disturbed_pct": 15.7
+   },
+   "dead_live_pct": 10.7
+  },
+  "WI": {
+   "top_species": [
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 14.4
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 11.6
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 10.1
+    },
+    {
+     "spcd": 746,
+     "common": "quaking aspen",
+     "vcc": 27.8,
+     "share_pct": 6.8
+    },
+    {
+     "spcd": 129,
+     "common": "eastern white pine",
+     "vcc": 40.2,
+     "share_pct": 4.8
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 4.6
+    }
+   ],
+   "agents": {
+    "insect": 1.0,
+    "disease": 0.7,
+    "fire": 0.0,
+    "animal": 0.5,
+    "weather": 0.5,
+    "other": 0.1,
+    "disturbed_pct": 2.8
+   },
+   "dead_live_pct": 5.4
+  },
+  "WV": {
+   "top_species": [
+    {
+     "spcd": 832,
+     "common": "chestnut oak",
+     "vcc": 49.3,
+     "share_pct": 10.8
+    },
+    {
+     "spcd": 833,
+     "common": "northern red oak",
+     "vcc": 36.6,
+     "share_pct": 10.2
+    },
+    {
+     "spcd": 621,
+     "common": "yellow-poplar",
+     "vcc": 28.4,
+     "share_pct": 9.8
+    },
+    {
+     "spcd": 802,
+     "common": "white oak",
+     "vcc": 39.5,
+     "share_pct": 9.5
+    },
+    {
+     "spcd": 316,
+     "common": "red maple",
+     "vcc": 31.0,
+     "share_pct": 9.0
+    },
+    {
+     "spcd": 318,
+     "common": "sugar maple",
+     "vcc": 37.4,
+     "share_pct": 7.6
+    }
+   ],
+   "agents": {
+    "insect": 4.6,
+    "disease": 1.6,
+    "fire": 0.2,
+    "animal": 2.2,
+    "weather": 0.7,
+    "other": 2.3,
+    "disturbed_pct": 11.6
+   },
+   "dead_live_pct": 2.8
+  },
+  "WY": {
+   "top_species": [
+    {
+     "spcd": 108,
+     "common": "lodgepole pine",
+     "vcc": 25.9,
+     "share_pct": 28.4
+    },
+    {
+     "spcd": 93,
+     "common": "Engelmann spruce",
+     "vcc": 26.8,
+     "share_pct": 19.1
+    },
+    {
+     "spcd": 19,
+     "common": "subalpine fir",
+     "vcc": 30.0,
+     "share_pct": 13.9
+    },
+    {
+     "spcd": 202,
+     "common": "Douglas-fir",
+     "vcc": 23.9,
+     "share_pct": 12.4
+    },
+    {
+     "spcd": 122,
+     "common": "ponderosa pine",
+     "vcc": 21.0,
+     "share_pct": 10.5
+    },
+    {
+     "spcd": 101,
+     "common": "whitebark pine",
+     "vcc": 29.0,
+     "share_pct": 5.3
+    }
+   ],
+   "agents": {
+    "insect": 1.0,
+    "disease": 1.0,
+    "fire": 2.0,
+    "animal": 0.3,
+    "weather": 0.4,
+    "other": 0.4,
+    "disturbed_pct": 5.1
+   },
+   "dead_live_pct": 25.4
+  }
+ }
+}
