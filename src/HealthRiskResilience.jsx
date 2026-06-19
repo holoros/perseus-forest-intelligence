@@ -145,6 +145,24 @@ export default function HealthRiskResilience({ data, state, scenario: scenarioPr
         </div>
       )}
 
+      {/* Bivariate key for the map surface: stress class (x) by resilience class (y). */}
+      <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
+        <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
+          Map colors — stress × resilience. Deep red = high stress, low resilience (priority).
+        </div>
+        <svg width="92" height="92" viewBox="0 0 92 92" style={{ fontSize: 8 }}>
+          {(() => {
+            const PAL = [["#e8e8e8","#e4acac","#c85a5a"],["#b0d5df","#ad9ea5","#985356"],["#64acbe","#627f8c","#574249"]];
+            const cells = [];
+            for (let sy = 0; sy < 3; sy++) for (let sx = 0; sx < 3; sx++)
+              cells.push(<rect key={sx+"-"+sy} x={20 + sx*20} y={4 + (2-sy)*20} width={20} height={20} fill={PAL[sy][sx]} />);
+            return cells;
+          })()}
+          <text x="20" y="82" fill="var(--mut)">stress →</text>
+          <text x="14" y="64" fill="var(--mut)" transform="rotate(-90 14 64)">resilience →</text>
+        </svg>
+      </div>
+
       {/* Stress vs resilience scatter (the two axes behind the priority class) */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>

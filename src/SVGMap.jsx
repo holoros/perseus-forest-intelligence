@@ -135,6 +135,19 @@ function rampHealth(v){
   }
   return rgbHex(stops[0][1]);
 }
+// HRR bivariate palette: stress class (x) by resilience class (y), matching the
+// static figures. Used for the 0.5deg health surface when grid breaks are present.
+const HRR_BIV = {
+  "0-0":"#e8e8e8","1-0":"#e4acac","2-0":"#c85a5a",
+  "0-1":"#b0d5df","1-1":"#ad9ea5","2-1":"#985356",
+  "0-2":"#64acbe","1-2":"#627f8c","2-2":"#574249",
+};
+function hrrBiFill(stress, resil, bk){
+  if(!bk || stress == null || resil == null) return null;
+  const sx = stress < bk.qx[0] ? 0 : stress < bk.qx[1] ? 1 : 2;
+  const sy = resil  < bk.qy[0] ? 0 : resil  < bk.qy[1] ? 1 : 2;
+  return HRR_BIV[sx + "-" + sy];
+}
 
 export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   timeline, mapYear, mapScenario, selected, onPick,
@@ -393,8 +406,11 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
             const [x1, y1] = projPath(lon + 0.25, lat - 0.25);
             const x = Math.min(x0, x1), y = Math.min(y0, y1);
             const w = Math.abs(x1 - x0) * 1.18, h = Math.abs(y1 - y0) * 1.18;
+            // True bivariate fill (stress x resilience) when grid breaks are present;
+            // fall back to the single priority-index ramp otherwise.
+            const biv = hrrBiFill(c[3], c[4], hrrGrid.breaks);
             return <rect key={"g" + i} x={x} y={y} width={w} height={h}
-              fill={rampHealth(idx * 100)} opacity={0.9} />;
+              fill={biv || rampHealth(idx * 100)} opacity={0.9} />;
           })}
         </g>
       )}
