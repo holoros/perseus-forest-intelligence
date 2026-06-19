@@ -5,6 +5,16 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.13 — 2026-06-18 (deployed)
+* **Similar-areas peer comparison in the draw-your-own-AOI report.** When an AOI
+  is drawn or selected, the AOI report now adds a "Similar areas" section: it
+  finds the states most similar to the AOI's home state by standardized forest
+  stress, resilience, and climate exposure, and shows a plain-language readout
+  plus a priority-share bar comparison of the home state against that peer group.
+  Bridges the rich existing AOI report (ecoregion/state radar, scorecard,
+  priority dial, model agreement, CSV) to the new "compare my area to similar
+  areas" concept. Reuses the per-state HRR data; self-contained; non-regressive.
+
 ### v1.12 — 2026-06-18 (deployed)
 * **Compare areas view (accessible direction, prototype).** New lead tab that
   realizes the "how does my area compare to similar areas" concept: pick a state,

@@ -754,7 +754,64 @@ function Collapsible({ title, subtitle, defaultOpen = false, children }){
   );
 }
 
-export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }){
+// Similar areas (state-level HRR peer comparison) for a drawn AOI. Given the
+// AOI's home state, finds the states most similar in standardized forest stress,
+// resilience, and climate exposure, and shows how the home state's priority
+// forest area compares to that peer group. Bridges the drawn AOI to the
+// "compare my area to similar areas" concept using the per-state HRR data.
+const SIM_KEYS = ["stress_mean","resil_mean","ce_mean"];
+function similarStates(hrr, state, n = 5){
+  if(!hrr || !hrr[state]) return null;
+  const all = Object.entries(hrr).map(([st,d]) => ({ st, ...d }));
+  const stats = {};
+  SIM_KEYS.forEach(k => { const xs = all.map(r=>r[k]).filter(v=>v!=null);
+    const m = xs.reduce((a,b)=>a+b,0)/xs.length;
+    const sd = Math.sqrt(xs.reduce((a,b)=>a+(b-m)**2,0)/xs.length) || 1; stats[k] = { m, sd }; });
+  const z = r => SIM_KEYS.map(k => ((r[k] ?? stats[k].m) - stats[k].m) / stats[k].sd);
+  const me = all.find(r=>r.st===state); const zMe = z(me);
+  const peers = all.filter(r=>r.st!==state)
+    .map(r => ({ ...r, d: Math.sqrt(z(r).reduce((a,zk,i)=>a+(zk-zMe[i])**2,0)) }))
+    .sort((a,b)=>a.d-b.d).slice(0,n);
+  return { me, peers };
+}
+function SimilarAreas({ state, hrr }){
+  const res = (state && hrr) ? similarStates(hrr, state) : null;
+  if(!res) return null;
+  const { me, peers } = res;
+  const vals = peers.map(p=>p.priority_pct).filter(v=>v!=null).sort((a,b)=>a-b);
+  const med = vals.length ? vals[Math.floor(vals.length/2)] : null;
+  const lo = vals[0], hi = vals[vals.length-1];
+  const stance = med==null ? "" : me.priority_pct>med*1.15 ? "higher than"
+    : me.priority_pct<med*0.85 ? "lower than" : "in line with";
+  const rows = [{ st: me.st, v: me.priority_pct, me: true }, ...peers.map(p=>({ st: p.st, v: p.priority_pct }))];
+  const maxv = Math.max(...rows.map(r=>r.v||0)) || 1;
+  const f1 = v => (v==null ? "–" : v.toFixed(1)), f0 = v => (v==null ? "–" : v.toFixed(0));
+  return (
+    <div style={{margin:"4px 0 0"}}>
+      <div className="aoi-sub">Similar areas · state-level forest health</div>
+      <div className="note" style={{margin:"0 6px 4px"}}>
+        {me.st}'s priority forest area is <b style={{color:"var(--ink)"}}>{f1(me.priority_pct)}%</b>.
+        {" "}States most similar in forest stress, resilience, and climate exposure ({peers.map(p=>p.st).join(", ")})
+        {" "}run {f0(lo)} to {f0(hi)}% (median {f0(med)}%); {me.st} sits <b style={{color:"var(--ink)"}}>{stance}</b> its peers.
+      </div>
+      <div className="aoi-bars">
+        {rows.map(r => (
+          <div key={r.st} className="aoi-bar-row">
+            <span className="aoi-bar-lab" style={{fontWeight:r.me?700:400}}>{r.st}{r.me?" (your area)":""}</span>
+            <span className="aoi-bar-track"><span className="aoi-bar-fill"
+              style={{width:`${(r.v||0)/maxv*100}%`, background:r.me?"#1d7e0f":"#74c476"}}/></span>
+            <span className="aoi-bar-pct">{f1(r.v)}</span>
+          </div>
+        ))}
+      </div>
+      <div className="note" style={{margin:"2px 6px 2px"}}>
+        Peer states by standardized stress, resilience, and climate exposure (HRR layer); state-level context for this area.
+      </div>
+    </div>
+  );
+}
+
+export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr }){
   const [mmMetric, setMmMetric] = useState("agc_live_total");
   const [mmBucket, setMmBucket] = useState("managed (harvest)");
   const [mmYear, setMmYear] = useState(2050);
@@ -960,6 +1017,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial" }
       </>)}
 
       <ModelAgreement state={state} metric={mmMetric} setMetric={setMmMetric} bucket={mmBucket} setBucket={setMmBucket} year={mmYear} setYear={setMmYear}/>
+      <SimilarAreas state={state} hrr={hrr}/>
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
       <div className="note" style={{marginTop:6}}>
         Sources: FIA plots (attributes, ownership), yield_curves_by_l3 (projection),

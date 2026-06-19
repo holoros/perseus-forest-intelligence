@@ -1439,7 +1439,7 @@ export default function App(){
             })}
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
-          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} onClose={()=>setAoi(null)}/>}
+          {aoi && <AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} onClose={()=>setAoi(null)}/>}
           {aoi && <button className="mini-btn" style={{margin:"6px 4px 2px",borderStyle:"solid"}}
             onClick={()=>setResearchOpen(o=>!o)}
             title="show or hide the multi-model research tools (engine comparison, scenarios, stumpage, rotation)">
