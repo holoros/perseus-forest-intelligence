@@ -486,7 +486,8 @@ export default function App(){
   const [hrrEco,setHrrEco] = useState(null); // HRR aggregated to EPA L3 ecoregions
   const [hrrCounty,setHrrCounty] = useState(null); // HRR by county (FIPS + centroid)
   const [hrrLand,setHrrLand] = useState(null);     // HRR by ownership group
-  const [hrrUnit,setHrrUnit] = useState("surface"); // health map unit: surface | county
+  const [hrrHex,setHrrHex] = useState(null);        // HRR aggregated to H3 hexes
+  const [hrrUnit,setHrrUnit] = useState("surface"); // health map unit: surface | hex | county
   // v1.3 map/AOI tools
   const [ecoOn,setEcoOn] = useState(false);
   const [ecoGeo,setEcoGeo] = useState(null);
@@ -520,6 +521,7 @@ export default function App(){
     j("api/hrr_ecoregion.json").then(setHrrEco).catch(()=>{});
     j("api/hrr_county.json").then(setHrrCounty).catch(()=>{});
     j("api/hrr_landowner.json").then(setHrrLand).catch(()=>{});
+    j("api/hrr_hex.json").then(setHrrHex).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
@@ -1223,7 +1225,8 @@ export default function App(){
                   <SVGMap geo={geoData} states={states} focal={FOCAL}
                           mode={tab==="health" && hrr && hrr.states ? "health" : mapMode}
                           hrr={hrr && hrr.states} hrrGrid={tab==="health" && hrrUnit==="surface" ? hrrGrid : null}
-                          hrrCounty={tab==="health" && hrrUnit==="county" ? hrrCounty : null} timeline={timeline}
+                          hrrCounty={tab==="health" && hrrUnit==="county" ? hrrCounty : null}
+                          hrrHex={tab==="health" && hrrUnit==="hex" ? hrrHex : null} timeline={timeline}
                           mapYear={mapYear} mapScenario={mapScenario}
                           selected={sel} onPick={st=>setSel(st)}
                           conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]

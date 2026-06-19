@@ -156,7 +156,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   ecoData, ecoFill, ecoOpacity = 0.75,
                                   inspectMode = false, onInspect, userLoc = null,
                                   baseLayer = null, baseBounds = null, baseOpacity = 0.6,
-                                  focusGeom = null, hrr = null, hrrGrid = null, hrrCounty = null }){
+                                  focusGeom = null, hrr = null, hrrGrid = null, hrrCounty = null, hrrHex = null }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -411,6 +411,15 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
             const biv = hrrBiFill(c[3], c[4], hrrGrid.breaks);
             return <rect key={"g" + i} x={x} y={y} width={w} height={h}
               fill={biv || rampHealth(idx * 100)} opacity={0.9} />;
+          })}
+        </g>
+      )}
+      {mode === "health" && hrrHex && hrrHex.cells && (
+        <g style={{pointerEvents:"none"}}>
+          {hrrHex.cells.map((c, i) => {
+            const pts = c.b.map(([la, lo]) => projPath(lo, la).join(",")).join(" ");
+            return <polygon key={"h" + i} points={pts}
+              fill={HRR_BIV[c.sx + "-" + c.sy]} opacity={0.9} stroke="#0b1015" strokeWidth={0.15} />;
           })}
         </g>
       )}

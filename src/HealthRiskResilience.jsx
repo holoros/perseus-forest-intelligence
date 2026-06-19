@@ -106,12 +106,46 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
               {bd.length === 2 ? ` · 90% band ${bd[0]}–${bd[1]}%` : ""}
             </div>
           </div>
-          <div style={{ fontSize: 12, color: "var(--mut)", maxWidth: 300 }}>
-            High stress + low resilience. National baseline share{" "}
-            <b>{fmt(nat.priority_share_pct, 1)}%</b>; sensitive to scoring weights
-            {sr.length === 2 ? ` (range ${sr[0]}–${sr[1]}%)` : ""}. Quote as a range.
+          <div style={{ fontSize: 12, color: "var(--mut)", maxWidth: 320 }}>
+            <b>What this is:</b> the share of this area's forest most likely to need management
+            attention — forest that is both highly stressed (climate exposure, sensitivity, and
+            recent observed disturbance) and low in resilience (younger, less stocked, low adaptive
+            capacity). National baseline <b>{fmt(nat.priority_share_pct, 1)}%</b>; sensitive to the
+            scoring weights{sr.length === 2 ? ` (range ${sr[0]} to ${sr[1]}%)` : ""}, so quote it as a range.
           </div>
         </div>
+
+        {/* Scenario priority with 90% error bars */}
+        {share.current != null && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 2 }}>
+              Priority forest area (% of forest) with 90% uncertainty band
+            </div>
+            {(() => {
+              const rows3 = [["current", "Current"], ["rcp45", "RCP4.5 (central)"], ["rcp85", "RCP8.5 (high-end)"]];
+              const hi = 45, W = 250, L = 96;
+              return (
+                <svg width="100%" viewBox={`0 0 ${L + W + 30} ${rows3.length * 18 + 4}`} style={{ fontSize: 10, fontVariantNumeric: "tabular-nums" }}>
+                  {rows3.map(([k, lbl], i) => {
+                    const v = share[k], bdk = band[k] || [v, v];
+                    if (v == null) return null;
+                    const y = i * 18 + 11, x = (p) => L + (p / hi) * W;
+                    return (
+                      <g key={k}>
+                        <text x={L - 4} y={y + 3} textAnchor="end" fill="var(--mut,#8a93a0)">{lbl}</text>
+                        <line x1={x(bdk[0])} x2={x(bdk[1])} y1={y} y2={y} stroke="#985356" strokeWidth={2} />
+                        <line x1={x(bdk[0])} x2={x(bdk[0])} y1={y - 3} y2={y + 3} stroke="#985356" strokeWidth={1.5} />
+                        <line x1={x(bdk[1])} x2={x(bdk[1])} y1={y - 3} y2={y + 3} stroke="#985356" strokeWidth={1.5} />
+                        <circle cx={x(v)} cy={y} r={3.5} fill="#c85a5a" />
+                        <text x={x(bdk[1]) + 6} y={y + 3} fill="var(--fg,#cdd)">{fmt(v, 0)}% [{fmt(bdk[0], 0)}–{fmt(bdk[1], 0)}]</text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Scenario toggle */}
         <div className="controls" style={{ marginTop: 8 }}>
@@ -167,7 +201,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
       {onUnit && (
         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, fontSize: 11 }}>
           <span style={{ color: "var(--mut)" }}>Map unit:</span>
-          {[["surface", "Surface"], ["county", "Counties"]].map(([k, lbl]) => (
+          {[["surface", "Surface"], ["hex", "Hexes"], ["county", "Counties"]].map(([k, lbl]) => (
             <button key={k} onClick={() => onUnit(k)}
               style={{ fontSize: 11, padding: "1px 8px", borderRadius: 3, cursor: "pointer",
                 border: "1px solid var(--bd,#345)", background: (unit || "surface") === k ? "#3a6ea5" : "transparent",

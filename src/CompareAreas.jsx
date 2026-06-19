@@ -71,9 +71,14 @@ export default function CompareAreas({ data, state, onPickState }) {
 
       {/* plain-language readout */}
       <div className="chartcard" style={{ padding: "10px 12px", marginBottom: 8, fontSize: 13, lineHeight: 1.5 }}>
-        {me.st}{me.region ? ` (${me.region})` : ""}'s priority forest area is <b>{fmt(me.priority_pct, 1)}%</b>.
+        <div style={{ fontSize: 11.5, color: "var(--mut)", marginBottom: 6 }}>
+          <b>Priority forest</b> = the share of this area's forest most likely to need management
+          attention: forest that is both highly stressed (climate exposure, sensitivity, and recent
+          observed disturbance) and low in resilience (younger, less stocked, low adaptive capacity).
+        </div>
+        About <b>{fmt(me.priority_pct, 1)}%</b> of {me.st}{me.region ? ` (${me.region})` : ""}'s forest reads as priority.
         {" "}Among the {sameRegion ? "same-region " : ""}areas most similar to it ({peers.map((p) => p.st).join(", ")}),
-        {" "}priority area runs {fmt(peerLo, 0)} to {fmt(peerHi, 0)}% (median {fmt(peerMed, 0)}%).
+        {" "}it runs {fmt(peerLo, 0)} to {fmt(peerHi, 0)}% (median {fmt(peerMed, 0)}%).
         {stance ? <> {me.st} sits <b>{stance}</b> its peers.</> : null}
       </div>
 
