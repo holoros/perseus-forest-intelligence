@@ -23,7 +23,7 @@ function rampColor(pct) {
 
 const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
 
-export default function HealthRiskResilience({ data, detail, ecoData, state, scenario: scenarioProp, onScenario, onPickState }) {
+export default function HealthRiskResilience({ data, detail, ecoData, landData, unit, onUnit, state, scenario: scenarioProp, onScenario, onPickState }) {
   const [scenarioLocal, setScenarioLocal] = useState("current");
   const scenario = scenarioProp || scenarioLocal;
   const setScenario = onScenario || setScenarioLocal;
@@ -162,6 +162,40 @@ export default function HealthRiskResilience({ data, detail, ecoData, state, sce
           <text x="14" y="64" fill="var(--mut)" transform="rotate(-90 14 64)">resilience →</text>
         </svg>
       </div>
+
+      {/* Map unit toggle: smoothed surface vs county centroids. */}
+      {onUnit && (
+        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, fontSize: 11 }}>
+          <span style={{ color: "var(--mut)" }}>Map unit:</span>
+          {[["surface", "Surface"], ["county", "Counties"]].map(([k, lbl]) => (
+            <button key={k} onClick={() => onUnit(k)}
+              style={{ fontSize: 11, padding: "1px 8px", borderRadius: 3, cursor: "pointer",
+                border: "1px solid var(--bd,#345)", background: (unit || "surface") === k ? "#3a6ea5" : "transparent",
+                color: (unit || "surface") === k ? "#fff" : "var(--fg,#cdd)" }}>{lbl}</button>
+          ))}
+        </div>
+      )}
+
+      {/* Landowner view: priority by FIA ownership group. */}
+      {landData && landData.landowners && (
+        <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
+          <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
+            By ownership — priority share of forest
+          </div>
+          {Object.entries(landData.landowners).sort((a, b) => b[1].priority_pct - a[1].priority_pct).map(([nm, d]) => (
+            <div key={nm} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
+              <span style={{ width: 96 }}>{nm}</span>
+              <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
+                <span style={{ display: "block", height: "100%", width: `${Math.min(100, d.priority_pct * 4)}%`, background: rampColor(d.priority_pct) }} />
+              </span>
+              <span style={{ width: 30, textAlign: "right" }}>{fmt(d.priority_pct, 0)}%</span>
+            </div>
+          ))}
+          <div style={{ fontSize: 9.5, color: "var(--mut)", marginTop: 3 }}>
+            Private and state/local forest carries more priority area than federal/National Forest.
+          </div>
+        </div>
+      )}
 
       {/* Ecoregion view: priority by EPA Level III ecoregion (selectable unit). */}
       {ecoData && ecoData.ecoregions && (() => {

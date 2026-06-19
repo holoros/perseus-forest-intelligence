@@ -156,7 +156,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   ecoData, ecoFill, ecoOpacity = 0.75,
                                   inspectMode = false, onInspect, userLoc = null,
                                   baseLayer = null, baseBounds = null, baseOpacity = 0.6,
-                                  focusGeom = null, hrr = null, hrrGrid = null }){
+                                  focusGeom = null, hrr = null, hrrGrid = null, hrrCounty = null }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -411,6 +411,16 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
             const biv = hrrBiFill(c[3], c[4], hrrGrid.breaks);
             return <rect key={"g" + i} x={x} y={y} width={w} height={h}
               fill={biv || rampHealth(idx * 100)} opacity={0.9} />;
+          })}
+        </g>
+      )}
+      {mode === "health" && hrrCounty && hrrCounty.counties && (
+        <g style={{pointerEvents:"none"}}>
+          {Object.entries(hrrCounty.counties).map(([fips, c]) => {
+            const [cx, cy] = projPath(c.lon, c.lat);
+            const r = Math.max(1.6, Math.sqrt(c.n) * 0.55);
+            return <circle key={"c" + fips} cx={cx} cy={cy} r={r}
+              fill={rampHealth(c.priority_pct)} opacity={0.85} stroke="#0b1015" strokeWidth={0.2} />;
           })}
         </g>
       )}
