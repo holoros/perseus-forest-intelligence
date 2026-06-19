@@ -1,385 +1,317 @@
 {
-  "schema": "hrr_states_v2",
+  "schema": "hrr_states_v3",
   "generated": "2026-06-17",
   "coverage": "48 contiguous states, 219130 FIA plots",
-  "method": "Stress = 0.6 biomass-weighted Potter(2017) species VCC + 0.4 observed FIA disturbance (DSTRBCD). Resilience = stand age + stocking + VCC adaptive capacity. National 3x3 bivariate, shared tertile breaks.",
+  "method": "INDEPENDENT axes. Stress = 0.35 Potter Climate-Exposure + 0.25 Sensitivity + 0.40 observed FIA disturbance. Resilience = stand age + stocking + adaptive capacity (1 - Potter Low-Adaptive-Capacity). No term shared across axes; stress~resilience correlation ~0 (was -0.64 with the earlier shared-exposure formulation).",
   "provenance": {
     "fia": "FIA PLOT/COND/TREE, most-recent inventory, OSC Cardinal",
-    "vcc": "Potter, Crane & Hargrove 2017 (Project CAPTURE); 303/304 species matched to FIA SPCD",
-    "disturbance": "FIA COND DSTRBCD1/2/3",
-    "climate_exposure": "Potter CE component"
+    "vcc": "Potter, Crane & Hargrove 2017 components CE/S/LAC; 303/304 species matched to FIA SPCD",
+    "disturbance": "FIA COND DSTRBCD1/2/3"
   },
   "national": {
-    "priority_share_pct": 14.6,
+    "priority_share_pct": 11.8,
     "scenario_priority_share_pct": {
-      "current": 11,
-      "rcp45": 24,
-      "rcp85": 35
+      "current": 4.8,
+      "rcp45": 19.3,
+      "rcp85": 32.3
     },
-    "scenario_90pct_band": {
-      "current": [
-        10,
-        12
-      ],
-      "rcp45": [
-        22,
-        26
-      ],
-      "rcp85": [
-        33,
-        37
-      ]
-    },
-    "structural_uncertainty_pct_range": [
-      7,
-      18
-    ],
-    "dominant_levers": [
-      "stress VCC-vs-disturbance blend",
-      "priority threshold definition"
-    ],
-    "scenario_note": "RCP4.5 central case; RCP8.5 high-end bound, now considered unlikely. Severity magnitudes representative; spatial pattern CE-driven."
+    "scenario_note": "RCP4.5 central case; RCP8.5 high-end bound, now considered unlikely. Severities representative; spatial pattern CE-driven.",
+    "structural_uncertainty_note": "Absolute share sensitive to scoring weights and threshold; quote as a range. Spatial pattern and state ranking stable.",
+    "priority_share_basis": "FIA plots (per-state priority_pct values are also plot-level)",
+    "scenario_basis": "0.5-degree grid forest area; the current/baseline grid share (~5%) is lower than the plot-level national priority (~12%) because cell-mean averaging rarely places a cell in both extremes once the axes are independent. Read the scenario series for the GROWTH under warming, not as the same basis as the plot-level share."
   },
   "states": {
     "KS": {
       "n_plots": 2441,
-      "priority_pct": 74.4,
-      "ce_mean": 74.26,
-      "stress_mean": 0.491,
-      "resil_mean": 0.255
-    },
-    "NE": {
-      "n_plots": 604,
-      "priority_pct": 59.9,
-      "ce_mean": 67.97,
-      "stress_mean": 0.493,
-      "resil_mean": 0.347
+      "priority_pct": 43.7,
+      "stress_mean": 0.469,
+      "resil_mean": 0.355
     },
     "IA": {
       "n_plots": 1159,
-      "priority_pct": 57.3,
-      "ce_mean": 65.04,
-      "stress_mean": 0.531,
-      "resil_mean": 0.329
-    },
-    "OK": {
-      "n_plots": 1879,
-      "priority_pct": 38.9,
-      "ce_mean": 53.91,
-      "stress_mean": 0.42,
-      "resil_mean": 0.347
-    },
-    "IL": {
-      "n_plots": 3149,
-      "priority_pct": 36.6,
-      "ce_mean": 55.25,
-      "stress_mean": 0.399,
-      "resil_mean": 0.376
+      "priority_pct": 31.5,
+      "stress_mean": 0.505,
+      "resil_mean": 0.384
     },
     "TX": {
       "n_plots": 9422,
-      "priority_pct": 36.6,
-      "ce_mean": 53.94,
-      "stress_mean": 0.333,
-      "resil_mean": 0.32
-    },
-    "ND": {
-      "n_plots": 379,
-      "priority_pct": 32.2,
-      "ce_mean": 57.66,
-      "stress_mean": 0.406,
-      "resil_mean": 0.38
+      "priority_pct": 30.4,
+      "stress_mean": 0.362,
+      "resil_mean": 0.333
     },
     "FL": {
       "n_plots": 2977,
-      "priority_pct": 28.0,
-      "ce_mean": 26.67,
-      "stress_mean": 0.379,
-      "resil_mean": 0.392
+      "priority_pct": 29.6,
+      "stress_mean": 0.418,
+      "resil_mean": 0.331
     },
-    "MO": {
-      "n_plots": 8261,
-      "priority_pct": 25.5,
-      "ce_mean": 49.52,
-      "stress_mean": 0.386,
-      "resil_mean": 0.37
+    "NE": {
+      "n_plots": 604,
+      "priority_pct": 25.0,
+      "stress_mean": 0.481,
+      "resil_mean": 0.405
     },
-    "IN": {
-      "n_plots": 4474,
-      "priority_pct": 23.6,
-      "ce_mean": 47.86,
-      "stress_mean": 0.379,
-      "resil_mean": 0.399
+    "OK": {
+      "n_plots": 1879,
+      "priority_pct": 22.6,
+      "stress_mean": 0.439,
+      "resil_mean": 0.369
     },
-    "NJ": {
-      "n_plots": 993,
-      "priority_pct": 23.6,
-      "ce_mean": 44.01,
-      "stress_mean": 0.386,
-      "resil_mean": 0.456
+    "IL": {
+      "n_plots": 3149,
+      "priority_pct": 21.0,
+      "stress_mean": 0.395,
+      "resil_mean": 0.401
     },
     "MN": {
       "n_plots": 18111,
-      "priority_pct": 22.5,
-      "ce_mean": 41.68,
-      "stress_mean": 0.31,
-      "resil_mean": 0.39
+      "priority_pct": 16.9,
+      "stress_mean": 0.322,
+      "resil_mean": 0.347
     },
-    "KY": {
-      "n_plots": 2797,
-      "priority_pct": 22.3,
-      "ce_mean": 43.72,
-      "stress_mean": 0.428,
-      "resil_mean": 0.42
-    },
-    "OH": {
-      "n_plots": 2205,
-      "priority_pct": 21.2,
-      "ce_mean": 42.76,
-      "stress_mean": 0.451,
-      "resil_mean": 0.433
+    "MO": {
+      "n_plots": 8261,
+      "priority_pct": 16.6,
+      "stress_mean": 0.389,
+      "resil_mean": 0.369
     },
     "WI": {
       "n_plots": 16666,
-      "priority_pct": 19.6,
-      "ce_mean": 39.6,
-      "stress_mean": 0.325,
-      "resil_mean": 0.404
+      "priority_pct": 15.2,
+      "stress_mean": 0.333,
+      "resil_mean": 0.355
+    },
+    "NJ": {
+      "n_plots": 993,
+      "priority_pct": 15.2,
+      "stress_mean": 0.389,
+      "resil_mean": 0.435
+    },
+    "IN": {
+      "n_plots": 4474,
+      "priority_pct": 14.8,
+      "stress_mean": 0.391,
+      "resil_mean": 0.397
+    },
+    "KY": {
+      "n_plots": 2797,
+      "priority_pct": 14.8,
+      "stress_mean": 0.443,
+      "resil_mean": 0.402
+    },
+    "OH": {
+      "n_plots": 2205,
+      "priority_pct": 14.0,
+      "stress_mean": 0.465,
+      "resil_mean": 0.405
     },
     "LA": {
       "n_plots": 2558,
-      "priority_pct": 18.5,
-      "ce_mean": 36.45,
-      "stress_mean": 0.319,
-      "resil_mean": 0.412
+      "priority_pct": 14.0,
+      "stress_mean": 0.372,
+      "resil_mean": 0.386
     },
-    "SD": {
-      "n_plots": 960,
-      "priority_pct": 18.2,
-      "ce_mean": 31.71,
-      "stress_mean": 0.241,
-      "resil_mean": 0.527
-    },
-    "MI": {
-      "n_plots": 19544,
-      "priority_pct": 14.4,
-      "ce_mean": 36.84,
-      "stress_mean": 0.309,
-      "resil_mean": 0.448
-    },
-    "TN": {
-      "n_plots": 3007,
-      "priority_pct": 13.7,
-      "ce_mean": 41.28,
-      "stress_mean": 0.359,
-      "resil_mean": 0.46
+    "ND": {
+      "n_plots": 379,
+      "priority_pct": 13.5,
+      "stress_mean": 0.427,
+      "resil_mean": 0.424
     },
     "GA": {
       "n_plots": 7155,
+      "priority_pct": 12.0,
+      "stress_mean": 0.342,
+      "resil_mean": 0.372
+    },
+    "SD": {
+      "n_plots": 960,
       "priority_pct": 11.8,
-      "ce_mean": 28.65,
-      "stress_mean": 0.278,
-      "resil_mean": 0.424
+      "stress_mean": 0.3,
+      "resil_mean": 0.427
     },
-    "AR": {
-      "n_plots": 3347,
-      "priority_pct": 10.7,
-      "ce_mean": 38.15,
-      "stress_mean": 0.275,
-      "resil_mean": 0.438
-    },
-    "WV": {
-      "n_plots": 6155,
-      "priority_pct": 10.5,
-      "ce_mean": 37.78,
-      "stress_mean": 0.354,
-      "resil_mean": 0.466
+    "MI": {
+      "n_plots": 19544,
+      "priority_pct": 11.5,
+      "stress_mean": 0.32,
+      "resil_mean": 0.39
     },
     "AL": {
       "n_plots": 4733,
-      "priority_pct": 10.2,
-      "ce_mean": 30.86,
-      "stress_mean": 0.247,
-      "resil_mean": 0.419
-    },
-    "NY": {
-      "n_plots": 5339,
-      "priority_pct": 8.6,
-      "ce_mean": 33.2,
-      "stress_mean": 0.339,
-      "resil_mean": 0.486
-    },
-    "MS": {
-      "n_plots": 3574,
-      "priority_pct": 8.6,
-      "ce_mean": 32.21,
-      "stress_mean": 0.241,
-      "resil_mean": 0.452
-    },
-    "PA": {
-      "n_plots": 5396,
-      "priority_pct": 8.0,
-      "ce_mean": 33.61,
-      "stress_mean": 0.325,
-      "resil_mean": 0.496
-    },
-    "VA": {
-      "n_plots": 3659,
-      "priority_pct": 7.9,
-      "ce_mean": 36.84,
-      "stress_mean": 0.329,
-      "resil_mean": 0.491
-    },
-    "NC": {
-      "n_plots": 3909,
-      "priority_pct": 7.8,
-      "ce_mean": 31.98,
-      "stress_mean": 0.277,
-      "resil_mean": 0.476
-    },
-    "SC": {
-      "n_plots": 3308,
-      "priority_pct": 6.9,
-      "ce_mean": 29.77,
-      "stress_mean": 0.24,
-      "resil_mean": 0.447
-    },
-    "WY": {
-      "n_plots": 3209,
-      "priority_pct": 6.6,
-      "ce_mean": 7.82,
-      "stress_mean": 0.231,
-      "resil_mean": 0.623
+      "priority_pct": 9.7,
+      "stress_mean": 0.312,
+      "resil_mean": 0.376
     },
     "CO": {
       "n_plots": 4657,
-      "priority_pct": 5.9,
-      "ce_mean": 10.66,
-      "stress_mean": 0.211,
-      "resil_mean": 0.633
+      "priority_pct": 8.3,
+      "stress_mean": 0.281,
+      "resil_mean": 0.475
+    },
+    "TN": {
+      "n_plots": 3007,
+      "priority_pct": 8.2,
+      "stress_mean": 0.382,
+      "resil_mean": 0.441
+    },
+    "WY": {
+      "n_plots": 3209,
+      "priority_pct": 8.1,
+      "stress_mean": 0.306,
+      "resil_mean": 0.48
     },
     "ID": {
       "n_plots": 6351,
-      "priority_pct": 5.8,
-      "ce_mean": 3.31,
-      "stress_mean": 0.263,
-      "resil_mean": 0.617
+      "priority_pct": 8.1,
+      "stress_mean": 0.346,
+      "resil_mean": 0.476
+    },
+    "NY": {
+      "n_plots": 5339,
+      "priority_pct": 7.5,
+      "stress_mean": 0.357,
+      "resil_mean": 0.418
+    },
+    "NC": {
+      "n_plots": 3909,
+      "priority_pct": 7.2,
+      "stress_mean": 0.329,
+      "resil_mean": 0.432
+    },
+    "WV": {
+      "n_plots": 6155,
+      "priority_pct": 7.1,
+      "stress_mean": 0.369,
+      "resil_mean": 0.422
+    },
+    "SC": {
+      "n_plots": 3308,
+      "priority_pct": 7.0,
+      "stress_mean": 0.307,
+      "resil_mean": 0.398
+    },
+    "AR": {
+      "n_plots": 3347,
+      "priority_pct": 7.0,
+      "stress_mean": 0.315,
+      "resil_mean": 0.411
     },
     "ME": {
       "n_plots": 4821,
-      "priority_pct": 5.7,
-      "ce_mean": 26.62,
-      "stress_mean": 0.311,
-      "resil_mean": 0.495
-    },
-    "MD": {
-      "n_plots": 1119,
-      "priority_pct": 5.5,
-      "ce_mean": 34.21,
-      "stress_mean": 0.246,
-      "resil_mean": 0.505
+      "priority_pct": 7.0,
+      "stress_mean": 0.329,
+      "resil_mean": 0.409
     },
     "AZ": {
       "n_plots": 5679,
-      "priority_pct": 5.4,
-      "ce_mean": 19.61,
-      "stress_mean": 0.216,
-      "resil_mean": 0.62
+      "priority_pct": 6.8,
+      "stress_mean": 0.266,
+      "resil_mean": 0.473
     },
-    "MT": {
-      "n_plots": 7389,
-      "priority_pct": 4.3,
-      "ce_mean": 4.89,
-      "stress_mean": 0.235,
-      "resil_mean": 0.634
+    "MS": {
+      "n_plots": 3574,
+      "priority_pct": 6.7,
+      "stress_mean": 0.305,
+      "resil_mean": 0.415
     },
     "NM": {
       "n_plots": 5925,
-      "priority_pct": 4.1,
-      "ce_mean": 16.17,
-      "stress_mean": 0.195,
-      "resil_mean": 0.612
+      "priority_pct": 6.4,
+      "stress_mean": 0.26,
+      "resil_mean": 0.461
     },
-    "MA": {
-      "n_plots": 752,
-      "priority_pct": 4.1,
-      "ce_mean": 32.84,
-      "stress_mean": 0.328,
-      "resil_mean": 0.549
+    "MT": {
+      "n_plots": 7389,
+      "priority_pct": 6.1,
+      "stress_mean": 0.324,
+      "resil_mean": 0.497
     },
-    "CT": {
-      "n_plots": 500,
-      "priority_pct": 4.0,
-      "ce_mean": 33.12,
-      "stress_mean": 0.33,
-      "resil_mean": 0.53
-    },
-    "DE": {
-      "n_plots": 262,
-      "priority_pct": 3.8,
-      "ce_mean": 29.63,
-      "stress_mean": 0.214,
-      "resil_mean": 0.542
-    },
-    "UT": {
-      "n_plots": 5495,
-      "priority_pct": 3.3,
-      "ce_mean": 12.18,
-      "stress_mean": 0.144,
-      "resil_mean": 0.651
-    },
-    "RI": {
-      "n_plots": 211,
-      "priority_pct": 3.3,
-      "ce_mean": 34.06,
-      "stress_mean": 0.307,
-      "resil_mean": 0.503
+    "PA": {
+      "n_plots": 5396,
+      "priority_pct": 6.1,
+      "stress_mean": 0.345,
+      "resil_mean": 0.431
     },
     "CA": {
       "n_plots": 3997,
-      "priority_pct": 3.2,
-      "ce_mean": 9.8,
-      "stress_mean": 0.271,
-      "resil_mean": 0.665
+      "priority_pct": 5.8,
+      "stress_mean": 0.321,
+      "resil_mean": 0.529
     },
     "NV": {
       "n_plots": 2752,
-      "priority_pct": 2.7,
-      "ce_mean": 21.53,
-      "stress_mean": 0.229,
-      "resil_mean": 0.608
+      "priority_pct": 5.8,
+      "stress_mean": 0.242,
+      "resil_mean": 0.427
     },
-    "VT": {
-      "n_plots": 1268,
-      "priority_pct": 2.5,
-      "ce_mean": 28.19,
-      "stress_mean": 0.345,
-      "resil_mean": 0.544
+    "VA": {
+      "n_plots": 3659,
+      "priority_pct": 5.7,
+      "stress_mean": 0.36,
+      "resil_mean": 0.458
     },
-    "NH": {
-      "n_plots": 1375,
-      "priority_pct": 2.0,
-      "ce_mean": 26.05,
-      "stress_mean": 0.318,
-      "resil_mean": 0.57
+    "UT": {
+      "n_plots": 5495,
+      "priority_pct": 5.2,
+      "stress_mean": 0.211,
+      "resil_mean": 0.485
     },
     "OR": {
       "n_plots": 9788,
-      "priority_pct": 1.9,
-      "ce_mean": 5.05,
-      "stress_mean": 0.187,
-      "resil_mean": 0.676
+      "priority_pct": 4.8,
+      "stress_mean": 0.274,
+      "resil_mean": 0.531
+    },
+    "MD": {
+      "n_plots": 1119,
+      "priority_pct": 3.8,
+      "stress_mean": 0.291,
+      "resil_mean": 0.461
+    },
+    "CT": {
+      "n_plots": 500,
+      "priority_pct": 3.8,
+      "stress_mean": 0.353,
+      "resil_mean": 0.471
+    },
+    "RI": {
+      "n_plots": 211,
+      "priority_pct": 3.8,
+      "stress_mean": 0.325,
+      "resil_mean": 0.436
     },
     "WA": {
       "n_plots": 5419,
-      "priority_pct": 1.8,
-      "ce_mean": 3.27,
-      "stress_mean": 0.239,
-      "resil_mean": 0.678
+      "priority_pct": 3.7,
+      "stress_mean": 0.321,
+      "resil_mean": 0.545
+    },
+    "VT": {
+      "n_plots": 1268,
+      "priority_pct": 3.5,
+      "stress_mean": 0.369,
+      "resil_mean": 0.464
+    },
+    "MA": {
+      "n_plots": 752,
+      "priority_pct": 3.5,
+      "stress_mean": 0.348,
+      "resil_mean": 0.489
+    },
+    "NH": {
+      "n_plots": 1375,
+      "priority_pct": 2.2,
+      "stress_mean": 0.345,
+      "resil_mean": 0.489
+    },
+    "DE": {
+      "n_plots": 262,
+      "priority_pct": 1.1,
+      "stress_mean": 0.264,
+      "resil_mean": 0.48
     }
   },
   "caveats": [
-    "Absolute priority share is sensitive to scoring weights (range 7-18%); quote as a range. Spatial pattern and state ranking are stable.",
+    "Independent-axis formulation (v5) replaces the earlier shared-exposure version; removes artificial axis correlation.",
     "Per-state climate severities not yet calibrated (CEM warming params exist for focal states only)."
   ]
 }
