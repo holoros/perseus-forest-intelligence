@@ -49,13 +49,49 @@ export default function HealthRiskResilience({ data, state, scenario: scenarioPr
   const sc = share[scenario];
   const bd = band[scenario] || [];
 
+  // Export the per-state HRR table as CSV, with a provenance + national-summary
+  // header block so the download is self-documenting for reporting use.
+  function downloadCsv() {
+    const q = (v) => `"${String(v).replace(/"/g, '""')}"`;
+    const lines = [];
+    lines.push(`# PERSEUS Forest Health / Risk / Resilience (${data.schema || "hrr_states"})`);
+    lines.push(`# coverage,${q(data.coverage || "")}`);
+    lines.push(`# generated,${q(data.generated || "")}`);
+    if (data.method) lines.push(`# method,${q(data.method)}`);
+    lines.push(`# national_baseline_priority_pct,${nat.priority_share_pct ?? ""}`);
+    lines.push(`# scenario_priority_pct_current,${share.current ?? ""}`);
+    lines.push(`# scenario_priority_pct_rcp45,${share.rcp45 ?? ""}`);
+    lines.push(`# scenario_priority_pct_rcp85,${share.rcp85 ?? ""}`);
+    if (sr.length === 2) lines.push(`# structural_uncertainty_pct_range,${sr[0]}-${sr[1]}`);
+    lines.push("state,n_plots,priority_pct,stress_mean,resil_mean,ce_mean");
+    rows.forEach((r) => {
+      lines.push([r.st, r.n_plots ?? "", r.priority_pct ?? "", r.stress_mean ?? "",
+        r.resil_mean ?? "", r.ce_mean ?? ""].join(","));
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "perseus_hrr_states.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div>
-      <div className="who" style={{ marginBottom: 6 }}>
-        <b>Forest Health, Risk & Resilience</b>{" "}
-        <span style={{ color: "var(--mut)" }}>
-          · {data.coverage || "48 states"} · stress × resilience priority
+      <div className="who" style={{ marginBottom: 6, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+        <span>
+          <b>Forest Health, Risk & Resilience</b>{" "}
+          <span style={{ color: "var(--mut)" }}>
+            · {data.coverage || "48 states"} · stress × resilience priority
+          </span>
         </span>
+        <button className="mini-btn" style={{ borderStyle: "solid", whiteSpace: "nowrap" }}
+          onClick={downloadCsv} title="Download the per-state HRR table (CSV, with provenance header)">
+          Download CSV
+        </button>
       </div>
 
       {/* National headline */}

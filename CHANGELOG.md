@@ -5,6 +5,15 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.11 — 2026-06-18 (deployed)
+* **HRR data export (Forest health tab).** Added a Download CSV button that
+  exports the per-state HRR table (state, n_plots, priority_pct, stress_mean,
+  resil_mean, ce_mean) with a provenance and national-summary header block
+  (schema, coverage, method, baseline and scenario shares, structural range).
+  Prompted by reviewing the FACT Custom Forest Carbon alpha, where disabled
+  export was the main blocker to a reporting workflow; PERSEUS makes its health
+  data directly exportable and self-documenting. Client-side Blob, no new deps.
+
 ### v1.10 — 2026-06-18 (deployed)
 * **Deep-linkable health scenario (refinement T2).** The Forest health scenario
   (Current / RCP4.5 / RCP8.5) now round-trips through the URL hash as `hscen`,
