@@ -23,7 +23,7 @@ function rampColor(pct) {
 
 const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
 
-export default function HealthRiskResilience({ data, detail, ecoData, landData, unit, onUnit, state, scenario: scenarioProp, onScenario, onPickState }) {
+export default function HealthRiskResilience({ data, detail, ecoData, landData, landEco, unit, onUnit, state, scenario: scenarioProp, onScenario, onPickState }) {
   const [scenarioLocal, setScenarioLocal] = useState("current");
   const [selOwn, setSelOwn] = useState(null); // landowner query selection
   const scenario = scenarioProp || scenarioLocal;
@@ -241,25 +241,33 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
 
       {/* Ecoregion view: priority by EPA Level III ecoregion (selectable unit). */}
       {ecoData && ecoData.ecoregions && (() => {
-        const rowsE = Object.values(ecoData.ecoregions).sort((a, b) => b.priority_pct - a.priority_pct);
+        const rowsE = Object.entries(ecoData.ecoregions).map(([code, v]) => ({ code, ...v }))
+          .sort((a, b) => b.priority_pct - a.priority_pct);
         const maxE = rowsE.length ? rowsE[0].priority_pct : 100;
         const top = rowsE.slice(0, 8);
+        const topOwn = (code) => {
+          const o = landEco && landEco.ecoregions && landEco.ecoregions[code] && landEco.ecoregions[code].own;
+          if (!o) return null;
+          const t = Object.entries(o).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0];
+          return t ? `${t[0]} ${Math.round(t[1])}%` : null;
+        };
         return (
           <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
             <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-              By EPA Level III ecoregion — highest priority share ({rowsE.length} ecoregions)
+              By EPA Level III ecoregion — highest priority share ({rowsE.length} ecoregions){landEco ? " · dominant owner" : ""}
             </div>
-            {top.map((e) => (
-              <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
-                <span style={{ width: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
+            {top.map((e) => { const to = topOwn(e.code); return (
+              <div key={e.code} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
+                <span style={{ width: 138, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
                 <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
                   <span style={{ display: "block", height: "100%", width: `${Math.min(100, e.priority_pct / maxE * 100)}%`, background: rampColor(e.priority_pct) }} />
                 </span>
                 <span style={{ width: 32, textAlign: "right" }}>{fmt(e.priority_pct, 0)}%</span>
+                {to && <span style={{ width: 84, textAlign: "right", color: "var(--mut)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{to}</span>}
               </div>
-            ))}
+            ); })}
             <div style={{ fontSize: 9.5, color: "var(--mut)", marginTop: 3 }}>
-              Dry-edge and prairie ecoregions rank highest; productive forested ecoregions lowest.
+              Dry-edge and prairie ecoregions rank highest; productive forested ecoregions lowest.{landEco ? " Dominant forest owner from the USDA FS ownership raster." : ""}
             </div>
           </div>
         );

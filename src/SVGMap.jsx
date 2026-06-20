@@ -157,7 +157,11 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   inspectMode = false, onInspect, userLoc = null,
                                   baseLayer = null, baseBounds = null, baseOpacity = 0.6,
                                   focusGeom = null, hrr = null, hrrGrid = null, hrrCounty = null, hrrHex = null,
-                                  hrrEcoGeo = null, hrrEco = null }){
+                                  hrrEcoGeo = null, hrrEco = null,
+                                  countyGeo = null, countyPri = null, landCounty = null, landEco = null, landHex = null }){
+  // Top ownership types for a unit's composition object, for map tooltips.
+  const ownTop = (o) => { if(!o) return ""; return Object.entries(o).filter(([,v])=>v>0)
+    .sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k} ${Math.round(v)}%`).join(", "); };
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -424,7 +428,18 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           })}
         </g>
       )}
-      {mode === "health" && hrrCounty && hrrCounty.counties && (
+      {mode === "health" && countyGeo && countyGeo.features && countyPri && (
+        <g style={{pointerEvents:"none"}}>
+          {countyGeo.features.map((ft, i) => {
+            const gid = ft.properties && ft.properties.GEOID;
+            const c = gid != null ? countyPri[String(parseInt(gid, 10))] : null; // hrr_county keys are FIPS w/o leading zero
+            return <path key={"cty" + i} d={geomToD(ft.geometry)}
+              fill={c ? rampHealth(c.priority_pct) : "#2a3a47"} fillOpacity={c ? 0.9 : 0.1}
+              stroke="#0b1015" strokeWidth={0.12} />;
+          })}
+        </g>
+      )}
+      {mode === "health" && !countyGeo && hrrCounty && hrrCounty.counties && (
         <g style={{pointerEvents:"none"}}>
           {Object.entries(hrrCounty.counties).map(([fips, c]) => {
             const [cx, cy] = projPath(c.lon, c.lat);

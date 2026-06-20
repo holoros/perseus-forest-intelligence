@@ -496,7 +496,11 @@ export default function App(){
   const [hrrCounty,setHrrCounty] = useState(null); // HRR by county (FIPS + centroid)
   const [hrrLand,setHrrLand] = useState(null);     // HRR by ownership group
   const [hrrHex,setHrrHex] = useState(null);        // HRR aggregated to H3 hexes
-  const [hrrUnit,setHrrUnit] = useState("surface"); // health map unit: surface | hex | county
+  const [hrrUnit,setHrrUnit] = useState("surface"); // health map unit: surface | hex | county | ecoregion
+  const [landCounty,setLandCounty] = useState(null); // ownership composition by county (FIPS)
+  const [landEco,setLandEco] = useState(null);       // ownership composition by EPA L3 ecoregion
+  const [landHex,setLandHex] = useState(null);       // ownership composition by HRR hex index
+  const [countyGeo,setCountyGeo] = useState(null);   // simplified CONUS county polygons (GEOID)
   // v1.3 map/AOI tools
   const [ecoOn,setEcoOn] = useState(false);
   const [ecoGeo,setEcoGeo] = useState(null);
@@ -531,6 +535,11 @@ export default function App(){
     j("api/hrr_county.json").then(setHrrCounty).catch(()=>{});
     j("api/hrr_landowner.json").then(setHrrLand).catch(()=>{});
     j("api/hrr_hex.json").then(setHrrHex).catch(()=>{});
+    // landowner composition by unit (USDA FS ownership raster, RDS-2025-0045) + county polygons
+    j("api/landowner_by_county.json").then(setLandCounty).catch(()=>{});
+    j("api/landowner_by_ecoregion.json").then(setLandEco).catch(()=>{});
+    j("api/landowner_by_hex.json").then(setLandHex).catch(()=>{});
+    j("geo/us_counties.geojson").then(setCountyGeo).catch(()=>{});
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
@@ -1237,7 +1246,10 @@ export default function App(){
                           hrr={hrr && hrr.states} hrrGrid={tab==="health" && hrrUnit==="surface" ? hrrGrid : null}
                           hrrCounty={tab==="health" && hrrUnit==="county" ? hrrCounty : null}
                           hrrHex={tab==="health" && hrrUnit==="hex" ? hrrHex : null}
-                          hrrEcoGeo={tab==="health" && hrrUnit==="ecoregion" ? ecoGeo : null} hrrEco={hrrEco} timeline={timeline}
+                          hrrEcoGeo={tab==="health" && hrrUnit==="ecoregion" ? ecoGeo : null} hrrEco={hrrEco}
+                          countyGeo={tab==="health" && hrrUnit==="county" ? countyGeo : null}
+                          countyPri={hrrCounty && hrrCounty.counties}
+                          landCounty={landCounty} landEco={landEco} landHex={landHex} timeline={timeline}
                           mapYear={mapYear} mapScenario={mapScenario}
                           selected={sel} onPick={st=>setSel(st)}
                           conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]
@@ -1501,7 +1513,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="landis" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandisStratified data={landis} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
-          {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
+          {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
