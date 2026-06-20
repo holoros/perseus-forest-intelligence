@@ -5,6 +5,18 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.18 — 2026-06-20 (deployed) — forest-health reassessment
+* **Hex/county display fix.** State fills now hide under full-coverage units
+  (surface, hexes, ecoregion) and dim strongly under county dots, so the chosen
+  map unit reads as the primary layer instead of the state choropleth bleeding
+  through underneath.
+* **Ecoregion as a map unit.** Added "Ecoregion" to the map-unit toggle; the map
+  now colors EPA Level III ecoregion polygons by priority share (a spatial
+  summary, complementing the existing ecoregion ranking list).
+* **Landowner query.** The by-ownership list is now clickable: selecting an
+  ownership group shows its priority, stress, resilience, and plot count. Noted
+  that a per-state ownership filter needs per-state ownership data.
+
 ### v1.17 — 2026-06-18 (deployed) — decision, credibility, economics, performance (draft for feedback)
 * **Foreground the decision (item 4).** The AOI report now leads with a "Suggested
   direction" line (reserve / managed / climate-smart) from the area's outcomes,

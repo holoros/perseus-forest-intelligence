@@ -156,7 +156,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                                   ecoData, ecoFill, ecoOpacity = 0.75,
                                   inspectMode = false, onInspect, userLoc = null,
                                   baseLayer = null, baseBounds = null, baseOpacity = 0.6,
-                                  focusGeom = null, hrr = null, hrrGrid = null, hrrCounty = null, hrrHex = null }){
+                                  focusGeom = null, hrr = null, hrrGrid = null, hrrCounty = null, hrrHex = null,
+                                  hrrEcoGeo = null, hrrEco = null }){
   // v0.71 stable zoom/pan: ref-backed view (no re-renders during continuous
   // interaction) + rAF-throttled state sync.
   const viewRef = useRef({ k: 1, tx: 0, ty: 0 });
@@ -433,6 +434,17 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           })}
         </g>
       )}
+      {mode === "health" && hrrEcoGeo && hrrEcoGeo.features && hrrEco && hrrEco.ecoregions && (
+        <g style={{pointerEvents:"none"}}>
+          {hrrEcoGeo.features.map((ft, i) => {
+            const code = ft.properties && ft.properties.NA_L3CODE;
+            const e = code && hrrEco.ecoregions[code];
+            return <path key={"eco" + i} d={geomToD(ft.geometry)}
+              fill={e ? rampHealth(e.priority_pct) : "#2a3a47"} fillOpacity={e ? 0.85 : 0.12}
+              stroke="#0b1015" strokeWidth={0.15} />;
+          })}
+        </g>
+      )}
       {features.map(ft=>{
         const st = ft.properties.state;
         const cov = states[st] || {};
@@ -443,8 +455,9 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         if(mode === "health"){
           const col = hrrSt ? rampHealth(hrrSt.priority_pct) : null;
           fill = col || "#2a3a47";
-          // when the 0.5deg grid surface is shown, drop state fills to outline-only
-          opacity = hrrGrid ? 0 : (col ? 0.92 : 0.30);
+          // Hide state fills under a full-coverage unit (surface/hex/ecoregion);
+          // strongly dim them under county dots so counties read as the unit.
+          opacity = (hrrGrid || hrrHex || hrrEcoGeo) ? 0 : (hrrCounty ? 0.12 : (col ? 0.92 : 0.30));
         } else if(mode === "carbon"){
           const v = (timeline && timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]);
           const col = rampCarbon(v != null ? v : -1);

@@ -722,10 +722,11 @@ export default function App(){
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
   useEffect(()=>{
-    if(!(ecoOn || inspectMode || aoi)) return;
+    const needEco = ecoOn || inspectMode || aoi || (tab==="health" && hrrUnit==="ecoregion");
+    if(!needEco) return;
     if(!ecoGeo) j("geo/us_eco_l3_features.geojson").then(setEcoGeo).catch(()=>{});
     if(!l3yields) j("api/yield_curves_by_l3.json").then(setL3yields).catch(()=>{});
-  },[ecoOn,inspectMode,aoi,ecoGeo,l3yields]);
+  },[ecoOn,inspectMode,aoi,ecoGeo,l3yields,tab,hrrUnit]);
 
   // ---- carbon-map year animation (play/pause) ----
   useEffect(()=>{
@@ -1235,7 +1236,8 @@ export default function App(){
                           mode={tab==="health" && hrr && hrr.states ? "health" : mapMode}
                           hrr={hrr && hrr.states} hrrGrid={tab==="health" && hrrUnit==="surface" ? hrrGrid : null}
                           hrrCounty={tab==="health" && hrrUnit==="county" ? hrrCounty : null}
-                          hrrHex={tab==="health" && hrrUnit==="hex" ? hrrHex : null} timeline={timeline}
+                          hrrHex={tab==="health" && hrrUnit==="hex" ? hrrHex : null}
+                          hrrEcoGeo={tab==="health" && hrrUnit==="ecoregion" ? ecoGeo : null} hrrEco={hrrEco} timeline={timeline}
                           mapYear={mapYear} mapScenario={mapScenario}
                           selected={sel} onPick={st=>setSel(st)}
                           conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]

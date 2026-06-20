@@ -25,6 +25,7 @@ const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d))
 
 export default function HealthRiskResilience({ data, detail, ecoData, landData, unit, onUnit, state, scenario: scenarioProp, onScenario, onPickState }) {
   const [scenarioLocal, setScenarioLocal] = useState("current");
+  const [selOwn, setSelOwn] = useState(null); // landowner query selection
   const scenario = scenarioProp || scenarioLocal;
   const setScenario = onScenario || setScenarioLocal;
   if (!data || !data.national || !data.states)
@@ -201,7 +202,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
       {onUnit && (
         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, fontSize: 11 }}>
           <span style={{ color: "var(--mut)" }}>Map unit:</span>
-          {[["surface", "Surface"], ["hex", "Hexes"], ["county", "Counties"]].map(([k, lbl]) => (
+          {[["surface", "Surface"], ["hex", "Hexes"], ["county", "Counties"], ["ecoregion", "Ecoregion"]].map(([k, lbl]) => (
             <button key={k} onClick={() => onUnit(k)}
               style={{ fontSize: 11, padding: "1px 8px", borderRadius: 3, cursor: "pointer",
                 border: "1px solid var(--bd,#345)", background: (unit || "surface") === k ? "#3a6ea5" : "transparent",
@@ -214,19 +215,26 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
       {landData && landData.landowners && (
         <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
           <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-            By ownership — priority share of forest
+            By ownership — priority share of forest <span style={{ opacity: .7 }}>(click to query)</span>
           </div>
           {Object.entries(landData.landowners).sort((a, b) => b[1].priority_pct - a[1].priority_pct).map(([nm, d]) => (
-            <div key={nm} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
-              <span style={{ width: 96 }}>{nm}</span>
+            <div key={nm} onClick={() => setSelOwn(selOwn === nm ? null : nm)}
+              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1, cursor: "pointer",
+                background: selOwn === nm ? "rgba(58,110,165,0.18)" : "transparent", borderRadius: 3, padding: "1px 2px" }}>
+              <span style={{ width: 96, fontWeight: selOwn === nm ? 700 : 400 }}>{nm}</span>
               <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
                 <span style={{ display: "block", height: "100%", width: `${Math.min(100, d.priority_pct * 4)}%`, background: rampColor(d.priority_pct) }} />
               </span>
               <span style={{ width: 30, textAlign: "right" }}>{fmt(d.priority_pct, 0)}%</span>
             </div>
           ))}
+          {selOwn && landData.landowners[selOwn] && (
+            <div style={{ fontSize: 10, marginTop: 5, padding: "5px 7px", borderRadius: 4, background: "rgba(58,110,165,0.12)" }}>
+              <b>{selOwn}</b>: priority {fmt(landData.landowners[selOwn].priority_pct, 1)}% · stress {fmt(landData.landowners[selOwn].stress_mean, 3)} · resilience {fmt(landData.landowners[selOwn].resil_mean, 3)} · n = {landData.landowners[selOwn].n != null ? landData.landowners[selOwn].n.toLocaleString() : "–"} plots.
+            </div>
+          )}
           <div style={{ fontSize: 9.5, color: "var(--mut)", marginTop: 3 }}>
-            Private and state/local forest carries more priority area than federal/National Forest.
+            Private and state/local forest carries more priority area than federal/National Forest. These are national aggregates; a per-state ownership filter needs per-state ownership data.
           </div>
         </div>
       )}
