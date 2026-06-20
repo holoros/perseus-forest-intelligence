@@ -61,7 +61,8 @@ const MAP_BINS = [
             ["hcs_v4_intensity_clearcut","Clearcut intensity (v4, 2024)"],
             ["hcs_v4_class_partial","Silvicultural class · partial (v4)"],
             ["value_at_risk","Value at risk of removal"],["volume_removed","Volume removed (annual)"],
-            ["gfc_lossyear","Forest loss year (Hansen)"]] },
+            ["gfc_lossyear","Forest loss year (Hansen)"],
+            ["forest_change_0823","Forest change 2008→2023 (NLCD)"]] },
 ];
 const binForLayer = (layer) => (MAP_BINS.find(b => b.layers.some(([k])=>k===layer)) || {}).id;
 
@@ -105,6 +106,14 @@ const CONUS_LEGENDS = {
     ramp: ["#fff7ec","#fdbb84","#ef6548","#b30000","#7f0000"],
     lo: "0", mid: "45", hi: "90",
     note: "FIA size-class product allocation",
+  },
+  forest_change_0823: {
+    title: "Forest change 2008 to 2023 (NLCD)",
+    type: "categorical",
+    stops: [
+      ["#c82822", "Forest loss"], ["#269e5a", "Forest gain"], ["#3c6e46", "Stable forest"],
+    ],
+    note: "Annual NLCD forest classes (41/42/43/90) differenced 2008 vs 2023. Observed land-cover change, an independent threat signal.",
   },
   lcms_2022: {
     title: "LCMS disturbance cause (2022)",
