@@ -852,22 +852,47 @@ function aoiGridSample(hrrGrid, centroid, geom){
   let lo=0; while(lo<all.length && all[lo]<idx) lo++;
   return { n: near.length, mode, idx, stress: mean(3), resil: mean(4), ce: mean(5), pct: Math.round(lo/all.length*100) };
 }
+// Surrounding-area neighborhood: sample the grid within a radius of the AOI centroid
+// to give localized context (how the area compares to what is around it).
+function aoiNeighborhood(hrrGrid, centroid, radius){
+  if(!hrrGrid || !hrrGrid.cells || !centroid) return null;
+  const lat=centroid[1], lon=centroid[0];
+  const near = hrrGrid.cells.filter(c => Math.abs(c[0]-lat)<=radius && Math.abs(c[1]-lon)<=radius);
+  if(near.length < 2) return null;
+  const mean = k => near.reduce((a,c)=>a+c[k],0)/near.length;
+  return { n:near.length, idx:mean(2), stress:mean(3), resil:mean(4), ce:mean(5) };
+}
 function AOIHealth({ hrrGrid, centroid, geom }){
   const s = aoiGridSample(hrrGrid, centroid, geom);
   if(!s) return null;
   const f3 = v => v.toFixed(3);
+  const surr = aoiNeighborhood(hrrGrid, centroid, 1.0); // ~1° ring around the area
+  const cmp = (a,b) => a==null||b==null ? "" : a>b*1.05 ? "higher than" : a<b*0.95 ? "lower than" : "about the same as";
+  const arrow = (a,b) => a==null||b==null ? "" : a>b*1.05 ? " ▲" : a<b*0.95 ? " ▼" : " ≈";
   return (
     <div style={{margin:"4px 0 0"}}>
       <div className="aoi-sub">This area's forest health · sampled from the 0.5° HRR grid</div>
       <div className="aoi-grid">
         <div className="aoi-row"><span className="aoi-k">Priority index</span><span className="aoi-v">{f3(s.idx)} · {ord(s.pct)} pct nationally</span></div>
-        <div className="aoi-row"><span className="aoi-k">Stress</span><span className="aoi-v">{f3(s.stress)}</span></div>
-        <div className="aoi-row"><span className="aoi-k">Resilience</span><span className="aoi-v">{f3(s.resil)}</span></div>
+        <div className="aoi-row"><span className="aoi-k">Disturbance &amp; climate stress</span><span className="aoi-v">{f3(s.stress)}{surr?arrow(s.stress,surr.stress):""}</span></div>
+        <div className="aoi-row"><span className="aoi-k">Resilience</span><span className="aoi-v">{f3(s.resil)}{surr?arrow(s.resil,surr.resil):""}</span></div>
         <div className="aoi-row"><span className="aoi-k">Climate exposure</span><span className="aoi-v">{f3(s.ce)}</span></div>
       </div>
       <div className="note" style={{margin:"2px 6px 2px"}}>
         Priority index = stress × (1 − resilience), averaged over {s.n} grid cell{s.n>1?"s":""} {s.mode==="polygon"?"inside":"near"} this area; percentile is among all CONUS grid cells.{s.mode==="polygon"?"":" Draw a polygon AOI for a within-area sample."}
       </div>
+      {surr && (
+        <div style={{margin:"6px 0 0"}}>
+          <div className="aoi-sub">Surrounding area &amp; sensitivity · ~1° neighborhood ({surr.n} cells)</div>
+          <div className="aoi-grid">
+            <div className="aoi-row"><span className="aoi-k">Neighborhood stress</span><span className="aoi-v">{f3(surr.stress)}</span></div>
+            <div className="aoi-row"><span className="aoi-k">Neighborhood resilience</span><span className="aoi-v">{f3(surr.resil)}</span></div>
+          </div>
+          <div className="note" style={{margin:"2px 6px 2px"}}>
+            This area's disturbance and climate stress is {cmp(s.stress,surr.stress)} its surroundings, and its resilience is {cmp(s.resil,surr.resil)} the neighborhood. Higher stress and lower resilience mean greater sensitivity to future climate and disturbance, which raises risk to long-term value and is worth weighing in management choices. This is the localized, parcel-specific signal a generic appraisal misses.
+          </div>
+        </div>
+      )}
     </div>
   );
 }
