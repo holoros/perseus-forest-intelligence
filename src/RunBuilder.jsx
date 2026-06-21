@@ -21,6 +21,14 @@ const PRICE_PATHS = { low:{saw:0.20,pulp:0.03,carbon:8,label:"Low"}, base:{saw:0
 const ES_LEVELS = [["none","None",0],["mod","$5/ac/yr",5],["high","$15/ac/yr",15]];
 const SAW_FRACTION = 0.55, DISCOUNT = 0.04, ES_MANAGED_FRAC = 0.5;
 const annuity = (age,r)=>(1-Math.pow(1+r,-age))/r;
+// Regional price adjustment (illustrative, directional; replace with real CFRU/TMS series).
+const REGION_OF = {};
+"CT DE MA MD ME NH NJ NY PA RI VA VT WV".split(" ").forEach(s=>REGION_OF[s]="Northeast");
+"AL AR FL GA KY LA MS NC OK SC TN TX".split(" ").forEach(s=>REGION_OF[s]="South");
+"IA IL IN MI MN MO OH WI".split(" ").forEach(s=>REGION_OF[s]="North Central");
+"AK AZ CA CO ID KS MT ND NE NM NV OR SD UT WA WY".split(" ").forEach(s=>REGION_OF[s]="West");
+const REGION_MULT = { "Northeast":{saw:1.0,pulp:1.0}, "South":{saw:0.85,pulp:1.35}, "North Central":{saw:0.9,pulp:1.0}, "West":{saw:1.2,pulp:0.8} };
+const regionAdjust = (p, st) => { const m = REGION_MULT[REGION_OF[st]||"Northeast"]; return { ...p, saw:p.saw*m.saw, pulp:p.pulp*m.pulp }; };
 const fmt = (v,d=0)=>(v==null||isNaN(v)?"–":Number(v).toLocaleString(undefined,{maximumFractionDigits:d}));
 // Policy as a scenario driver
 // Future policy scenarios. Forestry, unlike ag, trends toward restricting management.
@@ -90,6 +98,20 @@ function MultiLineChart({ rows }) {
   );
 }
 
+// Build an inline SVG of the ensemble trajectories for embedding in the report.
+function svgFor(rows){
+  if(!rows.length) return "";
+  const W=560,H=200,m={l:46,r:12,t:10,b:24};
+  const xs=rows.flatMap(r=>r.pts.map(p=>p[0])), ys=rows.flatMap(r=>r.pts.map(p=>p[1]));
+  const x0=Math.min(...xs),x1=Math.max(...xs),y1=Math.max(...ys,1)*1.05,y0=Math.min(...ys,0);
+  const px=v=>m.l+(v-x0)/((x1-x0)||1)*(W-m.l-m.r), py=v=>(H-m.b)-(v-y0)/((y1-y0)||1)*(H-m.t-m.b);
+  const ax=`<line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#ccc"/><line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}" stroke="#ccc"/>`;
+  const yl=[y0,(y0+y1)/2,y1].map(t=>`<text x="${m.l-4}" y="${(py(t)+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#666">${Math.round(t)}</text>`).join("");
+  const xlb=[x0,Math.round((x0+x1)/2),x1].map(t=>`<text x="${px(t).toFixed(1)}" y="${H-m.b+13}" text-anchor="middle" font-size="9" fill="#666">${t}</text>`).join("");
+  const lines=rows.map(r=>`<polyline points="${r.pts.map(p=>px(p[0]).toFixed(1)+','+py(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="${CLS_COL[r.cls]||'#888'}" stroke-width="1.3" opacity="0.85"/>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;border:1px solid #eee">${ax}${yl}${xlb}${lines}</svg>`;
+}
+
 export default function RunBuilder({ initState }) {
   const [st, setSt] = useState(initState && STATES.includes(initState) ? initState : "ME");
   useEffect(() => { if (initState && STATES.includes(initState)) setSt(initState); }, [initState]);
@@ -154,7 +176,7 @@ export default function RunBuilder({ initState }) {
         if (sc.climate!=="historic") { const cf=ms.filter(e=>(e.model||"").toLowerCase().includes(sc.climate)); if (cf.length) ms=cf; }
         return { mk, cls, rows: ms.map(e=>({model:e.model,cls:e.cls,pts:e.pts.map(pt=>[pt[0],pt[1]])})) };
       });
-      const e = econFromL3(repNode, mg[3], p);
+      const e = econFromL3(repNode, mg[3], regionAdjust(p, st));
       const npvH = (e.npvH||0)*polT(policy);
       const npvC = (e.npvC||0)*polC(policy);
       const esv = (sc.mgmt==="reserve"?1:ES_MANAGED_FRAC) * (esAnnual ? esAnnual*annuity(e.age||100,DISCOUNT) : 0);
@@ -174,7 +196,7 @@ export default function RunBuilder({ initState }) {
   }
 
   // recommendation (reserve vs managed) for this area + market + ES
-  const eRes = econFromL3(repNode,"untreated",p), eBas = econFromL3(repNode,"harvested",p);
+  const eRes = econFromL3(repNode,"untreated",regionAdjust(p,st)), eBas = econFromL3(repNode,"harvested",regionAdjust(p,st));
   const esAge = eRes.age||eBas.age||100;
   const esFull = esAnnual?esAnnual*annuity(esAge,DISCOUNT):0, esMan = esFull*ES_MANAGED_FRAC;
   const reserveTotal=(eRes.npvC||0)*polC(policy)+esFull, managedTotal=(eBas.npvH||0)*polT(policy)+esMan;
@@ -219,6 +241,8 @@ export default function RunBuilder({ initState }) {
 <table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Risk</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
 <h2>Scenario detail (multi-model ensemble)</h2>
 <table><thead><tr><th>Scenario</th><th>Engines (model runs)</th><th>Economics (NPV per acre)</th></tr></thead><tbody>${scnRows}</tbody></table>
+<h2>Ensemble trajectories</h2>
+${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px 0 2px">Scenario ${i+1}: ${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</div>${svgFor(r.engines.flatMap(e=>e.rows))}`).join("")}
 <h2>Run specification (Cardinal contract)</h2>
 <pre>${esc(JSON.stringify(spec,null,2))}</pre>
 <h2>Methods &amp; caveats</h2>
@@ -241,6 +265,7 @@ export default function RunBuilder({ initState }) {
   return (
     <div>
       <div className="who" style={{marginBottom:6}}><b>Build a run</b> <span style={{color:"var(--mut)"}}>· select an area, choose models, build scenarios, submit</span></div>
+      <div className="note" style={{margin:"0 0 8px",padding:"6px 9px",borderRadius:6,background:"rgba(63,182,139,0.08)",border:"1px solid var(--line)"}}>New here? Pick a state, keep the default models and the two scenarios, and press <b>Run free</b>. Then change the market, policy, or emphasis and watch the recommendation update.</div>
 
       {/* 1. area */}
       <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
@@ -284,6 +309,7 @@ export default function RunBuilder({ initState }) {
           </div>
         ))}
         <span onClick={addScn} style={{...chip(false),display:"inline-block",marginTop:2}}>+ add scenario</span>
+        <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Prices are regionally adjusted (illustrative) for the selected state.</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:8}}>
           <span style={{color:"var(--mut)"}}>Market:</span>
           {Object.entries(PRICE_PATHS).map(([k,v])=><span key={k} style={chip(price===k)} onClick={()=>setPrice(k)}>{v.label}</span>)}
