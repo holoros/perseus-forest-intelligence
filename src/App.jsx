@@ -12,6 +12,7 @@ const FaustmannRotation = lazy(() => import("./FaustmannRotation.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
+import ScenarioRunner from "./ScenarioRunner.jsx";
 import GlossaryPanel from "./GlossaryPanel.jsx";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
@@ -731,7 +732,7 @@ export default function App(){
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
   useEffect(()=>{
-    const needEco = ecoOn || inspectMode || aoi || (tab==="health" && hrrUnit==="ecoregion");
+    const needEco = ecoOn || inspectMode || aoi || tab==="scenario" || (tab==="health" && hrrUnit==="ecoregion");
     if(!needEco) return;
     if(!ecoGeo) j("geo/us_eco_l3_features.geojson").then(setEcoGeo).catch(()=>{});
     if(!l3yields) j("api/yield_curves_by_l3.json").then(setL3yields).catch(()=>{});
@@ -1481,10 +1482,10 @@ export default function App(){
           )}
           {/* When an AOI is active, the research surface is collapsed by default. */}
           {(!aoi || researchOpen) && <div className="tabs">
-            {[["compare","Compare areas"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
+            {[["compare","Compare areas"],["scenario","Scenario runner"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["stumpage","Stumpage"],["landis","LANDIS stratified"],
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]]
-              .filter(([k])=> k==="compare" || k==="health" || toolsOpen || tab===k)
+              .filter(([k])=> k==="compare" || k==="scenario" || k==="health" || toolsOpen || tab===k)
               .map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
@@ -1515,6 +1516,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
+          {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
