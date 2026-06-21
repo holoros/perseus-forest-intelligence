@@ -78,6 +78,15 @@ export default function ScenarioRunner({ yields }) {
   const p = PRICE_PATHS[price];
   const econRows = MGMT.filter(([k]) => mgmts[k]).map(([k, lbl, curveKey, col]) => ({ k, lbl, col, e: econAt(node, curveKey, p) }));
 
+  // Decision synthesis: reserve (carbon) vs managed (timber), at chosen prices and at high prices.
+  const eRes = econAt(node, "untreated", p), eBas = econAt(node, "harvested", p);
+  const eResHi = econAt(node, "untreated", PRICE_PATHS.high), eBasHi = econAt(node, "harvested", PRICE_PATHS.high);
+  const carbonLean = (eRes.npvC || 0) > (eBas.npvH || 0);
+  const flips = carbonLean !== ((eResHi.npvC || 0) > (eBasHi.npvH || 0));
+  const decision = carbonLean
+    ? `At ${p.label.toLowerCase()} market prices, this forest is worth more standing: carbon NPV (~$${fmt(eRes.npvC)}/ac) exceeds timber NPV (~$${fmt(eBas.npvH)}/ac). A reserve or light-touch strategy looks favorable here${flips ? ", though that flips toward harvest if timber prices run high." : "."}`
+    : `At ${p.label.toLowerCase()} market prices, active management pays: timber NPV (~$${fmt(eBas.npvH)}/ac) exceeds carbon NPV (~$${fmt(eRes.npvC)}/ac). A managed strategy looks favorable here${flips ? ", though carbon can win if prices or payments rise." : "."}`;
+
   const chip = (on, okCol) => ({ fontSize: 11, padding: "2px 9px", borderRadius: 4, cursor: "pointer",
     border: `1px solid ${on ? (okCol || "#3a6ea5") : "var(--bd,#345)"}`,
     background: on ? (okCol || "#3a6ea5") : "transparent", color: on ? "#fff" : "var(--fg,#cdd)" });
@@ -136,6 +145,12 @@ export default function ScenarioRunner({ yields }) {
           {Object.entries(PRICE_PATHS).map(([k, v]) => <span key={k} style={chip(price === k)} onClick={() => setPrice(k)}>{v.label}</span>)}
           <span style={{ color: "var(--mut)" }}>· carbon ${p.carbon}/tCO2e</span>
         </div>
+      </div>
+
+      {/* decision headline */}
+      <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8, borderLeft: "3px solid " + (carbonLean ? "#2e9e6b" : "#d98a3c") }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", marginBottom: 2 }}>Recommendation</div>
+        <div style={{ fontSize: 12 }}>{decision}</div>
       </div>
 
       {/* chart */}
