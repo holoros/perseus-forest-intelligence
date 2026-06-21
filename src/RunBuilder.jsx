@@ -151,6 +151,17 @@ export default function RunBuilder({ initState }) {
     return best;
   })();
 
+  // Surveillance (near-term, Guo framework): observed disturbance by named agent,
+  // from the FIA disturbance-rate metrics already in the series.
+  const latestRate = (key) => { const m = series && series[key]; if(!m) return null;
+    const lab = Object.keys(m)[0]; const arr = lab && m[lab];
+    const e = arr && arr[0]; return e && e.pts && e.pts.length ? e.pts[e.pts.length-1][1] : null; };
+  const distAgents = series ? [["insect","Insects","#d98a3c"],["disease","Disease","#c0504d"],
+      ["weather","Weather","#3a6ea5"],["animal","Animal","#2e9e6b"],["human","Human","#8a5cd1"]]
+      .map(([k,lbl,col])=>{ const v=latestRate(k+"_rate_state_pct"); return v!=null?{k,lbl,col,v}:null; }).filter(Boolean) : [];
+  const anyDist = latestRate("any_disturbance_rate_pct");
+  const distMax = distAgents.length ? Math.max(...distAgents.map(a=>a.v)) : 1;
+
   const selModels = MODELS.filter(([k]) => models[k]);
   const p = PRICE_PATHS[price];
   const esAnnual = (ES_LEVELS.find(([k])=>k===es)||[])[2] || 0;
@@ -284,6 +295,24 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
         {dataSource!=="fia" && <div className="note" style={{marginTop:3,color:"#8a5cd1"}}>{dataSource==="treemap"?"TreeMap":"Your inventory"} drives a subscriber Cardinal run; the free preview below uses precomputed FIA results for {st}.</div>}
         <div className="note" style={{marginTop:4}}>States are the precomputed unit here. A subscriber run takes a drawn AOI or uploaded inventory at any scale, crossing state lines, and resolves the same way.</div>
       </div>
+
+      {/* surveillance (near-term, Guo framework) */}
+      {distAgents.length > 0 && (
+        <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
+          <div style={{fontSize:11,color:"var(--mut)",marginBottom:4}}>Forest-health surveillance · near-term · observed disturbance by agent ({st})</div>
+          {anyDist!=null && <div style={{fontSize:12,marginBottom:5}}>Any disturbance affects <b>{anyDist.toFixed(1)}%</b> of forest area (FIA).</div>}
+          {distAgents.map(a=>(
+            <div key={a.k} style={{display:"flex",alignItems:"center",gap:8,fontSize:11,marginBottom:3}}>
+              <span style={{width:58,color:"var(--mut)"}}>{a.lbl}</span>
+              <div style={{flex:1,height:9,background:"var(--panel)",borderRadius:3,overflow:"hidden"}}>
+                <div style={{height:"100%",width:Math.max(2,a.v/distMax*100)+"%",background:a.col}}/>
+              </div>
+              <span style={{width:42,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{a.v.toFixed(1)}%</span>
+            </div>
+          ))}
+          <div className="note" style={{marginTop:4}}>Named-agent disturbance rates (FIA). This is the framework's near-term surveillance layer; the scenario engine below is the longer-term assessment. Available where FIA disturbance coding is complete; expanding CONUS-wide is on the roadmap.</div>
+        </div>
+      )}
 
       {/* 2. models */}
       <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
