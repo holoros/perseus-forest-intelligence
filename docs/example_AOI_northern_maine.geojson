@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "North Maine Woods example parcel",
+        "note": "Illustrative spruce-fir ownership in the budworm region, for demo"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-69.45, 46.20],
+            [-69.10, 46.22],
+            [-69.05, 46.45],
+            [-69.40, 46.48],
+            [-69.45, 46.20]
+          ]
+        ]
+      }
+    }
+  ]
+}

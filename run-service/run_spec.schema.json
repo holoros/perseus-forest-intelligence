@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "perseus/run_spec.schema.json",
+  "title": "PERSEUS scenario run-spec",
+  "description": "Contract the front end posts and the Cardinal scenario-runner consumes. One run = one AOI x chosen models x an assumption matrix.",
+  "type": "object",
+  "required": ["aoi", "models", "assumptions", "tier"],
+  "properties": {
+    "spec_version": { "type": "string", "default": "1.0" },
+    "aoi": {
+      "type": "object",
+      "description": "Area of interest: a point, a drawn polygon, or an uploaded stand inventory reference.",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["point", "polygon", "inventory"] },
+        "lon": { "type": "number" },
+        "lat": { "type": "number" },
+        "geometry": { "type": "object", "description": "GeoJSON geometry when type=polygon" },
+        "inventory_ref": { "type": "string", "description": "stored upload id when type=inventory" },
+        "l3code": { "type": "string", "description": "optional pre-resolved EPA L3 ecoregion code" }
+      }
+    },
+    "data_source": {
+      "type": "object",
+      "description": "Data-agnostic stand initialization. The runner pulls plot/condition state from the chosen source for the AOI; user-supplied inventory overrides.",
+      "properties": {
+        "source": { "enum": ["fia", "treemap", "user"], "default": "fia" },
+        "fia_evalid": { "type": "string", "description": "optional FIA evaluation id to pin the inventory vintage" },
+        "treemap_year": { "type": "integer", "description": "TreeMap raster year when source=treemap" },
+        "upload_ref": { "type": "string", "description": "stored upload id of a user tree/condition list when source=user" }
+      },
+      "default": { "source": "fia" }
+    },
+    "models": {
+      "type": "array",
+      "description": "Engines to run.",
+      "items": { "enum": ["fvs", "cbm", "gcbm", "cem", "landis", "yield"] },
+      "minItems": 1,
+      "default": ["fvs", "cbm", "yield"]
+    },
+    "assumptions": {
+      "type": "object",
+      "description": "Contrasts to run. The runner expands the cross-product (management x climate x disturbance).",
+      "properties": {
+        "management": { "type": "array", "items": { "enum": ["reserve", "baseline", "increased", "intensive", "climate_smart"] }, "default": ["reserve", "baseline"] },
+        "climate": { "type": "array", "items": { "enum": ["historic", "rcp45", "rcp85"] }, "default": ["historic", "rcp45"] },
+        "disturbance": { "type": "array", "items": { "enum": ["historic", "elevated"] }, "default": ["historic"] },
+        "horizon_year": { "type": "integer", "minimum": 2030, "maximum": 2125, "default": 2100 }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "description": "Requested output metrics (landowner-facing).",
+      "items": { "enum": ["agc", "agb", "volume", "harvest_value", "npv", "carbon_value", "es_water", "es_habitat", "hrr_priority"] },
+      "default": ["agc", "volume", "harvest_value", "carbon_value"]
+    },
+    "markets": {
+      "type": "object",
+      "description": "Forward market assumptions that drive economic outputs. A price_scenario picks a built-in low/base/high path; explicit values override.",
+      "properties": {
+        "price_scenario": { "enum": ["low", "base", "high"], "default": "base" },
+        "sawtimber_usd_per_cuft": { "type": "number", "description": "stumpage, sawtimber" },
+        "pulp_usd_per_cuft": { "type": "number", "description": "stumpage, pulp/fiber" },
+        "biomass_usd_per_ton": { "type": "number" },
+        "carbon_usd_per_tco2e": { "type": "number", "default": 15 },
+        "es_water_usd_per_ac_yr": { "type": "number" },
+        "es_habitat_usd_per_ac_yr": { "type": "number" },
+        "discount_rate": { "type": "number", "default": 0.04 }
+      },
+      "default": { "price_scenario": "base", "carbon_usd_per_tco2e": 15, "discount_rate": 0.04 }
+    },
+    "tier": { "enum": ["free", "subscriber"], "default": "free" },
+    "user": { "type": ["string", "null"], "description": "account id; required for subscriber custom runs" }
+  }
+}
