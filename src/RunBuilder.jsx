@@ -47,6 +47,17 @@ const RESIL_FACTOR = { reserve:1.10, conservation:1.05, extensive:1.0, baseline:
 const EMPH = { balanced:{e:1,c:1,r:1,a:1}, income:{e:2,c:0.5,r:0.5,a:1}, carbon:{e:0.5,c:2,r:1,a:1}, resilience:{e:0.5,c:1,r:2,a:1} };
 const EMPH_LABELS = [["balanced","Balanced"],["income","Income"],["carbon","Carbon"],["resilience","Resilience"]];
 const norm = (v, lo, hi) => (hi>lo ? (v-lo)/(hi-lo) : 0.5);
+function computeScores(rs, emphasis){
+  const vals=(key)=>rs.map(r=>r.criteria[key]).filter(v=>v!=null);
+  const rng=(key)=>{const v=vals(key);return v.length?[Math.min(...v),Math.max(...v)]:[0,1];};
+  const [eLo,eHi]=rng("econ"),[cLo,cHi]=rng("carbon"),[rLo,rHi]=rng("resil"),[aLo,aHi]=rng("agree");
+  const w=EMPH[emphasis]||EMPH.balanced;
+  const scored=rs.map(r=>{const c=r.criteria;
+    const ne=norm(c.econ,eLo,eHi),nc=norm(c.carbon,cLo,cHi),nr=c.resil!=null?norm(c.resil,rLo,rHi):0.5,na=c.agree!=null?norm(c.agree,aLo,aHi):0.5;
+    return {r,score:100*(w.e*ne+w.c*nc+w.r*nr+w.a*na)/(w.e+w.c+w.r+w.a)};});
+  const best=scored.length?Math.max(...scored.map(s=>s.score)):0;
+  return {scored,best};
+}
 
 function econFromL3(node, curveKey, p) {
   const cm = (node && node.curves) || {};
@@ -173,6 +184,38 @@ export default function RunBuilder() {
   }
   function runFree() { setHpc("idle"); resolve(); }
 
+  function generateReport() {
+    if (!run || !run.results) return;
+    const { scored, best } = computeScores(run.results, emphasis);
+    const esc = s => String(s).replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
+    const date = new Date().toLocaleDateString();
+    const scoreRows = scored.map(({ r, score }) => { const c=r.criteria; const isBest=score>=best-0.001;
+      return `<tr${isBest?' style="background:#eaf7f0;font-weight:600"':''}><td>${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>$${fmt(c.econ)}</td><td>$${fmt(c.carbon)}</td><td>$${fmt(c.es)}</td><td>${c.resil!=null?Math.round(c.resil*100):"&ndash;"}</td><td>${c.agree!=null?Math.round(c.agree*100)+"%":"&ndash;"}</td><td>${Math.round(score)}${isBest?" &#9733;":""}</td></tr>`; }).join("");
+    const scnRows = run.results.map((r,i) => { const present=r.engines.filter(e=>e.rows.length); const eng=present.map(e=>`${e.cls} (${e.rows.length})`).join(", ");
+      return `<tr><td>${i+1}. ${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>${eng||"&mdash;"}</td><td>timber $${fmt(r.econ.npvH)}, carbon $${fmt(r.econ.npvC)}, ES $${fmt(r.econ.esv)}, <b>total $${fmt(r.econ.total)}</b></td></tr>`; }).join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Forest Scenario Report &mdash; ${st}</title>
+<style>body{font-family:Georgia,serif;max-width:760px;margin:32px auto;padding:0 16px;color:#1a1a1a;line-height:1.5}h1{font-size:21px;margin-bottom:2px}h2{font-size:14px;border-bottom:1px solid #ccc;padding-bottom:3px;margin-top:22px}table{border-collapse:collapse;width:100%;font-size:12px;margin:6px 0}th,td{border:1px solid #ccc;padding:4px 7px;text-align:left}.muted{color:#666;font-size:11px}.rec{border-left:4px solid #2e9e6b;padding:8px 12px;background:#f6fbf8;margin:10px 0}pre{background:#f5f5f5;padding:8px;font-size:10px;overflow:auto;white-space:pre-wrap}@media print{body{margin:0}}</style></head><body>
+<h1>PERSEUS Forest Scenario Report</h1>
+<div class="muted">Area: ${st} &middot; Generated ${date} &middot; Decision-support prototype (illustrative)</div>
+<div class="rec"><b>Recommendation.</b> ${decision?esc(decision):"Run scenarios to generate a recommendation."}</div>
+<h2>Assumptions</h2>
+<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Market prices: ${p.label}. Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
+<h2>Multi-criteria scorecard</h2>
+<table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
+<h2>Scenario detail (multi-model ensemble)</h2>
+<table><thead><tr><th>Scenario</th><th>Engines (model runs)</th><th>Economics (NPV per acre)</th></tr></thead><tbody>${scnRows}</tbody></table>
+<h2>Run specification (Cardinal contract)</h2>
+<pre>${esc(JSON.stringify(spec,null,2))}</pre>
+<h2>Methods &amp; caveats</h2>
+<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with illustrative forward prices and a 4% discount rate; policy and ecosystem-service effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
+</body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `PERSEUS_report_${st}_${new Date().toISOString().slice(0,10)}.html`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+
   const setScn=(i,k,v)=>setScenarios(s=>s.map((r,j)=>j===i?{...r,[k]:v}:r));
   const addScn=()=>setScenarios(s=>[...s,{mgmt:(availMgmts[0]||MGMTS[0])[0],climate:"rcp45"}]);
   const rmScn=(i)=>setScenarios(s=>s.length>1?s.filter((_,j)=>j!==i):s);
@@ -255,6 +298,7 @@ export default function RunBuilder() {
 
       {/* results */}
       {run && run.status==="no_data" && <div className="note" style={{padding:8}}>No precomputed series for {st}. A subscriber run would compute this live on Cardinal.</div>}
+      {run && run.results && <div style={{margin:"2px 0 8px"}}><button onClick={generateReport} className="mini-btn" style={{borderStyle:"solid",fontSize:12,padding:"4px 12px"}}>⬇ Download report (HTML · print to PDF)</button></div>}
       {run && run.results && decision && (
         <div className="chartcard" style={{padding:"8px 10px",marginBottom:8,borderLeft:"3px solid "+(carbonLean?"#2e9e6b":"#d98a3c")}}>
           <div style={{fontSize:11,fontWeight:600,marginBottom:2}}>Recommendation {hpc==="complete"?"· delivered from Cardinal":"· free precomputed"}</div>
@@ -276,15 +320,7 @@ export default function RunBuilder() {
         );
       })}
       {run && run.results && run.results.length>0 && (() => {
-        const rs = run.results;
-        const vals = (key) => rs.map(r=>r.criteria[key]).filter(v=>v!=null);
-        const rng = (key) => { const v=vals(key); return v.length?[Math.min(...v),Math.max(...v)]:[0,1]; };
-        const [eLo,eHi]=rng("econ"),[cLo,cHi]=rng("carbon"),[rLo,rHi]=rng("resil"),[aLo,aHi]=rng("agree");
-        const w = EMPH[emphasis];
-        const scored = rs.map(r=>{ const c=r.criteria;
-          const ne=norm(c.econ,eLo,eHi), nc=norm(c.carbon,cLo,cHi), nr=c.resil!=null?norm(c.resil,rLo,rHi):0.5, na=c.agree!=null?norm(c.agree,aLo,aHi):0.5;
-          return { r, score:100*(w.e*ne+w.c*nc+w.r*nr+w.a*na)/(w.e+w.c+w.r+w.a) }; });
-        const best = Math.max(...scored.map(s=>s.score));
+        const { scored, best } = computeScores(run.results, emphasis);
         return (
           <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
             <div style={{fontSize:11,fontWeight:600,marginBottom:1}}>Multi-criteria scorecard <span style={{color:"var(--mut)",fontWeight:400}}>· precision-forestry decision framework</span></div>
