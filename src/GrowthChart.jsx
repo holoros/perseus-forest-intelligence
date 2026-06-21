@@ -106,13 +106,26 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   const xstep = Math.max(1, (xnorm<1.5?1:xnorm<3?2:xnorm<7?5:10)*xmag);
   const xticks=[]; for(let t=Math.ceil(x0/xstep)*xstep; t<=x1+1e-6; t+=xstep)
     xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{Math.round(t)}</text>);
-  const bands = showBands ? visible.filter(s=> s.pts.some(p=>p.length>=4)).map((s,i)=>{
-    const col = classCol[s.cls] || "#bbb";
-    const bp = s.pts.filter(p=>p.length>=4);
-    const up = bp.map((p,k)=> (k?"L":"M") + X(p[0]).toFixed(1) + " " + Y(p[3]).toFixed(1)).join(" ");
-    const dn = bp.slice().reverse().map(p=> "L" + X(p[0]).toFixed(1) + " " + Y(p[2]).toFixed(1)).join(" ");
-    return <path key={"b"+i} d={up+" "+dn+" Z"} fill={col} opacity="0.12" stroke="none"/>;
-  }) : null;
+  // Uncertainty bands aggregated by model CLASS (one soft envelope per family)
+  // rather than one per engine — with many engines, per-engine bands stack into
+  // an unreadable blob. The class envelope spans min(lo)..max(hi) across the
+  // family at each year. Fewer bands draw darker so they remain visible.
+  const bands = showBands ? (() => {
+    const byCls = {};
+    visible.forEach(s => { if(s.pts.some(p=>p.length>=4)) (byCls[s.cls]=byCls[s.cls]||[]).push(s); });
+    const entries = Object.entries(byCls);
+    const op = entries.length <= 2 ? 0.16 : entries.length <= 4 ? 0.12 : 0.09;
+    return entries.map(([cls, ser]) => {
+      const col = classCol[cls] || "#bbb";
+      const byYr = {};
+      ser.forEach(s => s.pts.forEach(p => { if(p.length>=4){ (byYr[p[0]]=byYr[p[0]]||{lo:[],hi:[]}); byYr[p[0]].lo.push(p[2]); byYr[p[0]].hi.push(p[3]); } }));
+      const yrs = Object.keys(byYr).map(Number).sort((a,b)=>a-b);
+      if(yrs.length < 2) return null;
+      const up = yrs.map((y,k)=> (k?"L":"M") + X(y).toFixed(1) + " " + Y(Math.max(...byYr[y].hi)).toFixed(1)).join(" ");
+      const dn = yrs.slice().reverse().map(y=> "L" + X(y).toFixed(1) + " " + Y(Math.min(...byYr[y].lo)).toFixed(1)).join(" ");
+      return <path key={"b"+cls} d={up+" "+dn+" Z"} fill={col} opacity={op} stroke="none"><title>{cls} ensemble range</title></path>;
+    });
+  })() : null;
   const INV_MODELS=["yc_hybrid_v1","yc_treemap_spatial_v1"];
   const invBand = (showInvBand ? (()=>{
     const ser=visible.filter(s=>INV_MODELS.includes(s.model));
@@ -129,18 +142,22 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   const DASH = { CEM:"0", CBM:"7 3", FVS:"4 3", YC:"1.5 3", LANDIS:"9 3 2 3",
                  OSM:"6 2", ES:"2 2", ECON:"7 2 2 2" };
   const dashFor = s => DASH[s.cls] != null ? DASH[s.cls] : "0";
-  const drawLine = (s, i, dashed) => {
+  const drawLine = (s, i, dashed, dense) => {
     const col = shadeFor(s);
     const d = s.pts.map((p,k)=> (k? "L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
     const tag = dashed ? `${s.label} · ${overlayLabel||"compare"}` : `${s.label}`;
+    // When many engines draw, thin and fade member lines so the class bands and
+    // family labels carry the story instead of a tangle of equal-weight lines.
+    const sw = dashed ? 1.2 : (dense ? 1.0 : 1.8);
+    const op = dashed ? 0.55 : (dense ? 0.5 : 0.95);
     return <g key={(dashed?"o":"")+i}>
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
             style={{cursor:"pointer"}}
             onClick={()=> !dashed && onIsolate && onIsolate(s.model)}>
         <title>{`${tag} (${s.cls}) — click to isolate`}</title>
       </path>
-      <path d={d} fill="none" stroke={col} strokeWidth={dashed?1.2:1.8}
-            opacity={dashed?0.55:0.95}
+      <path d={d} fill="none" stroke={col} strokeWidth={sw}
+            opacity={op}
             strokeDasharray={dashFor(s)}
             style={{pointerEvents:"none"}}/>
     </g>;
@@ -260,8 +277,8 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
           <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="5 4" strokeWidth="1"/>
           <text x={L+4} y={Y(fiaRef)-4} fill="#8aa0b0" fontSize="10">FIA observed {fiaRef} Tg{fiaYear?` (${fiaYear})`:""}</text>
         </>}
-        {drawSet.map((s,i)=> drawLine(s, i, false))}
-        {drawOverlay.map((s,i)=> drawLine(s, i, true))}
+        {drawSet.map((s,i)=> drawLine(s, i, false, DENSE))}
+        {drawOverlay.map((s,i)=> drawLine(s, i, true, DENSE))}
         {endLabels}
         {hoverX != null && (
           <line x1={hoverX} y1={T} x2={hoverX} y2={H-B}
