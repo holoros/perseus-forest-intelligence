@@ -21,6 +21,10 @@ const PRICE_PATHS = {
   high: { saw: 0.55, pulp: 0.09, carbon: 30, label: "High" },
 };
 const SAW_FRACTION = 0.55, DISCOUNT = 0.04;
+// Ecosystem-service payments (user-set $/ac/yr; intact forest delivers more, managed gets a fraction).
+const ES_LEVELS = [["none", "None", 0], ["mod", "$5/ac/yr", 5], ["high", "$15/ac/yr", 15]];
+const ES_MANAGED_FRAC = 0.5;
+const annuity = (age, r) => (1 - Math.pow(1 + r, -age)) / r;
 const fmt = (v, d = 0) => (v == null || isNaN(v) ? "–" : Number(v).toLocaleString(undefined, { maximumFractionDigits: d }));
 // Economics at the final curve age for one management series.
 function econAt(node, curveKey, p) {
@@ -70,6 +74,7 @@ export default function ScenarioRunner({ yields }) {
   const [mgmts, setMgmts] = useState({ reserve: true, baseline: true });
   const [climate, setClimate] = useState("historic");
   const [price, setPrice] = useState("base");
+  const [es, setEs] = useState("none");
   if (!l3) return <div className="empty">Scenario data loading…</div>;
   let selCodes = Object.keys(sel).filter((k) => sel[k] && l3[k]);
   if (!selCodes.length) selCodes = [codes[0]];
@@ -97,16 +102,29 @@ export default function ScenarioRunner({ yields }) {
     : null;
 
   const p = PRICE_PATHS[price];
-  const econRows = MGMT.filter(([k]) => mgmts[k]).map(([k, lbl, curveKey, col]) => ({ k, lbl, col, e: econAt(node, curveKey, p) }));
-
-  // Decision synthesis: reserve (carbon) vs managed (timber), at chosen prices and at high prices.
   const eRes = econAt(node, "untreated", p), eBas = econAt(node, "harvested", p);
   const eResHi = econAt(node, "untreated", PRICE_PATHS.high), eBasHi = econAt(node, "harvested", PRICE_PATHS.high);
-  const carbonLean = (eRes.npvC || 0) > (eBas.npvH || 0);
-  const flips = carbonLean !== ((eResHi.npvC || 0) > (eBasHi.npvH || 0));
+  const esAnnual = (ES_LEVELS.find(([k]) => k === es) || [])[2] || 0;
+  const esAge = eRes.age || eBas.age || 100;
+  const esNPVfull = esAnnual ? esAnnual * annuity(esAge, DISCOUNT) : 0;
+  const esNPVmanaged = esNPVfull * ES_MANAGED_FRAC;
+  const esFor = (k) => (k === "reserve" ? esNPVfull : esNPVmanaged);
+
+  const econRows = MGMT.filter(([k]) => mgmts[k]).map(([k, lbl, curveKey, col]) => {
+    const e = econAt(node, curveKey, p);
+    const primary = k === "reserve" ? (e.npvC || 0) : (e.npvH || 0);
+    return { k, lbl, col, e, esv: esFor(k), total: primary + esFor(k) };
+  });
+
+  // Decision synthesis: total NPV of keeping forest standing (carbon + ES) vs managing (timber + partial ES).
+  const reserveTotal = (eRes.npvC || 0) + esNPVfull;
+  const managedTotal = (eBas.npvH || 0) + esNPVmanaged;
+  const carbonLean = reserveTotal > managedTotal;
+  const flips = carbonLean !== (((eResHi.npvC || 0) + esNPVfull) > ((eBasHi.npvH || 0) + esNPVmanaged));
+  const esClause = esAnnual ? " with ecosystem-service payments" : "";
   const decision = carbonLean
-    ? `At ${p.label.toLowerCase()} market prices, this forest is worth more standing: carbon NPV (~$${fmt(eRes.npvC)}/ac) exceeds timber NPV (~$${fmt(eBas.npvH)}/ac). A reserve or light-touch strategy looks favorable here${flips ? ", though that flips toward harvest if timber prices run high." : "."}`
-    : `At ${p.label.toLowerCase()} market prices, active management pays: timber NPV (~$${fmt(eBas.npvH)}/ac) exceeds carbon NPV (~$${fmt(eRes.npvC)}/ac). A managed strategy looks favorable here${flips ? ", though carbon can win if prices or payments rise." : "."}`;
+    ? `At ${p.label.toLowerCase()} market prices${esClause}, this forest is worth more standing: keeping it intact pencils out higher (~$${fmt(reserveTotal)}/ac NPV) than harvesting (~$${fmt(managedTotal)}/ac). A reserve or light-touch strategy looks favorable here${flips ? ", though that can flip toward harvest if timber prices run high." : "."}`
+    : `At ${p.label.toLowerCase()} market prices${esAnnual ? " even with ecosystem-service payments" : ""}, active management pays: harvesting pencils out higher (~$${fmt(managedTotal)}/ac NPV) than keeping it standing (~$${fmt(reserveTotal)}/ac). A managed strategy looks favorable here${flips ? ", though keeping it standing can win if carbon or ES payments rise." : "."}`;
 
   const chip = (on, okCol) => ({ fontSize: 11, padding: "2px 9px", borderRadius: 4, cursor: "pointer",
     border: `1px solid ${on ? (okCol || "#3a6ea5") : "var(--bd,#345)"}`,
@@ -169,10 +187,14 @@ export default function ScenarioRunner({ yields }) {
             {METRICS.map(([k, lbl]) => <option key={k} value={k}>{lbl}</option>)}
           </select>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Market prices:</span>
           {Object.entries(PRICE_PATHS).map(([k, v]) => <span key={k} style={chip(price === k)} onClick={() => setPrice(k)}>{v.label}</span>)}
           <span style={{ color: "var(--mut)" }}>· carbon ${p.carbon}/tCO2e</span>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
+          <span style={{ color: "var(--mut)" }}>Ecosystem-service payments:</span>
+          {ES_LEVELS.map(([k, lbl]) => <span key={k} style={chip(es === k)} onClick={() => setEs(k)}>{lbl}</span>)}
         </div>
       </div>
 
@@ -209,32 +231,32 @@ export default function ScenarioRunner({ yields }) {
       {econRows.length > 0 && (
         <div className="chartcard" style={{ padding: "8px 10px", marginTop: 8 }}>
           <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-            Economics at age {econRows[0].e.age || "horizon"} · {p.label} market · timber vs carbon ($/ac)
+            Net present value per acre · age {esAge} · {p.label} market{esAnnual ? ` · ES $${esAnnual}/ac/yr` : ""}
           </div>
           <table style={{ width: "100%", fontSize: 11, borderCollapse: "collapse", fontVariantNumeric: "tabular-nums" }}>
             <thead>
               <tr style={{ color: "var(--mut)", textAlign: "right" }}>
                 <th style={{ textAlign: "left", fontWeight: 500 }}>Management</th>
-                <th style={{ fontWeight: 500 }}>Timber value</th>
-                <th style={{ fontWeight: 500 }}>Carbon value</th>
-                <th style={{ fontWeight: 500 }}>NPV (timber)</th>
-                <th style={{ fontWeight: 500 }}>NPV (carbon)</th>
+                <th style={{ fontWeight: 500 }}>Timber</th>
+                <th style={{ fontWeight: 500 }}>Carbon</th>
+                <th style={{ fontWeight: 500 }}>Eco-services</th>
+                <th style={{ fontWeight: 500 }}>Total NPV</th>
               </tr>
             </thead>
             <tbody>
               {econRows.map((r) => (
                 <tr key={r.k} style={{ textAlign: "right", borderTop: "1px solid var(--line,#345)" }}>
                   <td style={{ textAlign: "left", color: r.col, fontWeight: 600 }}>{r.lbl.split(" ")[0]}</td>
-                  <td>${fmt(r.e.harvest)}</td>
-                  <td>${fmt(r.e.carbon)}</td>
                   <td>${fmt(r.e.npvH)}</td>
                   <td>${fmt(r.e.npvC)}</td>
+                  <td>${fmt(r.esv)}</td>
+                  <td style={{ fontWeight: 600 }}>${fmt(r.total)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           <div className="note" style={{ marginTop: 4 }}>
-            Illustrative stumpage and carbon prices, 4% discount. The point is the trade-off: managed land earns timber revenue, reserved land builds carbon value. Which wins depends on the prices you assume — that is the decision the tool is built to inform.
+            Illustrative prices, 4% discount; ES paid per acre held (managed land at {Math.round(ES_MANAGED_FRAC * 100)}% of intact). The point is the trade-off across timber, carbon, and ecosystem services: which use wins depends on the prices and payments you assume, which is the decision the tool is built to inform.
           </div>
         </div>
       )}
