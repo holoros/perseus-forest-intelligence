@@ -941,7 +941,7 @@ function AreaBriefing({ aoi }){
   );
 }
 
-export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid, fia }){
+export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid, fia, onRun }){
   const [mmMetric, setMmMetric] = useState("agc_live_total");
   const [mmBucket, setMmBucket] = useState("managed (harvest)");
   const [mmYear, setMmYear] = useState(2050);
@@ -967,6 +967,8 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
             onClick={()=>openReport(aoi, stumpage, units, {bucket:mmBucket, year:mmYear})} title="open a full printable area report (save or print to PDF)">Report ↗</button>
           <button className="mini-btn" style={{marginTop:0,marginRight:6}}
             onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV ↓</button>
+          {onRun && state && <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",borderColor:"#8a5cd1",fontWeight:600}}
+            onClick={()=>onRun(state)} title="run the full multi-model scenario ensemble for this area">Run scenarios →</button>}
           {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
         </span>
       </div>

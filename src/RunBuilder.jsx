@@ -90,8 +90,9 @@ function MultiLineChart({ rows }) {
   );
 }
 
-export default function RunBuilder() {
-  const [st, setSt] = useState("ME");
+export default function RunBuilder({ initState }) {
+  const [st, setSt] = useState(initState && STATES.includes(initState) ? initState : "ME");
+  useEffect(() => { if (initState && STATES.includes(initState)) setSt(initState); }, [initState]);
   const [models, setModels] = useState({ fvs:true, cbm:true, cem:true, yield:true, landis:false });
   const [metric, setMetric] = useState("agc_live_total");
   const [scenarios, setScenarios] = useState([{ mgmt:"reserve", climate:"historic" }, { mgmt:"baseline", climate:"historic" }]);
