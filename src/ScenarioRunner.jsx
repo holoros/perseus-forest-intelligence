@@ -97,8 +97,9 @@ export default function ScenarioRunner({ yields }) {
 
   const atEnd = (s) => s.pts.length ? s.pts[s.pts.length - 1][1] : null;
   const res = series.find((s) => s.k === "reserve"), bas = series.find((s) => s.k === "baseline");
-  const takeaway = (res && bas && atEnd(res) != null && atEnd(bas) != null)
-    ? `At age ${node.curves[metric].untreated.slice(-1)[0][0]}, leaving this stand unharvested holds about ${fmt(atEnd(res))} vs ${fmt(atEnd(bas))} under harvest (${METRICS.find(([k])=>k===metric)[1].toLowerCase()}). The gap is the carbon-vs-income trade-off to weigh.`
+  const tAge = node.curves && node.curves[metric] && node.curves[metric].untreated && node.curves[metric].untreated.slice(-1)[0][0];
+  const takeaway = (tAge && res && bas && atEnd(res) != null && atEnd(bas) != null)
+    ? `At age ${tAge}, leaving this forest unharvested holds about ${fmt(atEnd(res))} vs ${fmt(atEnd(bas))} under harvest (${METRICS.find(([k])=>k===metric)[1].toLowerCase()}). The gap is the carbon-vs-income trade-off to weigh.`
     : null;
 
   const p = PRICE_PATHS[price];
