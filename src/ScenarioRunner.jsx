@@ -41,18 +41,39 @@ function econAt(node, curveKey, p) {
   return out;
 }
 
+// Blend yield curves across multiple ecoregions (a multi-region / multi-state ownership).
+const BLEND_CURVES = ["agb_tonac", "carbon_lbac", "voltot_cuftac", "merchvol_cuftac"];
+const BLEND_SERIES = ["untreated", "harvested"];
+function blendNode(nodes) {
+  nodes = nodes.filter(Boolean);
+  if (nodes.length <= 1) return nodes[0];
+  const curves = {};
+  for (const cn of BLEND_CURVES) {
+    curves[cn] = {};
+    for (const sv of BLEND_SERIES) {
+      const arrs = nodes.map((n) => n.curves && n.curves[cn] && n.curves[cn][sv]).filter(Boolean);
+      if (!arrs.length) continue;
+      curves[cn][sv] = arrs[0].map((pt, i) => {
+        const vals = arrs.map((a) => a[i] && a[i][1]).filter((v) => v != null && !isNaN(v));
+        return [pt[0], vals.reduce((s, v) => s + v, 0) / (vals.length || 1)];
+      });
+    }
+  }
+  return { name: nodes.length + " ecoregions (blended)", curves };
+}
+
 export default function ScenarioRunner({ yields }) {
   const l3 = yields && yields.l3;
   const codes = l3 ? Object.keys(l3).sort((a, b) => l3[a].name.localeCompare(l3[b].name)) : [];
-  const [code, setCode] = useState("");
+  const [sel, setSel] = useState({});
   const [metric, setMetric] = useState("agb_tonac");
   const [mgmts, setMgmts] = useState({ reserve: true, baseline: true });
   const [climate, setClimate] = useState("historic");
   const [price, setPrice] = useState("base");
-  const cur = code && l3 && l3[code];
   if (!l3) return <div className="empty">Scenario data loading…</div>;
-  const cc = code || codes[0];
-  const node = l3[cc];
+  let selCodes = Object.keys(sel).filter((k) => sel[k] && l3[k]);
+  if (!selCodes.length) selCodes = [codes[0]];
+  const node = blendNode(selCodes.map((c) => l3[c]));
 
   const toggle = (k) => setMgmts((m) => ({ ...m, [k]: !m[k] }));
   const series = MGMT.filter(([k]) => mgmts[k]).map(([k, lbl, curveKey, col]) => {
@@ -99,13 +120,21 @@ export default function ScenarioRunner({ yields }) {
 
       {/* place + data source */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 11 }}>
-          <span style={{ color: "var(--mut)" }}>Place (ecoregion):</span>
-          <select value={cc} onChange={(e) => setCode(e.target.value)}
-            style={{ background: "var(--panel)", color: "var(--ink)", border: "1px solid var(--line)", borderRadius: 5, padding: "2px 6px", fontSize: 11, maxWidth: 240 }}>
-            {codes.map((c) => <option key={c} value={c}>{l3[c].name}</option>)}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
+          <span style={{ color: "var(--mut)" }}>Your area:</span>
+          {selCodes.map((c) => (
+            <span key={c} style={{ ...chip(true), display: "inline-flex", gap: 5, alignItems: "center" }}>
+              {l3[c].name}
+              {selCodes.length > 1 && <span onClick={() => setSel((s) => ({ ...s, [c]: false }))} style={{ cursor: "pointer", fontWeight: 700 }}>×</span>}
+            </span>
+          ))}
+          <select value="" onChange={(e) => { if (e.target.value) setSel((s) => ({ ...s, [e.target.value]: true })); }}
+            style={{ background: "var(--panel)", color: "var(--ink)", border: "1px solid var(--line)", borderRadius: 5, padding: "2px 6px", fontSize: 11, maxWidth: 200 }}>
+            <option value="">+ add ecoregion…</option>
+            {codes.filter((c) => !selCodes.includes(c)).map((c) => <option key={c} value={c}>{l3[c].name}</option>)}
           </select>
         </div>
+        <div className="note" style={{ marginTop: 4 }}>Select any combination to represent an ownership that spans regions or states, at any scale. Results blend across the areas you pick. A map-drawn AOI or uploaded inventory drives this directly for subscribers.</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginTop: 6 }}>
           <span style={{ color: "var(--mut)" }}>Data source:</span>
           {SOURCES.map(([k, lbl, on]) => <span key={k} style={{ ...chip(k === "fia"), cursor: on ? "pointer" : "default", opacity: on ? 1 : 0.5 }} title={on ? "" : "subscriber / on-demand"}>{lbl}{!on ? " ◦" : ""}</span>)}
