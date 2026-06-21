@@ -23,8 +23,25 @@ const SAW_FRACTION = 0.55, DISCOUNT = 0.04, ES_MANAGED_FRAC = 0.5;
 const annuity = (age,r)=>(1-Math.pow(1+r,-age))/r;
 const fmt = (v,d=0)=>(v==null||isNaN(v)?"–":Number(v).toLocaleString(undefined,{maximumFractionDigits:d}));
 // Policy as a scenario driver
-const POLICIES = [["none","No policy constraint"],["cert","Certification (+10% timber)"],["setaside","Riparian set-aside (15% no-harvest)"],["reserve_mandate","Reserve mandate (no harvest)"]];
-const applyPolicy = (npvH, policy) => policy==="cert" ? npvH*1.10 : policy==="setaside" ? npvH*0.85 : policy==="reserve_mandate" ? 0 : npvH;
+// Future policy scenarios. Forestry, unlike ag, trends toward restricting management.
+const POLICIES = [
+  ["none","No policy constraint"],
+  ["cert","Certification (+10% timber)"],
+  ["setaside","Riparian set-aside (15% no-harvest)"],
+  ["lsog","Late-successional / old-growth protection"],
+  ["carbon_market","Compliance carbon market"],
+  ["proforestation","Proforestation (let it grow)"],
+  ["public_pressure","Public harvest restrictions"],
+  ["reserve_mandate","Reserve mandate (no harvest)"],
+];
+// effect on timber (t) and carbon (c) value
+const POLICY_FX = {
+  none:{t:1,c:1}, cert:{t:1.10,c:1}, setaside:{t:0.85,c:1.05},
+  lsog:{t:0.65,c:1.25}, carbon_market:{t:1,c:2.0}, proforestation:{t:0,c:1.30},
+  public_pressure:{t:0.55,c:1.10}, reserve_mandate:{t:0,c:1},
+};
+const polT = (policy)=>(POLICY_FX[policy]||POLICY_FX.none).t;
+const polC = (policy)=>(POLICY_FX[policy]||POLICY_FX.none).c;
 // Multi-criteria framework (precision-forestry MCDA): emphasis presets weight normalized criteria
 const RESIL_FACTOR = { reserve:1.10, conservation:1.05, extensive:1.0, baseline:0.95, intensive:0.90 };
 const EMPH = { balanced:{e:1,c:1,r:1,a:1}, income:{e:2,c:0.5,r:0.5,a:1}, carbon:{e:0.5,c:2,r:1,a:1}, resilience:{e:0.5,c:1,r:2,a:1} };
@@ -120,9 +137,10 @@ export default function RunBuilder() {
         return { mk, cls, rows: ms.map(e=>({model:e.model,cls:e.cls,pts:e.pts.map(pt=>[pt[0],pt[1]])})) };
       });
       const e = econFromL3(repNode, mg[3], p);
-      const npvH = applyPolicy(e.npvH||0, policy);
+      const npvH = (e.npvH||0)*polT(policy);
+      const npvC = (e.npvC||0)*polC(policy);
       const esv = (sc.mgmt==="reserve"?1:ES_MANAGED_FRAC) * (esAnnual ? esAnnual*annuity(e.age||100,DISCOUNT) : 0);
-      const primary = sc.mgmt==="reserve" ? (e.npvC||0) : npvH;
+      const primary = sc.mgmt==="reserve" ? npvC : npvH;
       const total = primary + esv;
       // multi-criteria: forest-condition outcome (ensemble endpoint mean) + agreement + resilience
       const ends = engines.flatMap(en=>en.rows).map(r=>r.pts[r.pts.length-1][1]);
@@ -130,8 +148,8 @@ export default function RunBuilder() {
       const sd = ends.length>1 ? Math.sqrt(ends.reduce((a,b)=>a+(b-mean)**2,0)/ends.length) : 0;
       const agree = mean ? Math.max(0, 1-(sd/Math.abs(mean))) : null;
       const resil = stateResil!=null ? Math.min(1, stateResil*(RESIL_FACTOR[sc.mgmt]||1)) : null;
-      return { sc, engines, econ:{...e, npvH, esv, total},
-               criteria:{ econ:total, carbon:e.npvC||0, es:esv, resil, agree, outcome:mean } };
+      return { sc, engines, econ:{...e, npvH, npvC, esv, total},
+               criteria:{ econ:total, carbon:npvC, es:esv, resil, agree, outcome:mean } };
     });
     setRun({ status:"complete", results });
   }
@@ -140,7 +158,7 @@ export default function RunBuilder() {
   const eRes = econFromL3(repNode,"untreated",p), eBas = econFromL3(repNode,"harvested",p);
   const esAge = eRes.age||eBas.age||100;
   const esFull = esAnnual?esAnnual*annuity(esAge,DISCOUNT):0, esMan = esFull*ES_MANAGED_FRAC;
-  const reserveTotal=(eRes.npvC||0)+esFull, managedTotal=applyPolicy(eBas.npvH||0,policy)+esMan;
+  const reserveTotal=(eRes.npvC||0)*polC(policy)+esFull, managedTotal=(eBas.npvH||0)*polT(policy)+esMan;
   const carbonLean = reserveTotal>managedTotal;
   const polClause = policy!=="none" ? ` under ${(POLICIES.find(([k])=>k===policy)||[])[1].toLowerCase()}` : "";
   const decision = repNode ? (carbonLean
@@ -211,6 +229,7 @@ export default function RunBuilder() {
           <span style={{color:"var(--mut)"}}>Policy:</span>
           <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
         </div>
+        <div className="note" style={{marginTop:4}}>Unlike agriculture, forest policy and public sentiment tend to restrict harvesting. These futures, from certification to old-growth protection, compliance carbon, and proforestation, let you test how restrictions reshape value, carbon, and the recommended strategy.</div>
       </div>
 
       {/* 4. submit */}
