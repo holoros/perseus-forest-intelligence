@@ -100,6 +100,8 @@ export default function RunBuilder({ initState }) {
   const [es, setEs] = useState("none");
   const [policy, setPolicy] = useState("none");
   const [emphasis, setEmphasis] = useState("balanced");
+  const [dataSource, setDataSource] = useState("fia");
+  const [upload, setUpload] = useState(null); // {name, rows, cols}
   const [series, setSeries] = useState(null);
   const [yields, setYields] = useState(null);
   const [hrr, setHrr] = useState(null);
@@ -134,6 +136,7 @@ export default function RunBuilder({ initState }) {
   const stateStress = hrr && hrr[st] ? hrr[st].stress_mean : null;
   const spec = {
     spec_version:"1.0", aoi:{type:"inventory",state:st,scale:"ownership"},
+    data_source: dataSource==="user" && upload ? {source:"user",upload_ref:upload.name,n_rows:upload.rows} : {source:dataSource},
     models:selModels.map(([k])=>k),
     assumptions:{ management:[...new Set(scenarios.map(s=>s.mgmt))], climate:[...new Set(scenarios.map(s=>s.climate))], horizon_year:2100, policy },
     markets:{ price_scenario:price, carbon_usd_per_tco2e:p.carbon, es_usd_per_ac_yr:esAnnual, discount_rate:DISCOUNT },
@@ -188,6 +191,13 @@ export default function RunBuilder({ initState }) {
     setTimeout(()=>{ setHpc("complete"); resolve(); }, 3800);
   }
   function runFree() { setHpc("idle"); resolve(); }
+  function onUpload(e){
+    const file = e.target.files && e.target.files[0]; if(!file) return;
+    const rd = new FileReader();
+    rd.onload = () => { const lines = String(rd.result||"").split(/\r?\n/).filter(l=>l.trim());
+      setUpload({ name:file.name, rows:Math.max(0,lines.length-1), cols:(lines[0]||"").split(",").length }); };
+    rd.readAsText(file);
+  }
 
   function generateReport() {
     if (!run || !run.results) return;
@@ -240,6 +250,13 @@ export default function RunBuilder({ initState }) {
           <select value={st} onChange={e=>setSt(e.target.value)} style={sel}>{STATES.map(s=><option key={s} value={s}>{s}</option>)}</select>
           <span style={{color:"var(--mut)"}}>{series===null?"loading area data…":`${availMetrics.length} metrics available`}</span>
         </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
+          <span style={{color:"var(--mut)"}}>Data source:</span>
+          {[["fia","FIA"],["treemap","TreeMap"],["user","Upload inventory"]].map(([k,lbl])=><span key={k} style={chip(dataSource===k)} onClick={()=>setDataSource(k)}>{lbl}</span>)}
+          {dataSource==="user" && <input type="file" accept=".csv,.txt" onChange={onUpload} style={{fontSize:10}}/>}
+        </div>
+        {dataSource==="user" && upload && <div className="note" style={{marginTop:3}}>Loaded {upload.name}: {upload.rows} rows × {upload.cols} columns. A subscriber run initializes stands from this inventory on Cardinal.</div>}
+        {dataSource!=="fia" && <div className="note" style={{marginTop:3,color:"#8a5cd1"}}>{dataSource==="treemap"?"TreeMap":"Your inventory"} drives a subscriber Cardinal run; the free preview below uses precomputed FIA results for {st}.</div>}
         <div className="note" style={{marginTop:4}}>States are the precomputed unit here. A subscriber run takes a drawn AOI or uploaded inventory at any scale, crossing state lines, and resolves the same way.</div>
       </div>
 
