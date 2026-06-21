@@ -22,6 +22,14 @@ const ES_LEVELS = [["none","None",0],["mod","$5/ac/yr",5],["high","$15/ac/yr",15
 const SAW_FRACTION = 0.55, DISCOUNT = 0.04, ES_MANAGED_FRAC = 0.5;
 const annuity = (age,r)=>(1-Math.pow(1+r,-age))/r;
 const fmt = (v,d=0)=>(v==null||isNaN(v)?"–":Number(v).toLocaleString(undefined,{maximumFractionDigits:d}));
+// Policy as a scenario driver
+const POLICIES = [["none","No policy constraint"],["cert","Certification (+10% timber)"],["setaside","Riparian set-aside (15% no-harvest)"],["reserve_mandate","Reserve mandate (no harvest)"]];
+const applyPolicy = (npvH, policy) => policy==="cert" ? npvH*1.10 : policy==="setaside" ? npvH*0.85 : policy==="reserve_mandate" ? 0 : npvH;
+// Multi-criteria framework (precision-forestry MCDA): emphasis presets weight normalized criteria
+const RESIL_FACTOR = { reserve:1.10, conservation:1.05, extensive:1.0, baseline:0.95, intensive:0.90 };
+const EMPH = { balanced:{e:1,c:1,r:1,a:1}, income:{e:2,c:0.5,r:0.5,a:1}, carbon:{e:0.5,c:2,r:1,a:1}, resilience:{e:0.5,c:1,r:2,a:1} };
+const EMPH_LABELS = [["balanced","Balanced"],["income","Income"],["carbon","Carbon"],["resilience","Resilience"]];
+const norm = (v, lo, hi) => (hi>lo ? (v-lo)/(hi-lo) : 0.5);
 
 function econFromL3(node, curveKey, p) {
   const cm = (node && node.curves) || {};
@@ -58,13 +66,17 @@ export default function RunBuilder() {
   const [scenarios, setScenarios] = useState([{ mgmt:"reserve", climate:"historic" }, { mgmt:"baseline", climate:"historic" }]);
   const [price, setPrice] = useState("base");
   const [es, setEs] = useState("none");
+  const [policy, setPolicy] = useState("none");
+  const [emphasis, setEmphasis] = useState("balanced");
   const [series, setSeries] = useState(null);
   const [yields, setYields] = useState(null);
+  const [hrr, setHrr] = useState(null);
   const [run, setRun] = useState(null);
   const [hpc, setHpc] = useState("idle"); // idle|submitting|queued|running|complete
   const base = import.meta.env.BASE_URL || "/";
 
   useEffect(() => { fetch(`${base}api/yield_curves_by_l3.json`).then(r=>r.json()).then(setYields).catch(()=>{}); }, []);
+  useEffect(() => { fetch(`${base}api/hrr_states.json`).then(r=>r.json()).then(setHrr).catch(()=>{}); }, []);
   useEffect(() => {
     setSeries(null); setRun(null); setHpc("idle");
     fetch(`${base}api/series/${st}.json`).then(r=>r.ok?r.json():null).then(setSeries).catch(()=>setSeries(null));
@@ -86,10 +98,12 @@ export default function RunBuilder() {
   const selModels = MODELS.filter(([k]) => models[k]);
   const p = PRICE_PATHS[price];
   const esAnnual = (ES_LEVELS.find(([k])=>k===es)||[])[2] || 0;
+  const stateResil = hrr && hrr[st] ? hrr[st].resil_mean : null;
+  const stateStress = hrr && hrr[st] ? hrr[st].stress_mean : null;
   const spec = {
     spec_version:"1.0", aoi:{type:"inventory",state:st,scale:"ownership"},
     models:selModels.map(([k])=>k),
-    assumptions:{ management:[...new Set(scenarios.map(s=>s.mgmt))], climate:[...new Set(scenarios.map(s=>s.climate))], horizon_year:2100 },
+    assumptions:{ management:[...new Set(scenarios.map(s=>s.mgmt))], climate:[...new Set(scenarios.map(s=>s.climate))], horizon_year:2100, policy },
     markets:{ price_scenario:price, carbon_usd_per_tco2e:p.carbon, es_usd_per_ac_yr:esAnnual, discount_rate:DISCOUNT },
     outputs:[metric], tier:"subscriber",
   };
@@ -106,9 +120,18 @@ export default function RunBuilder() {
         return { mk, cls, rows: ms.map(e=>({model:e.model,cls:e.cls,pts:e.pts.map(pt=>[pt[0],pt[1]])})) };
       });
       const e = econFromL3(repNode, mg[3], p);
+      const npvH = applyPolicy(e.npvH||0, policy);
       const esv = (sc.mgmt==="reserve"?1:ES_MANAGED_FRAC) * (esAnnual ? esAnnual*annuity(e.age||100,DISCOUNT) : 0);
-      const primary = sc.mgmt==="reserve" ? (e.npvC||0) : (e.npvH||0);
-      return { sc, engines, econ:{...e, esv, total: primary+esv} };
+      const primary = sc.mgmt==="reserve" ? (e.npvC||0) : npvH;
+      const total = primary + esv;
+      // multi-criteria: forest-condition outcome (ensemble endpoint mean) + agreement + resilience
+      const ends = engines.flatMap(en=>en.rows).map(r=>r.pts[r.pts.length-1][1]);
+      const mean = ends.length ? ends.reduce((a,b)=>a+b,0)/ends.length : null;
+      const sd = ends.length>1 ? Math.sqrt(ends.reduce((a,b)=>a+(b-mean)**2,0)/ends.length) : 0;
+      const agree = mean ? Math.max(0, 1-(sd/Math.abs(mean))) : null;
+      const resil = stateResil!=null ? Math.min(1, stateResil*(RESIL_FACTOR[sc.mgmt]||1)) : null;
+      return { sc, engines, econ:{...e, npvH, esv, total},
+               criteria:{ econ:total, carbon:e.npvC||0, es:esv, resil, agree, outcome:mean } };
     });
     setRun({ status:"complete", results });
   }
@@ -117,11 +140,12 @@ export default function RunBuilder() {
   const eRes = econFromL3(repNode,"untreated",p), eBas = econFromL3(repNode,"harvested",p);
   const esAge = eRes.age||eBas.age||100;
   const esFull = esAnnual?esAnnual*annuity(esAge,DISCOUNT):0, esMan = esFull*ES_MANAGED_FRAC;
-  const reserveTotal=(eRes.npvC||0)+esFull, managedTotal=(eBas.npvH||0)+esMan;
+  const reserveTotal=(eRes.npvC||0)+esFull, managedTotal=applyPolicy(eBas.npvH||0,policy)+esMan;
   const carbonLean = reserveTotal>managedTotal;
+  const polClause = policy!=="none" ? ` under ${(POLICIES.find(([k])=>k===policy)||[])[1].toLowerCase()}` : "";
   const decision = repNode ? (carbonLean
-    ? `At ${p.label.toLowerCase()} prices${esAnnual?" with ES payments":""}, this forest is worth more standing (~$${fmt(reserveTotal)}/ac NPV) than harvested (~$${fmt(managedTotal)}/ac). A reserve or light-touch strategy looks favorable.`
-    : `At ${p.label.toLowerCase()} prices${esAnnual?" even with ES payments":""}, active management pays (~$${fmt(managedTotal)}/ac NPV) over keeping it standing (~$${fmt(reserveTotal)}/ac). A managed strategy looks favorable.`) : null;
+    ? `At ${p.label.toLowerCase()} prices${esAnnual?" with ES payments":""}${polClause}, this forest is worth more standing (~$${fmt(reserveTotal)}/ac NPV) than harvested (~$${fmt(managedTotal)}/ac). A reserve or light-touch strategy looks favorable.`
+    : `At ${p.label.toLowerCase()} prices${esAnnual?" even with ES payments":""}${polClause}, active management pays (~$${fmt(managedTotal)}/ac NPV) over keeping it standing (~$${fmt(reserveTotal)}/ac). A managed strategy looks favorable.`) : null;
 
   function submitHPC() {
     setRun(null); setHpc("submitting");
@@ -183,6 +207,10 @@ export default function RunBuilder() {
           <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
           {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
         </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
+          <span style={{color:"var(--mut)"}}>Policy:</span>
+          <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
+        </div>
       </div>
 
       {/* 4. submit */}
@@ -228,6 +256,46 @@ export default function RunBuilder() {
           </div>
         );
       })}
+      {run && run.results && run.results.length>0 && (() => {
+        const rs = run.results;
+        const vals = (key) => rs.map(r=>r.criteria[key]).filter(v=>v!=null);
+        const rng = (key) => { const v=vals(key); return v.length?[Math.min(...v),Math.max(...v)]:[0,1]; };
+        const [eLo,eHi]=rng("econ"),[cLo,cHi]=rng("carbon"),[rLo,rHi]=rng("resil"),[aLo,aHi]=rng("agree");
+        const w = EMPH[emphasis];
+        const scored = rs.map(r=>{ const c=r.criteria;
+          const ne=norm(c.econ,eLo,eHi), nc=norm(c.carbon,cLo,cHi), nr=c.resil!=null?norm(c.resil,rLo,rHi):0.5, na=c.agree!=null?norm(c.agree,aLo,aHi):0.5;
+          return { r, score:100*(w.e*ne+w.c*nc+w.r*nr+w.a*na)/(w.e+w.c+w.r+w.a) }; });
+        const best = Math.max(...scored.map(s=>s.score));
+        return (
+          <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
+            <div style={{fontSize:11,fontWeight:600,marginBottom:1}}>Multi-criteria scorecard <span style={{color:"var(--mut)",fontWeight:400}}>· precision-forestry decision framework</span></div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,margin:"4px 0"}}>
+              <span style={{color:"var(--mut)"}}>Emphasis:</span>
+              {EMPH_LABELS.map(([k,lbl])=><span key={k} style={chip(emphasis===k)} onClick={()=>setEmphasis(k)}>{lbl}</span>)}
+            </div>
+            <table style={{width:"100%",fontSize:11,borderCollapse:"collapse",fontVariantNumeric:"tabular-nums"}}>
+              <thead><tr style={{color:"var(--mut)",textAlign:"right"}}>
+                <th style={{textAlign:"left",fontWeight:500}}>Scenario</th>
+                <th style={{fontWeight:500}}>Total $/ac</th><th style={{fontWeight:500}}>Carbon $</th><th style={{fontWeight:500}}>Eco-svc $</th>
+                <th style={{fontWeight:500}}>Resilience</th><th style={{fontWeight:500}}>Agreement</th><th style={{fontWeight:500}}>Score</th>
+              </tr></thead>
+              <tbody>
+                {scored.map(({r,score},i)=>{ const c=r.criteria; const isBest=score>=best-0.001;
+                  return (
+                    <tr key={i} style={{textAlign:"right",borderTop:"1px solid var(--line,#345)",background:isBest?"rgba(46,158,107,0.12)":"transparent"}}>
+                      <td style={{textAlign:"left"}}>{(MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1]} · {(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td>
+                      <td>${fmt(c.econ)}</td><td>${fmt(c.carbon)}</td><td>${fmt(c.es)}</td>
+                      <td>{c.resil!=null?Math.round(c.resil*100):"–"}</td><td>{c.agree!=null?Math.round(c.agree*100)+"%":"–"}</td>
+                      <td style={{fontWeight:700,color:isBest?"#2e9e6b":"var(--ink)"}}>{Math.round(score)}{isBest?" ★":""}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <div className="note" style={{marginTop:4}}>Each scenario scored 0–100 across economic value, carbon, ecosystem services, resilience, and cross-model agreement, weighted by your emphasis. Resilience is the state HRR baseline with an illustrative management adjustment. This is the multi-criteria, multi-model basis that sets PERSEUS apart from single-objective tools.</div>
+          </div>
+        );
+      })()}
       {run && run.results && <div className="note" style={{color:"var(--mut)"}}>Each line is one model run; spread between engines is the honest uncertainty. Economics from per-acre yield curves for the representative ecoregion. This is the ensemble and valuation a subscriber gets on demand for their exact area.</div>}
     </div>
   );
