@@ -44,17 +44,20 @@ const polT = (policy)=>(POLICY_FX[policy]||POLICY_FX.none).t;
 const polC = (policy)=>(POLICY_FX[policy]||POLICY_FX.none).c;
 // Multi-criteria framework (precision-forestry MCDA): emphasis presets weight normalized criteria
 const RESIL_FACTOR = { reserve:1.10, conservation:1.05, extensive:1.0, baseline:0.95, intensive:0.90 };
-const EMPH = { balanced:{e:1,c:1,r:1,a:1}, income:{e:2,c:0.5,r:0.5,a:1}, carbon:{e:0.5,c:2,r:1,a:1}, resilience:{e:0.5,c:1,r:2,a:1} };
-const EMPH_LABELS = [["balanced","Balanced"],["income","Income"],["carbon","Carbon"],["resilience","Resilience"]];
+// Disturbance/climate risk: active management can lower competition- and fuel-driven risk (illustrative)
+const RISK_FACTOR = { reserve:1.05, conservation:1.0, extensive:1.0, baseline:0.92, intensive:0.85 };
+const EMPH = { balanced:{e:1,c:1,r:1,a:1,k:1}, income:{e:2,c:0.5,r:0.5,a:1,k:0.5}, carbon:{e:0.5,c:2,r:1,a:1,k:1}, resilience:{e:0.5,c:1,r:2,a:1,k:1.5} };
+const EMPH_LABELS = [["balanced","Balanced"],["income","Income"],["carbon","Carbon"],["resilience","Resilience & risk"]];
 const norm = (v, lo, hi) => (hi>lo ? (v-lo)/(hi-lo) : 0.5);
 function computeScores(rs, emphasis){
   const vals=(key)=>rs.map(r=>r.criteria[key]).filter(v=>v!=null);
   const rng=(key)=>{const v=vals(key);return v.length?[Math.min(...v),Math.max(...v)]:[0,1];};
-  const [eLo,eHi]=rng("econ"),[cLo,cHi]=rng("carbon"),[rLo,rHi]=rng("resil"),[aLo,aHi]=rng("agree");
+  const [eLo,eHi]=rng("econ"),[cLo,cHi]=rng("carbon"),[rLo,rHi]=rng("resil"),[aLo,aHi]=rng("agree"),[kLo,kHi]=rng("risk");
   const w=EMPH[emphasis]||EMPH.balanced;
   const scored=rs.map(r=>{const c=r.criteria;
     const ne=norm(c.econ,eLo,eHi),nc=norm(c.carbon,cLo,cHi),nr=c.resil!=null?norm(c.resil,rLo,rHi):0.5,na=c.agree!=null?norm(c.agree,aLo,aHi):0.5;
-    return {r,score:100*(w.e*ne+w.c*nc+w.r*nr+w.a*na)/(w.e+w.c+w.r+w.a)};});
+    const nk=c.risk!=null?(1-norm(c.risk,kLo,kHi)):0.5; // lower risk is better
+    return {r,score:100*(w.e*ne+w.c*nc+w.r*nr+w.a*na+w.k*nk)/(w.e+w.c+w.r+w.a+w.k)};});
   const best=scored.length?Math.max(...scored.map(s=>s.score)):0;
   return {scored,best};
 }
@@ -159,8 +162,9 @@ export default function RunBuilder() {
       const sd = ends.length>1 ? Math.sqrt(ends.reduce((a,b)=>a+(b-mean)**2,0)/ends.length) : 0;
       const agree = mean ? Math.max(0, 1-(sd/Math.abs(mean))) : null;
       const resil = stateResil!=null ? Math.min(1, stateResil*(RESIL_FACTOR[sc.mgmt]||1)) : null;
+      const risk = stateStress!=null ? Math.min(1, stateStress*(RISK_FACTOR[sc.mgmt]||1)) : null;
       return { sc, engines, econ:{...e, npvH, npvC, esv, total},
-               criteria:{ econ:total, carbon:npvC, es:esv, resil, agree, outcome:mean } };
+               criteria:{ econ:total, carbon:npvC, es:esv, resil, risk, agree, outcome:mean } };
     });
     setRun({ status:"complete", results });
   }
@@ -190,7 +194,7 @@ export default function RunBuilder() {
     const esc = s => String(s).replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
     const date = new Date().toLocaleDateString();
     const scoreRows = scored.map(({ r, score }) => { const c=r.criteria; const isBest=score>=best-0.001;
-      return `<tr${isBest?' style="background:#eaf7f0;font-weight:600"':''}><td>${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>$${fmt(c.econ)}</td><td>$${fmt(c.carbon)}</td><td>$${fmt(c.es)}</td><td>${c.resil!=null?Math.round(c.resil*100):"&ndash;"}</td><td>${c.agree!=null?Math.round(c.agree*100)+"%":"&ndash;"}</td><td>${Math.round(score)}${isBest?" &#9733;":""}</td></tr>`; }).join("");
+      return `<tr${isBest?' style="background:#eaf7f0;font-weight:600"':''}><td>${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>$${fmt(c.econ)}</td><td>$${fmt(c.carbon)}</td><td>$${fmt(c.es)}</td><td>${c.resil!=null?Math.round(c.resil*100):"&ndash;"}</td><td>${c.risk!=null?Math.round(c.risk*100):"&ndash;"}</td><td>${c.agree!=null?Math.round(c.agree*100)+"%":"&ndash;"}</td><td>${Math.round(score)}${isBest?" &#9733;":""}</td></tr>`; }).join("");
     const scnRows = run.results.map((r,i) => { const present=r.engines.filter(e=>e.rows.length); const eng=present.map(e=>`${e.cls} (${e.rows.length})`).join(", ");
       return `<tr><td>${i+1}. ${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>${eng||"&mdash;"}</td><td>timber $${fmt(r.econ.npvH)}, carbon $${fmt(r.econ.npvC)}, ES $${fmt(r.econ.esv)}, <b>total $${fmt(r.econ.total)}</b></td></tr>`; }).join("");
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Forest Scenario Report &mdash; ${st}</title>
@@ -201,7 +205,7 @@ export default function RunBuilder() {
 <h2>Assumptions</h2>
 <p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Market prices: ${p.label}. Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
 <h2>Multi-criteria scorecard</h2>
-<table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
+<table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Risk</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
 <h2>Scenario detail (multi-model ensemble)</h2>
 <table><thead><tr><th>Scenario</th><th>Engines (model runs)</th><th>Economics (NPV per acre)</th></tr></thead><tbody>${scnRows}</tbody></table>
 <h2>Run specification (Cardinal contract)</h2>
@@ -332,7 +336,7 @@ export default function RunBuilder() {
               <thead><tr style={{color:"var(--mut)",textAlign:"right"}}>
                 <th style={{textAlign:"left",fontWeight:500}}>Scenario</th>
                 <th style={{fontWeight:500}}>Total $/ac</th><th style={{fontWeight:500}}>Carbon $</th><th style={{fontWeight:500}}>Eco-svc $</th>
-                <th style={{fontWeight:500}}>Resilience</th><th style={{fontWeight:500}}>Agreement</th><th style={{fontWeight:500}}>Score</th>
+                <th style={{fontWeight:500}}>Resilience</th><th style={{fontWeight:500}}>Risk</th><th style={{fontWeight:500}}>Agreement</th><th style={{fontWeight:500}}>Score</th>
               </tr></thead>
               <tbody>
                 {scored.map(({r,score},i)=>{ const c=r.criteria; const isBest=score>=best-0.001;
@@ -340,14 +344,16 @@ export default function RunBuilder() {
                     <tr key={i} style={{textAlign:"right",borderTop:"1px solid var(--line,#345)",background:isBest?"rgba(46,158,107,0.12)":"transparent"}}>
                       <td style={{textAlign:"left"}}>{(MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1]} · {(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td>
                       <td>${fmt(c.econ)}</td><td>${fmt(c.carbon)}</td><td>${fmt(c.es)}</td>
-                      <td>{c.resil!=null?Math.round(c.resil*100):"–"}</td><td>{c.agree!=null?Math.round(c.agree*100)+"%":"–"}</td>
+                      <td>{c.resil!=null?Math.round(c.resil*100):"–"}</td>
+                      <td style={{color:c.risk!=null?(c.risk>0.4?"#c0504d":"var(--ink)"):"var(--mut)"}}>{c.risk!=null?Math.round(c.risk*100):"–"}</td>
+                      <td>{c.agree!=null?Math.round(c.agree*100)+"%":"–"}</td>
                       <td style={{fontWeight:700,color:isBest?"#2e9e6b":"var(--ink)"}}>{Math.round(score)}{isBest?" ★":""}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-            <div className="note" style={{marginTop:4}}>Each scenario scored 0–100 across economic value, carbon, ecosystem services, resilience, and cross-model agreement, weighted by your emphasis. Resilience is the state HRR baseline with an illustrative management adjustment. This is the multi-criteria, multi-model basis that sets PERSEUS apart from single-objective tools.</div>
+            <div className="note" style={{marginTop:4}}>Each scenario scored 0–100 across economic value, carbon, ecosystem services, resilience, disturbance/climate risk (lower is better), and cross-model agreement, weighted by your emphasis. Resilience and risk come from the state HRR layer with an illustrative management adjustment. This is the multi-criteria, multi-model basis that sets PERSEUS apart from single-objective tools.</div>
           </div>
         );
       })()}
