@@ -897,6 +897,49 @@ function AOIHealth({ hrrGrid, centroid, geom }){
   );
 }
 
+// Valuation band: per-acre NPV range across market scenarios and management, from the
+// AOI's L3 yield curves. Shows the value spread (sensitivity) an owner is exposed to.
+const VB_PRICES = { low:{saw:.20,pulp:.03,carbon:8,label:"low"}, base:{saw:.35,pulp:.05,carbon:15,label:"base"}, high:{saw:.55,pulp:.09,carbon:30,label:"high"} };
+function vbEcon(node, ck, p){
+  const cm = (node && node.curves) || {};
+  const merch = cm.merchvol_cuftac && cm.merchvol_cuftac[ck];
+  const carb = cm.carbon_lbac && cm.carbon_lbac[ck];
+  const blend = .55*p.saw + .45*p.pulp, r = .04, o = {};
+  if(merch && merch.length){ const [a,v]=merch[merch.length-1]; o.timber=(v*blend)/Math.pow(1+r,a); }
+  if(carb && carb.length){ const [a,lb]=carb[carb.length-1]; o.carbon=((lb/2204.62)*(44/12)*p.carbon)/Math.pow(1+r,a); }
+  return o;
+}
+function ValuationBand({ node }){
+  if(!node || !node.curves) return null;
+  const vals = [];
+  Object.values(VB_PRICES).forEach(p => {
+    const m=vbEcon(node,"harvested",p), r=vbEcon(node,"untreated",p);
+    if(m.timber!=null) vals.push(m.timber);
+    if(r.carbon!=null) vals.push(r.carbon);
+  });
+  if(!vals.length) return null;
+  const lo=Math.min(...vals), hi=Math.max(...vals);
+  const mBase=vbEcon(node,"harvested",VB_PRICES.base).timber, rBase=vbEcon(node,"untreated",VB_PRICES.base).carbon;
+  const f=v=>"$"+Math.round(v).toLocaleString();
+  const pos=v=> hi>lo ? (v-lo)/(hi-lo)*100 : 50;
+  return (
+    <div style={{margin:"6px 0 0"}}>
+      <div className="aoi-sub">Potential value band · per-acre NPV across markets &amp; management (illustrative)</div>
+      <div style={{position:"relative",height:24,margin:"6px 8px 2px"}}>
+        <div style={{position:"absolute",top:10,left:0,right:0,height:4,background:"linear-gradient(90deg,#d98a3c,#2e9e6b)",borderRadius:2}}/>
+        {mBase!=null && <div title="managed, base prices" style={{position:"absolute",top:5,left:pos(mBase)+"%",width:2,height:14,background:"#d98a3c"}}/>}
+        {rBase!=null && <div title="reserve, base carbon" style={{position:"absolute",top:5,left:pos(rBase)+"%",width:2,height:14,background:"#2e9e6b"}}/>}
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--mut)",margin:"0 8px"}}>
+        <span>{f(lo)} (managed, low)</span><span>{f(hi)} (reserve, high)</span>
+      </div>
+      <div className="note" style={{margin:"3px 6px 2px"}}>
+        Per-acre value ranges from about {f(lo)} to {f(hi)} depending on markets and whether this land is managed for timber or held for carbon. That spread is the market-and-management sensitivity an owner carries; policy (LSOG, proforestation) and climate widen it further. Use Run scenarios for the full multi-model picture.
+      </div>
+    </div>
+  );
+}
+
 // Area briefing: foregrounds the decision (item 4), a reserve-vs-managed outlook
 // (item 10), and an illustrative carbon economics figure (item 9), all from data
 // already computed for the AOI. Draft for feedback; the carbon price is illustrative.
@@ -941,7 +984,7 @@ function AreaBriefing({ aoi }){
   );
 }
 
-export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid, fia, onRun }){
+export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid, fia, onRun, l3yields }){
   const [mmMetric, setMmMetric] = useState("agc_live_total");
   const [mmBucket, setMmBucket] = useState("managed (harvest)");
   const [mmYear, setMmYear] = useState(2050);
@@ -949,6 +992,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
   const cv = (v, u, d=0) => { const c = conv(v, u, units); return `${c.value.toFixed(d)} ${c.unit}`; };
   const price = (v, u) => { const c = conv(v, u, units); return `$${Math.round(c.value)}/${c.unit.replace("$/","")}`; };
   const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats, landscape, geom } = aoi;
+  const l3node = l3yields && l3yields.l3 && l3code ? l3yields.l3[l3code] : null;
   const unt = (curves && curves.untreated) || [];
   const har = (curves && curves.harvested) || [];
   const agb50 = valAt(unt, 50), agb50h = valAt(har, 50);
@@ -1152,6 +1196,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
 
       <ModelAgreement state={state} metric={mmMetric} setMetric={setMmMetric} bucket={mmBucket} setBucket={setMmBucket} year={mmYear} setYear={setMmYear} fia={fia}/>
       <AOIHealth hrrGrid={hrrGrid} centroid={centroid} geom={geom}/>
+      {l3node && <ValuationBand node={l3node}/>}
       <SimilarAreas state={state} hrr={hrr}/>
       <StandOutlook aoi={aoi} stumpage={stumpage} units={units}/>
       <div className="note" style={{marginTop:6}}>
