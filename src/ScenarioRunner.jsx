@@ -14,7 +14,32 @@ const MODELS = [["yield", "Yield curves", true], ["fvs", "FVS", false], ["cbm", 
                 ["cem", "CEM", false], ["landis", "LANDIS", false]];
 const SOURCES = [["fia", "FIA", true], ["treemap", "TreeMap", false], ["user", "Your inventory", false]];
 const CLIMATE = [["historic", "Historic"], ["rcp45", "RCP4.5"], ["rcp85", "RCP8.5"]];
-const fmt = (v, d = 0) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
+// Forward price paths (mirror cardinal/run_scenario.py; illustrative stumpage).
+const PRICE_PATHS = {
+  low:  { saw: 0.20, pulp: 0.03, carbon: 8,  label: "Low" },
+  base: { saw: 0.35, pulp: 0.05, carbon: 15, label: "Base" },
+  high: { saw: 0.55, pulp: 0.09, carbon: 30, label: "High" },
+};
+const SAW_FRACTION = 0.55, DISCOUNT = 0.04;
+const fmt = (v, d = 0) => (v == null || isNaN(v) ? "–" : Number(v).toLocaleString(undefined, { maximumFractionDigits: d }));
+// Economics at the final curve age for one management series.
+function econAt(node, curveKey, p) {
+  const cm = node && node.curves || {};
+  const merch = cm.merchvol_cuftac && cm.merchvol_cuftac[curveKey];
+  const carb = cm.carbon_lbac && cm.carbon_lbac[curveKey];
+  const blend = SAW_FRACTION * p.saw + (1 - SAW_FRACTION) * p.pulp;
+  const out = {};
+  if (merch && merch.length) {
+    const [age, v] = merch[merch.length - 1];
+    out.age = age; out.harvest = v * blend; out.npvH = (v * blend) / Math.pow(1 + DISCOUNT, age);
+  }
+  if (carb && carb.length) {
+    const [age, lb] = carb[carb.length - 1];
+    const cv = (lb / 2204.62) * (44 / 12) * p.carbon;
+    out.age = out.age || age; out.carbon = cv; out.npvC = cv / Math.pow(1 + DISCOUNT, age);
+  }
+  return out;
+}
 
 export default function ScenarioRunner({ yields }) {
   const l3 = yields && yields.l3;
@@ -23,6 +48,7 @@ export default function ScenarioRunner({ yields }) {
   const [metric, setMetric] = useState("agb_tonac");
   const [mgmts, setMgmts] = useState({ reserve: true, baseline: true });
   const [climate, setClimate] = useState("historic");
+  const [price, setPrice] = useState("base");
   const cur = code && l3 && l3[code];
   if (!l3) return <div className="empty">Scenario data loading…</div>;
   const cc = code || codes[0];
@@ -48,6 +74,9 @@ export default function ScenarioRunner({ yields }) {
   const takeaway = (res && bas && atEnd(res) != null && atEnd(bas) != null)
     ? `At age ${node.curves[metric].untreated.slice(-1)[0][0]}, leaving this stand unharvested holds about ${fmt(atEnd(res))} vs ${fmt(atEnd(bas))} under harvest (${METRICS.find(([k])=>k===metric)[1].toLowerCase()}). The gap is the carbon-vs-income trade-off to weigh.`
     : null;
+
+  const p = PRICE_PATHS[price];
+  const econRows = MGMT.filter(([k]) => mgmts[k]).map(([k, lbl, curveKey, col]) => ({ k, lbl, col, e: econAt(node, curveKey, p) }));
 
   const chip = (on, okCol) => ({ fontSize: 11, padding: "2px 9px", borderRadius: 4, cursor: "pointer",
     border: `1px solid ${on ? (okCol || "#3a6ea5") : "var(--bd,#345)"}`,
@@ -95,12 +124,17 @@ export default function ScenarioRunner({ yields }) {
           {CLIMATE.map(([k, lbl]) => <span key={k} style={{ ...chip(climate === k), opacity: k === "historic" ? 1 : 0.6 }} onClick={() => setClimate(k)}
             title={k === "historic" ? "" : "calibrated climate scaling in progress (CEM run)"}>{lbl}{k !== "historic" ? " ◦" : ""}</span>)}
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Output:</span>
           <select value={metric} onChange={(e) => setMetric(e.target.value)}
             style={{ background: "var(--panel)", color: "var(--ink)", border: "1px solid var(--line)", borderRadius: 5, padding: "2px 6px", fontSize: 11 }}>
             {METRICS.map(([k, lbl]) => <option key={k} value={k}>{lbl}</option>)}
           </select>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
+          <span style={{ color: "var(--mut)" }}>Market prices:</span>
+          {Object.entries(PRICE_PATHS).map(([k, v]) => <span key={k} style={chip(price === k)} onClick={() => setPrice(k)}>{v.label}</span>)}
+          <span style={{ color: "var(--mut)" }}>· carbon ${p.carbon}/tCO2e</span>
         </div>
       </div>
 
@@ -126,6 +160,40 @@ export default function ScenarioRunner({ yields }) {
           Free: precomputed yield projections shown above. Subscriber: run the full ensemble (FVS, CBM, CEM, LANDIS) on demand for your exact area, your own inventory, and custom climate and management — at any scale.
         </div>
       </div>
+
+      {/* economics: markets differentiator */}
+      {econRows.length > 0 && (
+        <div className="chartcard" style={{ padding: "8px 10px", marginTop: 8 }}>
+          <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
+            Economics at age {econRows[0].e.age || "horizon"} · {p.label} market · timber vs carbon ($/ac)
+          </div>
+          <table style={{ width: "100%", fontSize: 11, borderCollapse: "collapse", fontVariantNumeric: "tabular-nums" }}>
+            <thead>
+              <tr style={{ color: "var(--mut)", textAlign: "right" }}>
+                <th style={{ textAlign: "left", fontWeight: 500 }}>Management</th>
+                <th style={{ fontWeight: 500 }}>Timber value</th>
+                <th style={{ fontWeight: 500 }}>Carbon value</th>
+                <th style={{ fontWeight: 500 }}>NPV (timber)</th>
+                <th style={{ fontWeight: 500 }}>NPV (carbon)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {econRows.map((r) => (
+                <tr key={r.k} style={{ textAlign: "right", borderTop: "1px solid var(--line,#345)" }}>
+                  <td style={{ textAlign: "left", color: r.col, fontWeight: 600 }}>{r.lbl.split(" ")[0]}</td>
+                  <td>${fmt(r.e.harvest)}</td>
+                  <td>${fmt(r.e.carbon)}</td>
+                  <td>${fmt(r.e.npvH)}</td>
+                  <td>${fmt(r.e.npvC)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="note" style={{ marginTop: 4 }}>
+            Illustrative stumpage and carbon prices, 4% discount. The point is the trade-off: managed land earns timber revenue, reserved land builds carbon value. Which wins depends on the prices you assume — that is the decision the tool is built to inform.
+          </div>
+        </div>
+      )}
     </div>
   );
 }
