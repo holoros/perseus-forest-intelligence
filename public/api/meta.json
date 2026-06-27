@@ -1,5 +1,5 @@
 {
- "generated": "2026-06-09T12:53:19.574668+00:00",
+ "generated": "2026-06-27T01:35:14.772237+00:00",
  "schema": "perseus_api_v1",
  "db_version": "v0.66",
  "stats": {
@@ -25,7 +25,8 @@
    "yc_fiadb_rcp85",
    "yc_treemap_rcp45",
    "yc_treemap_rcp85"
-  ]
+  ],
+  "yc_ci_band": "fit_residual_relRMSE"
  },
  "metrics": {
   "agc_live_total": {
