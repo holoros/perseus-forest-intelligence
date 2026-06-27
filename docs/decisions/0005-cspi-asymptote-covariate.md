@@ -46,3 +46,20 @@ the clamp half-width (default +/- 25%). Raising beta increases the effect. This 
 mechanism and provenance only; it does NOT regenerate live data or alter published numbers.
 On sign-off, regenerate the canonical CI with the flag on, validate t0 vs FIA, and bump
 the Zenodo record to v1.2.
+
+## Stress-test update (2026-06-27)
+
+A stress battery (knob sweep, spatial cross-validation, Bakuzis site-ordering; see
+20260627_cspi_stress_bakuzis_assessment.md) revised the scope. Spatial leave-one-ecoregion-out
+cross-validation shows CSPI generalizes on the REMEASUREMENT asymptotes (held-out log-RMSE
+0.783 to 0.716, +8.5%, within-ft partial r +0.37) but NOT on the current HYBRID production
+asymptotes (+0.0%, within-ft partial r +0.08; hybrid asymptotes are far noisier and are a
+different, peak-decline parameter). Knob sweep is robust (A-weighted change ~3% at beta=1.0
+clamp 25%, bounded under ~6% even at beta=2.0). Bakuzis site-ordering PASSES (monotone,
+non-crossing site curves).
+
+Revised decision: apply CSPI scaling to the remeasurement-track refit (the Block 1+3 curves
+this ADR's #75 promotes), NOT the hybrid engine. The mechanism, t0-pin, and wiring are
+reused unchanged; only the input fit table changes at promotion time. Do not promote CSPI on
+the hybrid engine: harmless (CONUS-neutral, well-ordered) but unsupported out-of-sample.
+Keep beta=1.0 and clamp +/-25%. This PR stays DRAFT until the remeas promotion lands.
