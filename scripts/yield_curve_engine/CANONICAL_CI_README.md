@@ -18,3 +18,7 @@ CEM/FVS/CBM in `public/api/`.
 Run order: `ycx_hybrid_fit2.R` (per state) -> `ycx_fit_band.R` (per state) ->
 `ycx_canonical_ci_fiadb.R` / `ycx_canonical_ci_treemap.R` -> `ycx_stress_test.py` ->
 `ingest_yc_production.sh` -> `48_export_api.py`.
+
+## Citable dataset
+
+The 192 CI files + these scripts are archived on Zenodo: **DOI [10.5281/zenodo.20959004](https://doi.org/10.5281/zenodo.20959004)** (CC-BY-4.0, v1.0.0).
