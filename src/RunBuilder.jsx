@@ -112,7 +112,11 @@ function svgFor(rows){
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;border:1px solid #eee">${ax}${yl}${xlb}${lines}</svg>`;
 }
 
-export default function RunBuilder({ initState }) {
+export default function RunBuilder({ initState, units = "imperial" }) {
+  // Per-area economics are stored $/ac; convert at display time for the unit toggle.
+  const UA = units === "metric" ? 2.471054 : 1;     // $/ac -> $/ha
+  const PER = units === "metric" ? "ha" : "ac";
+  const mpa = (v) => "$" + fmt(v == null ? v : v * UA);  // money per area, unit-aware
   const [st, setSt] = useState(initState && STATES.includes(initState) ? initState : "ME");
   useEffect(() => { if (initState && STATES.includes(initState)) setSt(initState); }, [initState]);
   const [models, setModels] = useState({ fvs:true, cbm:true, cem:true, yield:true, landis:false });
@@ -224,8 +228,8 @@ export default function RunBuilder({ initState }) {
   const carbonLean = reserveTotal>managedTotal;
   const polClause = policy!=="none" ? ` under ${(POLICIES.find(([k])=>k===policy)||[])[1].toLowerCase()}` : "";
   const decision = repNode ? (carbonLean
-    ? `At ${p.label.toLowerCase()} prices${esAnnual?" with ES payments":""}${polClause}, this forest is worth more standing (~$${fmt(reserveTotal)}/ac NPV) than harvested (~$${fmt(managedTotal)}/ac). A reserve or light-touch strategy looks favorable.`
-    : `At ${p.label.toLowerCase()} prices${esAnnual?" even with ES payments":""}${polClause}, active management pays (~$${fmt(managedTotal)}/ac NPV) over keeping it standing (~$${fmt(reserveTotal)}/ac). A managed strategy looks favorable.`) : null;
+    ? `At ${p.label.toLowerCase()} prices${esAnnual?" with ES payments":""}${polClause}, this forest is worth more standing (~${mpa(reserveTotal)}/${PER} NPV) than harvested (~${mpa(managedTotal)}/${PER}). A reserve or light-touch strategy looks favorable.`
+    : `At ${p.label.toLowerCase()} prices${esAnnual?" even with ES payments":""}${polClause}, active management pays (~${mpa(managedTotal)}/${PER} NPV) over keeping it standing (~${mpa(reserveTotal)}/${PER}). A managed strategy looks favorable.`) : null;
 
   function submitHPC() {
     setRun(null); setHpc("submitting");
@@ -401,7 +405,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <MultiLineChart rows={allRows}/>
             <div style={{display:"flex",flexWrap:"wrap",gap:10,fontSize:10,marginTop:2}}>{present.map(e=><span key={e.cls} style={{color:CLS_COL[e.cls]}}>● {e.cls} ({e.rows.length})</span>)}</div>
             {repNode && (r.econ.npvH!=null||r.econ.npvC!=null) && (
-              <div className="note" style={{marginTop:4}}>Economics (NPV/ac, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber ${fmt(r.econ.npvH)} · carbon ${fmt(r.econ.npvC)} · eco-services ${fmt(r.econ.esv)} · <b>total ${fmt(r.econ.total)}</b></div>
+              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b></div>
             )}
           </div>
         );
@@ -418,7 +422,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <table style={{width:"100%",fontSize:11,borderCollapse:"collapse",fontVariantNumeric:"tabular-nums"}}>
               <thead><tr style={{color:"var(--mut)",textAlign:"right"}}>
                 <th style={{textAlign:"left",fontWeight:500}}>Scenario</th>
-                <th style={{fontWeight:500}}>Total $/ac</th><th style={{fontWeight:500}}>Carbon $</th><th style={{fontWeight:500}}>Eco-svc $</th>
+                <th style={{fontWeight:500}}>Total $/{PER}</th><th style={{fontWeight:500}}>Carbon $</th><th style={{fontWeight:500}}>Eco-svc $</th>
                 <th style={{fontWeight:500}}>Resilience</th><th style={{fontWeight:500}}>Risk</th><th style={{fontWeight:500}}>Agreement</th><th style={{fontWeight:500}}>Score</th>
               </tr></thead>
               <tbody>
@@ -426,7 +430,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
                   return (
                     <tr key={i} style={{textAlign:"right",borderTop:"1px solid var(--line,#345)",background:isBest?"rgba(46,158,107,0.12)":"transparent"}}>
                       <td style={{textAlign:"left"}}>{(MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1]} · {(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td>
-                      <td>${fmt(c.econ)}</td><td>${fmt(c.carbon)}</td><td>${fmt(c.es)}</td>
+                      <td>{mpa(c.econ)}</td><td>{mpa(c.carbon)}</td><td>{mpa(c.es)}</td>
                       <td>{c.resil!=null?Math.round(c.resil*100):"–"}</td>
                       <td style={{color:c.risk!=null?(c.risk>0.4?"#c0504d":"var(--ink)"):"var(--mut)"}}>{c.risk!=null?Math.round(c.risk*100):"–"}</td>
                       <td>{c.agree!=null?Math.round(c.agree*100)+"%":"–"}</td>

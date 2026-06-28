@@ -4,6 +4,19 @@
 // low-high (q25-q75) band per bucket. Real $ (CPI-U, base 2024) by default,
 // nominal optional. Dependency-free inline SVG.
 import { useState } from "react";
+import { conv, unitLabel } from "./units.js";
+
+// Scale a stumpage sub-series (rows [yr,lo,md,hi,n]) by a price-unit factor so the
+// metric / Imperial toggle flows through to the price charts.
+function scaleSeries(series, buckets, f) {
+  if (f === 1) return series;
+  const out = {};
+  buckets.forEach((b) => {
+    if (series[b]) out[b] = series[b].map(([yr, lo, md, hi, n]) =>
+      [yr, lo == null ? lo : lo * f, md == null ? md : md * f, hi == null ? hi : hi * f, n]);
+  });
+  return out;
+}
 
 const BUCKET_COL = {
   sawlog_softwood:  "#3fb68b",
@@ -70,13 +83,20 @@ function PriceChart({ series, buckets, unit, title }){
   );
 }
 
-export default function StumpagePanel({ data, state }){
+export default function StumpagePanel({ data, state, units = "imperial" }){
   const [real, setReal] = useState(true);
   if(!data || !data.meta)
     return <div className="empty">Stumpage data not loaded.</div>;
   const avail = data.meta.states || [];
   const src = real ? data.series_real : data.series;
   const stSeries = src && src[state];
+  // Price-unit conversion for the metric toggle ($/MBF and $/cord -> $/m3).
+  const sawUnit = unitLabel(data.meta.units.sawlog, units);
+  const pulpUnit = unitLabel(data.meta.units.pulpwood, units);
+  const sawF = conv(1, data.meta.units.sawlog, units).value;
+  const pulpF = conv(1, data.meta.units.pulpwood, units).value;
+  const sawSeries = stSeries ? scaleSeries(stSeries, ["sawlog_softwood","sawlog_hardwood"], sawF) : null;
+  const pulpSeries = stSeries ? scaleSeries(stSeries, ["pulpwood_softwood","pulpwood_hardwood"], pulpF) : null;
   if(!stSeries)
     return (
       <div>
@@ -97,10 +117,10 @@ export default function StumpagePanel({ data, state }){
         </span>
       </div>
       <div className="chartcard" style={{padding:"6px 8px"}}>
-        <PriceChart series={stSeries} buckets={["sawlog_softwood","sawlog_hardwood"]}
-          unit={data.meta.units.sawlog} title="Sawlog"/>
-        <PriceChart series={stSeries} buckets={["pulpwood_softwood","pulpwood_hardwood"]}
-          unit={data.meta.units.pulpwood} title="Pulpwood"/>
+        <PriceChart series={sawSeries} buckets={["sawlog_softwood","sawlog_hardwood"]}
+          unit={sawUnit} title="Sawlog"/>
+        <PriceChart series={pulpSeries} buckets={["pulpwood_softwood","pulpwood_hardwood"]}
+          unit={pulpUnit} title="Pulpwood"/>
       </div>
       <div className="lgd" style={{marginTop:8}}>
         {Object.keys(BUCKET_LABEL).filter(b => stSeries[b] && stSeries[b].length).map(b => (
@@ -109,8 +129,8 @@ export default function StumpagePanel({ data, state }){
       </div>
       <div className="note">
         Median price (solid) with the q25 to q75 band (shaded). {real ? "Real" : "Nominal"} dollars
-        {real && `, deflated by BLS CPI-U to ${data.meta.cpi_base_year}`}. Source: {data.meta.source}.
-        Toggle to {real ? "nominal" : "real"} above. Data: api/stumpage.json.
+        {real && `, deflated by BLS CPI-U to ${data.meta.cpi_base_year}`}. Prices in {sawUnit} (sawlog) and {pulpUnit} (pulpwood); switch units up top. Source: {data.meta.source}.
+        Toggle to {real ? "nominal" : "real"} above. Thin markets (for example hardwood sawlog in the Pacific Northwest, softwood sawlog in the upper Midwest) rest on few transactions in some years and can show implausibly low or volatile values; read those with caution. Data: api/stumpage.json.
       </div>
     </div>
   );

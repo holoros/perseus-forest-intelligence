@@ -23,6 +23,16 @@ function rampColor(pct) {
 
 const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
 
+// Plain-language band for a Potter (2017) species climate-vulnerability score (VCC).
+// National distribution across tracked species: ~17 to 61, median 32, p90 ~45.
+// Bands chosen on that distribution so "Higher" really is the upper tail.
+function vccBand(v) {
+  if (v == null) return { label: "n/a", color: "var(--mut,#8a93a0)" };
+  if (v >= 42) return { label: "Higher", color: "#c85a5a" };
+  if (v >= 34) return { label: "Moderate", color: "#e08a1e" };
+  return { label: "Lower", color: "#4f9d8a" };
+}
+
 export default function HealthRiskResilience({ data, detail, ecoData, landData, landEco, unit, onUnit, state, scenario: scenarioProp, onScenario, onPickState }) {
   const [scenarioLocal, setScenarioLocal] = useState("current");
   const [selOwn, setSelOwn] = useState(null); // landowner query selection
@@ -286,18 +296,41 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
             <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
               {state} detail — what drives the score
             </div>
-            <div style={{ fontSize: 10.5, marginBottom: 3 }}><b>Top species by biomass</b> (VCC = Potter vulnerability, higher = more vulnerable)</div>
-            {dd.top_species && dd.top_species.map((sp) => (
+            <div style={{ fontSize: 10.5, marginBottom: 1 }}><b>Top species by biomass &amp; their climate vulnerability</b></div>
+            <div style={{ fontSize: 9.5, color: "var(--mut)", marginBottom: 4 }}>
+              Vulnerability is the Potter (2017) species climate-sensitivity score. Bars sized by biomass share, colored by vulnerability:{" "}
+              <span style={{ color: "#4f9d8a" }}>● Lower</span> <span style={{ color: "#e08a1e" }}>● Moderate</span> <span style={{ color: "#c85a5a" }}>● Higher</span> (national median ≈ 32).
+            </div>
+            {dd.top_species && dd.top_species.map((sp) => {
+              const vb = vccBand(sp.vcc);
+              return (
               <div key={sp.spcd} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
-                <span style={{ width: 116, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sp.common}</span>
-                <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
-                  <span style={{ display: "block", height: "100%", width: `${Math.min(100, sp.share_pct * 3)}%`,
-                    background: sp.vcc != null && sp.vcc >= 42 ? "#c85a5a" : sp.vcc != null && sp.vcc >= 38 ? "#e08a1e" : "#64acbe" }} />
+                <span style={{ width: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sp.common}</span>
+                <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}
+                  title={`${sp.common}: ${fmt(sp.share_pct,0)}% of biomass · vulnerability ${sp.vcc==null?"n/a":fmt(sp.vcc,0)} (${vb.label})`}>
+                  <span style={{ display: "block", height: "100%", width: `${Math.min(100, sp.share_pct * 3)}%`, background: vb.color }} />
                 </span>
                 <span style={{ width: 30, textAlign: "right" }}>{fmt(sp.share_pct, 0)}%</span>
-                <span style={{ width: 28, textAlign: "right", color: "var(--mut)" }}>{sp.vcc == null ? "–" : fmt(sp.vcc, 0)}</span>
+                <span style={{ width: 78, textAlign: "right", color: vb.color, fontWeight: 600 }}>
+                  {vb.label}{sp.vcc != null ? ` ${fmt(sp.vcc, 0)}` : ""}
+                </span>
               </div>
-            ))}
+            );})}
+            {(() => {
+              const sps = dd.top_species || [];
+              // Decision focus: species that are BOTH abundant and at least moderately vulnerable.
+              const watch = sps.filter((s) => s.vcc != null && s.vcc >= 38 && s.share_pct >= 8)
+                .sort((a, b) => (b.vcc * b.share_pct) - (a.vcc * a.share_pct));
+              return (
+                <div style={{ fontSize: 9.5, marginTop: 5, padding: "5px 7px", borderRadius: 5,
+                  background: "rgba(200,90,90,0.08)", border: "1px solid var(--line,#2a3a47)", lineHeight: 1.4 }}>
+                  <b style={{ color: "var(--fg,#ddd)" }}>What to do with this:</b>{" "}
+                  {watch.length
+                    ? <>{watch.map((s) => s.common).join(", ")} {watch.length > 1 ? "are" : "is"} both abundant and climate-vulnerable here — the clearest priority. Favor regenerating and retaining the lower-vulnerability species, diversify away from heavy reliance on the flagged ones, and watch them in the near-term disturbance feed.</>
+                    : <>No single abundant species here is highly vulnerable; vulnerability is spread across species, so broad diversification and maintaining structure matter more than targeting one species.</>}
+                </div>
+              );
+            })()}
             <div style={{ fontSize: 10, marginTop: 6, color: "var(--mut)" }}>
               <b style={{ color: "var(--fg,#ddd)" }}>Observed disturbance:</b>{" "}
               {ag.disturbed_pct != null ? `${fmt(ag.disturbed_pct, 0)}% of plots` : "–"}
