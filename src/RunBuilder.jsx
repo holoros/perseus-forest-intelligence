@@ -112,7 +112,7 @@ function svgFor(rows){
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;border:1px solid #eee">${ax}${yl}${xlb}${lines}</svg>`;
 }
 
-export default function RunBuilder({ initState, units = "imperial" }) {
+export default function RunBuilder({ initState, units = "imperial", simple = false }) {
   // Per-area economics are stored $/ac; convert at display time for the unit toggle.
   const UA = units === "metric" ? 2.471054 : 1;     // $/ac -> $/ha
   const PER = units === "metric" ? "ha" : "ac";
@@ -353,16 +353,19 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
         ))}
         <span onClick={addScn} style={{...chip(false),display:"inline-block",marginTop:2}}>+ add scenario</span>
         <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Prices are regionally adjusted (illustrative) for the selected state.</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:8}}>
-          <span style={{color:"var(--mut)"}}>Market:</span>
-          {Object.entries(PRICE_PATHS).map(([k,v])=><span key={k} style={chip(price===k)} onClick={()=>setPrice(k)}>{v.label}</span>)}
-          <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
-          {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
-        </div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
-          <span style={{color:"var(--mut)"}}>Policy:</span>
-          <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
-        </div>
+        <details open={!simple} style={{marginTop:8}}>
+          <summary style={{fontSize:11,color:"var(--mut)",cursor:"pointer"}}>Market, ecosystem-service &amp; policy options <span style={{color:"#8a5cd1"}}>· illustrative placeholders</span></summary>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
+            <span style={{color:"var(--mut)"}}>Market:</span>
+            {Object.entries(PRICE_PATHS).map(([k,v])=><span key={k} style={chip(price===k)} onClick={()=>setPrice(k)}>{v.label}</span>)}
+            <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
+            {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
+          </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
+            <span style={{color:"var(--mut)"}}>Policy:</span>
+            <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
+          </div>
+        </details>
         <div className="note" style={{marginTop:4}}>Unlike agriculture, forest policy and public sentiment tend to restrict harvesting. These futures, from certification to old-growth protection, compliance carbon, and proforestation, let you test how restrictions reshape value, carbon, and the recommended strategy.</div>
       </div>
 
@@ -405,7 +408,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <MultiLineChart rows={allRows}/>
             <div style={{display:"flex",flexWrap:"wrap",gap:10,fontSize:10,marginTop:2}}>{present.map(e=><span key={e.cls} style={{color:CLS_COL[e.cls]}}>● {e.cls} ({e.rows.length})</span>)}</div>
             {repNode && (r.econ.npvH!=null||r.econ.npvC!=null) && (
-              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b></div>
+              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"#8a5cd1"}}>· illustrative prices</span></div>
             )}
           </div>
         );

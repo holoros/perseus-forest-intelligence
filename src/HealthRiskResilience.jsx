@@ -306,7 +306,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
             {(() => {
               const pts = (dd.top_species || []).filter((s) => s.vcc != null && s.share_pct != null);
               if (pts.length < 2) return null;
-              const W = 320, H = 188, M = { l: 30, r: 70, t: 12, b: 26 };
+              const W = 320, H = 188, M = { l: 30, r: 20, t: 12, b: 26 };
               const vcs = pts.map((s) => s.vcc), shs = pts.map((s) => s.share_pct);
               const vlo = Math.max(16, Math.min(28, Math.min(...vcs)) - 2);
               const vhi = Math.min(62, Math.max(44, Math.max(...vcs)) + 2);
@@ -332,12 +332,16 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
                   <text x={W - M.r - 2} y={M.t + 8} textAnchor="end" fill="#c85a5a" fontSize={7.5} opacity={0.85}>abundant &amp; vulnerable</text>
                   {lab.map(({ s, x, y }) => {
                     const vb = vccBand(s.vcc), cy = py(s.share_pct);
+                    const short = s.common.replace(/^eastern /, "e. ").replace(/^western /, "w. ")
+                      .replace(/^northern /, "n. ").replace(/^southern /, "s. ");
+                    const txt = short.length > 13 ? short.slice(0, 12) + "…" : short;
+                    const right = x > (M.l + (W - M.r)) * 0.6; // points on the right get left-side labels
                     return (
                       <g key={s.spcd}>
                         <circle cx={x} cy={cy} r={4.5} fill={vb.color} stroke="#0b1015" strokeWidth={0.6}>
                           <title>{`${s.common}: ${fmt(s.share_pct, 0)}% of biomass, vulnerability ${fmt(s.vcc, 0)} (${vb.label})`}</title>
                         </circle>
-                        <text x={x + 6} y={y + 3} fill="var(--fg,#cdd)" fontSize={8}>{s.common.length > 14 ? s.common.slice(0, 13) + "…" : s.common}</text>
+                        <text x={right ? x - 6 : x + 6} y={y + 3} textAnchor={right ? "end" : "start"} fill="var(--fg,#cdd)" fontSize={8}>{txt}</text>
                       </g>
                     );
                   })}

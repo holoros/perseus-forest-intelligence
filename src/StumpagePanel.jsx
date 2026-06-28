@@ -32,7 +32,8 @@ const BUCKET_LABEL = {
 };
 
 // Compact multi-series line+band chart. rows = [year, low, median, high, n].
-function PriceChart({ series, buckets, unit, title }){
+// `floor` (display units) flags implausibly low points (thin-market noise) with a hollow marker.
+function PriceChart({ series, buckets, unit, title, floor }){
   const W = 440, H = 200, P = { l: 44, r: 12, t: 14, b: 24 };
   const present = buckets.filter(b => series[b] && series[b].length);
   if(!present.length)
@@ -71,10 +72,16 @@ function PriceChart({ series, buckets, unit, title }){
               + " L" + band.slice().reverse().map(([yr,,,hi]) => `${sx(yr).toFixed(1)} ${sy(hi).toFixed(1)}`).join(" L") + " Z"
             : null;
           const lineD = "M" + pts.map(([yr,,md]) => `${sx(yr).toFixed(1)} ${sy(md).toFixed(1)}`).join(" L");
+          const lowPts = floor != null ? pts.filter(([,,md]) => md != null && md < floor) : [];
           return (
             <g key={b}>
               {bandD && <path d={bandD} fill={col} opacity="0.13"/>}
               <path d={lineD} fill="none" stroke={col} strokeWidth="1.6"/>
+              {lowPts.map(([yr,,md]) => (
+                <circle key={yr} cx={sx(yr)} cy={sy(md)} r="2.6" fill="none" stroke={col} strokeWidth="1">
+                  <title>{`${yr}: implausibly low for ${title.toLowerCase()} (thin-market noise)`}</title>
+                </circle>
+              ))}
             </g>
           );
         })}
@@ -118,7 +125,7 @@ export default function StumpagePanel({ data, state, units = "imperial" }){
       </div>
       <div className="chartcard" style={{padding:"6px 8px"}}>
         <PriceChart series={sawSeries} buckets={["sawlog_softwood","sawlog_hardwood"]}
-          unit={sawUnit} title="Sawlog"/>
+          unit={sawUnit} title="Sawlog" floor={40 * sawF}/>
         <PriceChart series={pulpSeries} buckets={["pulpwood_softwood","pulpwood_hardwood"]}
           unit={pulpUnit} title="Pulpwood"/>
       </div>
@@ -130,7 +137,7 @@ export default function StumpagePanel({ data, state, units = "imperial" }){
       <div className="note">
         Median price (solid) with the q25 to q75 band (shaded). {real ? "Real" : "Nominal"} dollars
         {real && `, deflated by BLS CPI-U to ${data.meta.cpi_base_year}`}. Prices in {sawUnit} (sawlog) and {pulpUnit} (pulpwood); switch units up top. Source: {data.meta.source}.
-        Toggle to {real ? "nominal" : "real"} above. Thin markets (for example hardwood sawlog in the Pacific Northwest, softwood sawlog in the upper Midwest) rest on few transactions in some years and can show implausibly low or volatile values; read those with caution. Data: api/stumpage.json.
+        Toggle to {real ? "nominal" : "real"} above. Hollow markers (○) flag sawlog years priced implausibly low for sawtimber — thin-market noise in places like Pacific-Northwest hardwood and upper-Midwest softwood; read those with caution. Data: api/stumpage.json.
       </div>
     </div>
   );

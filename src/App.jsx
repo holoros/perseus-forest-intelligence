@@ -1500,7 +1500,7 @@ export default function App(){
           )}
           {/* When an AOI is active, the research surface is collapsed by default. */}
           {(!aoi || researchOpen) && <div className="tabs">
-            {[["compare","Compare areas"],["scenario","Scenario runner"],["runbuilder","Build a run"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
+            {[["compare","Compare areas"],["runbuilder","Build a run"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["ensemble","Cross-model ensemble"],["stumpage","Stumpage"],["landis","LANDIS stratified"],
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]]
               .filter(([k])=> k==="compare" || k==="runbuilder" || k==="health" || toolsOpen || tab===k)
@@ -1538,7 +1538,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
-          {(!aoi || researchOpen) && tab==="runbuilder" && <RunBuilder initState={sel} units={units}/>}
+          {(!aoi || researchOpen) && tab==="runbuilder" && <RunBuilder initState={sel} units={units} simple={simple}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
