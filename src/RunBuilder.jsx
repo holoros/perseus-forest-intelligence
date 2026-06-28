@@ -204,6 +204,9 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   const hasRealPrice = !!(econParams && econParams.stumpage_usd_m3[st] != null);
   const stumpageM3 = hasRealPrice ? econParams.stumpage_usd_m3[st] : NATIONAL_STUMPAGE_M3;
   const stumpageCuft = stumpageM3 * M3_PER_CUFT * p.mult;
+  const stBasis = econParams && econParams.basis ? econParams.basis[st] : null;   // measured|partial|regional
+  const stDetail = econParams && econParams.detail ? econParams.detail[st] : null;
+  const priceConf = stBasis==="measured" ? "measured" : stBasis==="partial" ? "saw or pulp imputed regionally" : "regional estimate";
   const esAnnual = (ES_LEVELS.find(([k])=>k===es)||[])[2] || 0;
   // hrr_states.json nests per-state values under `.states` (keyed by state code).
   // Reading hrr[st] directly returned undefined, which blanked the scorecard
@@ -297,7 +300,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
 <div class="muted">Area: ${st} &middot; Generated ${date} &middot; Decision-support prototype (illustrative)</div>
 <div class="rec"><b>Recommendation.</b> ${decision?esc(decision):"Run scenarios to generate a recommendation."}</div>
 <h2>Assumptions</h2>
-<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${hasRealPrice?`real ${st} blended stumpage $${fmt(stumpageM3,0)}/m³`:`national-mean stumpage $${fmt(NATIONAL_STUMPAGE_M3,0)}/m³`}${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
+<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${st} blended stumpage $${fmt(stumpageM3,0)}/m³ (${priceConf}${stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
 <h2>Multi-criteria scorecard</h2>
 <table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Risk</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
 <h2>Scenario detail (multi-model ensemble)</h2>
@@ -397,7 +400,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
             {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
           </div>
-          <div className="note" style={{marginTop:2}}>Timber priced from {hasRealPrice ? <>real <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b></> : <>the national-mean stumpage <b>${fmt(NATIONAL_STUMPAGE_M3,0)}/m³</b> ({st} not yet measured)</>}{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}. <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
+          <div className="note" style={{marginTop:2}}>Timber priced from <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b> <span style={{color:"var(--mut)"}}>({priceConf}{stDetail&&stDetail.region?`, ${stDetail.saw_share*100|0}% sawtimber mix`:""}{stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})</span>{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}. <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Policy:</span>
             <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>

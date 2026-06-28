@@ -55,7 +55,7 @@ function svgQuadrant(sp) {
   return s + "</svg>";
 }
 
-export function openMyForestReport(state, stateName, hrr, detail, stumpageM3, aoi, hrrEco) {
+export function openMyForestReport(state, stateName, hrr, detail, stumpageM3, aoi, hrrEco, econ) {
   const s = hrr && hrr.states && hrr.states[state];
   const dd = detail && detail.states && detail.states[state];
   if (!s) { alert("Forest summary data is still loading — try again in a moment."); return; }
@@ -74,6 +74,15 @@ export function openMyForestReport(state, stateName, hrr, detail, stumpageM3, ao
   const mortPct = s.mort_frac_mean != null ? (s.mort_frac_mean * 100) : null;
   const mbf = stumpageM3 != null ? Math.round(stumpageM3 * 2.359737) : null;
   const date = new Date().toLocaleDateString();
+  // confidence: health from plot count; price from the stumpage basis
+  const np = s.n_plots || 0;
+  const healthConf = np >= 3000 ? "high" : np >= 1000 ? "moderate" : "limited";
+  const stB = econ && econ.basis ? econ.basis[state] : null;
+  const stConf = stB === "measured" ? "measured market prices" : stB === "partial" ? "measured prices with saw or pulp imputed from the regional median" : "a regional estimate (no local price series)";
+  const stDet = econ && econ.detail ? econ.detail[state] : null;
+  const top3 = sp.slice(0, 3);
+  const top3names = top3.map(x => esc(x.common)).join(", ");
+  const top3share = top3.length ? Math.round(top3.reduce((a, b) => a + b.share_pct, 0)) : null;
 
   // ---- visuals ----
   const priBars = svgBars([
@@ -133,12 +142,15 @@ ${aoiBlock}
 </p>
 ${scen.current != null ? `<p class="cap">Looking ahead: under warming, the national priority share rises from about ${Math.round(scen.current)}% today toward ${scen.rcp45 != null ? Math.round(scen.rcp45) + "% (RCP4.5)" : ""}${scen.rcp85 != null ? ` and ${Math.round(scen.rcp85)}% (RCP8.5)` : ""}. Your area's relative standing is more stable than the absolute number.</p>` : ""}
 
+<p class="cap"><b>How confident is this?</b> Health, species, and mortality come from <b>${np ? np.toLocaleString() : "the available"}</b> FIA plots (<b>${healthConf}</b> confidence). The stumpage value is ${stConf}${stDet && stDet.n_min ? `, based on roughly ${stDet.n_min} recent transactions` : ""}. These are estimates to start a conversation, not an appraisal or a stand exam of your specific land.</p>
+
 <h2>Your species and their climate vulnerability</h2>
 ${quad ? `<div class="fig">${quad}</div><p class="cap">Each dot is a species placed by its climate vulnerability (x) and share of your biomass (y). The shaded upper-right is abundant <i>and</i> vulnerable — the species to act on first. Color: <span style="color:#4f9d8a">&#9679; lower</span> <span style="color:#e08a1e">&#9679; moderate</span> <span style="color:#c85a5a">&#9679; higher</span> (US median ≈ 32).</p>` : ""}
 <table><thead><tr><th>Species (by biomass)</th><th style="text-align:right">Share</th><th style="text-align:right">Vulnerability (VCC)</th></tr></thead><tbody>${speciesRows || '<tr><td colspan="3">Species detail not available for this area.</td></tr>'}</tbody></table>
 ${watch.length ? `<p><span class="pill">watch list</span> ${watch.map(w => esc(w.common)).join(", ")} ${watch.length > 1 ? "are" : "is"} both abundant and climate-vulnerable here.</p>` : ""}
 
-<h2>Recent disturbance &amp; mortality</h2>
+<h2>Forest conditions</h2>
+<p>Measured from <b>${np ? np.toLocaleString() : "the available"}</b> FIA plots, your forest is led by <b>${top3names || "mixed species"}</b>${top3share != null ? ` (about ${top3share}% of biomass)` : ""}.${aoi && ftop ? ` Locally the most common forest type is <b>${esc(ftop.name || ftop)}</b>.` : ""} The figures below describe its current health and recent change.</p>
 <div class="grid2">
  <div>${agentBars ? `<div class="fig">${agentBars}</div><p class="cap">Share of plots showing each disturbance agent.</p>` : `<p>${ag.disturbed_pct != null ? `About ${Math.round(ag.disturbed_pct)}% of plots show recent disturbance.` : "Disturbance detail not available."}</p>`}</div>
  <div>

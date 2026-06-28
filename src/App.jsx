@@ -1557,12 +1557,12 @@ export default function App(){
               {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>)}
             {simple && cov && (
             <button className="tab" style={{marginLeft:6,borderColor:"var(--accent)",color:"var(--accent)"}}
-              onClick={()=>openMyForestReport(sel, cov.name, hrr, hrrDetail, econParams && econParams.stumpage_usd_m3 ? econParams.stumpage_usd_m3[sel] : null, aoi, hrrEco)}
+              onClick={()=>openMyForestReport(sel, cov.name, hrr, hrrDetail, econParams && econParams.stumpage_usd_m3 ? econParams.stumpage_usd_m3[sel] : null, aoi, hrrEco, econParams)}
               title="Open a plain-language one-page summary of this state's forest: health, your species, and what you might do. Print or save to PDF.">
               🌲 My forest summary</button>)}
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
-          {aoi && <Suspense fallback={<div className="note" style={{padding:8}}>Loading area report…</div>}><AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} fia={fia} l3yields={l3yields} onClose={()=>setAoi(null)} onRun={(s)=>{ if(s) setSel(s); setAoi(null); setTab("runbuilder"); }} onMyForest={()=>{ const st=aoi.state||sel; openMyForestReport(st, (states&&states[st]&&states[st].name)||st, hrr, hrrDetail, econParams&&econParams.stumpage_usd_m3?econParams.stumpage_usd_m3[st]:null, aoi, hrrEco); }}/></Suspense>}
+          {aoi && <Suspense fallback={<div className="note" style={{padding:8}}>Loading area report…</div>}><AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} fia={fia} l3yields={l3yields} onClose={()=>setAoi(null)} onRun={(s)=>{ if(s) setSel(s); setAoi(null); setTab("runbuilder"); }} onMyForest={()=>{ const st=aoi.state||sel; openMyForestReport(st, (states&&states[st]&&states[st].name)||st, hrr, hrrDetail, econParams&&econParams.stumpage_usd_m3?econParams.stumpage_usd_m3[st]:null, aoi, hrrEco, econParams); }}/></Suspense>}
           {aoi && <button className="mini-btn" style={{margin:"6px 4px 2px",borderStyle:"solid"}}
             onClick={()=>setResearchOpen(o=>!o)}
             title="show or hide the multi-model research tools (engine comparison, scenarios, stumpage, rotation)">
