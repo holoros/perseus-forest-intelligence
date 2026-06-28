@@ -30,6 +30,25 @@ const M3_PER_CUFT = 1/35.3147;            // yield-curve merch volume is cu ft/a
 const DISC_RATES = [["0.03","3%"],["0.04","4%"],["0.05","5%"],["0.07","7%"]];
 const NATIONAL_STUMPAGE_M3 = 25.55;       // fallback for states without a measured blended price
 const annuity = (age,r)=>(1-Math.pow(1+r,-age))/r;
+// lb of carbon (C) per acre -> tCO2e per acre: lb->Mg (/2204.62), C->CO2e (x44/12)
+const LB_C_TO_TCO2E = (1/2204.62)*(44/12);
+// Flow-basis carbon value: a carbon program pays annually for net sequestration, so the
+// present value is the discounted stream of annual carbon gain, not a single discount of the
+// horizon stock. Over each sparse interval [a0,a1] the annual gain (c1-c0)/(a1-a0) is treated
+// as a level annuity; its PV is price x annualGain x (annuity(a1)-annuity(a0)). Summing the
+// intervals keeps early, lightly-discounted sequestration in the value, so carbon no longer
+// vanishes at high discount rates (the prior horizon-discount artifact).
+function carbonFlowNPV(carb, price, disc){
+  if (!carb || carb.length<2) return {npv:0, age:carb&&carb.length?carb[carb.length-1][0]:null};
+  let npv=0;
+  for (let i=1;i<carb.length;i++){
+    const [a0,c0]=carb[i-1], [a1,c1]=carb[i];
+    if (a1<=a0) continue;
+    const annualGain = ((c1-c0)/(a1-a0))*LB_C_TO_TCO2E;   // tCO2e/ac/yr over this interval
+    npv += annualGain*price*(annuity(a1,disc)-annuity(a0,disc));
+  }
+  return {npv, age:carb[carb.length-1][0]};
+}
 const fmt = (v,d=0)=>(v==null||isNaN(v)?"–":Number(v).toLocaleString(undefined,{maximumFractionDigits:d}));
 // Policy as a scenario driver
 // Future policy scenarios. Forestry, unlike ag, trends toward restricting management.
@@ -95,8 +114,8 @@ function rotationTimber(merch, stumpageCuft, disc, estCost = 0, mgmtCost = 0) {
 }
 
 // stumpageCuft = effective $/cu ft (real per-state $/m3 x price-scenario mult, converted).
-// Timber value is the optimal single-rotation NPV (rotation R*); carbon value is the carbon
-// trajectory discounted at the horizon. LEV (perpetual land value) is carried for display.
+// Timber value is the optimal single-rotation NPV (rotation R*); carbon value is the flow-basis
+// NPV of annual net sequestration (carbonFlowNPV). LEV (perpetual land value) is carried for display.
 function econFromL3(node, curveKey, stumpageCuft, carbonPrice, disc, estCost = 0, mgmtCost = 0) {
   const cm = (node && node.curves) || {};
   const merch = cm.merchvol_cuftac && cm.merchvol_cuftac[curveKey];
@@ -104,7 +123,7 @@ function econFromL3(node, curveKey, stumpageCuft, carbonPrice, disc, estCost = 0
   const o = {};
   const ft = rotationTimber(merch, stumpageCuft, disc, estCost, mgmtCost);
   if (ft) { o.npvH = ft.npv; o.rotation = ft.rotation; o.lev = ft.lev; }
-  if (carb && carb.length) { const [a,lb]=carb[carb.length-1]; o.age=a; o.npvC=((lb/2204.62)*(44/12)*carbonPrice)/Math.pow(1+disc,a); }
+  if (carb && carb.length) { const cf=carbonFlowNPV(carb, carbonPrice, disc); o.age=cf.age; o.npvC=cf.npv; }
   return o;
 }
 
@@ -207,6 +226,8 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   const stBasis = econParams && econParams.basis ? econParams.basis[st] : null;   // measured|partial|regional
   const stDetail = econParams && econParams.detail ? econParams.detail[st] : null;
   const priceConf = stBasis==="measured" ? "measured" : stBasis==="partial" ? "saw or pulp imputed regionally" : "regional estimate";
+  // Thin-market flag: a measured price resting on <=3 transactions is indicative, not firm.
+  const lowSample = !!(stDetail && stDetail.n_min!=null && stDetail.n_min<=3);
   const esAnnual = (ES_LEVELS.find(([k])=>k===es)||[])[2] || 0;
   // hrr_states.json nests per-state values under `.states` (keyed by state code).
   // Reading hrr[st] directly returned undefined, which blanked the scorecard
@@ -300,7 +321,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
 <div class="muted">Area: ${st} &middot; Generated ${date} &middot; Decision-support prototype (illustrative)</div>
 <div class="rec"><b>Recommendation.</b> ${decision?esc(decision):"Run scenarios to generate a recommendation."}</div>
 <h2>Assumptions</h2>
-<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${st} blended stumpage $${fmt(stumpageM3,0)}/m³ (${priceConf}${stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
+<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${st} blended stumpage $${fmt(stumpageM3,0)}/m³ (${priceConf}${stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""}${lowSample?", thin market — indicative only":""})${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
 <h2>Multi-criteria scorecard</h2>
 <table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Risk</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
 <h2>Scenario detail (multi-model ensemble)</h2>
@@ -310,7 +331,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
 <h2>Run specification (Cardinal contract)</h2>
 <pre>${esc(JSON.stringify(spec,null,2))}</pre>
 <h2>Methods &amp; caveats</h2>
-<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs. The carbon price is anchored to voluntary and compliance market benchmarks (the EPA social cost of carbon, ~$190/tCO2e, is higher but is a societal value, not a payment); ecosystem-service payments and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
+<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs. Carbon value is the flow-basis NPV of annual net sequestration (the discounted stream of yearly carbon gain), which is how a carbon program pays a landowner; this keeps early sequestration in the value rather than discounting a single horizon stock. The carbon price is anchored to voluntary and compliance market benchmarks (the EPA social cost of carbon, ~$190/tCO2e, is higher but is a societal value, not a payment); ecosystem-service payments and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
 </body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
@@ -400,7 +421,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
             {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
           </div>
-          <div className="note" style={{marginTop:2}}>Timber priced from <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b> <span style={{color:"var(--mut)"}}>({priceConf}{stDetail&&stDetail.region?`, ${stDetail.saw_share*100|0}% sawtimber mix`:""}{stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})</span>{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}. <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
+          <div className="note" style={{marginTop:2}}>Timber priced from <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b> <span style={{color:"var(--mut)"}}>({priceConf}{stDetail&&stDetail.region?`, ${stDetail.saw_share*100|0}% sawtimber mix`:""}{stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})</span>{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}.{lowSample && <span style={{color:"#c0792b"}}> Thin market (n≈{stDetail.n_min}) — treat this price as indicative.</span>} <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Policy:</span>
             <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>

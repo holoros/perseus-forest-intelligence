@@ -138,6 +138,7 @@ export default function StumpagePanel({ data, state, units = "imperial" }){
         Median price (solid) with the q25 to q75 band (shaded). {real ? "Real" : "Nominal"} dollars
         {real && `, deflated by BLS CPI-U to ${data.meta.cpi_base_year}`}. Prices in {sawUnit} (sawlog) and {pulpUnit} (pulpwood); switch units up top. Source: {data.meta.source}.
         Toggle to {real ? "nominal" : "real"} above. Hollow markers (○) flag sawlog years priced implausibly low for sawtimber — thin-market noise in places like Pacific-Northwest hardwood and upper-Midwest softwood; read those with caution. Data: api/stumpage.json.
+        {units==="metric" && <span> The $/m³ here is a board-foot geometric conversion of the published price (1 MBF ≈ 2.36 m³ of sawn product); the economics in <i>Build a run</i> instead value timber per m³ of standing roundwood (≈ 4.7–5.5 m³ per MBF log scale), so the two $/m³ figures are on different volume bases and should not be compared directly.</span>}
       </div>
     </div>
   );
