@@ -16,9 +16,9 @@ suppressWarnings(suppressMessages(library(data.table)))
 
 # ---- team knobs (documented assumptions, not estimates) ----
 CSPI_REF   <- 56.36     # CONUS median CSPI from ycx_cell_cspi.csv
-BETA       <- 1.0       # proportional; NOT the free-fit 2.77
-CLAMP_LO   <- 0.80      # max downward asymptote move (-20%)
-CLAMP_HI   <- 1.25      # max upward asymptote move (+25%)
+BETA       <- 1.5       # CV-optimal (deep assessment 2026-06-28: held-out skill rises to ~free slope)
+CLAMP_LO   <- 0.70      # widened to admit beta=1.5
+CLAMP_HI   <- 1.45      # widened to admit beta=1.5
 N0         <- 30        # sparse-cell shrinkage half-weight (full CSPI weight when n << N0)
 
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
