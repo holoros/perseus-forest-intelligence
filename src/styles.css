@@ -165,3 +165,16 @@ select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
   color:var(--mut);font-size:12px;cursor:pointer;text-decoration:underline}
 .welcome-skip:hover{color:var(--ink)}
 @media (max-width:560px){ .welcome-choices{grid-template-columns:1fr} }
+
+/* Accessibility: visible keyboard focus (WCAG 2.4.7) on all interactive controls. */
+a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible,
+.tab:focus-visible, .vm:focus-visible, .welcome-choice:focus-visible, [role="button"]:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+  border-radius:4px;
+}
+/* Slightly larger tap targets on touch screens. */
+@media (max-width:760px){
+  .tab,.vm,.mini-btn{min-height:30px}
+  .map-ctrl{font-size:12px}
+}
