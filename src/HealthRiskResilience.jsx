@@ -185,7 +185,8 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
           <div style={{ fontSize: 12.5 }}>
             <b>{state}</b> · priority <b>{fmt(selRow.priority_pct, 1)}%</b> ·
             stress {fmt(selRow.stress_mean, 3)} · resilience {fmt(selRow.resil_mean, 3)} ·
-            climate exposure {fmt(selRow.ce_mean, 0)} ·{" "}
+            climate exposure {fmt(selRow.ce_mean, 0)}
+            {selRow.mort_frac_mean != null ? <> · measured mortality {fmt(selRow.mort_frac_mean * 100, 2)}%/yr</> : null} ·{" "}
             <span style={{ color: "var(--mut)" }}>n = {selRow.n_plots?.toLocaleString()} plots</span>
           </div>
         </div>
