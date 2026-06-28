@@ -328,7 +328,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
                   {[vlo, (vlo + vhi) / 2, vhi].map((t, i) => <text key={i} x={px(t)} y={H - M.b + 11} textAnchor="middle" fill="var(--mut,#8a93a0)">{Math.round(t)}</text>)}
                   {[0, smax / 2, smax].map((t, i) => <text key={i} x={M.l - 3} y={py(t) + 3} textAnchor="end" fill="var(--mut,#8a93a0)">{Math.round(t)}%</text>)}
                   <text x={(M.l + W - M.r) / 2} y={H - 1} textAnchor="middle" fill="var(--mut,#8a93a0)">climate vulnerability →</text>
-                  <text x={M.l - 24} y={M.t + 2} fill="var(--mut,#8a93a0)" fontSize={8}>share ↑</text>
+                  <text transform={`translate(9 ${(M.t + H - M.b) / 2}) rotate(-90)`} textAnchor="middle" fill="var(--mut,#8a93a0)" fontSize={8}>biomass share →</text>
                   <text x={W - M.r - 2} y={M.t + 8} textAnchor="end" fill="#c85a5a" fontSize={7.5} opacity={0.85}>abundant &amp; vulnerable</text>
                   {lab.map(({ s, x, y }) => {
                     const vb = vccBand(s.vcc), cy = py(s.share_pct);
