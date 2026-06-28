@@ -17,18 +17,15 @@ const CLIMATES = [["historic","Historic"],["baseline_2020","2020 baseline"],["rc
 const METRICS = [["agc_live_total","Carbon, live (t/ac)"],["merch_vol_mcf","Merch. volume (MCF)"],
                  ["standing_value_musd","Standing value ($M)"],["es_bundle_score","Ecosystem-service score"],
                  ["mean_stand_age","Mean stand age (yr)"],["total_ecosystem_c","Total ecosystem C"]];
-const PRICE_PATHS = { low:{saw:0.20,pulp:0.03,carbon:8,label:"Low"}, base:{saw:0.35,pulp:0.05,carbon:15,label:"Base"}, high:{saw:0.55,pulp:0.09,carbon:30,label:"High"} };
+// Price scenarios apply a low/base/high band to the REAL per-state stumpage (timber side)
+// and an illustrative carbon price. `mult` scales the real stumpage; carbon stays illustrative.
+const PRICE_PATHS = { low:{mult:0.7,carbon:8,label:"Low"}, base:{mult:1.0,carbon:15,label:"Base"}, high:{mult:1.4,carbon:30,label:"High"} };
 const ES_LEVELS = [["none","None",0],["mod","$5/ac/yr",5],["high","$15/ac/yr",15]];
-const SAW_FRACTION = 0.55, DISCOUNT = 0.04, ES_MANAGED_FRAC = 0.5;
+const ES_MANAGED_FRAC = 0.5;
+const M3_PER_CUFT = 1/35.3147;            // yield-curve merch volume is cu ft/ac; stumpage is $/m3
+const DISC_RATES = [["0.03","3%"],["0.04","4%"],["0.05","5%"],["0.07","7%"]];
+const NATIONAL_STUMPAGE_M3 = 25.55;       // fallback for states without a measured blended price
 const annuity = (age,r)=>(1-Math.pow(1+r,-age))/r;
-// Regional price adjustment (illustrative, directional; replace with real CFRU/TMS series).
-const REGION_OF = {};
-"CT DE MA MD ME NH NJ NY PA RI VA VT WV".split(" ").forEach(s=>REGION_OF[s]="Northeast");
-"AL AR FL GA KY LA MS NC OK SC TN TX".split(" ").forEach(s=>REGION_OF[s]="South");
-"IA IL IN MI MN MO OH WI".split(" ").forEach(s=>REGION_OF[s]="North Central");
-"AK AZ CA CO ID KS MT ND NE NM NV OR SD UT WA WY".split(" ").forEach(s=>REGION_OF[s]="West");
-const REGION_MULT = { "Northeast":{saw:1.0,pulp:1.0}, "South":{saw:0.85,pulp:1.35}, "North Central":{saw:0.9,pulp:1.0}, "West":{saw:1.2,pulp:0.8} };
-const regionAdjust = (p, st) => { const m = REGION_MULT[REGION_OF[st]||"Northeast"]; return { ...p, saw:p.saw*m.saw, pulp:p.pulp*m.pulp }; };
 const fmt = (v,d=0)=>(v==null||isNaN(v)?"–":Number(v).toLocaleString(undefined,{maximumFractionDigits:d}));
 // Policy as a scenario driver
 // Future policy scenarios. Forestry, unlike ag, trends toward restricting management.
@@ -70,14 +67,14 @@ function computeScores(rs, emphasis){
   return {scored,best};
 }
 
-function econFromL3(node, curveKey, p) {
+// stumpageCuft = effective $/cu ft (real per-state $/m3 x price-scenario mult, converted).
+function econFromL3(node, curveKey, stumpageCuft, carbonPrice, disc) {
   const cm = (node && node.curves) || {};
   const merch = cm.merchvol_cuftac && cm.merchvol_cuftac[curveKey];
   const carb = cm.carbon_lbac && cm.carbon_lbac[curveKey];
-  const blend = SAW_FRACTION*p.saw + (1-SAW_FRACTION)*p.pulp;
   const o = {};
-  if (merch && merch.length) { const [a,v]=merch[merch.length-1]; o.age=a; o.npvH=(v*blend)/Math.pow(1+DISCOUNT,a); }
-  if (carb && carb.length) { const [a,lb]=carb[carb.length-1]; o.age=o.age||a; o.npvC=((lb/2204.62)*(44/12)*p.carbon)/Math.pow(1+DISCOUNT,a); }
+  if (merch && merch.length) { const [a,v]=merch[merch.length-1]; o.age=a; o.npvH=(v*stumpageCuft)/Math.pow(1+disc,a); }
+  if (carb && carb.length) { const [a,lb]=carb[carb.length-1]; o.age=o.age||a; o.npvC=((lb/2204.62)*(44/12)*carbonPrice)/Math.pow(1+disc,a); }
   return o;
 }
 
@@ -133,10 +130,13 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   const [hrr, setHrr] = useState(null);
   const [run, setRun] = useState(null);
   const [hpc, setHpc] = useState("idle"); // idle|submitting|queued|running|complete
+  const [disc, setDisc] = useState(0.04);   // user-selectable discount rate
+  const [econParams, setEconParams] = useState(null); // real per-state stumpage
   const base = import.meta.env.BASE_URL || "/";
 
   useEffect(() => { fetch(`${base}api/yield_curves_by_l3.json`).then(r=>r.json()).then(setYields).catch(()=>{}); }, []);
   useEffect(() => { fetch(`${base}api/hrr_states.json`).then(r=>r.json()).then(setHrr).catch(()=>{}); }, []);
+  useEffect(() => { fetch(`${base}api/econ_params.json`).then(r=>r.json()).then(setEconParams).catch(()=>{}); }, []);
   useEffect(() => {
     setSeries(null); setRun(null); setHpc("idle");
     fetch(`${base}api/series/${st}.json`).then(r=>r.ok?r.json():null).then(setSeries).catch(()=>setSeries(null));
@@ -168,6 +168,10 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
 
   const selModels = MODELS.filter(([k]) => models[k]);
   const p = PRICE_PATHS[price];
+  // Real per-state blended stumpage ($/m3) -> effective $/cu ft for the price scenario.
+  const hasRealPrice = !!(econParams && econParams.stumpage_usd_m3[st] != null);
+  const stumpageM3 = hasRealPrice ? econParams.stumpage_usd_m3[st] : NATIONAL_STUMPAGE_M3;
+  const stumpageCuft = stumpageM3 * M3_PER_CUFT * p.mult;
   const esAnnual = (ES_LEVELS.find(([k])=>k===es)||[])[2] || 0;
   // hrr_states.json nests per-state values under `.states` (keyed by state code).
   // Reading hrr[st] directly returned undefined, which blanked the scorecard
@@ -180,7 +184,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
     data_source: dataSource==="user" && upload ? {source:"user",upload_ref:upload.name,n_rows:upload.rows} : {source:dataSource},
     models:selModels.map(([k])=>k),
     assumptions:{ management:[...new Set(scenarios.map(s=>s.mgmt))], climate:[...new Set(scenarios.map(s=>s.climate))], horizon_year:2100, policy },
-    markets:{ price_scenario:price, carbon_usd_per_tco2e:p.carbon, es_usd_per_ac_yr:esAnnual, discount_rate:DISCOUNT },
+    markets:{ price_scenario:price, stumpage_usd_per_m3: hasRealPrice ? stumpageM3 : null, carbon_usd_per_tco2e:p.carbon, es_usd_per_ac_yr:esAnnual, discount_rate:disc },
     outputs:[metric], tier:"subscriber",
   };
 
@@ -195,14 +199,14 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
         if (sc.climate!=="historic") { const cf=ms.filter(e=>(e.model||"").toLowerCase().includes(sc.climate)); if (cf.length) ms=cf; }
         return { mk, cls, rows: ms.map(e=>({model:e.model,cls:e.cls,pts:e.pts.map(pt=>[pt[0],pt[1]])})) };
       });
-      const e = econFromL3(repNode, mg[3], regionAdjust(p, st));
+      const e = econFromL3(repNode, mg[3], stumpageCuft, p.carbon, disc);
       // Timber income is realized only when the stand is harvested; a reserve
       // earns no stumpage. Carbon value accrues under every management (from that
       // management's own carbon trajectory). Total is the explicit sum of the
       // realized components, so the displayed parts always reconcile with it.
       const timber = sc.mgmt==="reserve" ? 0 : (e.npvH||0)*polT(policy);
       const npvC = (e.npvC||0)*polC(policy);
-      const esv = (sc.mgmt==="reserve"?1:ES_MANAGED_FRAC) * (esAnnual ? esAnnual*annuity(e.age||100,DISCOUNT) : 0);
+      const esv = (sc.mgmt==="reserve"?1:ES_MANAGED_FRAC) * (esAnnual ? esAnnual*annuity(e.age||100,disc) : 0);
       const total = timber + npvC + esv;
       // multi-criteria: forest-condition outcome (ensemble endpoint mean) + agreement + resilience
       const ends = engines.flatMap(en=>en.rows).map(r=>r.pts[r.pts.length-1][1]);
@@ -218,9 +222,9 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   }
 
   // recommendation (reserve vs managed) for this area + market + ES
-  const eRes = econFromL3(repNode,"untreated",regionAdjust(p,st)), eBas = econFromL3(repNode,"harvested",regionAdjust(p,st));
+  const eRes = econFromL3(repNode,"untreated",stumpageCuft,p.carbon,disc), eBas = econFromL3(repNode,"harvested",stumpageCuft,p.carbon,disc);
   const esAge = eRes.age||eBas.age||100;
-  const esFull = esAnnual?esAnnual*annuity(esAge,DISCOUNT):0, esMan = esFull*ES_MANAGED_FRAC;
+  const esFull = esAnnual?esAnnual*annuity(esAge,disc):0, esMan = esFull*ES_MANAGED_FRAC;
   // Mirror the per-scenario economics so the headline matches the scorecard:
   // reserve earns carbon + ES (no stumpage); managed earns timber + its own carbon + ES.
   const reserveTotal=(eRes.npvC||0)*polC(policy)+esFull;
@@ -261,7 +265,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
 <div class="muted">Area: ${st} &middot; Generated ${date} &middot; Decision-support prototype (illustrative)</div>
 <div class="rec"><b>Recommendation.</b> ${decision?esc(decision):"Run scenarios to generate a recommendation."}</div>
 <h2>Assumptions</h2>
-<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Market prices: ${p.label}. Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
+<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${hasRealPrice?`real ${st} blended stumpage $${fmt(stumpageM3,0)}/m³`:`national-mean stumpage $${fmt(NATIONAL_STUMPAGE_M3,0)}/m³`}${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
 <h2>Multi-criteria scorecard</h2>
 <table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Risk</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
 <h2>Scenario detail (multi-model ensemble)</h2>
@@ -271,7 +275,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
 <h2>Run specification (Cardinal contract)</h2>
 <pre>${esc(JSON.stringify(spec,null,2))}</pre>
 <h2>Methods &amp; caveats</h2>
-<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with illustrative forward prices and a 4% discount rate; policy and ecosystem-service effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
+<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate; the carbon price, ecosystem-service payments, and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
 </body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
@@ -352,18 +356,21 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
           </div>
         ))}
         <span onClick={addScn} style={{...chip(false),display:"inline-block",marginTop:2}}>+ add scenario</span>
-        <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Prices are regionally adjusted (illustrative) for the selected state.</div>
+        <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Timber value uses real per-state blended stumpage; the carbon price, ES payments, and policy multipliers are illustrative.</div>
         <details open={!simple} style={{marginTop:8}}>
-          <summary style={{fontSize:11,color:"var(--mut)",cursor:"pointer"}}>Market, ecosystem-service &amp; policy options <span style={{color:"#8a5cd1"}}>· illustrative placeholders</span></summary>
+          <summary style={{fontSize:11,color:"var(--mut)",cursor:"pointer"}}>Market, ecosystem-service, policy &amp; discount rate</summary>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Market:</span>
             {Object.entries(PRICE_PATHS).map(([k,v])=><span key={k} style={chip(price===k)} onClick={()=>setPrice(k)}>{v.label}</span>)}
             <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
             {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
           </div>
+          <div className="note" style={{marginTop:2}}>Timber priced from {hasRealPrice ? <>real <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b></> : <>the national-mean stumpage <b>${fmt(NATIONAL_STUMPAGE_M3,0)}/m³</b> ({st} not yet measured)</>}{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}. <span style={{color:"#8a5cd1"}}>Carbon (${p.carbon}/tCO₂e) and ES remain illustrative.</span></div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Policy:</span>
             <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
+            <span style={{color:"var(--mut)",marginLeft:6}}>Discount rate:</span>
+            {DISC_RATES.map(([k,lbl])=><span key={k} style={chip(disc===+k)} onClick={()=>setDisc(+k)}>{lbl}</span>)}
           </div>
         </details>
         <div className="note" style={{marginTop:4}}>Unlike agriculture, forest policy and public sentiment tend to restrict harvesting. These futures, from certification to old-growth protection, compliance carbon, and proforestation, let you test how restrictions reshape value, carbon, and the recommended strategy.</div>
@@ -408,7 +415,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <MultiLineChart rows={allRows}/>
             <div style={{display:"flex",flexWrap:"wrap",gap:10,fontSize:10,marginTop:2}}>{present.map(e=><span key={e.cls} style={{color:CLS_COL[e.cls]}}>● {e.cls} ({e.rows.length})</span>)}</div>
             {repNode && (r.econ.npvH!=null||r.econ.npvC!=null) && (
-              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"#8a5cd1"}}>· illustrative prices</span></div>
+              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span style={{color:"#8a5cd1"}}>carbon illustrative</span></span></div>
             )}
           </div>
         );

@@ -483,6 +483,18 @@ export default function App(){
   // Layered audience mode: "simple" (landowner-first; dense research controls
   // hidden) vs full researcher surface. Default to the simple view.
   const [simple,setSimple] = useState(true);
+  const [welcome,setWelcome] = useState(false); // first-visit audience chooser
+  // Route the two audiences and remember the choice; the header toggle reuses this.
+  function chooseAudience(mode){
+    const research = mode === "research";
+    setSimple(!research); setToolsOpen(research); setWelcome(false);
+    try { localStorage.setItem("perseus_audience", mode); } catch(e){}
+  }
+  useEffect(()=>{
+    let saved=null; try { saved=localStorage.getItem("perseus_audience"); } catch(e){}
+    if(saved){ const research = saved==="research"; setSimple(!research); setToolsOpen(research); }
+    else setWelcome(true);
+  },[]);
   const [glossaryOpen,setGlossaryOpen] = useState(false);
   const [introOpen,setIntroOpen] = useState(true); // first-run guidance banner
   const [hrrScenario,setHrrScenario] = useState(initRef.current.hscen || "current"); // health tab scenario (deep-linkable)
@@ -1197,6 +1209,25 @@ export default function App(){
 
   return (
     <div className="app">
+      {welcome && (
+        <div className="welcome-overlay" role="dialog" aria-modal="true" aria-label="Choose your view">
+          <div className="welcome-card">
+            <div className="welcome-title">PERSEUS Forest Intelligence</div>
+            <p className="welcome-sub">Forest health, risk, value, and multi-model scenario projections across the lower 48. Choose how you want to start — you can switch any time from the top bar.</p>
+            <div className="welcome-choices">
+              <button className="welcome-choice" onClick={()=>chooseAudience("landowner")}>
+                <b>I own or manage forest land</b>
+                <span>A guided view: find your area, see how it compares to similar places, and test management and climate scenarios in plain language.</span>
+              </button>
+              <button className="welcome-choice" onClick={()=>chooseAudience("research")}>
+                <b>I'm a researcher or analyst</b>
+                <span>The full surface: every model engine, all CONUS data layers, stumpage, rotation economics, and the multi-model detail.</span>
+              </button>
+            </div>
+            <button className="welcome-skip" onClick={()=>chooseAudience("landowner")}>Skip — just open the tool</button>
+          </div>
+        </div>
+      )}
       <header className="top">
         <h1>PERSEUS Forest Intelligence <span className="pill">Tier A</span></h1>
         <span className="sub">Focal: <b style={{color:"#f4c430"}}>ME · IN · GA</b> · click map or pick a state →</span>
@@ -1219,8 +1250,8 @@ export default function App(){
         <nav className="topnav" style={{display:"flex",gap:14,fontSize:13,marginLeft:4,alignItems:"center"}}>
           <span className="viewmode" role="group" aria-label="View mode"
             title="Landowner = a simplified view with the essentials. Researcher = the full multi-model surface and all data layers.">
-            <button className={"vm"+(simple?" on":"")} onClick={()=>{ setSimple(true); setToolsOpen(false); }}>Landowner</button>
-            <button className={"vm"+(!simple?" on":"")} onClick={()=>{ setSimple(false); setToolsOpen(true); }}>Researcher</button>
+            <button className={"vm"+(simple?" on":"")} onClick={()=>chooseAudience("landowner")}>Landowner</button>
+            <button className={"vm"+(!simple?" on":"")} onClick={()=>chooseAudience("research")}>Researcher</button>
           </span>
           <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Methods notes">Methods</a>
           <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Ecoregion economics viewer">Ecoregion</a>

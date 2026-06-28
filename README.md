@@ -82,10 +82,10 @@ Raster overlays are in `public/raster/`, produced by `scripts/50_raster_image_ov
 
 ## Known limitations
 
-- **Illustrative economics:** forward prices, the carbon price, ecosystem-service payment
-  levels, the discount rate, and the policy multipliers are reasonable placeholders pending
-  real regional series (CFRU/TMS stumpage and the ecoregion NPV-by-discount-rate table exist
-  on Cardinal and are the next integration). The mechanics are sound; the numbers are stand-ins.
+- **Economics:** timber value now uses real per-state blended stumpage ($/m3, from
+  `api/econ_params.json`) with a user-selectable discount rate. The carbon price,
+  ecosystem-service payments, and policy multipliers remain illustrative placeholders. NPV is
+  single-harvest-at-horizon; a Faustmann rotation basis is a planned refinement.
 - **Climate scaling:** RCP pathways currently share the baseline yield curves for most
   engines; calibrated CEM climate scaling is in progress, so historic and RCP may read
   similarly until it lands.
