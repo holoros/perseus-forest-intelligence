@@ -16,6 +16,7 @@ import CompareAreas from "./CompareAreas.jsx";
 import ScenarioRunner from "./ScenarioRunner.jsx";
 import RunBuilder from "./RunBuilder.jsx";
 import GlossaryPanel from "./GlossaryPanel.jsx";
+import { openMyForestReport } from "./myForest.js";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
 
@@ -512,6 +513,7 @@ export default function App(){
   const [hrr,setHrr] = useState(null);
   const [hrrGrid,setHrrGrid] = useState(null);
   const [hrrDetail,setHrrDetail] = useState(null); // per-state drill-down: top species, agents, dead/live
+  const [econParams,setEconParams] = useState(null); // real per-state stumpage (for the my-forest summary)
   const [hrrEco,setHrrEco] = useState(null); // HRR aggregated to EPA L3 ecoregions
   const [hrrCounty,setHrrCounty] = useState(null); // HRR by county (FIPS + centroid)
   const [hrrLand,setHrrLand] = useState(null);     // HRR by ownership group
@@ -553,6 +555,7 @@ export default function App(){
     j("api/hrr_states.json").then(setHrr).catch(()=>{});
     j("api/hrr_grid.json").then(setHrrGrid).catch(()=>{});
     j("api/hrr_state_detail.json").then(setHrrDetail).catch(()=>{});
+    j("api/econ_params.json").then(setEconParams).catch(()=>{});
     j("api/hrr_ecoregion.json").then(setHrrEco).catch(()=>{});
     j("api/hrr_county.json").then(setHrrCounty).catch(()=>{});
     j("api/hrr_landowner.json").then(setHrrLand).catch(()=>{});
@@ -1552,6 +1555,11 @@ export default function App(){
             <button className="tab" style={{marginLeft:6,opacity:0.85}} onClick={()=>setToolsOpen(o=>!o)}
               title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation">
               {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>)}
+            {simple && cov && (
+            <button className="tab" style={{marginLeft:6,borderColor:"var(--accent)",color:"var(--accent)"}}
+              onClick={()=>openMyForestReport(sel, cov.name, hrr, hrrDetail, econParams && econParams.stumpage_usd_m3 ? econParams.stumpage_usd_m3[sel] : null)}
+              title="Open a plain-language one-page summary of this state's forest: health, your species, and what you might do. Print or save to PDF.">
+              🌲 My forest summary</button>)}
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
           {aoi && <Suspense fallback={<div className="note" style={{padding:8}}>Loading area report…</div>}><AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} fia={fia} l3yields={l3yields} onClose={()=>setAoi(null)} onRun={(s)=>{ if(s) setSel(s); setAoi(null); setTab("runbuilder"); }}/></Suspense>}

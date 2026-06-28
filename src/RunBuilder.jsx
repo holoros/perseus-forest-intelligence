@@ -71,7 +71,7 @@ function computeScores(rs, emphasis){
 // final age (which collapses to ~0 at high discount rates), find the optimal rotation age R*
 // that maximizes the single-rotation NPV of the harvest, and also report the perpetual
 // soil/land expectation value (LEV). Gross of establishment and management costs.
-function rotationTimber(merch, stumpageCuft, disc) {
+function rotationTimber(merch, stumpageCuft, disc, estCost = 0, mgmtCost = 0) {
   if (!merch || merch.length < 2) return null;
   const vol = (a) => {
     if (a <= merch[0][0]) return merch[0][1] * a / Math.max(merch[0][0], 1);
@@ -80,21 +80,25 @@ function rotationTimber(merch, stumpageCuft, disc) {
     }
     return merch[merch.length - 1][1];
   };
-  let bestNPV = -1, R = 0;
-  for (let a = 10; a <= 120; a++) { const npv1 = vol(a)*stumpageCuft / Math.pow(1+disc, a); if (npv1 > bestNPV) { bestNPV = npv1; R = a; } }
-  const lev = vol(R)*stumpageCuft / (Math.pow(1+disc, R) - 1);   // perpetual bare-land value
+  // Net single-rotation NPV: harvest revenue at R, less establishment cost (age 0) and the
+  // present value of annual management cost over the rotation. estCost/mgmtCost default 0 (gross).
+  const ann = (R) => disc > 0 ? (1 - Math.pow(1+disc, -R)) / disc : R;
+  const srNPV = (R) => vol(R)*stumpageCuft*Math.pow(1+disc, -R) - estCost - mgmtCost*ann(R);
+  let bestNPV = -Infinity, R = 10;
+  for (let a = 10; a <= 120; a++) { const v = srNPV(a); if (v > bestNPV) { bestNPV = v; R = a; } }
+  const lev = bestNPV / (1 - Math.pow(1+disc, -R));   // perpetual land value (identical rotations)
   return { npv: bestNPV, rotation: R, lev };
 }
 
 // stumpageCuft = effective $/cu ft (real per-state $/m3 x price-scenario mult, converted).
 // Timber value is the optimal single-rotation NPV (rotation R*); carbon value is the carbon
 // trajectory discounted at the horizon. LEV (perpetual land value) is carried for display.
-function econFromL3(node, curveKey, stumpageCuft, carbonPrice, disc) {
+function econFromL3(node, curveKey, stumpageCuft, carbonPrice, disc, estCost = 0, mgmtCost = 0) {
   const cm = (node && node.curves) || {};
   const merch = cm.merchvol_cuftac && cm.merchvol_cuftac[curveKey];
   const carb = cm.carbon_lbac && cm.carbon_lbac[curveKey];
   const o = {};
-  const ft = rotationTimber(merch, stumpageCuft, disc);
+  const ft = rotationTimber(merch, stumpageCuft, disc, estCost, mgmtCost);
   if (ft) { o.npvH = ft.npv; o.rotation = ft.rotation; o.lev = ft.lev; }
   if (carb && carb.length) { const [a,lb]=carb[carb.length-1]; o.age=a; o.npvC=((lb/2204.62)*(44/12)*carbonPrice)/Math.pow(1+disc,a); }
   return o;
@@ -153,6 +157,8 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   const [run, setRun] = useState(null);
   const [hpc, setHpc] = useState("idle"); // idle|submitting|queued|running|complete
   const [disc, setDisc] = useState(0.04);   // user-selectable discount rate
+  const [estCost, setEstCost] = useState(0);   // establishment cost $/ac (net Faustmann)
+  const [mgmtCost, setMgmtCost] = useState(0); // annual management cost $/ac/yr
   const [econParams, setEconParams] = useState(null); // real per-state stumpage
   const base = import.meta.env.BASE_URL || "/";
 
@@ -221,7 +227,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
         if (sc.climate!=="historic") { const cf=ms.filter(e=>(e.model||"").toLowerCase().includes(sc.climate)); if (cf.length) ms=cf; }
         return { mk, cls, rows: ms.map(e=>({model:e.model,cls:e.cls,pts:e.pts.map(pt=>[pt[0],pt[1]])})) };
       });
-      const e = econFromL3(repNode, mg[3], stumpageCuft, p.carbon, disc);
+      const e = econFromL3(repNode, mg[3], stumpageCuft, p.carbon, disc, estCost, mgmtCost);
       // Timber income is realized only when the stand is harvested; a reserve
       // earns no stumpage. Carbon value accrues under every management (from that
       // management's own carbon trajectory). Total is the explicit sum of the
@@ -244,7 +250,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   }
 
   // recommendation (reserve vs managed) for this area + market + ES
-  const eRes = econFromL3(repNode,"untreated",stumpageCuft,p.carbon,disc), eBas = econFromL3(repNode,"harvested",stumpageCuft,p.carbon,disc);
+  const eRes = econFromL3(repNode,"untreated",stumpageCuft,p.carbon,disc,estCost,mgmtCost), eBas = econFromL3(repNode,"harvested",stumpageCuft,p.carbon,disc,estCost,mgmtCost);
   const esAge = eRes.age||eBas.age||100;
   const esFull = esAnnual?esAnnual*annuity(esAge,disc):0, esMan = esFull*ES_MANAGED_FRAC;
   // Mirror the per-scenario economics so the headline matches the scorecard:
@@ -394,6 +400,15 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <span style={{color:"var(--mut)",marginLeft:6}}>Discount rate:</span>
             {DISC_RATES.map(([k,lbl])=><span key={k} style={chip(disc===+k)} onClick={()=>setDisc(+k)}>{lbl}</span>)}
           </div>
+          {!simple && (
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
+            <span style={{color:"var(--mut)"}}>Rotation costs ($/ac):</span>
+            <span style={{color:"var(--mut)"}}>establishment</span>
+            <input type="number" min="0" step="50" value={estCost} onChange={e=>setEstCost(Math.max(0,+e.target.value||0))} style={{...sel,width:70}}/>
+            <span style={{color:"var(--mut)"}}>annual mgmt</span>
+            <input type="number" min="0" step="1" value={mgmtCost} onChange={e=>setMgmtCost(Math.max(0,+e.target.value||0))} style={{...sel,width:60}}/>
+            <span style={{color:"var(--mut)",fontSize:10}}>net Faustmann; 0 = gross of costs</span>
+          </div>)}
         </details>
         <div className="note" style={{marginTop:4}}>Unlike agriculture, forest policy and public sentiment tend to restrict harvesting. These futures, from certification to old-growth protection, compliance carbon, and proforestation, let you test how restrictions reshape value, carbon, and the recommended strategy.</div>
       </div>
