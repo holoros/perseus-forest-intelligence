@@ -165,8 +165,12 @@ export default function RunBuilder({ initState }) {
   const selModels = MODELS.filter(([k]) => models[k]);
   const p = PRICE_PATHS[price];
   const esAnnual = (ES_LEVELS.find(([k])=>k===es)||[])[2] || 0;
-  const stateResil = hrr && hrr[st] ? hrr[st].resil_mean : null;
-  const stateStress = hrr && hrr[st] ? hrr[st].stress_mean : null;
+  // hrr_states.json nests per-state values under `.states` (keyed by state code).
+  // Reading hrr[st] directly returned undefined, which blanked the scorecard
+  // Resilience/Risk columns; resolve through `.states` so they populate.
+  const hrrSt = hrr && hrr.states ? hrr.states[st] : null;
+  const stateResil = hrrSt ? hrrSt.resil_mean : null;
+  const stateStress = hrrSt ? hrrSt.stress_mean : null;
   const spec = {
     spec_version:"1.0", aoi:{type:"inventory",state:st,scale:"ownership"},
     data_source: dataSource==="user" && upload ? {source:"user",upload_ref:upload.name,n_rows:upload.rows} : {source:dataSource},
@@ -188,11 +192,14 @@ export default function RunBuilder({ initState }) {
         return { mk, cls, rows: ms.map(e=>({model:e.model,cls:e.cls,pts:e.pts.map(pt=>[pt[0],pt[1]])})) };
       });
       const e = econFromL3(repNode, mg[3], regionAdjust(p, st));
-      const npvH = (e.npvH||0)*polT(policy);
+      // Timber income is realized only when the stand is harvested; a reserve
+      // earns no stumpage. Carbon value accrues under every management (from that
+      // management's own carbon trajectory). Total is the explicit sum of the
+      // realized components, so the displayed parts always reconcile with it.
+      const timber = sc.mgmt==="reserve" ? 0 : (e.npvH||0)*polT(policy);
       const npvC = (e.npvC||0)*polC(policy);
       const esv = (sc.mgmt==="reserve"?1:ES_MANAGED_FRAC) * (esAnnual ? esAnnual*annuity(e.age||100,DISCOUNT) : 0);
-      const primary = sc.mgmt==="reserve" ? npvC : npvH;
-      const total = primary + esv;
+      const total = timber + npvC + esv;
       // multi-criteria: forest-condition outcome (ensemble endpoint mean) + agreement + resilience
       const ends = engines.flatMap(en=>en.rows).map(r=>r.pts[r.pts.length-1][1]);
       const mean = ends.length ? ends.reduce((a,b)=>a+b,0)/ends.length : null;
@@ -200,7 +207,7 @@ export default function RunBuilder({ initState }) {
       const agree = mean ? Math.max(0, 1-(sd/Math.abs(mean))) : null;
       const resil = stateResil!=null ? Math.min(1, stateResil*(RESIL_FACTOR[sc.mgmt]||1)) : null;
       const risk = stateStress!=null ? Math.min(1, stateStress*(RISK_FACTOR[sc.mgmt]||1)) : null;
-      return { sc, engines, econ:{...e, npvH, npvC, esv, total},
+      return { sc, engines, econ:{...e, npvH:timber, npvC, esv, total},
                criteria:{ econ:total, carbon:npvC, es:esv, resil, risk, agree, outcome:mean } };
     });
     setRun({ status:"complete", results });
@@ -210,7 +217,10 @@ export default function RunBuilder({ initState }) {
   const eRes = econFromL3(repNode,"untreated",regionAdjust(p,st)), eBas = econFromL3(repNode,"harvested",regionAdjust(p,st));
   const esAge = eRes.age||eBas.age||100;
   const esFull = esAnnual?esAnnual*annuity(esAge,DISCOUNT):0, esMan = esFull*ES_MANAGED_FRAC;
-  const reserveTotal=(eRes.npvC||0)*polC(policy)+esFull, managedTotal=(eBas.npvH||0)*polT(policy)+esMan;
+  // Mirror the per-scenario economics so the headline matches the scorecard:
+  // reserve earns carbon + ES (no stumpage); managed earns timber + its own carbon + ES.
+  const reserveTotal=(eRes.npvC||0)*polC(policy)+esFull;
+  const managedTotal=(eBas.npvH||0)*polT(policy)+(eBas.npvC||0)*polC(policy)+esMan;
   const carbonLean = reserveTotal>managedTotal;
   const polClause = policy!=="none" ? ` under ${(POLICIES.find(([k])=>k===policy)||[])[1].toLowerCase()}` : "";
   const decision = repNode ? (carbonLean

@@ -479,6 +479,9 @@ export default function App(){
   // v1.3 reconstruction: detail-panel tabs + their datasets
   const [tab,setTab] = useState(initRef.current.tab || "compare"); // lead with the accessible Compare areas view
   const [toolsOpen,setToolsOpen] = useState(false); // research tabs hidden by default (simplified interface)
+  // Layered audience mode: "simple" (landowner-first; dense research controls
+  // hidden) vs full researcher surface. Default to the simple view.
+  const [simple,setSimple] = useState(true);
   const [glossaryOpen,setGlossaryOpen] = useState(false);
   const [introOpen,setIntroOpen] = useState(true); // first-run guidance banner
   const [hrrScenario,setHrrScenario] = useState(initRef.current.hscen || "current"); // health tab scenario (deep-linkable)
@@ -1208,7 +1211,12 @@ export default function App(){
           <a href="https://crsf.umaine.edu" target="_blank" rel="noopener noreferrer" title="Center for Research on Sustainable Forests">
             <img src={`${BASE}logos/crsf.png`} alt="CRSF"/></a>
         </div>
-        <nav className="topnav" style={{display:"flex",gap:14,fontSize:13,marginLeft:4}}>
+        <nav className="topnav" style={{display:"flex",gap:14,fontSize:13,marginLeft:4,alignItems:"center"}}>
+          <span className="viewmode" role="group" aria-label="View mode"
+            title="Landowner = a simplified view with the essentials. Researcher = the full multi-model surface and all data layers.">
+            <button className={"vm"+(simple?" on":"")} onClick={()=>{ setSimple(true); setToolsOpen(false); }}>Landowner</button>
+            <button className={"vm"+(!simple?" on":"")} onClick={()=>{ setSimple(false); setToolsOpen(true); }}>Researcher</button>
+          </span>
           <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Methods notes">Methods</a>
           <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Ecoregion economics viewer">Ecoregion</a>
           <button className="linkbtn" title="plain-language glossary and data sources" onClick={()=>setGlossaryOpen(true)}>Glossary</button>
@@ -1273,7 +1281,8 @@ export default function App(){
                 </div>);
               })()}
           <div className="map-ctrl">
-            {/* GROUP · View mode */}
+            {/* GROUP · View mode (researcher only) */}
+            {!simple && (<>
             <span className="ctrl-grp-lab">View</span>
             <select value={mapMode} onChange={e=>setMapMode(e.target.value)} title="Map mode">
               <option value="coverage">engine coverage</option>
@@ -1302,14 +1311,16 @@ export default function App(){
               )}
             </div>
             <span className="ctrl-sep"/>
+            </>)}
             {/* GROUP · Context layers */}
             <span className="ctrl-grp-lab">Context</span>
             <label className="mc-tog" title="Forest / non-forest context base (forest = green)">
               <input type="checkbox" checked={baseOn} onChange={e=>setBaseOn(e.target.checked)}/> forest base
             </label>
+            {!simple && (
             <label className="mc-tog" title="EPA L3 ecoregion overlay, colored by AGB at 50 yr">
               <input type="checkbox" checked={ecoOn} onChange={e=>setEcoOn(e.target.checked)}/> ecoregions
-            </label>
+            </label>)}
             <select value={units} onChange={e=>setUnits(e.target.value)} title="Display units"
               style={{fontSize:"11.5px"}}>
               <option value="imperial">Imperial (ac · ton)</option>
@@ -1317,11 +1328,12 @@ export default function App(){
             </select>
             <span className="ctrl-sep"/>
             {/* GROUP · Explore tools */}
-            <span className="ctrl-grp-lab">Explore</span>
+            <span className="ctrl-grp-lab">{simple ? "Your area" : "Explore"}</span>
+            {!simple && (
             <label className="mc-tog" title="click the map to inspect a point (state, L3 ecoregion, AGB at 50 yr)">
               <input type="checkbox" checked={inspectMode}
                 onChange={e=>{ setInspectMode(e.target.checked); if(!e.target.checked) setInspectInfo(null); }}/> inspect
-            </label>
+            </label>)}
             <label className="mc-tog" title="upload an AOI: GeoJSON or zipped shapefile">
               AOI ↑<input type="file" accept=".zip,.json,.geojson" style={{display:"none"}}
                 onChange={e=>handleAoiFile(e.target.files[0])}/>
@@ -1473,9 +1485,9 @@ export default function App(){
               background:"rgba(63,182,139,0.10)",border:"1px solid var(--line,#2a3a47)",
               fontSize:12.5,lineHeight:1.45,color:"var(--ink,#e8edf2)",display:"flex",gap:8,alignItems:"flex-start"}}>
               <span style={{flex:1}}>
-                <b>New here?</b> This tool compares forest carbon, health, and management outcomes across the US.
-                Start in <b>Compare areas</b>: pick a state on the map (or draw your own area with <b>AOI&nbsp;↑</b>) to see how it stacks up against similar places.
-                The <b>Research tools</b> toggle reveals the full multi-model detail. Unsure of a term? See <b>Glossary</b> up top.
+                <b>New here?</b> This is the <b>Landowner view</b>: pick your state, or click <b>◎&nbsp;Forest&nbsp;near&nbsp;me</b> / draw an area with <b>AOI&nbsp;↑</b>.
+                Then use the three tabs: <b>Compare areas</b> (how your forest stacks up), <b>Build a run</b> (test management and climate scenarios), and <b>Forest health</b> (stress and resilience).
+                Want the full multi-model detail and every data layer? Switch to <b>Researcher</b> up top. Unsure of a term? See <b>Glossary</b>.
               </span>
               <button onClick={()=>setIntroOpen(false)} aria-label="dismiss"
                 style={{background:"transparent",border:"none",color:"var(--mut,#8a93a0)",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button>
@@ -1499,9 +1511,10 @@ export default function App(){
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
             })}
+            {!simple && (
             <button className="tab" style={{marginLeft:6,opacity:0.85}} onClick={()=>setToolsOpen(o=>!o)}
               title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation">
-              {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>
+              {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>)}
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
           {aoi && <Suspense fallback={<div className="note" style={{padding:8}}>Loading area report…</div>}><AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} fia={fia} l3yields={l3yields} onClose={()=>setAoi(null)} onRun={(s)=>{ if(s) setSel(s); setAoi(null); setTab("runbuilder"); }}/></Suspense>}

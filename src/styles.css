@@ -140,3 +140,10 @@ select{background:var(--panel);color:var(--ink);border:1px solid var(--line);
   header.top .stat{margin-left:0}
   header.top .state-pick{max-width:100%}
 }
+
+/* Layered audience toggle (Landowner / Researcher) in the header nav. */
+.viewmode{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.viewmode .vm{background:transparent;color:var(--mut);border:none;cursor:pointer;
+  font-size:12px;padding:3px 10px;line-height:1.4}
+.viewmode .vm:hover{color:var(--ink)}
+.viewmode .vm.on{background:var(--accent);color:#0b1015;font-weight:600}
