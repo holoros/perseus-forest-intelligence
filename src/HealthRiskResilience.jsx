@@ -103,15 +103,16 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
               {fmt(sc, 0)}%
             </div>
             <div style={{ fontSize: 11, color: "var(--mut)" }}>
-              priority forest area
+              priority forest area · CONUS (national)
               {bd.length === 2 ? ` · 90% band ${bd[0]}–${bd[1]}%` : ""}
             </div>
           </div>
           <div style={{ fontSize: 12, color: "var(--mut)", maxWidth: 320 }}>
-            <b>What this is:</b> the share of this area's forest most likely to need management
+            <b>What this is:</b> the share of the nation's forest most likely to need management
             attention — forest that is both highly stressed (climate exposure, sensitivity, and
             recent observed disturbance) and low in resilience (younger, less stocked, low adaptive
-            capacity). National baseline <b>{fmt(nat.priority_share_pct, 1)}%</b>; sensitive to the
+            capacity). The big number is the CONUS total; your selected state is shown below the map.
+            National baseline <b>{fmt(nat.priority_share_pct, 1)}%</b>; sensitive to the
             scoring weights{sr.length === 2 ? ` (range ${sr[0]} to ${sr[1]}%)` : ""}, so quote it as a range.
           </div>
         </div>
@@ -262,12 +263,12 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
                 <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
                   <span style={{ display: "block", height: "100%", width: `${Math.min(100, e.priority_pct / maxE * 100)}%`, background: rampColor(e.priority_pct) }} />
                 </span>
-                <span style={{ width: 32, textAlign: "right" }}>{fmt(e.priority_pct, 0)}%</span>
+                <span style={{ width: 36, textAlign: "right" }}>{fmt(e.priority_pct, 0)}%{e.priority_pct >= 99.5 ? "*" : ""}</span>
                 {to && <span style={{ width: 84, textAlign: "right", color: "var(--mut)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{to}</span>}
               </div>
             ); })}
             <div style={{ fontSize: 9.5, color: "var(--mut)", marginTop: 3 }}>
-              Dry-edge and prairie ecoregions rank highest; productive forested ecoregions lowest.{landEco ? " Dominant forest owner from the USDA FS ownership raster." : ""}
+              Dry-edge and prairie ecoregions rank highest; productive forested ecoregions lowest.{top.some(e => e.priority_pct >= 99.5) ? " * a near-100% share reflects very little forested area in that ecoregion (small sample); interpret with caution." : ""}{landEco ? " Dominant forest owner from the USDA FS ownership raster." : ""}
             </div>
           </div>
         );

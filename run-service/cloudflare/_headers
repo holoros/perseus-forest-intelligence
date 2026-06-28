@@ -1,0 +1,18 @@
+# Cloudflare Pages headers for the PERSEUS static front end.
+# Hashed assets are immutable; data JSON is revalidated so updates land without a redeploy.
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/api/*
+  Cache-Control: public, max-age=300, must-revalidate
+
+/geo/*
+  Cache-Control: public, max-age=86400
+
+/raster/*
+  Cache-Control: public, max-age=86400
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

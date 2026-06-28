@@ -1,12 +1,41 @@
 # PERSEUS Forest Intelligence
 
-CONUS multi-model forest-carbon explorer covering all 48 conterminous states with deep focal coverage for Maine, Indiana, and Georgia (Minnesota, Oregon, Washington, and Idaho now also carry multi-engine series). Pick a state, drill into multi-model growth curves with uncertainty ribbons and the FIA above-ground reference; toggle the LANDIS biomass spatial layer for Maine (total + balsam fir, red spruce, red maple, pine) plus a growing library of CONUS rasters (LCMS disturbance, TreeMap forest type, relative density, BGI/CSI/CSPI, asymptotic AGB, LANDFIRE canopy height, Hansen forest loss).
-
-Built on the `perseus_db` carbon-pool-harmonized database (current export schema `perseus_api_v1`). Static React + Vite + MapLibre, deployed via GitHub Pages.
+Precision-forestry decision support for the conterminous US. Pick or draw an area, see its
+localized forest health, risk, and value, then run multiple growth-and-yield models across
+contrasting economic, policy, and climate scenarios and get a multi-criteria recommendation
+and a downloadable report. Built as the assessment-and-values engine of the Guo et al. (2026)
+integrative forest-health framework, with a near-term disturbance-surveillance layer.
 
 **Live app:** https://holoros.github.io/perseus-forest-intelligence/
-**Latest deployed version:** v1.3 (gh-pages, May 2026)
-**Latest release tag:** v0.56 (release tagging is currently behind the deployed build; see Known limitations).
+**Deployed version:** v1.38
+**Stack:** React + Vite + MapLibre, static SPA, auto-deployed to GitHub Pages from `main`.
+
+## Two views, one tool
+
+A header toggle sets the interface for the audience:
+
+- **Landowner (default):** a simplified path. Pick your state or find your area
+  (`Forest near me`, AOI upload, coordinate jump), then use three tabs: Compare areas,
+  Build a run, and Forest health. Research-only map controls are hidden.
+- **Researcher:** the full surface. All map data layers (forest structure, ownership,
+  stumpage/products, future risk), the carbon-trajectory map mode, point inspection, and the
+  full tab set (Engine compare, RD trend, Engine spread, Stumpage, LANDIS, Landowner yields,
+  Faustmann rotation).
+
+## What it does
+
+- **Compare areas:** how a state or drawn area stacks up against similar places on priority
+  forest area, stress, resilience, and climate exposure.
+- **Build a run:** the on-demand flow. Choose an area and data source (FIA / TreeMap / upload
+  inventory), select models (FVS, CBM, CEM, yield curves, LANDIS), build management x climate
+  scenarios, set market prices, ecosystem-service payments, and a policy driver, then get a
+  real multi-model ensemble, per-acre economics (timber + carbon + ecosystem services), a
+  six-criterion multi-criteria scorecard, a plain-language recommendation, and a one-click
+  HTML/PDF report. The free tier resolves the precomputed PERSEUS series client-side; the
+  subscriber path dispatches the same run-spec to the OSC Cardinal HPC cluster.
+- **Forest health:** priority forest area (stress x resilience) for 48 states and ~219k FIA
+  plots, with current vs RCP4.5/RCP8.5 projections, ownership and ecoregion breakdowns, and a
+  per-state species/vulnerability drill-down. Map units: surface, hexes, counties, ecoregion.
 
 ## Develop / build
 
@@ -14,73 +43,64 @@ Built on the `perseus_db` carbon-pool-harmonized database (current export schema
 npm install
 npm run dev        # local dev server
 npm run build      # static bundle -> dist/
+npm run preview    # serve the built bundle
 ```
-
-## Refresh data
-
-> **`public/api/` is the canonical source of truth (as of v1.6).** The deployed
-> data was assembled from the June hybrid / treemap-spatial / 48-state pipeline
-> and committed here directly. The upstream `perseus_db` export
-> (`48_export_api.py`) is currently **partial** (11 states, 2 scenario buckets,
-> no `yc_treemap_spatial_v1`) and does **not** reproduce v1.6. Do NOT wholesale
-> `cp` the DB export over `public/api/` — it would regress the site to 8-state /
-> 2-bucket data. Edit `public/api/` directly, or merge specific files only after
-> verifying they match the deployed schema. Re-syncing `perseus_db` to reproduce
-> v1.6 is tracked in issue #24.
-
-The `public/raster/` overlays are produced by `scripts/50_raster_image_overlays.sh`. To add or update overlays, regenerate the affected PNGs + bounds JSON, drop them into `public/raster/`, commit, and push to `main`.
 
 ## Deploy
 
-Continuous deploy is live (v1.6, 2 June 2026). Pages Source is **"GitHub
-Actions"** and `.github/workflows/deploy-pages.yml` runs on every push to
-`main`: it builds with Vite and publishes `dist/` via the Pages artifact path.
-A clean build reproduces the deployed site byte-for-byte, so pushes to `main`
-are non-regressive. The legacy `gh-pages` branch is no longer the serving
-source. To deploy: commit to `main` and push; the workflow does the rest.
+Continuous deploy: `.github/workflows/deploy-pages.yml` builds with Vite and publishes
+`dist/` via the Pages artifact on every push to `main`. Pages Source must be set to
+"GitHub Actions". A clean build reproduces the deployed site, so pushes to `main` are
+non-regressive. To deploy: commit to `main` and push.
 
-## What's in here
+A backend launch-architecture scaffold (Supabase + Cloudflare Pages + Paddle, with Cardinal
+as the compute layer) lives in `run-service/`. It is configuration and code templates only;
+standing it up requires creating the accounts and supplying credentials (see
+`run-service/README.md`). The static app runs fully without it.
 
-* CONUS choropleth (engines per state); 48-state coverage with focal ME/IN/GA highlight and multi-engine coverage for ME (32), WA (8), GA (7), MN (7), IN (6), ID (6), OR (5).
-* Multi-model growth curves with metric and management controls (reserve, managed harvest, managed intensive, managed conservation), FIA reference, toggleable uncertainty ribbons (CEM lo/hi, FVS q10/q90), engine hover, URL deep-links.
-* YC engine: FIA empirical Chapman-Richards yield curves stratified by forest type x EPA Level III ecoregion x ownership, with owner-specific harvest regimes and a climate sensitivity ribbon driven by a state-specific CSI envelope (eastern domain) plus modeled extrapolation for western and plains states.
-* Tier B spatial layer (Maine): LANDIS biomass total + 4 species, timestep + opacity, layer-aware legend.
-* CONUS raster overlays: LCMS disturbance cause (2022), TreeMap forest type group, relative density, BGI/CSI/CSPI productivity, asymptotic AGB, LANDFIRE canopy height, Hansen forest loss, harvest intensity, expected removal.
-* Per-state HTML reports for GA, ID, IN, ME, MN, OR, WA.
-* Stumpage view: $/MBF and $/cord by state, 120K observations 1977 to 2026, deflated to real $24 with the BLS CPI-U.
-* Methods page: CONUS B1.1 vs B1.3 inventory stratification analysis at n=48.
+## Data
 
-## Engines
+`public/api/` is the canonical data source of truth. Key files:
 
-The current export catalogues 34 engines across 48 states and 70+ metrics covering carbon stocks, fluxes, volume, biodiversity, mortality, disturbance, and ownership. See `public/api/meta.json` for the canonical catalog.
+- `series/{ST}.json` — per-state multi-model trajectories by management and metric.
+- `meta.json`, `states.json` — catalog and per-state coverage.
+- `yield_curves_by_l3.json` — FIA Chapman-Richards yield curves by forest type x EPA L3
+  ecoregion x ownership.
+- `hrr_*.json` — forest health/risk/resilience by state, grid, county, ecoregion, hex, owner.
+- `landowner_by_county.json` (and `_ecoregion`, `_hex` as they are produced) — ownership
+  composition from the USDA FS forest-ownership raster (RDS-2025-0045).
+- `stumpage.json`, `faustmann_rotation.json`, `landowner_yields.json`, `landis_stratified.json`.
+- `geo/us_counties.geojson` — CONUS county boundaries for the county map unit.
 
+Raster overlays are in `public/raster/`, produced by `scripts/50_raster_image_overlays.sh`.
 
+## Methods and provenance
 
-## Methods and data provenance
-
-* CONUS yield-curve methodology: `docs/yc_engine_provenance.md` and the in-app methods page at https://holoros.github.io/perseus-forest-intelligence/methods/.
-* Inventory stratification analysis (CONUS B1.1 vs B1.3 at n=48): `public/methods/inventory-stratification/`.
-* Per-state HTML reports: `public/reports/{GA,ID,IN,ME,MN,OR,WA}_report.html`.
-* All scientific outputs cite `perseus_db` schema `perseus_api_v1` (see `public/api/meta.json` for the current snapshot).
+- Yield-curve methodology: `docs/yc_engine_provenance.md` and the in-app methods page.
+- Inventory stratification analysis: `public/methods/inventory-stratification/`.
+- Per-state HTML reports: `public/reports/{GA,ID,IN,ME,MN,OR,WA}_report.html`.
 
 ## Known limitations
 
-* **perseus_db export is partial:** the upstream DB reproduces only 11 states / 2 scenario buckets and lacks `yc_treemap_spatial_v1`; `public/api/` is canonical until the DB is re-synced (issue #24).
-* **Western climate band:** CSI rasters cover only the eastern domain (lon -90 to -52); 18 western and plains states use a modeled transfer from the national climate-embedding PCs plus latitude (R^2 about 0.3 to 0.4) and are flagged `domain=modeled`.
-* **YC managed scenarios** are owner-class default rotations, not explicit per-stand silvicultural prescriptions.
+- **Illustrative economics:** forward prices, the carbon price, ecosystem-service payment
+  levels, the discount rate, and the policy multipliers are reasonable placeholders pending
+  real regional series (CFRU/TMS stumpage and the ecoregion NPV-by-discount-rate table exist
+  on Cardinal and are the next integration). The mechanics are sound; the numbers are stand-ins.
+- **Climate scaling:** RCP pathways currently share the baseline yield curves for most
+  engines; calibrated CEM climate scaling is in progress, so historic and RCP may read
+  similarly until it lands.
+- **Western climate band:** CSI rasters cover the eastern domain; 18 western/plains states use
+  a modeled transfer (flagged `domain=modeled`).
+- **perseus_db export:** `public/api/` is canonical; re-syncing the upstream DB export to
+  reproduce the deployed data is tracked separately.
 
 ## Citation
 
-If you use PERSEUS Forest Intelligence in research, please cite the underlying `perseus_db` data product and the CRSF yield-curve pipeline. Contact: Aaron Weiskittel (aaron.weiskittel@maine.edu).
+If you use PERSEUS Forest Intelligence in research, cite the underlying `perseus_db` data
+product and the CRSF yield-curve pipeline. Contact: Aaron Weiskittel
+(aaron.weiskittel@maine.edu).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Important: do not enable
-`push:` on `.github/workflows/deploy-pages.yml` until the v1.3
-features in gh-pages are reconciled into main source. The
-`v0.73-source` and `v1.3-deployed` tags anchor both states.
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for the source (main) and deploy
-(gh-pages) timelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md). The Pages workflow deploys `main` automatically;
+verify a clean `npm run build` before pushing.
