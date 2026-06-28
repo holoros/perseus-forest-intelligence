@@ -7,6 +7,7 @@ import DivergenceHeatmap from "./DivergenceHeatmap.jsx";
 // on demand rather than in the initial bundle (item 11, client-side portion).
 const StumpagePanel = lazy(() => import("./StumpagePanel.jsx"));
 const LandisStratified = lazy(() => import("./LandisStratified.jsx"));
+const CrossModelEnsemble = lazy(() => import("./CrossModelEnsemble.jsx"));
 const LandownerYields = lazy(() => import("./LandownerYields.jsx"));
 const FaustmannRotation = lazy(() => import("./FaustmannRotation.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
@@ -492,6 +493,8 @@ export default function App(){
   const [divergence,setDivergence] = useState(null);
   const [stumpage,setStumpage] = useState(null);
   const [landis,setLandis] = useState(null);
+  const [mmTraj,setMmTraj] = useState(null); // multimodel anchored trajectories (cross-model ensemble)
+  const [mmSum,setMmSum] = useState(null);   // multimodel state summary (2100 carbon + NPV)
   const [landowner,setLandowner] = useState(null);
   const [faustmann,setFaustmann] = useState(null);
   const [hrr,setHrr] = useState(null);
@@ -532,6 +535,8 @@ export default function App(){
     j("api/engine_divergence.json").then(setDivergence).catch(()=>{});
     j("api/stumpage.json").then(setStumpage).catch(()=>{});
     j("api/landis_stratified.json").then(setLandis).catch(()=>{});
+    j("api/multimodel_anchored_trajectories.json").then(setMmTraj).catch(()=>{});
+    j("api/multimodel_state_summary.json").then(setMmSum).catch(()=>{});
     j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
     j("api/hrr_states.json").then(setHrr).catch(()=>{});
     j("api/hrr_grid.json").then(setHrrGrid).catch(()=>{});
@@ -1496,11 +1501,12 @@ export default function App(){
           {/* When an AOI is active, the research surface is collapsed by default. */}
           {(!aoi || researchOpen) && <div className="tabs">
             {[["compare","Compare areas"],["scenario","Scenario runner"],["runbuilder","Build a run"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
-              ["stumpage","Stumpage"],["landis","LANDIS stratified"],
+              ["ensemble","Cross-model ensemble"],["stumpage","Stumpage"],["landis","LANDIS stratified"],
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]]
               .filter(([k])=> k==="compare" || k==="runbuilder" || k==="health" || toolsOpen || tab===k)
               .map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
+                || (k==="ensemble" && !(mmTraj && mmTraj[sel]))
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
                 || (k==="landis" && !(landis && landis[sel]))
                 || (k==="landowner" && !(landowner && landowner[sel]))
@@ -1524,14 +1530,15 @@ export default function App(){
             {researchOpen ? "Hide research tools ▴" : "Model comparison & research tools ▾"}</button>}
           {(!aoi || researchOpen) && tab==="divergence" && <DivergenceHeatmap data={divergence} selected={sel}
             onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
-          {(!aoi || researchOpen) && tab==="stumpage" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><StumpagePanel data={stumpage} state={sel}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="stumpage" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><StumpagePanel data={stumpage} state={sel} units={units}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landis" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandisStratified data={landis} state={sel}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="ensemble" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><CrossModelEnsemble traj={mmTraj} summary={mmSum} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
-          {(!aoi || researchOpen) && tab==="runbuilder" && <RunBuilder initState={sel}/>}
+          {(!aoi || researchOpen) && tab==="runbuilder" && <RunBuilder initState={sel} units={units}/>}
           {(!aoi || researchOpen) && (tab==="engines"||tab==="rd") && (<>
           {LANDIS_STATES.includes(sel) && (
             <div className="controls" style={{margin:"0 4px 8px"}}>
