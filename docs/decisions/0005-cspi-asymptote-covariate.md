@@ -63,3 +63,27 @@ this ADR's #75 promotes), NOT the hybrid engine. The mechanism, t0-pin, and wiri
 reused unchanged; only the input fit table changes at promotion time. Do not promote CSPI on
 the hybrid engine: harmless (CONUS-neutral, well-ordered) but unsupported out-of-sample.
 Keep beta=1.0 and clamp +/-25%. This PR stays DRAFT until the remeas promotion lands.
+
+## Deep-assessment update (2026-06-28): revise beta upward
+
+A deeper out-of-sample assessment (leave-one-ecoregion-out CV; 20260628_cspi_deep_assessment.md)
+revises the beta choice and strengthens the case for CSPI:
+
+- **CSPI is non-redundant.** Held-out CV skill for the cell asymptote: CSPI +8.4%, ClimateNA
+  site index +0.9% (no skill), latitude +3.7%. Partial corr(logA, logCSPI | SI) = +0.41, so
+  CSPI's signal is independent of the existing SI product. No simpler covariate substitutes.
+- **Optimal beta is higher than 1.0.** Held-out relRMSE improvement rises monotonically with
+  beta (1.0 +6.5%, 1.5 +8.8%, 2.0 +10.5%, free 2.77 +11.5%). The earlier "steep slope =
+  confounded" worry is refuted; the steepness generalizes. REVISED production setting:
+  **beta = 1.5** on the spatial density layer.
+- **Clamp interaction:** at beta=1.5 the [0.70,1.45] clamp binds heavily in low-productivity
+  regions (e.g., 37.5% of Maine cells hit the 0.70 floor). Since the unclamped CV supports the
+  stronger signal, the clamp should be loosened to ~[0.60,1.60] when using beta=1.5, so it caps
+  only true extremes rather than truncating real signal. The clamp was a safety bound from the
+  now-refuted steepness concern.
+- **Unchanged:** the asymptote scalar still cancels on the t0-anchored reserve trajectory, so
+  beta affects only the spatial/absolute product (density maps), not the anchored carbon line.
+
+Revised recommendation: promote CSPI on the spatial density layer at **beta=1.5, clamp
+[0.60,1.60]**. Production overlays (CONUS 1 km, Maine 30 m) have been rebuilt at beta=1.5; a
+final clamp-widening to [0.60,1.60] is the last tweak before promotion.
