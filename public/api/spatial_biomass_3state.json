@@ -1,0 +1,81 @@
+{
+  "product": "LANDIS-II statewide spatial live-AGB carbon (3 states)",
+  "generated": "2026-06-28T10:38:55-0400",
+  "units": {"total_TgC": "Tg C (live aboveground biomass x 0.47)", "mean_MgC_ha": "Mg C / ha", "year": "calendar year"},
+  "horizon": {"start_year": 2025, "end_year": 2100, "step_years": 5},
+  "model": "LANDIS-II v8 Biomass Succession, ~270 m grid, reserve / no-harvest",
+  "caveats": [
+    "Demonstration initialization: initial-communities biomass is uniform 1000 g/m2, NOT FIA-anchored per-cohort biomass; absolute TgC magnitudes reflect this uniform IC and accumulation under no-harvest, so treat as a reproducible-pipeline demonstration, not a calibrated inventory projection.",
+    "GA climate is HadGEM3_ssp245 (no baseline PRISM staged for GA); ME and WA use baseline PRISM climate. Cross-state magnitude comparisons are confounded by this climate difference.",
+    "Reserve / no-harvest scenario; no management removals."
+  ],
+  "states": {
+      "ME": {
+        "climate": "baseline (PRISM)",
+        "start_TgC": 115.24, "end_TgC": 297.34,
+        "series": {
+        "2025": {"total_TgC": 115.24, "mean_MgC_ha": 44.02, "n_cells": 359149},
+        "2030": {"total_TgC": 127.46, "mean_MgC_ha": 46.14, "n_cells": 378981},
+        "2035": {"total_TgC": 140.14, "mean_MgC_ha": 49.23, "n_cells": 390479},
+        "2040": {"total_TgC": 153.18, "mean_MgC_ha": 52.84, "n_cells": 397650},
+        "2045": {"total_TgC": 166.42, "mean_MgC_ha": 56.78, "n_cells": 402034},
+        "2050": {"total_TgC": 179.89, "mean_MgC_ha": 60.86, "n_cells": 405457},
+        "2055": {"total_TgC": 193.18, "mean_MgC_ha": 64.98, "n_cells": 407788},
+        "2060": {"total_TgC": 206.15, "mean_MgC_ha": 69.07, "n_cells": 409403},
+        "2065": {"total_TgC": 218.76, "mean_MgC_ha": 73.1, "n_cells": 410524},
+        "2070": {"total_TgC": 230.97, "mean_MgC_ha": 77.01, "n_cells": 411404},
+        "2075": {"total_TgC": 242.94, "mean_MgC_ha": 80.82, "n_cells": 412359},
+        "2080": {"total_TgC": 254.53, "mean_MgC_ha": 84.51, "n_cells": 413129},
+        "2085": {"total_TgC": 265.73, "mean_MgC_ha": 88.1, "n_cells": 413730},
+        "2090": {"total_TgC": 276.54, "mean_MgC_ha": 91.58, "n_cells": 414202},
+        "2095": {"total_TgC": 287, "mean_MgC_ha": 94.97, "n_cells": 414564},
+        "2100": {"total_TgC": 297.34, "mean_MgC_ha": 98.19, "n_cells": 415412}
+        }
+      },
+      "WA": {
+        "climate": "baseline (PRISM)",
+        "start_TgC": 162.23, "end_TgC": 2252.5,
+        "series": {
+        "2025": {"total_TgC": 162.23, "mean_MgC_ha": 25.73, "n_cells": 864816},
+        "2030": {"total_TgC": 367.88, "mean_MgC_ha": 58.35, "n_cells": 864816},
+        "2035": {"total_TgC": 578.74, "mean_MgC_ha": 91.8, "n_cells": 864816},
+        "2040": {"total_TgC": 778.41, "mean_MgC_ha": 123.47, "n_cells": 864816},
+        "2045": {"total_TgC": 963.98, "mean_MgC_ha": 152.9, "n_cells": 864816},
+        "2050": {"total_TgC": 1136.35, "mean_MgC_ha": 180.24, "n_cells": 864816},
+        "2055": {"total_TgC": 1291.13, "mean_MgC_ha": 204.8, "n_cells": 864816},
+        "2060": {"total_TgC": 1428.35, "mean_MgC_ha": 226.56, "n_cells": 864816},
+        "2065": {"total_TgC": 1550.72, "mean_MgC_ha": 245.97, "n_cells": 864816},
+        "2070": {"total_TgC": 1662.53, "mean_MgC_ha": 263.7, "n_cells": 864816},
+        "2075": {"total_TgC": 1768.32, "mean_MgC_ha": 280.49, "n_cells": 864816},
+        "2080": {"total_TgC": 1869.4, "mean_MgC_ha": 296.52, "n_cells": 864816},
+        "2085": {"total_TgC": 1967.1, "mean_MgC_ha": 312.01, "n_cells": 864816},
+        "2090": {"total_TgC": 2062.36, "mean_MgC_ha": 327.12, "n_cells": 864816},
+        "2095": {"total_TgC": 2155.73, "mean_MgC_ha": 341.93, "n_cells": 864816},
+        "2100": {"total_TgC": 2252.5, "mean_MgC_ha": 357.28, "n_cells": 864816}
+        }
+      },
+      "GA": {
+        "climate": "HadGEM3_ssp245",
+        "start_TgC": 270.14, "end_TgC": 3302.65,
+        "series": {
+        "2025": {"total_TgC": 270.14, "mean_MgC_ha": 30.29, "n_cells": 1223195},
+        "2030": {"total_TgC": 610.01, "mean_MgC_ha": 68.41, "n_cells": 1223195},
+        "2035": {"total_TgC": 946.06, "mean_MgC_ha": 106.09, "n_cells": 1223195},
+        "2040": {"total_TgC": 1257.17, "mean_MgC_ha": 140.98, "n_cells": 1223195},
+        "2045": {"total_TgC": 1520.17, "mean_MgC_ha": 170.48, "n_cells": 1223195},
+        "2050": {"total_TgC": 1748.39, "mean_MgC_ha": 196.07, "n_cells": 1223195},
+        "2055": {"total_TgC": 1943.2, "mean_MgC_ha": 217.92, "n_cells": 1223195},
+        "2060": {"total_TgC": 2116.33, "mean_MgC_ha": 237.33, "n_cells": 1223195},
+        "2065": {"total_TgC": 2276.51, "mean_MgC_ha": 255.3, "n_cells": 1223195},
+        "2070": {"total_TgC": 2428.63, "mean_MgC_ha": 272.36, "n_cells": 1223195},
+        "2075": {"total_TgC": 2581.08, "mean_MgC_ha": 289.45, "n_cells": 1223195},
+        "2080": {"total_TgC": 2729.21, "mean_MgC_ha": 306.06, "n_cells": 1223195},
+        "2085": {"total_TgC": 2873.63, "mean_MgC_ha": 322.26, "n_cells": 1223195},
+        "2090": {"total_TgC": 3014.78, "mean_MgC_ha": 338.09, "n_cells": 1223195},
+        "2095": {"total_TgC": 3153.01, "mean_MgC_ha": 353.59, "n_cells": 1223195},
+        "2100": {"total_TgC": 3302.65, "mean_MgC_ha": 370.37, "n_cells": 1223195}
+        }
+      }
+  }
+}
+
