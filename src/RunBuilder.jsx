@@ -321,7 +321,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
 <div class="muted">Area: ${st} &middot; Generated ${date} &middot; Decision-support prototype (illustrative)</div>
 <div class="rec"><b>Recommendation.</b> ${decision?esc(decision):"Run scenarios to generate a recommendation."}</div>
 <h2>Assumptions</h2>
-<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${st} blended stumpage $${fmt(stumpageM3,0)}/m³ (${priceConf}${stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""}${lowSample?", thin market — indicative only":""})${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
+<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${st} blended stumpage $${fmt(stumpageM3,0)}/m³ (multi-year real median; ${priceConf}${stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""}${lowSample?", thin market — indicative only":""})${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
 <h2>Multi-criteria scorecard</h2>
 <table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Risk</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
 <h2>Scenario detail (multi-model ensemble)</h2>
@@ -345,6 +345,10 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
   const rmScn=(i)=>setScenarios(s=>s.length>1?s.filter((_,j)=>j!==i):s);
   const sel={background:"var(--panel)",color:"var(--ink)",border:"1px solid var(--line)",borderRadius:5,padding:"2px 6px",fontSize:11};
   const chip=(on,col)=>({fontSize:11,padding:"2px 9px",borderRadius:4,cursor:"pointer",border:`1px solid ${on?(col||"#3a6ea5"):"var(--bd,#345)"}`,background:on?(col||"#3a6ea5"):"transparent",color:on?"#fff":"var(--fg,#cdd)"});
+  // a11y: make non-button clickable chips keyboard-operable (WCAG 2.1.1 / 4.1.2).
+  // Spread onto a <span> to add role=button, focusability, and Enter/Space activation.
+  const clickable=(fn,style,label)=>({style,onClick:fn,role:"button",tabIndex:0,"aria-label":label,
+    onKeyDown:e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(e); } }});
   const HPC_STEP={submitting:["Submitting run-spec to Cardinal…",15],queued:["Queued on SLURM (PUOM0008)…",40],running:["Running ensemble: FVS, CBM, CEM, yield…",75],complete:["Complete — results delivered",100]};
 
   return (
@@ -362,7 +366,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
         </div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
           <span style={{color:"var(--mut)"}}>Data source:</span>
-          {[["fia","FIA"],["treemap","TreeMap"],["user","Upload inventory"]].map(([k,lbl])=><span key={k} style={chip(dataSource===k)} onClick={()=>setDataSource(k)}>{lbl}</span>)}
+          {[["fia","FIA"],["treemap","TreeMap"],["user","Upload inventory"]].map(([k,lbl])=><span key={k} {...clickable(()=>setDataSource(k),chip(dataSource===k),`Data source ${lbl}`)}>{lbl}</span>)}
           {dataSource==="user" && <input type="file" accept=".csv,.txt" onChange={onUpload} style={{fontSize:10}}/>}
         </div>
         {dataSource==="user" && upload && <div className="note" style={{marginTop:3}}>Loaded {upload.name}: {upload.rows} rows × {upload.cols} columns. A subscriber run initializes stands from this inventory on Cardinal.</div>}
@@ -392,7 +396,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
       <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
         <div style={{fontSize:11,color:"var(--mut)",marginBottom:4}}>2 · Models &amp; output</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-          {MODELS.map(([k,lbl,cls])=><span key={k} style={chip(models[k],CLS_COL[cls])} onClick={()=>setModels(m=>({...m,[k]:!m[k]}))}>{lbl}</span>)}
+          {MODELS.map(([k,lbl,cls])=><span key={k} {...clickable(()=>setModels(m=>({...m,[k]:!m[k]})),chip(models[k],CLS_COL[cls]),`Toggle model ${lbl}`)} aria-pressed={!!models[k]}>{lbl}</span>)}
         </div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
           <span style={{color:"var(--mut)"}}>Output metric:</span>
@@ -408,25 +412,25 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <span style={{color:"var(--mut)",width:14}}>{i+1}</span>
             <select value={sc.mgmt} onChange={e=>setScn(i,"mgmt",e.target.value)} style={sel}>{(availMgmts.length?availMgmts:MGMTS).map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
             <select value={sc.climate} onChange={e=>setScn(i,"climate",e.target.value)} style={sel}>{CLIMATES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
-            {scenarios.length>1 && <span onClick={()=>rmScn(i)} style={{cursor:"pointer",color:"var(--mut)",fontWeight:700}}>×</span>}
+            {scenarios.length>1 && <span {...clickable(()=>rmScn(i),{cursor:"pointer",color:"var(--mut)",fontWeight:700},"Remove scenario")}>×</span>}
           </div>
         ))}
-        <span onClick={addScn} style={{...chip(false),display:"inline-block",marginTop:2}}>+ add scenario</span>
+        <span {...clickable(addScn,{...chip(false),display:"inline-block",marginTop:2},"Add scenario")}>+ add scenario</span>
         <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Timber value uses real per-state blended stumpage, and carbon a market-anchored price (voluntary/compliance); ES payments and policy multipliers are illustrative.</div>
         <details open={!simple} style={{marginTop:8}}>
           <summary style={{fontSize:11,color:"var(--mut)",cursor:"pointer"}}>Market, ecosystem-service, policy &amp; discount rate</summary>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Market:</span>
-            {Object.entries(PRICE_PATHS).map(([k,v])=><span key={k} style={chip(price===k)} onClick={()=>setPrice(k)}>{v.label}</span>)}
+            {Object.entries(PRICE_PATHS).map(([k,v])=><span key={k} {...clickable(()=>setPrice(k),chip(price===k),`Price scenario ${v.label}`)} aria-pressed={price===k}>{v.label}</span>)}
             <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
-            {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
+            {ES_LEVELS.map(([k,lbl])=><span key={k} {...clickable(()=>setEs(k),chip(es===k),`Ecosystem-service payment ${lbl}`)} aria-pressed={es===k}>{lbl}</span>)}
           </div>
-          <div className="note" style={{marginTop:2}}>Timber priced from <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b> <span style={{color:"var(--mut)"}}>({priceConf}{stDetail&&stDetail.region?`, ${stDetail.saw_share*100|0}% sawtimber mix`:""}{stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})</span>{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}.{lowSample && <span style={{color:"#c0792b"}}> Thin market (n≈{stDetail.n_min}) — treat this price as indicative.</span>} <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
+          <div className="note" style={{marginTop:2}}>Timber priced from <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b> <span style={{color:"var(--mut)"}}>(multi-year real median; {priceConf}{stDetail&&stDetail.region?`, ${stDetail.saw_share*100|0}% sawtimber mix`:""}{stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})</span>{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}.{lowSample && <span style={{color:"#c0792b"}}> Thin market (n≈{stDetail.n_min}) — treat this price as indicative.</span>} <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Policy:</span>
             <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
             <span style={{color:"var(--mut)",marginLeft:6}}>Discount rate:</span>
-            {DISC_RATES.map(([k,lbl])=><span key={k} style={chip(disc===+k)} onClick={()=>setDisc(+k)}>{lbl}</span>)}
+            {DISC_RATES.map(([k,lbl])=><span key={k} {...clickable(()=>setDisc(+k),chip(disc===+k),`Discount rate ${lbl}`)} aria-pressed={disc===+k}>{lbl}</span>)}
           </div>
           {!simple && (
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
@@ -492,7 +496,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <div style={{fontSize:11,fontWeight:600,marginBottom:1}}>Multi-criteria scorecard <span style={{color:"var(--mut)",fontWeight:400}}>· precision-forestry decision framework</span></div>
             <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,margin:"4px 0"}}>
               <span style={{color:"var(--mut)"}}>Emphasis:</span>
-              {EMPH_LABELS.map(([k,lbl])=><span key={k} style={chip(emphasis===k)} onClick={()=>setEmphasis(k)}>{lbl}</span>)}
+              {EMPH_LABELS.map(([k,lbl])=><span key={k} {...clickable(()=>setEmphasis(k),chip(emphasis===k),`Decision emphasis ${lbl}`)} aria-pressed={emphasis===k}>{lbl}</span>)}
             </div>
             <table style={{width:"100%",fontSize:11,borderCollapse:"collapse",fontVariantNumeric:"tabular-nums"}}>
               <thead><tr style={{color:"var(--mut)",textAlign:"right"}}>
