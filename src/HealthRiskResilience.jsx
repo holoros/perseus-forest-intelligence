@@ -298,9 +298,53 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
             </div>
             <div style={{ fontSize: 10.5, marginBottom: 1 }}><b>Top species by biomass &amp; their climate vulnerability</b></div>
             <div style={{ fontSize: 9.5, color: "var(--mut)", marginBottom: 4 }}>
-              Vulnerability is the Potter (2017) species climate-sensitivity score. Bars sized by biomass share, colored by vulnerability:{" "}
-              <span style={{ color: "#4f9d8a" }}>● Lower</span> <span style={{ color: "#e08a1e" }}>● Moderate</span> <span style={{ color: "#c85a5a" }}>● Higher</span> (national median ≈ 32).
+              Each species placed by its climate vulnerability (Potter 2017 score, x) and its share of biomass (y).
+              The upper right is abundant <i>and</i> vulnerable — the species to act on. Colored by vulnerability:{" "}
+              <span style={{ color: "#4f9d8a" }}>● Lower</span> <span style={{ color: "#e08a1e" }}>● Moderate</span> <span style={{ color: "#c85a5a" }}>● Higher</span> (US median ≈ 32).
             </div>
+            {/* Quadrant scatter: vulnerability (x) vs biomass share (y). Upper-right = priority. */}
+            {(() => {
+              const pts = (dd.top_species || []).filter((s) => s.vcc != null && s.share_pct != null);
+              if (pts.length < 2) return null;
+              const W = 320, H = 188, M = { l: 30, r: 70, t: 12, b: 26 };
+              const vcs = pts.map((s) => s.vcc), shs = pts.map((s) => s.share_pct);
+              const vlo = Math.max(16, Math.min(28, Math.min(...vcs)) - 2);
+              const vhi = Math.min(62, Math.max(44, Math.max(...vcs)) + 2);
+              const smax = Math.max(...shs) * 1.18 || 1;
+              const px = (v) => M.l + (v - vlo) / (vhi - vlo) * (W - M.l - M.r);
+              const py = (s) => H - M.b - (s / smax) * (H - M.t - M.b);
+              const medX = px(32), modX = px(38);
+              // light vertical de-overlap of labels sharing a similar y
+              const lab = pts.map((s) => ({ s, x: px(s.vcc), y: py(s.share_pct) }))
+                .sort((a, b) => a.y - b.y);
+              for (let i = 1; i < lab.length; i++) if (lab[i].y - lab[i - 1].y < 10) lab[i].y = lab[i - 1].y + 10;
+              return (
+                <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ fontSize: 9, fontVariantNumeric: "tabular-nums", marginBottom: 4 }}>
+                  <rect x={modX} y={M.t} width={(W - M.r) - modX} height={(H - M.b) - M.t} fill="rgba(200,90,90,0.07)" />
+                  <line x1={M.l} y1={H - M.b} x2={W - M.r} y2={H - M.b} stroke="var(--line,#345)" strokeWidth={0.7} />
+                  <line x1={M.l} y1={M.t} x2={M.l} y2={H - M.b} stroke="var(--line,#345)" strokeWidth={0.7} />
+                  <line x1={medX} y1={M.t} x2={medX} y2={H - M.b} stroke="var(--mut,#8a93a0)" strokeDasharray="3 3" strokeWidth={0.7} />
+                  <text x={medX} y={M.t - 2} textAnchor="middle" fill="var(--mut,#8a93a0)" fontSize={7.5}>US median</text>
+                  {[vlo, (vlo + vhi) / 2, vhi].map((t, i) => <text key={i} x={px(t)} y={H - M.b + 11} textAnchor="middle" fill="var(--mut,#8a93a0)">{Math.round(t)}</text>)}
+                  {[0, smax / 2, smax].map((t, i) => <text key={i} x={M.l - 3} y={py(t) + 3} textAnchor="end" fill="var(--mut,#8a93a0)">{Math.round(t)}%</text>)}
+                  <text x={(M.l + W - M.r) / 2} y={H - 1} textAnchor="middle" fill="var(--mut,#8a93a0)">climate vulnerability →</text>
+                  <text x={M.l - 24} y={M.t + 2} fill="var(--mut,#8a93a0)" fontSize={8}>share ↑</text>
+                  <text x={W - M.r - 2} y={M.t + 8} textAnchor="end" fill="#c85a5a" fontSize={7.5} opacity={0.85}>abundant &amp; vulnerable</text>
+                  {lab.map(({ s, x, y }) => {
+                    const vb = vccBand(s.vcc), cy = py(s.share_pct);
+                    return (
+                      <g key={s.spcd}>
+                        <circle cx={x} cy={cy} r={4.5} fill={vb.color} stroke="#0b1015" strokeWidth={0.6}>
+                          <title>{`${s.common}: ${fmt(s.share_pct, 0)}% of biomass, vulnerability ${fmt(s.vcc, 0)} (${vb.label})`}</title>
+                        </circle>
+                        <text x={x + 6} y={y + 3} fill="var(--fg,#cdd)" fontSize={8}>{s.common.length > 14 ? s.common.slice(0, 13) + "…" : s.common}</text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              );
+            })()}
+            <div style={{ fontSize: 9.5, color: "var(--mut)", marginBottom: 2, marginTop: 2 }}>Ranked detail:</div>
             {dd.top_species && dd.top_species.map((sp) => {
               const vb = vccBand(sp.vcc);
               return (
