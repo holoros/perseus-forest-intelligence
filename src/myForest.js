@@ -4,7 +4,7 @@
 
 function vccLabel(v){ if(v==null) return "n/a"; if(v>=42) return "higher"; if(v>=34) return "moderate"; return "lower"; }
 
-export function openMyForestReport(state, stateName, hrr, detail, stumpageM3){
+export function openMyForestReport(state, stateName, hrr, detail, stumpageM3, aoi, hrrEco){
   const s = hrr && hrr.states && hrr.states[state];
   const dd = detail && detail.states && detail.states[state];
   if(!s){ alert("Forest summary data is still loading — try again in a moment."); return; }
@@ -12,6 +12,16 @@ export function openMyForestReport(state, stateName, hrr, detail, stumpageM3){
   const nat = (hrr.national && hrr.national.priority_share_pct) || 11.8;
   const pri = s.priority_pct;
   const vs = pri > nat*1.15 ? "higher than" : pri < nat*0.85 ? "lower than" : "about the same as";
+  const cmp = (v) => v > nat*1.15 ? "higher than" : v < nat*0.85 ? "lower than" : "about the same as";
+  // AOI specifics (when the owner has drawn / located an area) + ecoregion context.
+  const eco = aoi && aoi.l3code && hrrEco && hrrEco.ecoregions ? hrrEco.ecoregions[aoi.l3code] : null;
+  const ftop = aoi && aoi.plotStats && aoi.plotStats.forestTypes && aoi.plotStats.forestTypes[0];
+  const acres = aoi && aoi.area_m2 ? Math.round(aoi.area_m2/4046.8564224) : null;
+  const aoiBlock = aoi ? `
+<h2>Your area</h2>
+<p>${acres?`About <b>${acres.toLocaleString()} acres</b> `:""}near <b>${aoi.centroid?aoi.centroid[1].toFixed(3)+"&deg;, "+aoi.centroid[0].toFixed(3)+"&deg;":""}</b>${aoi.l3name?`, in the <b>${esc(aoi.l3name)}</b> ecoregion of ${esc(stateName)}`:`, ${esc(stateName)}`}.${ftop?` The most common forest type here is <b>${esc(ftop.name||ftop)}</b>${ftop.share_pct?` (${Math.round(ftop.share_pct)}% of plots)`:""}.`:""}</p>
+${eco?`<p><b>Ecoregion context.</b> Across the ${esc(aoi.l3name||"local")} ecoregion, ${Math.round(eco.priority_pct)}% of forest is priority area (high stress, low resilience) &mdash; <b>${cmp(eco.priority_pct)}</b> the national average of ${nat}%. This is the backdrop your stand sits in.</p>`:""}
+` : "";
   const sp = (dd && dd.top_species) || [];
   // Watch-list: abundant AND at least moderately vulnerable.
   const watch = sp.filter(x=>x.vcc!=null && x.vcc>=38 && x.share_pct>=8)
@@ -44,12 +54,12 @@ export function openMyForestReport(state, stateName, hrr, detail, stumpageM3){
  .muted{color:#666;font-size:11px;margin-top:18px} .pill{display:inline-block;background:#eef5f0;color:#2e6b4f;border-radius:10px;padding:1px 9px;font-size:11px}
  @media print{body{margin:0}}
 </style></head><body>
-<h1>Your forest at a glance — ${esc(stateName)}</h1>
-<div class="sub">PERSEUS Forest Intelligence &middot; ${date} &middot; based on ${s.n_plots? s.n_plots.toLocaleString():""} FIA plots in ${esc(stateName)}</div>
-
-<h2>Health</h2>
+<h1>Your forest at a glance${aoi?"":` &mdash; ${esc(stateName)}`}</h1>
+<div class="sub">PERSEUS Forest Intelligence &middot; ${date}${aoi?` &middot; ${esc(aoi.l3name||stateName)}, ${esc(stateName)}`:` &middot; based on ${s.n_plots? s.n_plots.toLocaleString():""} FIA plots in ${esc(stateName)}`}</div>
+${aoiBlock}
+<h2>${aoi?`${esc(stateName)} &mdash; state context`:"Health"}</h2>
 <p><span class="big">${Math.round(pri)}%<small> of ${esc(stateName)}'s forest is priority area</small></span></p>
-<p>Priority area is forest that is both highly stressed (climate exposure, sensitivity, recent disturbance) and low in resilience (younger, less stocked). At ${Math.round(pri)}%, ${esc(stateName)} is <b>${vs}</b> the national average of ${nat}%.</p>
+<p>Priority area is forest that is both highly stressed (climate exposure, sensitivity, recent disturbance) and low in resilience (younger, less stocked). At ${Math.round(pri)}%, ${esc(stateName)} is <b>${vs}</b> the national average of ${nat}%.${aoi?" Your area and its ecoregion are summarized above; the species and value below are state-level, the finest published resolution.":""}</p>
 
 <h2>Your species and their climate vulnerability</h2>
 <table><thead><tr><th>Species (by biomass)</th><th style="text-align:right">Share</th><th style="text-align:right">Vulnerability</th></tr></thead><tbody>${speciesRows||'<tr><td colspan="3">Species detail not available for this area.</td></tr>'}</tbody></table>

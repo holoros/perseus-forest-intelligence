@@ -82,7 +82,7 @@ function Scorecard({ index }){
         <div style={{display:"flex",flexWrap:"wrap",gap:"3px 5px",marginTop:3}}>
           {axes.map(([k,lab]) => { const o=index[k], v=axV(o), gg=GRADE(v);
             const tip = (o && o.ref!=null)
-              ? `${lab}: this area ${ord(Math.round(v*100))} · state avg ${ord(Math.round(o.ref*100))} · ecoregion median 50th`
+              ? `${lab}: this area ${ord(Math.round(v*100))} Â· state avg ${ord(Math.round(o.ref*100))} Â· ecoregion median 50th`
               : `${lab}: this area ${ord(Math.round(v*100))} pct of ecoregion`;
             return <span key={k} title={tip} style={{fontSize:10.5,padding:"1px 7px",borderRadius:9,
               background:gg.color+"22",color:gg.color,border:`1px solid ${gg.color}66`,whiteSpace:"nowrap"}}>
@@ -202,8 +202,8 @@ function ConditionRadar({ index, allCurves, age0 }){
       onMouseEnter={()=>setHi(i)} onMouseLeave={()=>setHi(null)}/>; });
   let tip = null;
   if(hi!=null){ const [k,lab,pctl]=AXES6[hi]; const a=ax(hi); const v=axV(a); const [x,y]=pt(hi, R*val(hi));
-    const band = (a&&a.lo!=null&&a.hi!=null&&a.lo!==a.hi) ? ` (${Math.round(a.lo*100)}–${Math.round(a.hi*100)})` : "";
-    const refTxt = (a&&a.ref!=null) ? ` · state ${Math.round(a.ref*100)}th` : "";
+    const band = (a&&a.lo!=null&&a.hi!=null&&a.lo!==a.hi) ? ` (${Math.round(a.lo*100)}â${Math.round(a.hi*100)})` : "";
+    const refTxt = (a&&a.ref!=null) ? ` Â· state ${Math.round(a.ref*100)}th` : "";
     const txt = v==null ? `${lab}: n/a`
       : pctl ? `${lab}: ${Math.round(v*100)}th pct${band}${refTxt}`
              : `${lab}: ${Math.round(v*100)}% (stand index)`;
@@ -261,7 +261,7 @@ function ConditionRadar({ index, allCurves, age0 }){
   );
 }
 
-// Observed RD trajectory (2016/2020/2022 TreeMap-basis). Shades the 0.30–0.60
+// Observed RD trajectory (2016/2020/2022 TreeMap-basis). Shades the 0.30â0.60
 // management sweet spot (max growth, min mortality/risk) and flags where the
 // area's latest RD sits relative to it.
 const RD_LO = 0.30, RD_HI = 0.60;
@@ -280,19 +280,19 @@ function RDTrajectory({ series }){
   const inBand = latest>=RD_LO && latest<=RD_HI;
   const pos = latest<RD_LO ? "below" : latest>RD_HI ? "above" : "within";
   const msg = pos==="within"
-    ? `Latest RD ${latest.toFixed(2)} sits in the 0.30–0.60 sweet spot — near-optimal growth with low density-driven mortality.`
+    ? `Latest RD ${latest.toFixed(2)} sits in the 0.30â0.60 sweet spot â near-optimal growth with low density-driven mortality.`
     : pos==="below"
-    ? `Latest RD ${latest.toFixed(2)} is below the 0.30–0.60 sweet spot — understocked; growing space is available.`
-    : `Latest RD ${latest.toFixed(2)} is above the 0.30–0.60 sweet spot — dense; competition raises mortality and disturbance risk (a thinning candidate).`;
+    ? `Latest RD ${latest.toFixed(2)} is below the 0.30â0.60 sweet spot â understocked; growing space is available.`
+    : `Latest RD ${latest.toFixed(2)} is above the 0.30â0.60 sweet spot â dense; competition raises mortality and disturbance risk (a thinning candidate).`;
   return (
     <div style={{margin:"4px 6px 6px"}}>
-      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Relative density over time · 2016 → 2022</div>
+      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Relative density over time Â· 2016 â 2022</div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:340,display:"block",margin:"0 auto"}}>
         <rect x={x0} y={sy(RD_HI)} width={x1-x0} height={sy(RD_LO)-sy(RD_HI)} fill="#3fb68b" opacity="0.13"/>
         <line x1={x0} y1={sy(RD_HI)} x2={x1} y2={sy(RD_HI)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
         <line x1={x0} y1={sy(RD_LO)} x2={x1} y2={sy(RD_LO)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
         <text x={x1+3} y={sy(0.45)+3} fontSize="8" fill="#3fb68b">sweet spot</text>
-        <text x={x1+3} y={sy(0.45)+13} fontSize="7.5" fill="#5e7180">0.30–0.60</text>
+        <text x={x1+3} y={sy(0.45)+13} fontSize="7.5" fill="#5e7180">0.30â0.60</text>
         <line x1={x0} y1={y0} x2={x0} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
         <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
         {[0,0.3,0.6,0.9].filter(t=>t<=yMax).map((t,k)=>(
@@ -323,7 +323,7 @@ function StructureTrajectory({ series }){
   const sx = yr => x0 + (yr-2016)/(2022-2016)*(x1-x0);
   return (
     <div style={{margin:"4px 6px 6px"}}>
-      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Forest structure over time · 2016 → 2022</div>
+      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Forest structure over time Â· 2016 â 2022</div>
       {keys.map(k => {
         const { label, pts } = series[k];
         const v = pts.filter(p=>p.v!=null);
@@ -333,7 +333,7 @@ function StructureTrajectory({ series }){
         const line = v.map(p=>`${sx(p.year).toFixed(1)},${sy(p.v).toFixed(1)}`).join(" ");
         const first=v[0].v, last=v[v.length-1].v, d=last-first;
         const thr = 0.03*Math.abs(first||1);
-        const arrow = d>thr ? "↑" : d<-thr ? "↓" : "→";
+        const arrow = d>thr ? "â" : d<-thr ? "â" : "â";
         const col = d>thr ? "#1d7e0f" : d<-thr ? "#d9734f" : "#5e7180";
         return (
           <div key={k} style={{display:"flex",alignItems:"center",gap:6,margin:"1px 0"}}>
@@ -356,7 +356,7 @@ function StructureTrajectory({ series }){
 // list, and a rule-based management leaning. All axes already read "high = good"
 // (resilience is the inverted-risk axis), so no per-axis inversion is needed.
 // This is the user-prioritized dial of the multi-objective thesis: the same
-// area scores differently — and earns a different recommendation — depending on
+// area scores differently â and earns a different recommendation â depending on
 // what the landowner values.
 const PRIO = [
   ["carbon","Carbon"], ["value","Timber income"], ["productivity","Productivity"],
@@ -419,19 +419,19 @@ function recommendPathway(rows){
     const strong = (gOf("value")??0) >= 0.5 || (gOf("productivity")??0) >= 0.5;
     lean = "Actively managed";
     why = strong
-      ? "your weights favor income and productivity, and this area ranks well on them — it can support a managed timber rotation."
-      : "your weights favor income and productivity, but this area ranks low on them for its region — returns may be modest; weigh against sites that rank higher.";
+      ? "your weights favor income and productivity, and this area ranks well on them â it can support a managed timber rotation."
+      : "your weights favor income and productivity, but this area ranks low on them for its region â returns may be modest; weigh against sites that rank higher.";
   } else if(cons > prod + 0.12){
     lean = "Reserve / light-touch";
-    why = "your weights favor carbon, habitat, and biodiversity — a reserve or light-touch regime preserves standing stocks and structure.";
+    why = "your weights favor carbon, habitat, and biodiversity â a reserve or light-touch regime preserves standing stocks and structure.";
   } else {
     lean = "Climate-smart (balanced)";
-    why = "you weight production and conservation comparably — a climate-smart regime (partial harvest, retention, longer rotations) balances income against carbon and habitat.";
+    why = "you weight production and conservation comparably â a climate-smart regime (partial harvest, retention, longer rotations) balances income against carbon and habitat.";
   }
   // Resilience override: if resilience matters and the area is fragile, fold in
   // risk-reduction regardless of the production/conservation balance.
   if(resW >= 0.18 && resG!=null && resG < 0.4){
-    why += " Because resilience is a priority and this area ranks low on it, add risk-reduction treatments (thinning to the 0.30–0.60 RD sweet spot, fuels work).";
+    why += " Because resilience is a priority and this area ranks low on it, add risk-reduction treatments (thinning to the 0.30â0.60 RD sweet spot, fuels work).";
   }
   return { lean, why };
 }
@@ -493,7 +493,7 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
   const bandRobust = hasBand && (fitHi-fitLo) < 0.10;
   return (
     <div style={{margin:"4px 6px 6px"}}>
-      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>What do you value? · priorities</div>
+      <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>What do you value? Â· priorities</div>
       <div className="note" style={{margin:"0 0 3px"}}>Slide what matters; the fit, ranking, and recommendation update live.</div>
       <div style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:"3px 8px",alignItems:"center"}}>
         {avail.map(([k,lab]) => (
@@ -502,7 +502,7 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
             <input type="range" min="0" max="3" step="1" value={w[k]}
               onChange={e=>setk(k, +e.target.value)} style={{width:"100%",accentColor:"#3fb68b"}}/>
             <span style={{fontSize:10.5,color:"#5e7180",width:34,textAlign:"right"}}>
-              {["off","×1","×2","×3"][w[k]]}</span>
+              {["off","Ã1","Ã2","Ã3"][w[k]]}</span>
           </React.Fragment>
         ))}
       </div>
@@ -527,7 +527,7 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
           )}
           {rec && (
             <div className="note" style={{margin:"3px 0 0"}}>
-              For your priorities, lean <b style={{color:"var(--ink)"}}>{rec.lean}</b> — {rec.why}
+              For your priorities, lean <b style={{color:"var(--ink)"}}>{rec.lean}</b> â {rec.why}
             </div>
           )}
           {hasBand && (
@@ -760,7 +760,7 @@ function Collapsible({ title, subtitle, defaultOpen = false, children }){
         background:"transparent",border:"none",borderTop:"1px solid var(--line)",padding:"7px 4px 5px",
         cursor:"pointer",font:"inherit",textAlign:"left"}}>
         <span style={{fontSize:9,color:"#5e7180",transform:open?"rotate(90deg)":"none",
-          transition:"transform .15s",display:"inline-block"}}>▶</span>
+          transition:"transform .15s",display:"inline-block"}}>â¶</span>
         <span style={{fontSize:11,fontWeight:600,letterSpacing:".03em",textTransform:"uppercase",color:"var(--mut)"}}>{title}</span>
         {subtitle && <span style={{fontSize:10.5,color:"#5e7180",fontWeight:400,marginLeft:"auto"}}>{subtitle}</span>}
       </button>
@@ -800,10 +800,10 @@ function SimilarAreas({ state, hrr }){
     : me.priority_pct<med*0.85 ? "lower than" : "in line with";
   const rows = [{ st: me.st, v: me.priority_pct, me: true }, ...peers.map(p=>({ st: p.st, v: p.priority_pct }))];
   const maxv = Math.max(...rows.map(r=>r.v||0)) || 1;
-  const f1 = v => (v==null ? "–" : v.toFixed(1)), f0 = v => (v==null ? "–" : v.toFixed(0));
+  const f1 = v => (v==null ? "â" : v.toFixed(1)), f0 = v => (v==null ? "â" : v.toFixed(0));
   return (
     <div style={{margin:"4px 0 0"}}>
-      <div className="aoi-sub">Similar areas · state-level forest health</div>
+      <div className="aoi-sub">Similar areas Â· state-level forest health</div>
       <div className="note" style={{margin:"0 6px 4px"}}>
         {me.st}'s priority forest area is <b style={{color:"var(--ink)"}}>{f1(me.priority_pct)}%</b>.
         {" "}States most similar in forest stress, resilience, and climate exposure ({peers.map(p=>p.st).join(", ")})
@@ -866,24 +866,24 @@ function AOIHealth({ hrrGrid, centroid, geom }){
   const s = aoiGridSample(hrrGrid, centroid, geom);
   if(!s) return null;
   const f3 = v => v.toFixed(3);
-  const surr = aoiNeighborhood(hrrGrid, centroid, 1.0); // ~1° ring around the area
+  const surr = aoiNeighborhood(hrrGrid, centroid, 1.0); // ~1Â° ring around the area
   const cmp = (a,b) => a==null||b==null ? "" : a>b*1.05 ? "higher than" : a<b*0.95 ? "lower than" : "about the same as";
-  const arrow = (a,b) => a==null||b==null ? "" : a>b*1.05 ? " ▲" : a<b*0.95 ? " ▼" : " ≈";
+  const arrow = (a,b) => a==null||b==null ? "" : a>b*1.05 ? " â²" : a<b*0.95 ? " â¼" : " â";
   return (
     <div style={{margin:"4px 0 0"}}>
-      <div className="aoi-sub">This area's forest health · sampled from the 0.5° HRR grid</div>
+      <div className="aoi-sub">This area's forest health Â· sampled from the 0.5Â° HRR grid</div>
       <div className="aoi-grid">
-        <div className="aoi-row"><span className="aoi-k">Priority index</span><span className="aoi-v">{f3(s.idx)} · {ord(s.pct)} pct nationally</span></div>
+        <div className="aoi-row"><span className="aoi-k">Priority index</span><span className="aoi-v">{f3(s.idx)} Â· {ord(s.pct)} pct nationally</span></div>
         <div className="aoi-row"><span className="aoi-k">Disturbance &amp; climate stress</span><span className="aoi-v">{f3(s.stress)}{surr?arrow(s.stress,surr.stress):""}</span></div>
         <div className="aoi-row"><span className="aoi-k">Resilience</span><span className="aoi-v">{f3(s.resil)}{surr?arrow(s.resil,surr.resil):""}</span></div>
         <div className="aoi-row"><span className="aoi-k">Climate exposure</span><span className="aoi-v">{f3(s.ce)}</span></div>
       </div>
       <div className="note" style={{margin:"2px 6px 2px"}}>
-        Priority index = stress × (1 − resilience), averaged over {s.n} grid cell{s.n>1?"s":""} {s.mode==="polygon"?"inside":"near"} this area; percentile is among all CONUS grid cells.{s.mode==="polygon"?"":" Draw a polygon AOI for a within-area sample."}
+        Priority index = stress Ã (1 â resilience), averaged over {s.n} grid cell{s.n>1?"s":""} {s.mode==="polygon"?"inside":"near"} this area; percentile is among all CONUS grid cells.{s.mode==="polygon"?"":" Draw a polygon AOI for a within-area sample."}
       </div>
       {surr && (
         <div style={{margin:"6px 0 0"}}>
-          <div className="aoi-sub">Surrounding area &amp; sensitivity · ~1° neighborhood ({surr.n} cells)</div>
+          <div className="aoi-sub">Surrounding area &amp; sensitivity Â· ~1Â° neighborhood ({surr.n} cells)</div>
           <div className="aoi-grid">
             <div className="aoi-row"><span className="aoi-k">Neighborhood stress</span><span className="aoi-v">{f3(surr.stress)}</span></div>
             <div className="aoi-row"><span className="aoi-k">Neighborhood resilience</span><span className="aoi-v">{f3(surr.resil)}</span></div>
@@ -924,7 +924,7 @@ function ValuationBand({ node }){
   const pos=v=> hi>lo ? (v-lo)/(hi-lo)*100 : 50;
   return (
     <div style={{margin:"6px 0 0"}}>
-      <div className="aoi-sub">Potential value band · per-acre NPV across markets &amp; management (illustrative)</div>
+      <div className="aoi-sub">Potential value band Â· per-acre NPV across markets &amp; management (illustrative)</div>
       <div style={{position:"relative",height:24,margin:"6px 8px 2px"}}>
         <div style={{position:"absolute",top:10,left:0,right:0,height:4,background:"linear-gradient(90deg,#d98a3c,#2e9e6b)",borderRadius:2}}/>
         {mBase!=null && <div title="managed, base prices" style={{position:"absolute",top:5,left:pos(mBase)+"%",width:2,height:14,background:"#d98a3c"}}/>}
@@ -977,14 +977,14 @@ function AreaBriefing({ aoi }){
       )}
       {cVal!=null && (
         <div className="note" style={{margin:"2px 0 0"}}>
-          Illustrative carbon asset value of standing biomass at age 50: about ${cVal.toLocaleString()}/ac (AGB × 0.47 C × 3.667 CO2e × $15/tCO2e; price illustrative, not a quote).
+          Illustrative carbon asset value of standing biomass at age 50: about ${cVal.toLocaleString()}/ac (AGB Ã 0.47 C Ã 3.667 CO2e Ã $15/tCO2e; price illustrative, not a quote).
         </div>
       )}
     </div>
   );
 }
 
-export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid, fia, onRun, l3yields }){
+export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", hrr, hrrGrid, fia, onRun, l3yields, onMyForest }){
   const [mmMetric, setMmMetric] = useState("agc_live_total");
   const [mmBucket, setMmBucket] = useState("managed (harvest)");
   const [mmYear, setMmYear] = useState(2050);
@@ -1005,15 +1005,16 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
   return (
     <div className="aoi-report">
       <div className="aoi-head">
-        <b>AOI summary{name ? ` · ${name}` : ""}</b>
+        <b>AOI summary{name ? ` Â· ${name}` : ""}</b>
         <span>
           <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",fontWeight:600}}
-            onClick={()=>openReport(aoi, stumpage, units, {bucket:mmBucket, year:mmYear})} title="open a full printable area report (save or print to PDF)">Report ↗</button>
+            onClick={()=>openReport(aoi, stumpage, units, {bucket:mmBucket, year:mmYear})} title="open a full printable area report (save or print to PDF)">Report â</button>
           <button className="mini-btn" style={{marginTop:0,marginRight:6}}
-            onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV ↓</button>
+            onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV â</button>
+          {onMyForest && <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",borderColor:"var(--accent)",color:"var(--accent)",fontWeight:600}} onClick={onMyForest} title="plain-language one-page summary for this area with ecoregion and state context">🌲 My forest</button>}
           {onRun && state && <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",borderColor:"#8a5cd1",fontWeight:600}}
-            onClick={()=>onRun(state)} title="run the full multi-model scenario ensemble for this area">Run scenarios →</button>}
-          {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
+            onClick={()=>onRun(state)} title="run the full multi-model scenario ensemble for this area">Run scenarios â</button>}
+          {onClose && <button className="aoi-x" onClick={onClose} title="close">Ã</button>}
         </span>
       </div>
 
@@ -1029,14 +1030,14 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
 
       <div className="aoi-grid">
         {area_m2 ? <Row k="Area" v={fmtAreaU(area_m2, units)}/> : null}
-        {centroid ? <Row k="Centroid" v={`${centroid[1].toFixed(3)}°, ${centroid[0].toFixed(3)}°`}/> : null}
-        <Row k="Ecoregion" v={l3code ? `${l3code} ${l3name||""}` : "—"}/>
+        {centroid ? <Row k="Centroid" v={`${centroid[1].toFixed(3)}Â°, ${centroid[0].toFixed(3)}Â°`}/> : null}
+        <Row k="Ecoregion" v={l3code ? `${l3code} ${l3name||""}` : "â"}/>
         {l1 ? <Row k="Biome (L1)" v={l1}/> : null}
         {agb50 != null ? <Row k="AGB @50yr" v={`${cv(agb50,"ton/ac")}${agb50h!=null?` (${conv(agb50h,"ton/ac",units).value.toFixed(0)} harvested)`:""}`}/> : null}
       </div>
 
       {plotStats && plotStats.n > 0 && (
-       <Collapsible title="Forest attributes" subtitle={`${plotStats.n} FIA plots${plotStats.invYears?` · ${plotStats.invYears[0]}–${plotStats.invYears[1]}`:""}`}>
+       <Collapsible title="Forest attributes" subtitle={`${plotStats.n} FIA plots${plotStats.invYears?` Â· ${plotStats.invYears[0]}â${plotStats.invYears[1]}`:""}`}>
         <div className="aoi-grid">
           {plotStats.meanAge != null && <Row k="Mean stand age" v={`${plotStats.meanAge.toFixed(0)} yr`}/>}
           {plotStats.meanBA != null && <Row k="Mean live BA" v={cv(plotStats.meanBA,"sq ft/ac")}/>}
@@ -1178,18 +1179,18 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
           )}
         </div>
         {landscape.stumpage && (<>
-          <div className="aoi-sub" style={{borderTop:"none",marginTop:6}}>Stumpage prices{state?` · ${state}`:""}</div>
+          <div className="aoi-sub" style={{borderTop:"none",marginTop:6}}>Stumpage prices{state?` Â· ${state}`:""}</div>
           <div className="aoi-grid">
-            {landscape.stumpage.sawSW!=null && <Row k="Sawlog · softwood" v={price(landscape.stumpage.sawSW,"$/MBF")}/>}
-            {landscape.stumpage.sawHW!=null && <Row k="Sawlog · hardwood" v={price(landscape.stumpage.sawHW,"$/MBF")}/>}
-            {landscape.stumpage.pulpSW!=null && <Row k="Pulpwood · softwood" v={price(landscape.stumpage.pulpSW,"$/cord")}/>}
-            {landscape.stumpage.pulpHW!=null && <Row k="Pulpwood · hardwood" v={price(landscape.stumpage.pulpHW,"$/cord")}/>}
+            {landscape.stumpage.sawSW!=null && <Row k="Sawlog Â· softwood" v={price(landscape.stumpage.sawSW,"$/MBF")}/>}
+            {landscape.stumpage.sawHW!=null && <Row k="Sawlog Â· hardwood" v={price(landscape.stumpage.sawHW,"$/MBF")}/>}
+            {landscape.stumpage.pulpSW!=null && <Row k="Pulpwood Â· softwood" v={price(landscape.stumpage.pulpSW,"$/cord")}/>}
+            {landscape.stumpage.pulpHW!=null && <Row k="Pulpwood Â· hardwood" v={price(landscape.stumpage.pulpHW,"$/cord")}/>}
           </div>
         </>)}
         <div className="note" style={{margin:"4px 0 2px"}}>
           Landowner, forest cover, and disturbance risk are sampled from the CONUS rasters inside this area.
           Habitat and biodiversity (<i>~</i>) are indicative composites of forest continuity, structural maturity,
-          and forest-type diversity — refine with field inventory.
+          and forest-type diversity â refine with field inventory.
         </div>
         </Collapsible>
       </>)}

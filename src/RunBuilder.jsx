@@ -19,7 +19,11 @@ const METRICS = [["agc_live_total","Carbon, live (t/ac)"],["merch_vol_mcf","Merc
                  ["mean_stand_age","Mean stand age (yr)"],["total_ecosystem_c","Total ecosystem C"]];
 // Price scenarios apply a low/base/high band to the REAL per-state stumpage (timber side)
 // and an illustrative carbon price. `mult` scales the real stumpage; carbon stays illustrative.
-const PRICE_PATHS = { low:{mult:0.7,carbon:8,label:"Low"}, base:{mult:1.0,carbon:15,label:"Base"}, high:{mult:1.4,carbon:30,label:"High"} };
+// Carbon prices anchored to real payment benchmarks (mid-2026): voluntary forest market
+// (~$15/tCO2e, improved forest management), California compliance allowance (~$35), and the
+// CA compliance price ceiling (~$95). The EPA social cost of carbon (~$190) is a societal
+// value, not a landowner payment, so it is cited in the note rather than used as a price.
+const PRICE_PATHS = { low:{mult:0.7,carbon:15,label:"Low"}, base:{mult:1.0,carbon:35,label:"Base"}, high:{mult:1.4,carbon:95,label:"High"} };
 const ES_LEVELS = [["none","None",0],["mod","$5/ac/yr",5],["high","$15/ac/yr",15]];
 const ES_MANAGED_FRAC = 0.5;
 const M3_PER_CUFT = 1/35.3147;            // yield-curve merch volume is cu ft/ac; stumpage is $/m3
@@ -303,7 +307,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
 <h2>Run specification (Cardinal contract)</h2>
 <pre>${esc(JSON.stringify(spec,null,2))}</pre>
 <h2>Methods &amp; caveats</h2>
-<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs. The carbon price, ecosystem-service payments, and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
+<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs. The carbon price is anchored to voluntary and compliance market benchmarks (the EPA social cost of carbon, ~$190/tCO2e, is higher but is a societal value, not a payment); ecosystem-service payments and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
 </body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
@@ -384,7 +388,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
           </div>
         ))}
         <span onClick={addScn} style={{...chip(false),display:"inline-block",marginTop:2}}>+ add scenario</span>
-        <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Timber value uses real per-state blended stumpage; the carbon price, ES payments, and policy multipliers are illustrative.</div>
+        <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Timber value uses real per-state blended stumpage, and carbon a market-anchored price (voluntary/compliance); ES payments and policy multipliers are illustrative.</div>
         <details open={!simple} style={{marginTop:8}}>
           <summary style={{fontSize:11,color:"var(--mut)",cursor:"pointer"}}>Market, ecosystem-service, policy &amp; discount rate</summary>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
@@ -393,7 +397,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
             {ES_LEVELS.map(([k,lbl])=><span key={k} style={chip(es===k)} onClick={()=>setEs(k)}>{lbl}</span>)}
           </div>
-          <div className="note" style={{marginTop:2}}>Timber priced from {hasRealPrice ? <>real <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b></> : <>the national-mean stumpage <b>${fmt(NATIONAL_STUMPAGE_M3,0)}/m³</b> ({st} not yet measured)</>}{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}. <span style={{color:"#8a5cd1"}}>Carbon (${p.carbon}/tCO₂e) and ES remain illustrative.</span></div>
+          <div className="note" style={{marginTop:2}}>Timber priced from {hasRealPrice ? <>real <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b></> : <>the national-mean stumpage <b>${fmt(NATIONAL_STUMPAGE_M3,0)}/m³</b> ({st} not yet measured)</>}{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}. <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Policy:</span>
             <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
@@ -452,7 +456,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <MultiLineChart rows={allRows}/>
             <div style={{display:"flex",flexWrap:"wrap",gap:10,fontSize:10,marginTop:2}}>{present.map(e=><span key={e.cls} style={{color:CLS_COL[e.cls]}}>● {e.cls} ({e.rows.length})</span>)}</div>
             {repNode && (r.econ.npvH!=null||r.econ.npvC!=null) && (
-              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span style={{color:"#8a5cd1"}}>carbon illustrative</span></span>{r.sc.mgmt!=="reserve" && r.econ.rotation ? <span style={{color:"var(--mut)"}}> · optimal rotation <b>{r.econ.rotation} yr</b>, Faustmann land value {mpa(r.econ.lev)}/{PER}</span> : null}</div>
+              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span style={{color:"#8a5cd1"}}>carbon market-anchored</span></span>{r.sc.mgmt!=="reserve" && r.econ.rotation ? <span style={{color:"var(--mut)"}}> · optimal rotation <b>{r.econ.rotation} yr</b>, Faustmann land value {mpa(r.econ.lev)}/{PER}</span> : null}</div>
             )}
           </div>
         );
