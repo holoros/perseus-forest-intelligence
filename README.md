@@ -84,8 +84,9 @@ Raster overlays are in `public/raster/`, produced by `scripts/50_raster_image_ov
 
 - **Economics:** timber value now uses real per-state blended stumpage ($/m3, from
   `api/econ_params.json`) with a user-selectable discount rate. The carbon price,
-  ecosystem-service payments, and policy multipliers remain illustrative placeholders. NPV is
-  single-harvest-at-horizon; a Faustmann rotation basis is a planned refinement.
+  ecosystem-service payments, and policy multipliers remain illustrative placeholders. Timber
+  value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual
+  land expectation value (LEV) also reported, gross of establishment and management costs.
 - **Climate scaling:** RCP pathways currently share the baseline yield curves for most
   engines; calibrated CEM climate scaling is in progress, so historic and RCP may read
   similarly until it lands.

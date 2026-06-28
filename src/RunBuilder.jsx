@@ -67,14 +67,36 @@ function computeScores(rs, emphasis){
   return {scored,best};
 }
 
+// Faustmann rotation economics. Instead of discounting the standing volume at the curve's
+// final age (which collapses to ~0 at high discount rates), find the optimal rotation age R*
+// that maximizes the single-rotation NPV of the harvest, and also report the perpetual
+// soil/land expectation value (LEV). Gross of establishment and management costs.
+function rotationTimber(merch, stumpageCuft, disc) {
+  if (!merch || merch.length < 2) return null;
+  const vol = (a) => {
+    if (a <= merch[0][0]) return merch[0][1] * a / Math.max(merch[0][0], 1);
+    for (let i = 1; i < merch.length; i++) {
+      if (a <= merch[i][0]) { const [x0,y0]=merch[i-1], [x1,y1]=merch[i]; return y0 + (y1-y0)*(a-x0)/((x1-x0)||1); }
+    }
+    return merch[merch.length - 1][1];
+  };
+  let bestNPV = -1, R = 0;
+  for (let a = 10; a <= 120; a++) { const npv1 = vol(a)*stumpageCuft / Math.pow(1+disc, a); if (npv1 > bestNPV) { bestNPV = npv1; R = a; } }
+  const lev = vol(R)*stumpageCuft / (Math.pow(1+disc, R) - 1);   // perpetual bare-land value
+  return { npv: bestNPV, rotation: R, lev };
+}
+
 // stumpageCuft = effective $/cu ft (real per-state $/m3 x price-scenario mult, converted).
+// Timber value is the optimal single-rotation NPV (rotation R*); carbon value is the carbon
+// trajectory discounted at the horizon. LEV (perpetual land value) is carried for display.
 function econFromL3(node, curveKey, stumpageCuft, carbonPrice, disc) {
   const cm = (node && node.curves) || {};
   const merch = cm.merchvol_cuftac && cm.merchvol_cuftac[curveKey];
   const carb = cm.carbon_lbac && cm.carbon_lbac[curveKey];
   const o = {};
-  if (merch && merch.length) { const [a,v]=merch[merch.length-1]; o.age=a; o.npvH=(v*stumpageCuft)/Math.pow(1+disc,a); }
-  if (carb && carb.length) { const [a,lb]=carb[carb.length-1]; o.age=o.age||a; o.npvC=((lb/2204.62)*(44/12)*carbonPrice)/Math.pow(1+disc,a); }
+  const ft = rotationTimber(merch, stumpageCuft, disc);
+  if (ft) { o.npvH = ft.npv; o.rotation = ft.rotation; o.lev = ft.lev; }
+  if (carb && carb.length) { const [a,lb]=carb[carb.length-1]; o.age=a; o.npvC=((lb/2204.62)*(44/12)*carbonPrice)/Math.pow(1+disc,a); }
   return o;
 }
 
@@ -275,7 +297,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
 <h2>Run specification (Cardinal contract)</h2>
 <pre>${esc(JSON.stringify(spec,null,2))}</pre>
 <h2>Methods &amp; caveats</h2>
-<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate; the carbon price, ecosystem-service payments, and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
+<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs. The carbon price, ecosystem-service payments, and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
 </body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
@@ -415,7 +437,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <MultiLineChart rows={allRows}/>
             <div style={{display:"flex",flexWrap:"wrap",gap:10,fontSize:10,marginTop:2}}>{present.map(e=><span key={e.cls} style={{color:CLS_COL[e.cls]}}>● {e.cls} ({e.rows.length})</span>)}</div>
             {repNode && (r.econ.npvH!=null||r.econ.npvC!=null) && (
-              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span style={{color:"#8a5cd1"}}>carbon illustrative</span></span></div>
+              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span style={{color:"#8a5cd1"}}>carbon illustrative</span></span>{r.sc.mgmt!=="reserve" && r.econ.rotation ? <span style={{color:"var(--mut)"}}> · optimal rotation <b>{r.econ.rotation} yr</b>, Faustmann land value {mpa(r.econ.lev)}/{PER}</span> : null}</div>
             )}
           </div>
         );
