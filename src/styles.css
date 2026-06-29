@@ -173,8 +173,16 @@ a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible
   outline-offset:2px;
   border-radius:4px;
 }
+/* Focusable SVG state regions: CSS beats the presentation-attribute stroke, so a
+   focused state gets a bright accent outline ring even inside the map. */
+.mapwrap svg path[role="button"]:focus-visible{
+  outline:none; stroke:var(--accent); stroke-width:3; }
 /* Slightly larger tap targets on touch screens. */
 @media (max-width:760px){
   .tab,.vm,.mini-btn{min-height:30px}
   .map-ctrl{font-size:12px}
 }
+/* Interactive chips: inline-flex so min-height lands centered. On touch pointers,
+   guarantee a >=24px target (WCAG 2.2 2.5.8 target size, minimum). */
+.chip{display:inline-flex;align-items:center;box-sizing:border-box}
+@media (pointer:coarse){ .chip{min-height:24px} }

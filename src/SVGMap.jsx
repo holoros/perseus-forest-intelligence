@@ -500,15 +500,22 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         const title = mode === "health"
           ? `${st}${cov.name?" · "+cov.name:""}${hrrSt?` · priority ${hrrSt.priority_pct.toFixed(1)}% of forest`:" · no HRR score"}`
           : `${st}${cov.name?" · "+cov.name:""}${cov.engines?` · ${cov.engines} engines`:" · no model data"}`;
+        const activate = ()=>{
+          if(inspectMode || movedRef.current) return;
+          fitFeature(ft.geometry);                 // click-to-zoom (#1)
+          if(pickable && onPick) onPick(st);
+        };
         return (
           <path key={st} d={d} fill={fill} fillOpacity={opacity}
                 stroke={stroke} strokeWidth={sw}
                 style={{cursor: pickable ? "pointer" : "default"}}
-                onClick={()=>{
-                  if(inspectMode || movedRef.current) return;
-                  fitFeature(ft.geometry);                 // click-to-zoom (#1)
-                  if(pickable && onPick) onPick(st);
-                }}>
+                // a11y: pickable states are keyboard-focusable and Enter/Space-activatable,
+                // giving the choropleth parity with the header state <select> (WCAG 2.1.1).
+                tabIndex={pickable ? 0 : undefined}
+                role={pickable ? "button" : undefined}
+                aria-label={pickable ? title : undefined}
+                onKeyDown={pickable ? (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); if(onPick) onPick(st); } } : undefined}
+                onClick={activate}>
             <title>{title}</title>
           </path>
         );

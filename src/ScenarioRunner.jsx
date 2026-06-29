@@ -130,6 +130,9 @@ export default function ScenarioRunner({ yields }) {
   const chip = (on, okCol) => ({ fontSize: 11, padding: "2px 9px", borderRadius: 4, cursor: "pointer",
     border: `1px solid ${on ? (okCol || "#3a6ea5") : "var(--bd,#345)"}`,
     background: on ? (okCol || "#3a6ea5") : "transparent", color: on ? "#fff" : "var(--fg,#cdd)" });
+  // a11y: make non-button clickable chips keyboard-operable (WCAG 2.1.1 / 4.1.2) + tap-sized (.chip).
+  const clickable = (fn, style, label) => ({ style, className: "chip", onClick: fn, role: "button", tabIndex: 0, "aria-label": label,
+    onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(e); } } });
 
   return (
     <div>
@@ -144,7 +147,7 @@ export default function ScenarioRunner({ yields }) {
           {selCodes.map((c) => (
             <span key={c} style={{ ...chip(true), display: "inline-flex", gap: 5, alignItems: "center" }}>
               {l3[c].name}
-              {selCodes.length > 1 && <span onClick={() => setSel((s) => ({ ...s, [c]: false }))} style={{ cursor: "pointer", fontWeight: 700 }}>×</span>}
+              {selCodes.length > 1 && <span {...clickable(() => setSel((s) => ({ ...s, [c]: false })), { cursor: "pointer", fontWeight: 700 }, `Remove ${l3[c].name}`)}>×</span>}
             </span>
           ))}
           <select value="" onChange={(e) => { if (e.target.value) setSel((s) => ({ ...s, [e.target.value]: true })); }}
@@ -174,11 +177,11 @@ export default function ScenarioRunner({ yields }) {
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Management:</span>
-          {MGMT.map(([k, lbl, , col]) => <span key={k} style={chip(mgmts[k], col)} onClick={() => toggle(k)}>{lbl}</span>)}
+          {MGMT.map(([k, lbl, , col]) => <span key={k} {...clickable(() => toggle(k), chip(mgmts[k], col), `Toggle management ${lbl}`)} aria-pressed={!!mgmts[k]}>{lbl}</span>)}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Climate:</span>
-          {CLIMATE.map(([k, lbl]) => <span key={k} style={{ ...chip(climate === k), opacity: k === "historic" ? 1 : 0.6 }} onClick={() => setClimate(k)}
+          {CLIMATE.map(([k, lbl]) => <span key={k} {...clickable(() => setClimate(k), { ...chip(climate === k), opacity: k === "historic" ? 1 : 0.6 }, `Climate ${lbl}`)} aria-pressed={climate === k}
             title={k === "historic" ? "" : "calibrated climate scaling in progress (CEM run)"}>{lbl}{k !== "historic" ? " ◦" : ""}</span>)}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
@@ -190,12 +193,12 @@ export default function ScenarioRunner({ yields }) {
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Market prices:</span>
-          {Object.entries(PRICE_PATHS).map(([k, v]) => <span key={k} style={chip(price === k)} onClick={() => setPrice(k)}>{v.label}</span>)}
+          {Object.entries(PRICE_PATHS).map(([k, v]) => <span key={k} {...clickable(() => setPrice(k), chip(price === k), `Market prices ${v.label}`)} aria-pressed={price === k}>{v.label}</span>)}
           <span style={{ color: "var(--mut)" }}>· carbon ${p.carbon}/tCO2e</span>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
           <span style={{ color: "var(--mut)" }}>Ecosystem-service payments:</span>
-          {ES_LEVELS.map(([k, lbl]) => <span key={k} style={chip(es === k)} onClick={() => setEs(k)}>{lbl}</span>)}
+          {ES_LEVELS.map(([k, lbl]) => <span key={k} {...clickable(() => setEs(k), chip(es === k), `Ecosystem-service payment ${lbl}`)} aria-pressed={es === k}>{lbl}</span>)}
         </div>
       </div>
 

@@ -347,7 +347,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
   const chip=(on,col)=>({fontSize:11,padding:"2px 9px",borderRadius:4,cursor:"pointer",border:`1px solid ${on?(col||"#3a6ea5"):"var(--bd,#345)"}`,background:on?(col||"#3a6ea5"):"transparent",color:on?"#fff":"var(--fg,#cdd)"});
   // a11y: make non-button clickable chips keyboard-operable (WCAG 2.1.1 / 4.1.2).
   // Spread onto a <span> to add role=button, focusability, and Enter/Space activation.
-  const clickable=(fn,style,label)=>({style,onClick:fn,role:"button",tabIndex:0,"aria-label":label,
+  const clickable=(fn,style,label)=>({style,className:"chip",onClick:fn,role:"button",tabIndex:0,"aria-label":label,
     onKeyDown:e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(e); } }});
   const HPC_STEP={submitting:["Submitting run-spec to Cardinal…",15],queued:["Queued on SLURM (PUOM0008)…",40],running:["Running ensemble: FVS, CBM, CEM, yield…",75],complete:["Complete — results delivered",100]};
 
