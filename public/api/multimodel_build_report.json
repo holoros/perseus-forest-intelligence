@@ -1,0 +1,32 @@
+{
+ "state_summary_states": 48,
+ "summary_scenarios": [
+  "BAU",
+  "conservation",
+  "intensive",
+  "reserve"
+ ],
+ "trajectory_states": 48,
+ "trajectory_source_coverage": {
+  "CBM": 48,
+  "CBM_disturbed": 48,
+  "CEM": 48,
+  "CEM_disturbed": 48,
+  "FVS_default": 48,
+  "FVS_calibrated": 48,
+  "FVS_gompit": 39,
+  "YC": 48,
+  "LANDIS": 9
+ },
+ "landis_trajectory_states": [
+  "IN",
+  "ME",
+  "MI",
+  "MN",
+  "NH",
+  "OH",
+  "VT",
+  "WA",
+  "WI"
+ ]
+}
