@@ -21,6 +21,11 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
+      <defs>
+        <clipPath id="mc-plot">
+          <rect x={P.l} y={P.t} width={Math.max(0,W-P.l-P.r)} height={Math.max(0,H-P.t-P.b)}/>
+        </clipPath>
+      </defs>
       {yticks.map(t => (
         <g key={t}>
           <line x1={P.l} x2={W-P.r} y1={sy(t)} y2={sy(t)} stroke="var(--line)" strokeWidth="0.5"/>
@@ -30,6 +35,7 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
       {xticks.map(t => <text key={t} x={sx(t)} y={H-8} textAnchor="middle" fontSize="9" fill="var(--mut)">{t}</text>)}
       <text x={(P.l+W-P.r)/2} y={H-0.5} textAnchor="middle" fontSize="9" fill="var(--mut)">{xlabel}</text>
       {unit && <text x={W-P.r} y={P.t+1} textAnchor="end" fontSize="9" fill="var(--mut)">{unit}</text>}
+      <g clipPath="url(#mc-plot)">
       {present.map(s => {
         const band = s.pts.filter(p => p[1]!=null && p[3]!=null);
         const bandD = band.length
@@ -44,6 +50,7 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
           </g>
         );
       })}
+      </g>
     </svg>
   );
 }

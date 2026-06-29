@@ -7,7 +7,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
                                       showBands, showInvBand, hiddenEngines, yMode,
                                       overlayNode, overlayLabel,
                                       isolatedEngine, onIsolate, xMax }){
-  const W=560,H=320,L=48,R=70,T=14,B=30;
+  const W=560,H=320,L=48,R=86,T=14,B=30;
   const svgRef = useRef(null);
   const [hoverX, setHoverX] = useState(null);
 
@@ -198,9 +198,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       for(let i=famLabels.length-1;i>=0;i--){ famLabels[i].ly = Math.min(famLabels[i].ly, next-13); next = famLabels[i].ly; } }
   }
   const endLabels = DENSE
-    ? [<text key="hint" x={W-R+4} y={T+6} fill="#5e7180" fontSize="7" style={{pointerEvents:"none"}}>
-         {labelItems.length} engines · hover to ID</text>,
-       ...famLabels.map((it,k)=>(
+    ? [...famLabels.map((it,k)=>(
          <g key={"fam"+k} style={{pointerEvents:"none"}}>
            <line x1={W-R+1} y1={it.ly} x2={W-R+6} y2={it.ly} stroke={it.col} strokeWidth="2.4" strokeDasharray={it.dash}/>
            <text x={W-R+9} y={it.ly+3} fill={it.col} fontSize="9" fontWeight="600" textAnchor="start">{it.cls} ({it.n})</text>
@@ -268,17 +266,28 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   };
 
   return (
-    <div style={{position:"relative"}}>
+    <div style={{position:"relative",maxWidth:880}}>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
            style={{width:"100%",height:"auto",display:"block"}}
            onMouseMove={onMouseMove} onMouseLeave={()=> setHoverX(null)}>
-        {grid}{xticks}{invBand}{bands}
-        {fiaRef!=null && fiaRef >= y0 && fiaRef <= y1 && <>
-          <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="5 4" strokeWidth="1"/>
-          <text x={L+4} y={Y(fiaRef)-4} fill="#8aa0b0" fontSize="10">FIA observed {fiaRef} Tg{fiaYear?` (${fiaYear})`:""}</text>
-        </>}
-        {drawSet.map((s,i)=> drawLine(s, i, false, DENSE))}
-        {drawOverlay.map((s,i)=> drawLine(s, i, true, DENSE))}
+        <defs>
+          <clipPath id="gc-plot">
+            <rect x={L} y={T} width={Math.max(0,W-L-R)} height={Math.max(0,H-T-B)}/>
+          </clipPath>
+        </defs>
+        {grid}{xticks}
+        {/* Everything data-driven is clipped to the plot rectangle, so an engine
+            line above the zoomed y-range (or past the gutter) can never draw over
+            the axes, labels, or the controls above the chart. */}
+        <g clipPath="url(#gc-plot)">
+          {invBand}{bands}
+          {fiaRef!=null && fiaRef >= y0 && fiaRef <= y1 && <>
+            <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="5 4" strokeWidth="1"/>
+            <text x={L+4} y={Y(fiaRef)-4} fill="#8aa0b0" fontSize="10">FIA observed {fiaRef} Tg{fiaYear?` (${fiaYear})`:""}</text>
+          </>}
+          {drawSet.map((s,i)=> drawLine(s, i, false, DENSE))}
+          {drawOverlay.map((s,i)=> drawLine(s, i, true, DENSE))}
+        </g>
         {endLabels}
         {hoverX != null && (
           <line x1={hoverX} y1={T} x2={hoverX} y2={H-B}
