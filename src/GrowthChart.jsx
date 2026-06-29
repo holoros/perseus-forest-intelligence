@@ -13,8 +13,22 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
 
   // Optional user x-axis horizon clamp (projections run to 2125).
   const clampX = s => (xMax && s.pts) ? {...s, pts: s.pts.filter(p=>p[0]<=xMax)} : s;
-  const visible = (node||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).filter(s=>s.pts.length);
-  const visibleOverlay = (overlayNode||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).filter(s=>s.pts.length);
+  // Strip a leading hindcast segment that ends in a large upward "anchor-stitch" jump.
+  // Some engines (e.g. cem_v5_anchored) carry a declining pre-anchor history and then jump
+  // up to the 2025 FIA-anchored baseline, which draws a spurious vertical spike. A sudden
+  // large UPWARD step is non-physical for standing carbon, so we drop everything before it
+  // and keep the clean projected segment. Downward steps (real disturbance) are left intact.
+  const cleanTraj = s => {
+    const pts = s.pts; if(!pts || pts.length < 4) return s;
+    const vs = pts.map(p=>p[1]).filter(v=>v!=null);
+    const range = Math.max(...vs) - Math.min(...vs); if(range <= 0) return s;
+    let ji = -1, jmax = 0;
+    for(let i=1;i<pts.length;i++){ const up = pts[i][1]-pts[i-1][1]; if(up > jmax){ jmax = up; ji = i; } }
+    if(ji > 0 && jmax > 0.4*range && pts.length - ji >= 2) return {...s, pts: pts.slice(ji)};
+    return s;
+  };
+  const visible = (node||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).map(cleanTraj).filter(s=>s.pts.length);
+  const visibleOverlay = (overlayNode||[]).filter(s=> !hiddenEngines || !hiddenEngines.has(s.model)).map(clampX).map(cleanTraj).filter(s=>s.pts.length);
   // When an engine is isolated, only that engine's line draws — but keep the
   // full set in `visible` so hovers can re-display values for the others.
   const drawSet = isolatedEngine
@@ -148,8 +162,10 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const tag = dashed ? `${s.label} · ${overlayLabel||"compare"}` : `${s.label}`;
     // When many engines draw, thin and fade member lines so the class bands and
     // family labels carry the story instead of a tangle of equal-weight lines.
-    const sw = dashed ? 1.2 : (dense ? 1.0 : 1.8);
-    const op = dashed ? 0.55 : (dense ? 0.5 : 0.95);
+    // In dense mode the family-median lines carry the story, so member lines drop back to
+    // faint context (advanced-viz: central tendency + spread, not a tangle of equal-weight lines).
+    const sw = dashed ? 1.2 : (dense ? 0.7 : 1.8);
+    const op = dashed ? 0.55 : (dense ? 0.22 : 0.95);
     return <g key={(dashed?"o":"")+i}>
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
             style={{cursor:"pointer"}}
@@ -197,6 +213,20 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     if(famLabels.length && famLabels[famLabels.length-1].ly > H-B-3){ let next = H-B-3+13;
       for(let i=famLabels.length-1;i>=0;i--){ famLabels[i].ly = Math.min(famLabels[i].ly, next-13); next = famLabels[i].ly; } }
   }
+  // Dense mode draws one bold per-family MEDIAN trajectory (the central tendency a reader
+  // should follow) over the faint member lines, so 29 engines read as ~4 model families.
+  const med = a => { const b = a.slice().sort((x,y)=>x-y); const m = b.length>>1; return b.length%2 ? b[m] : (b[m-1]+b[m])/2; };
+  const famMedians = DENSE ? (()=>{
+    const byCls = {};
+    drawSet.forEach(s => { (byCls[s.cls]=byCls[s.cls]||[]).push(s); });
+    return Object.entries(byCls).map(([cls, ser]) => {
+      const byYr = {};
+      ser.forEach(s => s.pts.forEach(p => { if(p[1]!=null){ (byYr[p[0]]=byYr[p[0]]||[]).push(p[1]); } }));
+      const yrs = Object.keys(byYr).map(Number).sort((a,b)=>a-b);
+      return { cls, col: classCol[cls] || "#bbb", dash: DASH[cls]!=null?DASH[cls]:"0",
+        pts: yrs.map(y => [y, med(byYr[y])]) };
+    }).filter(f => f.pts.length >= 2);
+  })() : [];
   const endLabels = DENSE
     ? [...famLabels.map((it,k)=>(
          <g key={"fam"+k} style={{pointerEvents:"none"}}>
@@ -265,6 +295,45 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(data)));
   };
 
+  // Export the visible engine series as CSV (year column + one column per engine median),
+  // so researchers can pull the underlying numbers, not just the picture.
+  const downloadCsv = () => {
+    const ser = visible;
+    if(!ser.length) return;
+    const years = [...new Set(ser.flatMap(s=>s.pts.map(p=>p[0])))].sort((a,b)=>a-b);
+    const lookup = ser.map(s=>{ const m={}; s.pts.forEach(p=>{ m[p[0]]=p[2]; }); return m; });
+    const head = ["year", ...ser.map(s=>String(s.model).replace(/,/g,";"))].join(",");
+    const rows = years.map(y=> [y, ...lookup.map(m=> m[y]!=null ? m[y] : "")].join(","));
+    const csv = [head, ...rows].join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `perseus_series_${Date.now()}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Lightweight biological-plausibility screen on the visible trajectories: a projection
+  // should stay non-negative and grow monotonically or as a single hump (no implausible
+  // oscillation). This is a fast shape check in the spirit of the Bakuzis law-like
+  // relationships, not the full Bakuzis-matrix assessment (that runs on Cardinal).
+  const bioCheck = (()=>{
+    const ser = visible.filter(s => s.pts.length >= 3);
+    if(!ser.length) return null;
+    let pass = 0;
+    ser.forEach(s => {
+      const v = s.pts.map(p => p[2]).filter(x => x != null);
+      if(v.length < 3) return;
+      const nonNeg = v.every(x => x >= 0);
+      let flips = 0;
+      for(let i = 2; i < v.length; i++){
+        const d1 = v[i-1]-v[i-2], d2 = v[i]-v[i-1];
+        if(d1 !== 0 && d2 !== 0 && Math.sign(d1) !== Math.sign(d2)) flips++;
+      }
+      if(nonNeg && flips <= 1) pass++;
+    });
+    return { pass, n: ser.length };
+  })();
+
   return (
     <div style={{position:"relative",maxWidth:880}}>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
@@ -287,6 +356,11 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
           </>}
           {drawSet.map((s,i)=> drawLine(s, i, false, DENSE))}
           {drawOverlay.map((s,i)=> drawLine(s, i, true, DENSE))}
+          {famMedians.map((f,i)=>(
+            <path key={"fm"+i} fill="none" stroke={f.col} strokeWidth="2.6" strokeDasharray={f.dash}
+              style={{pointerEvents:"none"}} opacity="0.97"
+              d={f.pts.map((p,k)=> (k?"L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ")}/>
+          ))}
         </g>
         {endLabels}
         {hoverX != null && (
@@ -296,6 +370,14 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
         )}
         <text x={L} y={T} fill="#8aa0b0" fontSize="10">{unit||""}</text>
       </svg>
+      {bioCheck && bioCheck.n > 0 && (
+        <div style={{fontSize:10.5,color:"var(--mut)",marginTop:2,display:"flex",alignItems:"center",gap:6}}>
+          <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",
+            background: bioCheck.pass===bioCheck.n ? "#2e9e6b" : bioCheck.pass >= bioCheck.n*0.6 ? "#e0a72e" : "#c0504d"}}/>
+          Biological-plausibility screen: <b style={{color:"var(--ink)"}}>{bioCheck.pass}/{bioCheck.n}</b> visible trajectories are non-negative and monotone or single-peaked
+          <span title="A fast shape check in the spirit of the Bakuzis law-like relationships; the full Bakuzis-matrix assessment runs on Cardinal." style={{cursor:"help"}}>ⓘ</span>
+        </div>
+      )}
       {hoverX != null && hoverYear != null && (
         <div style={{
           position:"absolute", top:8,
@@ -329,6 +411,12 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             isolating · clear
           </button>
         )}
+        <button onClick={downloadCsv} title="Download the visible engine series as CSV"
+          style={{background:"var(--panel)", color:"var(--mut)",
+            border:"1px solid var(--line)", borderRadius:5,
+            padding:"1px 7px", fontSize:10, cursor:"pointer"}}>
+          ↓ CSV
+        </button>
         <button onClick={downloadPng}
           style={{background:"var(--panel)", color:"var(--mut)",
             border:"1px solid var(--line)", borderRadius:5,

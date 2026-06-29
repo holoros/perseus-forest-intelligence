@@ -291,6 +291,45 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
     ? `At ${p.label.toLowerCase()} prices${esAnnual?" with ES payments":""}${polClause}, this forest is worth more standing (~${mpa(reserveTotal)}/${PER} NPV) than harvested (~${mpa(managedTotal)}/${PER}). A reserve or light-touch strategy looks favorable.`
     : `At ${p.label.toLowerCase()} prices${esAnnual?" even with ES payments":""}${polClause}, active management pays (~${mpa(managedTotal)}/${PER} NPV) over keeping it standing (~${mpa(reserveTotal)}/${PER}). A managed strategy looks favorable.`) : null;
 
+  // Decision sensitivity: the carbon-price and discount-rate thresholds at which the
+  // reserve-vs-managed recommendation flips. Carbon NPV is linear in price, so the carbon
+  // threshold is closed-form; the discount threshold is found by a sign-change sweep of
+  // (reserveTotal - managedTotal). This tells the user WHAT drives the answer, not just the answer.
+  const sensText = (()=>{
+    if(!repNode) return null;
+    const kR = p.carbon>0 ? (eRes.npvC||0)/p.carbon : 0;   // reserve carbon NPV per $/tCO2e
+    const kM = p.carbon>0 ? (eBas.npvC||0)/p.carbon : 0;   // managed carbon NPV per $/tCO2e
+    const timber = (eBas.npvH||0)*polT(policy);
+    const dES = esMan - esFull;                            // managed minus reserve ES (usually < 0)
+    const denom = polC(policy)*(kR - kM);
+    let carbonFlip = denom!==0 ? (timber + dES)/denom : null;
+    if(carbonFlip!=null && (carbonFlip<0 || carbonFlip>300 || !isFinite(carbonFlip))) carbonFlip = null;
+    // discount-rate sign-change sweep
+    let discFlip = null, prev = null;
+    for(let d=0.01; d<=0.1201; d+=0.005){
+      const er = econFromL3(repNode,"untreated",stumpageCuft,p.carbon,d,estCost,mgmtCost);
+      const eb = econFromL3(repNode,"harvested",stumpageCuft,p.carbon,d,estCost,mgmtCost);
+      const eAge = er.age||eb.age||100;
+      const esF = esAnnual?esAnnual*annuity(eAge,d):0;
+      const rT = (er.npvC||0)*polC(policy)+esF;
+      const mT = (eb.npvH||0)*polT(policy)+(eb.npvC||0)*polC(policy)+esF*ES_MANAGED_FRAC;
+      const s = rT - mT;
+      if(prev && Math.sign(s)!==Math.sign(prev.s) && prev.s!==0){
+        discFlip = prev.d + (d-prev.d)*Math.abs(prev.s)/(Math.abs(prev.s)+Math.abs(s));
+        break;
+      }
+      prev = {d, s};
+    }
+    const other = carbonLean ? "active management" : "keeping it standing";
+    const cDir = carbonLean ? "falls below" : "rises above";
+    const dDir = carbonLean ? "rises above" : "falls below";
+    const parts = [];
+    if(carbonFlip!=null) parts.push(`carbon ${cDir} ~$${Math.round(carbonFlip)}/tCO₂e`);
+    if(discFlip!=null) parts.push(`the discount rate ${dDir} ~${(discFlip*100).toFixed(1)}%`);
+    if(!parts.length) return `What flips it: this call is robust to carbon price and discount rate across the plausible range (tested $0–300/tCO₂e, 1–12% discount).`;
+    return `What flips it: the recommendation tips toward ${other} if ${parts.join(" or ")} (now $${p.carbon}/tCO₂e, ${(disc*100).toFixed(0)}% discount).`;
+  })();
+
   function submitHPC() {
     setRun(null); setHpc("submitting");
     setTimeout(()=>setHpc("queued"), 700);
@@ -473,6 +512,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
         <div className="chartcard" style={{padding:"8px 10px",marginBottom:8,borderLeft:"3px solid "+(carbonLean?"#2e9e6b":"#d98a3c")}}>
           <div style={{fontSize:11,fontWeight:600,marginBottom:2}}>Recommendation {hpc==="complete"?"· delivered from Cardinal":"· free precomputed"}</div>
           <div style={{fontSize:12}}>{decision}</div>
+          {sensText && <div style={{fontSize:11,color:"var(--mut)",marginTop:4,borderTop:"1px solid var(--line)",paddingTop:4}}>{sensText}</div>}
         </div>
       )}
       {run && run.results && run.results.map((r,i)=>{

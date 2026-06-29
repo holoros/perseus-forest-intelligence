@@ -112,6 +112,23 @@ ${eco ? `<p><b>Ecoregion context.</b> Across the ${esc(aoi.l3name || "local")} e
   actions.push("Maintain a mix of species, sizes, and ages. Diversity is the cheapest insurance against climate and pest risk.");
   if (mbf) actions.push(`If you are weighing a harvest, recent blended stumpage in ${esc(stateName)} runs about <b>$${mbf}/MBF</b> ($${Math.round(stumpageM3)}/m³); a forester can tell you whether your stand is at a value-maximizing age.`);
 
+  // One-sentence-cluster synthesis tying health + conditions + the value tension together.
+  // Honest by construction: it points to Build a run for the harvest-vs-hold NPV rather than
+  // asserting one here, since this report does not compute the per-stand economics.
+  const attention = pri > nat * 1.15
+    ? "carries an above-average share of stressed, low-resilience forest, so health warrants attention"
+    : pri < nat * 0.85
+      ? "is in relatively good health, with a below-average share of stressed, low-resilience forest"
+      : "is about average in health for the country";
+  const urgency = (mortPct != null && mortPct > 1.2) || ((ag.disturbed_pct || 0) > 10)
+    ? " Recent mortality and disturbance argue for acting sooner rather than later."
+    : " Conditions look relatively stable, so there is room to plan deliberately.";
+  const watchClause = watch.length ? ` Keep an eye on <b>${watch.map(w => esc(w.common)).join(" and ")}</b> as abundant but climate-vulnerable.` : "";
+  const econClause = stumpageM3 != null
+    ? ` On value, ${esc(stateName)} stumpage runs about <b>$${Math.round(stumpageM3)}/m&sup3;</b> (multi-year median); because carbon payments can rival timber income at compliance prices, model the harvest-versus-hold tradeoff in <b>Build a run</b> before committing.`
+    : "";
+  const bottomLine = `Your forest ${attention}.${urgency}${watchClause}${econClause}`;
+
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>My forest — ${esc(stateName)}</title>
 <style>
  body{font-family:Georgia,serif;max-width:760px;margin:28px auto;padding:0 18px;color:#1a1a1a;line-height:1.5}
@@ -124,10 +141,13 @@ ${eco ? `<p><b>Ecoregion context.</b> Across the ${esc(aoi.l3name || "local")} e
  .fig{margin:8px 0 4px} .cap{font-size:10.5px;color:#777;margin:0 0 4px}
  .grid2{display:flex;gap:18px;flex-wrap:wrap} .grid2>div{flex:1;min-width:230px}
  .stat{display:inline-block;margin-right:18px;font-size:12.5px} .stat b{font-size:15px}
+ .bottomline{background:#f3f7f4;border-left:4px solid #2e6b4f;border-radius:0 6px 6px 0;padding:9px 13px;margin:10px 0 4px;font-size:13.5px;line-height:1.5}
+ .bottomline b.bl{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#2e6b4f;display:block;margin-bottom:2px}
  @media print{body{margin:0} h2{page-break-after:avoid}}
 </style></head><body>
 <h1>Your forest at a glance${aoi ? "" : ` — ${esc(stateName)}`}</h1>
 <div class="sub">PERSEUS Forest Intelligence &middot; ${date}${aoi ? ` &middot; ${esc(aoi.l3name || stateName)}, ${esc(stateName)}` : ` &middot; based on ${s.n_plots ? s.n_plots.toLocaleString() : ""} FIA plots in ${esc(stateName)}`}</div>
+<div class="bottomline"><b class="bl">Bottom line</b>${bottomLine}</div>
 ${aoiBlock}
 
 <h2>${aoi ? `${esc(stateName)} — state context` : "Health"}</h2>
