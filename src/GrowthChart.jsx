@@ -224,17 +224,26 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     for(let i=1;i<pts.length;i++){ if(year <= pts[i][0]){ const [xa,ya]=pts[i-1],[xb,yb]=pts[i]; const t=(year-xa)/((xb-xa)||1); return ya + t*(yb-ya); } }
     return pts[pts.length-1][1];
   };
+  // Light 3-point smooth (endpoints fixed) removes sub-pixel jitter without flattening real
+  // model disagreement, e.g. the genuine ~8% crossing undulation among the 3 FVS engines stays.
+  const smooth3 = pts => pts.map((p,i)=> (i===0 || i===pts.length-1) ? p : [p[0], 0.25*pts[i-1][1] + 0.5*p[1] + 0.25*pts[i+1][1]]);
   const famSummary = DENSE ? (()=>{
     const byCls = {};
     drawSet.forEach(s => { (byCls[s.cls]=byCls[s.cls]||[]).push(s); });
     return Object.entries(byCls).map(([cls, ser]) => {
       const grid = [...new Set(ser.flatMap(s => s.pts.map(p => p[0])))].sort((a,b)=>a-b);
-      const need = Math.max(1, Math.ceil(ser.length * 0.6));
-      const med=[], lo=[], hi=[];
-      grid.forEach(y => {
-        const vals = ser.map(s => interpAt(s.pts, y)).filter(v => v != null);
-        if(vals.length >= need){ med.push([y, quantile(vals,0.5)]); lo.push([y, quantile(vals,0.25)]); hi.push([y, quantile(vals,0.75)]); }
+      // Coverage per grid year; summarize only at FULL coverage so the contributing member set
+      // stays constant. This kills the tail spike where a ragged-ended subset changes the median.
+      const cov = grid.map(y => ser.filter(s => y >= s.pts[0][0] && y <= s.pts[s.pts.length-1][0]).length);
+      const maxCov = Math.max(...cov, 1);
+      let med=[], lo=[], hi=[];
+      grid.forEach((y,gi) => {
+        if(cov[gi] >= maxCov){
+          const vals = ser.map(s => interpAt(s.pts, y)).filter(v => v != null);
+          if(vals.length){ med.push([y, quantile(vals,0.5)]); lo.push([y, quantile(vals,0.25)]); hi.push([y, quantile(vals,0.75)]); }
+        }
       });
+      med = smooth3(med); lo = smooth3(lo); hi = smooth3(hi);
       return { cls, col: classCol[cls] || "#bbb", dash: DASH[cls]!=null?DASH[cls]:"0", med, lo, hi, single: ser.length < 2 };
     }).filter(f => f.med.length >= 2);
   })() : [];
