@@ -164,8 +164,8 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     // family labels carry the story instead of a tangle of equal-weight lines.
     // In dense mode the family-median lines carry the story, so member lines drop back to
     // faint context (advanced-viz: central tendency + spread, not a tangle of equal-weight lines).
-    const sw = dashed ? 1.2 : (dense ? 0.7 : 1.8);
-    const op = dashed ? 0.55 : (dense ? 0.22 : 0.95);
+    const sw = dashed ? 1.2 : (dense ? 0.6 : 1.8);
+    const op = dashed ? 0.55 : (dense ? 0.14 : 0.95);
     return <g key={(dashed?"o":"")+i}>
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
             style={{cursor:"pointer"}}
@@ -213,19 +213,30 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     if(famLabels.length && famLabels[famLabels.length-1].ly > H-B-3){ let next = H-B-3+13;
       for(let i=famLabels.length-1;i>=0;i--){ famLabels[i].ly = Math.min(famLabels[i].ly, next-13); next = famLabels[i].ly; } }
   }
-  // Dense mode draws one bold per-family MEDIAN trajectory (the central tendency a reader
-  // should follow) over the faint member lines, so 29 engines read as ~4 model families.
-  const med = a => { const b = a.slice().sort((x,y)=>x-y); const m = b.length>>1; return b.length%2 ? b[m] : (b[m-1]+b[m])/2; };
-  const famMedians = DENSE ? (()=>{
+  // Dense mode summarizes each model family by a bold MEDIAN line with a soft q25-q75 ribbon.
+  // Members carry different (sparse) year grids, so taking a per-exact-year median over whatever
+  // members happen to share that year produces a spurious zigzag. Instead, interpolate every
+  // member onto the union year grid and require >=60% family coverage at a year before summarizing,
+  // so the central line and ribbon are computed over a stable member set and read smoothly.
+  const quantile = (a, q) => { const b = a.slice().sort((x,y)=>x-y); const i = (b.length-1)*q; const lo = Math.floor(i), hi = Math.ceil(i); return lo===hi ? b[lo] : b[lo] + (b[hi]-b[lo])*(i-lo); };
+  const interpAt = (pts, year) => {
+    if(!pts.length || year < pts[0][0] || year > pts[pts.length-1][0]) return null;
+    for(let i=1;i<pts.length;i++){ if(year <= pts[i][0]){ const [xa,ya]=pts[i-1],[xb,yb]=pts[i]; const t=(year-xa)/((xb-xa)||1); return ya + t*(yb-ya); } }
+    return pts[pts.length-1][1];
+  };
+  const famSummary = DENSE ? (()=>{
     const byCls = {};
     drawSet.forEach(s => { (byCls[s.cls]=byCls[s.cls]||[]).push(s); });
     return Object.entries(byCls).map(([cls, ser]) => {
-      const byYr = {};
-      ser.forEach(s => s.pts.forEach(p => { if(p[1]!=null){ (byYr[p[0]]=byYr[p[0]]||[]).push(p[1]); } }));
-      const yrs = Object.keys(byYr).map(Number).sort((a,b)=>a-b);
-      return { cls, col: classCol[cls] || "#bbb", dash: DASH[cls]!=null?DASH[cls]:"0",
-        pts: yrs.map(y => [y, med(byYr[y])]) };
-    }).filter(f => f.pts.length >= 2);
+      const grid = [...new Set(ser.flatMap(s => s.pts.map(p => p[0])))].sort((a,b)=>a-b);
+      const need = Math.max(1, Math.ceil(ser.length * 0.6));
+      const med=[], lo=[], hi=[];
+      grid.forEach(y => {
+        const vals = ser.map(s => interpAt(s.pts, y)).filter(v => v != null);
+        if(vals.length >= need){ med.push([y, quantile(vals,0.5)]); lo.push([y, quantile(vals,0.25)]); hi.push([y, quantile(vals,0.75)]); }
+      });
+      return { cls, col: classCol[cls] || "#bbb", dash: DASH[cls]!=null?DASH[cls]:"0", med, lo, hi, single: ser.length < 2 };
+    }).filter(f => f.med.length >= 2);
   })() : [];
   const endLabels = DENSE
     ? [...famLabels.map((it,k)=>(
@@ -349,18 +360,22 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             line above the zoomed y-range (or past the gutter) can never draw over
             the axes, labels, or the controls above the chart. */}
         <g clipPath="url(#gc-plot)">
-          {invBand}{bands}
+          {invBand}{!DENSE && bands}
           {fiaRef!=null && fiaRef >= y0 && fiaRef <= y1 && <>
             <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="5 4" strokeWidth="1"/>
             <text x={L+4} y={Y(fiaRef)-4} fill="#8aa0b0" fontSize="10">FIA observed {fiaRef} Tg{fiaYear?` (${fiaYear})`:""}</text>
           </>}
           {drawSet.map((s,i)=> drawLine(s, i, false, DENSE))}
           {drawOverlay.map((s,i)=> drawLine(s, i, true, DENSE))}
-          {famMedians.map((f,i)=>(
-            <path key={"fm"+i} fill="none" stroke={f.col} strokeWidth="2.6" strokeDasharray={f.dash}
-              style={{pointerEvents:"none"}} opacity="0.97"
-              d={f.pts.map((p,k)=> (k?"L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ")}/>
-          ))}
+          {famSummary.map((f,i)=>{
+            const up = f.hi.map((p,k)=> (k?"L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
+            const dn = f.lo.slice().reverse().map(p=> "L" + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
+            const medD = f.med.map((p,k)=> (k?"L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
+            return <g key={"fs"+i} style={{pointerEvents:"none"}}>
+              {!f.single && <path d={up + " " + dn + " Z"} fill={f.col} opacity="0.13" stroke="none"/>}
+              <path d={medD} fill="none" stroke={f.col} strokeWidth="2.6" strokeDasharray={f.dash} opacity="0.97"/>
+            </g>;
+          })}
         </g>
         {endLabels}
         {hoverX != null && (
