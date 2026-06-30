@@ -2,7 +2,7 @@
 // LANDIS-stratified tabs. Each series is { label, color, pts:[[x,lo,mid,hi]] };
 // lo/hi may be null to draw a bare line. Inline SVG, dark-theme aware.
 export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", height = 230 }){
-  const W = 460, H = height, P = { l: 46, r: 12, t: 12, b: 26 };
+  const W = 460, H = height, P = { l: 46, r: 72, t: 12, b: 26 };
   const present = (series || []).filter(s => s.pts && s.pts.length);
   if(!present.length)
     return <div className="note" style={{margin:"8px 4px"}}>No series for this selection.</div>;
@@ -18,6 +18,14 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
   const xticks = [];
   const step = (xmax - xmin) > 60 ? 20 : (xmax - xmin) > 25 ? 10 : 5;
   for(let x = Math.ceil(xmin/step)*step; x <= xmax; x += step) xticks.push(x);
+  // Collision-avoided trailing labels in the right gutter, so each line is named in place
+  // rather than relying on a separate legend (Cross-model ensemble had unlabeled lines).
+  const endLabels = present.map(s => { const last = s.pts[s.pts.length-1];
+    return { label: s.label, color: s.color, y: Math.max(P.t+4, Math.min(H-P.b-3, sy(last[2] != null ? last[2] : last[1]))) }; })
+    .sort((a,b) => a.y - b.y);
+  { let prev = -99; for(const it of endLabels){ it.ly = Math.max(it.y, prev + 11); prev = it.ly; }
+    if(endLabels.length && endLabels[endLabels.length-1].ly > H-P.b-3){ let next = H-P.b-3+11;
+      for(let i=endLabels.length-1;i>=0;i--){ endLabels[i].ly = Math.min(endLabels[i].ly, next-11); next = endLabels[i].ly; } } }
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
@@ -51,6 +59,12 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
         );
       })}
       </g>
+      {endLabels.map((it,i) => (
+        <g key={"el"+i}>
+          <line x1={W-P.r+1} y1={it.ly} x2={W-P.r+5} y2={it.ly} stroke={it.color} strokeWidth="1.6"/>
+          <text x={W-P.r+7} y={it.ly+2.6} fontSize="8" fill={it.color}>{String(it.label).replace(/ \(90% band\)/,"").slice(0,17)}</text>
+        </g>
+      ))}
     </svg>
   );
 }
