@@ -48,6 +48,11 @@ header.top .state-pick:hover{border-color:var(--accent)}
   background:rgba(23,32,41,.9);padding:8px 10px;border:1px solid var(--line);border-radius:8px;line-height:1.7}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:middle}
 .detail{padding:7px 12px;overflow:auto}
+/* Inline-SVG charts use small viewBoxes with width:100%, so on a wide right panel they scale
+   up 2 to 3x and read as oversized. Cap chart SVGs at a designed width so every chart renders
+   at a consistent, legible size regardless of panel width. The map SVG is outside .chartcard
+   and is unaffected; per-chart inline maxWidth (CompareAreas 460, MiniChart 640) still wins. */
+.chartcard svg{max-width:720px}
 .detail h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:2px 4px 6px}
 .who{margin:0 4px 6px;font-size:12.5px}.who b{font-size:15px}
 .controls{display:flex;gap:6px;flex-wrap:wrap;margin:3px 4px 8px}

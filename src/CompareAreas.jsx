@@ -97,7 +97,7 @@ export default function CompareAreas({ data, state, onPickState }) {
       {/* comparison bars: your area vs peers on priority share */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>Priority forest area (% of forest)</div>
-        <svg width="100%" viewBox={`0 0 ${labW + barW + 30} ${bars.length * rowH + 4}`} style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }}>
+        <svg width="100%" viewBox={`0 0 ${labW + barW + 30} ${bars.length * rowH + 4}`} style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", maxWidth: 460, display: "block" }}>
           {bars.map((b, i) => {
             const y = i * rowH + 2, w = ((b.v || 0) / maxBar) * barW;
             return (

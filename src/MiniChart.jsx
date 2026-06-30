@@ -28,7 +28,7 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
       for(let i=endLabels.length-1;i>=0;i--){ endLabels[i].ly = Math.min(endLabels[i].ly, next-11); next = endLabels[i].ly; } } }
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block",maxWidth:640}}>
       <defs>
         <clipPath id="mc-plot">
           <rect x={P.l} y={P.t} width={Math.max(0,W-P.l-P.r)} height={Math.max(0,H-P.t-P.b)}/>
