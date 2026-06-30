@@ -1,6 +1,8 @@
 {
   "meta": {
-    "version": "v0.90",
+    "version": "v0.91",
+    "production_fvs_engine": "FVS_gompit",
+    "production_fvs_engine_note": "Production FVS configuration is recalibrated species-dependent growth with density-dependent gompit mortality (b2_gompit), selected on accuracy, the within-stand mortality effect, and a Bakuzis biological-realism assessment. Evidence DOI 10.5281/zenodo.21027931. The served ensemble represents FVS by this single production member; FVS_default and FVS_calibrated remain available as alternate trajectories.",
     "purpose": "Cross-engine scenario crosswalk so libcbm / CEM / LANDIS / yield curves can render on a single comparable (harvest_intensity x climate) axis.",
     "axes": {
       "harvest_intensity": ["reserve", "untreated", "baseline", "increased", "accelerated"],
