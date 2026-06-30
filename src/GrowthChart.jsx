@@ -165,17 +165,21 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     // In dense mode the family-median lines carry the story, so member lines drop back to
     // faint context (advanced-viz: central tendency + spread, not a tangle of equal-weight lines).
     const sw = dashed ? 1.2 : (dense ? 0.6 : 1.8);
-    const op = dashed ? 0.55 : (dense ? 0.14 : 0.95);
+    // In dense mode the family median + q25-q75 ribbon carry the story; drawing the faint member
+    // lines too just adds stray fragments (short/ragged series, different start years), so hide
+    // the visible member line entirely and keep only the invisible hover hit-path. Individual
+    // engines remain reachable via hover, click-to-isolate, and the per-engine drawer.
+    const op = dashed ? 0.55 : (dense ? 0 : 0.95);
     return <g key={(dashed?"o":"")+i}>
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
             style={{cursor:"pointer"}}
             onClick={()=> !dashed && onIsolate && onIsolate(s.model)}>
         <title>{`${tag} (${s.cls}) — click to isolate`}</title>
       </path>
-      <path d={d} fill="none" stroke={col} strokeWidth={sw}
+      {op > 0 && <path d={d} fill="none" stroke={col} strokeWidth={sw}
             opacity={op}
             strokeDasharray={dashFor(s)}
-            style={{pointerEvents:"none"}}/>
+            style={{pointerEvents:"none"}}/>}
     </g>;
   };
   // Collision-avoided trailing labels: stack each line's end label in the right

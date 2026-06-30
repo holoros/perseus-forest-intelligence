@@ -64,7 +64,10 @@ const MAP_BINS = [
             ["hcs_v4_intensity_partial","Partial intensity (v4, 2024)"],
             ["hcs_v4_intensity_clearcut","Clearcut intensity (v4, 2024)"],
             ["hcs_v4_class_partial","Silvicultural class · partial (v4)"],
-            ["value_at_risk","Value at risk of removal"],["volume_removed","Volume removed (annual)"],
+            // value_at_risk and volume_removed temporarily removed: their CONUS PNGs are mis-warped
+            // (sparse data baked into the NE corner, ~48 KB vs ~250 KB for a full layer), so they
+            // render over New England instead of CONUS. Re-enable after re-running value_at_risk_vol.R
+            // on Cardinal and re-rendering matching PNG + bounds via the render_value_overlay pipeline.
             ["gfc_lossyear","Forest loss year (Hansen)"],
             ["forest_change_0823","Forest change 2008→2023 (NLCD)"]] },
 ];
