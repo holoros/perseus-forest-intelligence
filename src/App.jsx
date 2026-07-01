@@ -1738,6 +1738,8 @@ export default function App(){
                     Switch to "all engines" to see the full multi-model spread under managed/reserve buckets.</>}
               {" "}Class buttons hide whole model families; the per-engine drawer hides individual engines.
               Y-axis "zoom to median" hides outliers. Hover a line for the engine. Data: perseus_db v0.66.
+              {" "}Cite: <a href="https://doi.org/10.5281/zenodo.20516949" target="_blank" rel="noopener noreferrer" style={{color:"var(--accent)"}}>CBM-CONUS trajectories DOI</a>{" "}·{" "}
+              <a href="https://doi.org/10.5281/zenodo.21027931" target="_blank" rel="noopener noreferrer" style={{color:"var(--accent)"}}>FVS engine evidence DOI</a>.
               {bucket === "reserve (no harvest, disturbance-exposed)" && <>
                 {" "}<b>Disturbance-exposed reserve:</b> the YC line is the no-harvest trajectory with an
                 explicit FIA-based disturbance drag. Central line = ~2× historical disturbance frequency;

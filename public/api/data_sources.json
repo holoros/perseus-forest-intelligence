@@ -1,0 +1,70 @@
+{
+  "schema": "perseus_data_sources_v1",
+  "generated": "2026-07-01",
+  "how_to_cite": "Weiskittel, A. R. (2026). PERSEUS Forest Intelligence: a CONUS multi-model forest carbon, value, and risk decision-support tool. Center for Research on Sustainable Forests, University of Maine. holoros.github.io/perseus-forest-intelligence",
+  "note": "Registry of the datasets and models behind PERSEUS. Deposited products carry a Zenodo DOI; upstream products carry their canonical citation. DOIs verified to resolve 2026-07-01.",
+  "sources": {
+    "fvs_production": {
+      "name": "Production FVS engine evidence (paired growth-by-mortality matrix + Bakuzis assessment)",
+      "authors": "Weiskittel, A. R.",
+      "year": 2026,
+      "doi": "10.5281/zenodo.21027931",
+      "url": "https://doi.org/10.5281/zenodo.21027931",
+      "license": "CC-BY-4.0",
+      "applies_to": ["engine:FVS"]
+    },
+    "cbm_conus": {
+      "name": "CBM-CONUS multi-model forest-carbon trajectories and reproduction code (concept DOI)",
+      "authors": "Weiskittel, A. R.",
+      "year": 2026,
+      "doi": "10.5281/zenodo.20516949",
+      "url": "https://doi.org/10.5281/zenodo.20516949",
+      "note": "Concept DOI, resolves to the latest version; 48-state trajectories, rollups, decompositions.",
+      "applies_to": ["engine:CBM", "tab:ensemble", "tab:engines"]
+    },
+    "inventory_stratification": {
+      "name": "Inventory stratification framework and code",
+      "authors": "Weiskittel, A. R.",
+      "year": 2026,
+      "doi": "10.5281/zenodo.20519700",
+      "url": "https://doi.org/10.5281/zenodo.20519700",
+      "applies_to": ["method:stratification"]
+    },
+    "treemap_2022": {
+      "name": "TreeMap 2022: tree-level model of the forests of the conterminous United States",
+      "authors": "Riley, K. L., Grenfell, I. C., Finney, M. A., et al.",
+      "year": 2024,
+      "url": "https://doi.org/10.2737/RDS-2019-0026-2022",
+      "applies_to": ["layer:standing_value", "layer:value_at_risk", "layer:volume_removed", "engine:YC"]
+    },
+    "fia_fiadb": {
+      "name": "USDA Forest Service Forest Inventory and Analysis Database (FIADB)",
+      "authors": "USDA Forest Service, Forest Inventory and Analysis Program",
+      "year": 2024,
+      "url": "https://www.fs.usda.gov/research/products/dataandtools/tools/fia-datamart",
+      "applies_to": ["health", "engine:YC", "engine:CEM", "landowner"]
+    },
+    "potter_2017_vcc": {
+      "name": "Species climate-change vulnerability (VCC) scores",
+      "authors": "Potter, K. M., et al.",
+      "year": 2017,
+      "url": "https://doi.org/10.1016/j.foreco.2017.06.024",
+      "applies_to": ["species:vcc"]
+    },
+    "harris_2025_ownership": {
+      "name": "Spatial forest ownership of the conterminous United States (US_forest_ownership)",
+      "authors": "Harris, N. L., et al.",
+      "year": 2025,
+      "url": "https://doi.org/10.2737/RDS-2025-0045",
+      "applies_to": ["layer:ownership", "landowner"]
+    },
+    "timbermart_south": {
+      "name": "TimberMart-South stumpage price series (with state-agency supplements)",
+      "authors": "TimberMart-South, University of Georgia",
+      "year": 2025,
+      "url": "https://www.timbermart-south.com/",
+      "note": "Feeds the region-aware blended stumpage (econ_params).",
+      "applies_to": ["stumpage", "economics"]
+    }
+  }
+}

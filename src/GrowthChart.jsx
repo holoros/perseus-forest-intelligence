@@ -328,7 +328,14 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const lookup = ser.map(s=>{ const m={}; s.pts.forEach(p=>{ m[p[0]]=p[2]; }); return m; });
     const head = ["year", ...ser.map(s=>String(s.model).replace(/,/g,";"))].join(",");
     const rows = years.map(y=> [y, ...lookup.map(m=> m[y]!=null ? m[y] : "")].join(","));
-    const csv = [head, ...rows].join("\n");
+    // Provenance header so downloaded data stays citable.
+    const cite = [
+      "# PERSEUS Forest Intelligence engine trajectories",
+      "# Cite: CBM-CONUS trajectories https://doi.org/10.5281/zenodo.20516949",
+      "#       FVS engine evidence https://doi.org/10.5281/zenodo.21027931",
+      "# Source: perseus_db; holoros.github.io/perseus-forest-intelligence",
+    ];
+    const csv = [...cite, head, ...rows].join("\n");
     const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
