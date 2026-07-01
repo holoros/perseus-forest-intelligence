@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-30 18:42:16.12393",
+  "generated": "2026-07-01 07:05:28.021883",
   "method": "LANDIS spp-biomass-log AGB sum x NumActiveSites x 72900 m2; AGC=AGB*0.47; FIADB year-0 anchored",
   "states": {
     "WA": {
@@ -72,6 +72,30 @@
       "2090": {"total_TgC": 374.05, "mean_MgC_ha": 55.29},
       "2095": {"total_TgC": 378.67, "mean_MgC_ha": 55.97},
       "2100": {"total_TgC": 383.17, "mean_MgC_ha": 56.63}
+      }
+    },
+    "MN": {
+      "climate": "HadGEM3_ssp245",
+      "year0_AGB_Tg": 372.08, "control_AGB_Tg": 371.80, "pct_diff": 0.08,
+      "start_TgC": 174.88,
+      "end_TgC": 487.86,
+      "series": {
+      "2025": {"total_TgC": 174.88, "mean_MgC_ha": 23.81},
+      "2030": {"total_TgC": 211.40, "mean_MgC_ha": 28.79},
+      "2035": {"total_TgC": 246.30, "mean_MgC_ha": 33.54},
+      "2040": {"total_TgC": 276.92, "mean_MgC_ha": 37.71},
+      "2045": {"total_TgC": 302.54, "mean_MgC_ha": 41.20},
+      "2050": {"total_TgC": 324.63, "mean_MgC_ha": 44.21},
+      "2055": {"total_TgC": 344.25, "mean_MgC_ha": 46.88},
+      "2060": {"total_TgC": 362.24, "mean_MgC_ha": 49.33},
+      "2065": {"total_TgC": 379.08, "mean_MgC_ha": 51.62},
+      "2070": {"total_TgC": 395.06, "mean_MgC_ha": 53.80},
+      "2075": {"total_TgC": 410.88, "mean_MgC_ha": 55.95},
+      "2080": {"total_TgC": 426.36, "mean_MgC_ha": 58.06},
+      "2085": {"total_TgC": 441.63, "mean_MgC_ha": 60.14},
+      "2090": {"total_TgC": 456.80, "mean_MgC_ha": 62.21},
+      "2095": {"total_TgC": 471.95, "mean_MgC_ha": 64.27},
+      "2100": {"total_TgC": 487.86, "mean_MgC_ha": 66.44}
       }
     }
   }
