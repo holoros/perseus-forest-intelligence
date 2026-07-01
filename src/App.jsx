@@ -8,6 +8,7 @@ import DivergenceHeatmap from "./DivergenceHeatmap.jsx";
 const StumpagePanel = lazy(() => import("./StumpagePanel.jsx"));
 const LandisStratified = lazy(() => import("./LandisStratified.jsx"));
 const CrossModelEnsemble = lazy(() => import("./CrossModelEnsemble.jsx"));
+const SpatialAnchored = lazy(() => import("./SpatialAnchored.jsx"));
 const LandownerYields = lazy(() => import("./LandownerYields.jsx"));
 const FaustmannRotation = lazy(() => import("./FaustmannRotation.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
@@ -509,6 +510,7 @@ export default function App(){
   const [divergence,setDivergence] = useState(null);
   const [stumpage,setStumpage] = useState(null);
   const [landis,setLandis] = useState(null);
+  const [spatialAnch,setSpatialAnch] = useState(null);
   const [mmTraj,setMmTraj] = useState(null); // multimodel anchored trajectories (cross-model ensemble)
   const [mmSum,setMmSum] = useState(null);   // multimodel state summary (2100 carbon + NPV)
   const [landowner,setLandowner] = useState(null);
@@ -552,6 +554,7 @@ export default function App(){
     j("api/engine_divergence.json").then(setDivergence).catch(()=>{});
     j("api/stumpage.json").then(setStumpage).catch(()=>{});
     j("api/landis_stratified.json").then(setLandis).catch(()=>{});
+    j("api/spatial_biomass_anchored.json").then(setSpatialAnch).catch(()=>{});
     j("api/multimodel_anchored_trajectories.json").then(setMmTraj).catch(()=>{});
     j("api/multimodel_state_summary.json").then(setMmSum).catch(()=>{});
     j("api/landowner_yields.json").then(setLandowner).catch(()=>{});
@@ -749,13 +752,14 @@ export default function App(){
       engines: !!series, rd: !!series, divergence: !!divergence,
       stumpage: !!(stumpage && stumpage.series && stumpage.series[sel]),
       landis: !!(landis && landis[sel]),
+      spatialbio: !!(spatialAnch && spatialAnch.states && spatialAnch.states[sel]),
       landowner: !!(landowner && landowner[sel]),
       faustmann: !!(faustmann && faustmann[sel]),
       health: !!(hrr && hrr.national),
       compare: !!(hrr && hrr.states),
     };
     if(!ok[tab]) setTab(ok.compare ? "compare" : "engines");
-  },[sel,series,divergence,stumpage,landis,landowner,faustmann,hrr]);
+  },[sel,series,divergence,stumpage,landis,spatialAnch,landowner,faustmann,hrr]);
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
   useEffect(()=>{
@@ -1539,6 +1543,7 @@ export default function App(){
           {(!aoi || researchOpen) && <div className="tabs">
             {[["compare","Compare areas"],["runbuilder","Build a run"],["health","Forest health"],["engines","Engine compare"],["rd","RD trend"],["divergence","Engine spread"],
               ["ensemble","Cross-model ensemble"],["stumpage","Stumpage"],["landis","LANDIS stratified"],
+              ["spatialbio","Spatial biomass"],
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"]]
               .filter(([k])=> k==="compare" || k==="runbuilder" || k==="health" || toolsOpen || tab===k)
               .map(([k,lbl])=>{
@@ -1546,6 +1551,7 @@ export default function App(){
                 || (k==="ensemble" && !(mmTraj && mmTraj[sel]))
                 || (k==="stumpage" && !(stumpage && stumpage.series && stumpage.series[sel]))
                 || (k==="landis" && !(landis && landis[sel]))
+                || (k==="spatialbio" && !(spatialAnch && spatialAnch.states && spatialAnch.states[sel]))
                 || (k==="landowner" && !(landowner && landowner[sel]))
                 || (k==="faustmann" && !(faustmann && faustmann[sel]))
                 || (k==="health" && !(hrr && hrr.national))
@@ -1574,6 +1580,7 @@ export default function App(){
             onPickState={st=>{ if(states && states[st] && states[st].has_series){ setSel(st); setTab("engines"); } }}/>}
           {(!aoi || researchOpen) && tab==="stumpage" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><StumpagePanel data={stumpage} state={sel} units={units}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landis" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandisStratified data={landis} state={sel}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="spatialbio" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><SpatialAnchored data={spatialAnch} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="ensemble" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><CrossModelEnsemble traj={mmTraj} summary={mmSum} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="landowner" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><LandownerYields data={landowner} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}

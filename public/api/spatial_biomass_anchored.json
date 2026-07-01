@@ -1,0 +1,78 @@
+{
+  "generated": "2026-06-30 18:42:16.12393",
+  "method": "LANDIS spp-biomass-log AGB sum x NumActiveSites x 72900 m2; AGC=AGB*0.47; FIADB year-0 anchored",
+  "states": {
+    "WA": {
+      "climate": "HadGEM3_ssp245",
+      "year0_AGB_Tg": 1298.87, "control_AGB_Tg": 1442.70, "pct_diff": -9.97,
+      "start_TgC": 610.47,
+      "end_TgC": 3194.32,
+      "series": {
+      "2025": {"total_TgC": 610.47, "mean_MgC_ha": 96.83},
+      "2030": {"total_TgC": 1341.94, "mean_MgC_ha": 106.43},
+      "2035": {"total_TgC": 1507.44, "mean_MgC_ha": 119.55},
+      "2040": {"total_TgC": 1672.76, "mean_MgC_ha": 132.66},
+      "2045": {"total_TgC": 1832.96, "mean_MgC_ha": 145.37},
+      "2050": {"total_TgC": 1988.33, "mean_MgC_ha": 157.69},
+      "2055": {"total_TgC": 2135.64, "mean_MgC_ha": 169.37},
+      "2060": {"total_TgC": 2274.99, "mean_MgC_ha": 180.42},
+      "2065": {"total_TgC": 2407.04, "mean_MgC_ha": 190.90},
+      "2070": {"total_TgC": 2532.73, "mean_MgC_ha": 200.87},
+      "2075": {"total_TgC": 2653.50, "mean_MgC_ha": 210.45},
+      "2080": {"total_TgC": 2769.15, "mean_MgC_ha": 219.62},
+      "2085": {"total_TgC": 2879.74, "mean_MgC_ha": 228.39},
+      "2090": {"total_TgC": 2985.88, "mean_MgC_ha": 236.80},
+      "2095": {"total_TgC": 3088.53, "mean_MgC_ha": 244.95},
+      "2100": {"total_TgC": 3194.32, "mean_MgC_ha": 253.33}
+      }
+    },
+    "GA": {
+      "climate": "HadGEM3_ssp245",
+      "year0_AGB_Tg": 944.07, "control_AGB_Tg": 944.60, "pct_diff": -0.06,
+      "start_TgC": 443.71,
+      "end_TgC": 917.51,
+      "series": {
+      "2025": {"total_TgC": 443.71, "mean_MgC_ha": 49.76},
+      "2030": {"total_TgC": 492.49, "mean_MgC_ha": 55.23},
+      "2035": {"total_TgC": 539.50, "mean_MgC_ha": 60.50},
+      "2040": {"total_TgC": 582.77, "mean_MgC_ha": 65.35},
+      "2045": {"total_TgC": 621.63, "mean_MgC_ha": 69.71},
+      "2050": {"total_TgC": 658.40, "mean_MgC_ha": 73.84},
+      "2055": {"total_TgC": 691.16, "mean_MgC_ha": 77.51},
+      "2060": {"total_TgC": 720.60, "mean_MgC_ha": 80.81},
+      "2065": {"total_TgC": 747.68, "mean_MgC_ha": 83.85},
+      "2070": {"total_TgC": 773.06, "mean_MgC_ha": 86.69},
+      "2075": {"total_TgC": 798.43, "mean_MgC_ha": 89.54},
+      "2080": {"total_TgC": 822.91, "mean_MgC_ha": 92.28},
+      "2085": {"total_TgC": 846.69, "mean_MgC_ha": 94.95},
+      "2090": {"total_TgC": 869.87, "mean_MgC_ha": 97.55},
+      "2095": {"total_TgC": 892.57, "mean_MgC_ha": 100.10},
+      "2100": {"total_TgC": 917.51, "mean_MgC_ha": 102.89}
+      }
+    },
+    "ME": {
+      "climate": "HadGEM3_ssp245",
+      "year0_AGB_Tg": 627.69, "control_AGB_Tg": 734.00, "pct_diff": -14.48,
+      "start_TgC": 295.01,
+      "end_TgC": 383.17,
+      "series": {
+      "2025": {"total_TgC": 295.01, "mean_MgC_ha": 43.60},
+      "2030": {"total_TgC": 301.61, "mean_MgC_ha": 44.58},
+      "2035": {"total_TgC": 308.37, "mean_MgC_ha": 45.58},
+      "2040": {"total_TgC": 315.13, "mean_MgC_ha": 46.58},
+      "2045": {"total_TgC": 321.78, "mean_MgC_ha": 47.56},
+      "2050": {"total_TgC": 328.42, "mean_MgC_ha": 48.54},
+      "2055": {"total_TgC": 334.89, "mean_MgC_ha": 49.50},
+      "2060": {"total_TgC": 341.13, "mean_MgC_ha": 50.42},
+      "2065": {"total_TgC": 347.18, "mean_MgC_ha": 51.31},
+      "2070": {"total_TgC": 353.00, "mean_MgC_ha": 52.17},
+      "2075": {"total_TgC": 358.66, "mean_MgC_ha": 53.01},
+      "2080": {"total_TgC": 364.03, "mean_MgC_ha": 53.81},
+      "2085": {"total_TgC": 369.15, "mean_MgC_ha": 54.56},
+      "2090": {"total_TgC": 374.05, "mean_MgC_ha": 55.29},
+      "2095": {"total_TgC": 378.67, "mean_MgC_ha": 55.97},
+      "2100": {"total_TgC": 383.17, "mean_MgC_ha": 56.63}
+      }
+    }
+  }
+}
