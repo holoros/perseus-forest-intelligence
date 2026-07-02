@@ -1,8 +1,8 @@
 {
   "schema": "perseus_data_sources_v1",
-  "generated": "2026-07-01",
+  "generated": "2026-07-02",
   "how_to_cite": "Weiskittel, A. R. (2026). PERSEUS Forest Intelligence: a CONUS multi-model forest carbon, value, and risk decision-support tool. Center for Research on Sustainable Forests, University of Maine. holoros.github.io/perseus-forest-intelligence",
-  "note": "Registry of the datasets and models behind PERSEUS. Deposited products carry a Zenodo DOI; upstream products carry their canonical citation. DOIs verified to resolve 2026-07-01.",
+  "note": "Registry of the datasets and models behind PERSEUS. Deposited products carry a Zenodo DOI; upstream products carry their canonical citation. DOIs confirmed published via the Zenodo API 2026-07-02 (harvest_decision_v5, stumpage_price_db added this cycle).",
   "sources": {
     "fvs_production": {
       "name": "Production FVS engine evidence (paired growth-by-mortality matrix + Bakuzis assessment)",
@@ -29,6 +29,26 @@
       "doi": "10.5281/zenodo.20519700",
       "url": "https://doi.org/10.5281/zenodo.20519700",
       "applies_to": ["method:stratification"]
+    },
+    "harvest_decision_v5": {
+      "name": "CONUS-HCS: a continental harvest decision-surface product (240 m annual harvest probability), v5",
+      "authors": "Weiskittel, A. R.",
+      "year": 2026,
+      "doi": "10.5281/zenodo.20533718",
+      "url": "https://doi.org/10.5281/zenodo.20533718",
+      "license": "CC-BY-4.0",
+      "note": "Concept DOI, resolves to the latest version (v5.0.1, 10.5281/zenodo.20837629); 240 m annual harvest probability and clearcut/partial decision surfaces.",
+      "applies_to": ["harvest", "layer:volume_removed"]
+    },
+    "stumpage_price_db": {
+      "name": "A harmonized CONUS stumpage price database (1995-2026, 2020 USD): multi-source compilation",
+      "authors": "Weiskittel, A. R.",
+      "year": 2026,
+      "doi": "10.5281/zenodo.20836865",
+      "url": "https://doi.org/10.5281/zenodo.20836865",
+      "license": "CC-BY-4.0",
+      "note": "Concept DOI, resolves to the latest version (v1.0.1, 10.5281/zenodo.20837628); deposited source behind the region-aware blended stumpage (econ_params).",
+      "applies_to": ["stumpage", "economics"]
     },
     "treemap_2022": {
       "name": "TreeMap 2022: tree-level model of the forests of the conterminous United States",
