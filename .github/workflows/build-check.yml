@@ -1,8 +1,8 @@
 name: Build check (no deploy)
 
-# Verifies that main can be built locally with npm. Does NOT touch gh-pages.
-# This catches obvious breakage in the source tree without risking the
-# v1.3 deployed bundle (see CONTRIBUTING.md for the source/deploy desync).
+# Verifies that main builds with npm and that the shipped api/ data has no
+# structural corruption (parse errors / NaN / Inf). Runs on push and PR; the
+# deploy workflow handles publishing separately.
 
 on:
   push:
@@ -20,8 +20,13 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install dependencies
         run: npm ci || npm install
+      - name: API data integrity (strict, structural only)
+        run: python3 scripts/check_api_integrity.py public/api --strict
       - name: Build
         run: npm run build
       - name: Report dist size

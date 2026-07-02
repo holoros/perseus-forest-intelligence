@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://holoros.github.io/perseus-forest-intelligence/sitemap.xml

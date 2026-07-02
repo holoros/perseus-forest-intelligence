@@ -348,7 +348,7 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   function generateReport() {
     if (!run || !run.results) return;
     const { scored, best } = computeScores(run.results, emphasis);
-    const esc = s => String(s).replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
     const date = new Date().toLocaleDateString();
     const scoreRows = scored.map(({ r, score }) => { const c=r.criteria; const isBest=score>=best-0.001;
       return `<tr${isBest?' style="background:#eaf7f0;font-weight:600"':''}><td>${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>$${fmt(c.econ)}</td><td>$${fmt(c.carbon)}</td><td>$${fmt(c.es)}</td><td>${c.resil!=null?Math.round(c.resil*100):"&ndash;"}</td><td>${c.risk!=null?Math.round(c.risk*100):"&ndash;"}</td><td>${c.agree!=null?Math.round(c.agree*100)+"%":"&ndash;"}</td><td>${Math.round(score)}${isBest?" &#9733;":""}</td></tr>`; }).join("");
