@@ -310,6 +310,9 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       const ctx = canvas.getContext("2d");
       ctx.scale(SCALE, SCALE);
       ctx.drawImage(img, 0, 0);
+      // Citation footer baked into the exported image so a shared PNG stays attributable.
+      ctx.fillStyle = "#5e7180"; ctx.font = "7px sans-serif"; ctx.textAlign = "left";
+      ctx.fillText("PERSEUS Forest Intelligence · DOI 10.5281/zenodo.20516949 · holoros.github.io/perseus-forest-intelligence", 4, H - 3);
       const url = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = url;

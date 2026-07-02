@@ -29,3 +29,25 @@ keywords:
 license: MIT
 version: "1.3"
 date-released: 2026-05-31
+references:
+  - type: data
+    title: "CBM-CONUS multi-model forest-carbon trajectories and reproduction code"
+    authors:
+      - given-names: Aaron
+        family-names: Weiskittel
+    doi: "10.5281/zenodo.20516949"
+    year: 2026
+  - type: data
+    title: "PERSEUS FVS engine evidence: paired growth-by-mortality matrix and Bakuzis assessment"
+    authors:
+      - given-names: Aaron
+        family-names: Weiskittel
+    doi: "10.5281/zenodo.21027931"
+    year: 2026
+  - type: data
+    title: "Inventory stratification framework and code"
+    authors:
+      - given-names: Aaron
+        family-names: Weiskittel
+    doi: "10.5281/zenodo.20519700"
+    year: 2026

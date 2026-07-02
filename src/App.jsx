@@ -1262,6 +1262,7 @@ export default function App(){
           </span>
           <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Methods notes">Methods</a>
           <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Ecoregion economics viewer">Ecoregion</a>
+          <a href={`${BASE}citation.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Data sources, DOIs, and how to cite">Data &amp; cite</a>
           <button className="linkbtn" title="plain-language glossary and data sources" onClick={()=>setGlossaryOpen(true)}>Glossary</button>
           <button className="linkbtn" title="copy a shareable link to this exact view"
             onClick={()=>{ try{ navigator.clipboard.writeText(window.location.href);

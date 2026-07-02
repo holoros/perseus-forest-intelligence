@@ -1,5 +1,7 @@
 # PERSEUS Forest Intelligence
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20516949.svg)](https://doi.org/10.5281/zenodo.20516949)
+
 Precision-forestry decision support for the conterminous US. Pick or draw an area, see its
 localized forest health, risk, and value, then run multiple growth-and-yield models across
 contrasting economic, policy, and climate scenarios and get a multi-criteria recommendation
