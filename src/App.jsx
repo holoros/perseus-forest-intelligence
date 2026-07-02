@@ -1383,7 +1383,7 @@ export default function App(){
                 onChange={e=>handleAoiFile(e.target.files[0])}/>
             </label>
             <button className="mc-locate" onClick={locateMe} disabled={locating}
-              title="Find the forest around your approximate location and zoom in to the local analysis">
+              title="Uses your browser location if you allow it; otherwise falls back to an approximate lookup by IP address (ipapi.co, a third-party service). No location data is stored.">
               {locating ? "locating…" : "◎ Forest near me"}
             </button>
             <input className="mc-coord" value={manualLoc} placeholder="lat, lon"

@@ -194,7 +194,7 @@ function ConditionRadar({ index, allCurves, age0 }){
   const labels = AXES6.map(([k,lab],i) => { const [x,y]=pt(i, R+15);
     const anc = Math.abs(x-C)<5 ? "middle" : (x>C ? "start" : "end");
     return <text key={k} x={x} y={y+3} textAnchor={anc} fontSize="9.5"
-      fill={axV(ax(i))!=null?"var(--ink)":"#5e7180"}>{lab}</text>; });
+      fill={axV(ax(i))!=null?"var(--ink)":"#8194a4"}>{lab}</text>; });
   const dots = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
     return <circle key={i} cx={x} cy={y} r={hi===i?4.2:3} fill="#3fb68b" stroke="#0b1015" strokeWidth="0.5"/>; });
   const hits = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
@@ -225,12 +225,12 @@ function ConditionRadar({ index, allCurves, age0 }){
   return (
     <div>
       <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 2px"}}>
-        <span style={{fontSize:10.5,color:"#5e7180"}}>Compare to:</span>
+        <span style={{fontSize:10.5,color:"#8194a4"}}>Compare to:</span>
         {hasBroad && <span style={chip(ctx.surrounding,"#7a9bd6")} onClick={()=>setCtx(c=>({...c,surrounding:!c.surrounding}))}>Surrounding</span>}
         {hasRef && <span style={chip(ctx.state,"#9aa7b0")} onClick={()=>setCtx(c=>({...c,state:!c.state}))}>State avg</span>}
       </div>
       <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 2px"}}>
-        <span style={{fontSize:10.5,color:"#5e7180"}}>Outlook:</span>
+        <span style={{fontSize:10.5,color:"#8194a4"}}>Outlook:</span>
         <span style={chip(pathway===null)} onClick={()=>setPathway(null)}>Now</span>
         <span style={chip(pathway==="reserve",FUT_COL.reserve)} title={canFuture?"":"ecoregion curves unavailable here"}
           onClick={()=>canFuture&&setPathway(pathway==="reserve"?null:"reserve")}>Reserve</span>
@@ -253,7 +253,7 @@ function ConditionRadar({ index, allCurves, age0 }){
       </svg>
       <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 10px",margin:"1px 0 0"}}>
         {legend.map(([lab,col,dash],k)=>(
-          <span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:8.5,color:"#5e7180"}}>
+          <span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10.5,color:"#8194a4"}}>
             <svg width="14" height="6"><line x1="0" y1="3" x2="14" y2="3" stroke={col} strokeWidth={dash?"1.2":"1.8"} strokeDasharray={dash?"3 2":"0"}/></svg>{lab}</span>
         ))}
       </div>
@@ -292,16 +292,16 @@ function RDTrajectory({ series }){
         <line x1={x0} y1={sy(RD_HI)} x2={x1} y2={sy(RD_HI)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
         <line x1={x0} y1={sy(RD_LO)} x2={x1} y2={sy(RD_LO)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
         <text x={x1+3} y={sy(0.45)+3} fontSize="8" fill="#3fb68b">sweet spot</text>
-        <text x={x1+3} y={sy(0.45)+13} fontSize="7.5" fill="#5e7180">0.30â0.60</text>
+        <text x={x1+3} y={sy(0.45)+13} fontSize="7.5" fill="#8194a4">0.30â0.60</text>
         <line x1={x0} y1={y0} x2={x0} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
         <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
         {[0,0.3,0.6,0.9].filter(t=>t<=yMax).map((t,k)=>(
-          <text key={k} x={x0-4} y={sy(t)+3} fontSize="8" textAnchor="end" fill="#5e7180">{t.toFixed(1)}</text>
+          <text key={k} x={x0-4} y={sy(t)+3} fontSize="8" textAnchor="end" fill="#8194a4">{t.toFixed(1)}</text>
         ))}
         <polyline points={line} fill="none" stroke="#1d7e0f" strokeWidth="1.8"/>
         {pts.map((p,k)=>(<g key={k}>
           <circle cx={sx(p.year)} cy={sy(p.rd)} r="3.2" fill={inBand&&k===pts.length-1?"#3fb68b":"#1d7e0f"} stroke="#0b1015" strokeWidth="0.5"/>
-          <text x={sx(p.year)} y={y1+12} fontSize="8.5" textAnchor="middle" fill="#5e7180">{p.year}</text>
+          <text x={sx(p.year)} y={y1+12} fontSize="8.5" textAnchor="middle" fill="#8194a4">{p.year}</text>
           <text x={sx(p.year)} y={sy(p.rd)-6} fontSize="8" textAnchor="middle" fill="var(--ink)">{p.rd.toFixed(2)}</text>
         </g>))}
       </svg>
@@ -334,7 +334,7 @@ function StructureTrajectory({ series }){
         const first=v[0].v, last=v[v.length-1].v, d=last-first;
         const thr = 0.03*Math.abs(first||1);
         const arrow = d>thr ? "â" : d<-thr ? "â" : "â";
-        const col = d>thr ? "#1d7e0f" : d<-thr ? "#d9734f" : "#5e7180";
+        const col = d>thr ? "#1d7e0f" : d<-thr ? "#d9734f" : "#8194a4";
         return (
           <div key={k} style={{display:"flex",alignItems:"center",gap:6,margin:"1px 0"}}>
             <span style={{fontSize:11,minWidth:86,color:"var(--ink)"}}>{label}</span>
@@ -501,7 +501,7 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
             <span style={{fontSize:11.5,color:"var(--ink)"}}>{lab}</span>
             <input type="range" min="0" max="3" step="1" value={w[k]}
               onChange={e=>setk(k, +e.target.value)} style={{width:"100%",accentColor:"#3fb68b"}}/>
-            <span style={{fontSize:10.5,color:"#5e7180",width:34,textAlign:"right"}}>
+            <span style={{fontSize:10.5,color:"#8194a4",width:34,textAlign:"right"}}>
               {["off","Ã1","Ã2","Ã3"][w[k]]}</span>
           </React.Fragment>
         ))}
@@ -700,12 +700,12 @@ function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, set
             </g>
           );
         })}
-        <text x={px(0)} y={axY-13} fontSize="8" textAnchor="start" fill="#5e7180">{fmtV(lo)}</text>
-        <text x={px(100)} y={axY-13} fontSize="8" textAnchor="end" fill="#5e7180">{fmtV(hi)}</text>
+        <text x={px(0)} y={axY-13} fontSize="8" textAnchor="start" fill="#8194a4">{fmtV(lo)}</text>
+        <text x={px(100)} y={axY-13} fontSize="8" textAnchor="end" fill="#8194a4">{fmtV(hi)}</text>
       </svg>
       <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 10px",margin:"1px 0 0"}}>
         {fams.map(f => (
-          <span key={f.fam} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:9,color:"#5e7180"}}>
+          <span key={f.fam} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10.5,color:"#8194a4"}}>
             <i style={{width:9,height:9,borderRadius:"50%",background:FAMILY_COL[f.fam]||"#888",display:"inline-block"}}/>
             {FAMILY_LAB[f.fam]||f.fam}{f.n>1?` (${f.n})`:""}
           </span>
@@ -759,10 +759,10 @@ function Collapsible({ title, subtitle, defaultOpen = false, children }){
       <button onClick={()=>setOpen(o=>!o)} style={{display:"flex",alignItems:"center",gap:7,width:"100%",
         background:"transparent",border:"none",borderTop:"1px solid var(--line)",padding:"7px 4px 5px",
         cursor:"pointer",font:"inherit",textAlign:"left"}}>
-        <span style={{fontSize:9,color:"#5e7180",transform:open?"rotate(90deg)":"none",
+        <span style={{fontSize:9,color:"#8194a4",transform:open?"rotate(90deg)":"none",
           transition:"transform .15s",display:"inline-block"}}>â¶</span>
         <span style={{fontSize:11,fontWeight:600,letterSpacing:".03em",textTransform:"uppercase",color:"var(--mut)"}}>{title}</span>
-        {subtitle && <span style={{fontSize:10.5,color:"#5e7180",fontWeight:400,marginLeft:"auto"}}>{subtitle}</span>}
+        {subtitle && <span style={{fontSize:10.5,color:"#8194a4",fontWeight:400,marginLeft:"auto"}}>{subtitle}</span>}
       </button>
       {open && <div style={{padding:"2px 2px 0"}}>{children}</div>}
     </div>

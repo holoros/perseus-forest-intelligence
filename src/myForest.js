@@ -2,7 +2,7 @@
 // already-loaded data (health/priority, species, disturbance, mortality, stumpage), with
 // inline-SVG visuals so it prints and saves to PDF cleanly. No external dependencies.
 
-const esc = (x) => String(x == null ? "" : x).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const esc = (x) => String(x == null ? "" : x).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 function vccLabel(v) { if (v == null) return "n/a"; if (v >= 42) return "higher"; if (v >= 34) return "moderate"; return "lower"; }
 function vccColor(v) { if (v == null) return "#999"; if (v >= 42) return "#c85a5a"; if (v >= 34) return "#e08a1e"; return "#4f9d8a"; }
 

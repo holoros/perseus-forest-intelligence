@@ -2,40 +2,22 @@
 
 Thanks for the interest. A few project specific notes before you start.
 
-## Read first: source vs deployed
+## How deployment works
 
-The repository ships in two states right now.
+The `main` branch is the single source of truth for both the code and the
+deployed site. Every push to `main` is built and published to GitHub Pages by
+`.github/workflows/deploy-pages.yml` (Pages Source: "GitHub Actions"), so
+https://holoros.github.io/perseus-forest-intelligence/ always reflects the
+latest `main`. `npm run build` from `main` reproduces the deployed bundle.
 
-* `main` carries the React + Vite + MapLibre **source** at app version v0.73.
-* `gh-pages` carries the **deployed bundle** at app version v1.3, which is what
-  https://holoros.github.io/perseus-forest-intelligence/ serves.
+The earlier source-vs-deploy split (source `v0.73`, deployed `v1.3`, with the
+deploy workflow gated to `workflow_dispatch` only) has been fully reconciled;
+that guidance no longer applies. The `v0.73-source` and `v1.3-deployed` tags
+remain only as historical anchors.
 
-v1.3 features in the deployed bundle that are not yet in main source:
-
-* "Upload AOI" top level button (.zip shapefile / .geojson upload, opens AOI tool with polygon preloaded)
-* "Inspect point" click-to-query point inspector (lat/lon + state + EPA L3 ecoregion + ycx AGB at age 50)
-* ycx year-slider animation (managed-harvest and reserve modes; EPA L3 polygons animate in lockstep)
-* CSPI v3 canopy-height reference figure (OOB R^2 = 0.87, RMSE = 3.737 m, 58,475 training rows)
-
-The Pages site currently deploys via direct push to the `gh-pages` branch
-(repo Settings -> Pages -> Source: "Deploy from a branch", branch `gh-pages`).
-That branch is built outside this main-branch source tree (likely from
-Aaron's Fedora workstation) and pushed directly. The `.github/workflows/deploy-pages.yml`
-workflow ships in this repo but is intentionally configured for
-`workflow_dispatch:` only AND the Pages "Source" setting is intentionally NOT
-GitHub Actions. Both safeguards must stay in place until the v1.3 source is
-reconciled into main, otherwise running the workflow OR flipping the Pages
-source would build from v0.73 main and overwrite the v1.3 gh-pages bundle.
-
-Reconciliation procedure when ready (after all v1.3 features land in main):
-
-1. Verify `npm run build` from main produces a bundle matching the deployed v1.3 features.
-2. Flip Settings -> Pages -> Source to "GitHub Actions".
-3. Change `.github/workflows/deploy-pages.yml` trigger from `workflow_dispatch:` to `push: branches: [main]`.
-4. Tag a `v1.4-source` release matching the reconciled main.
-
-The release tags `v0.73-source` (on main) and `v1.3-deployed` (on gh-pages)
-anchor both states so they remain reachable as that reconciliation happens.
+Because a merge to `main` deploys straight to production, keep changes on a
+feature branch and open a pull request; let the `build` check pass before
+merging.
 
 ## Branching and commits
 
@@ -48,7 +30,7 @@ anchor both states so they remain reachable as that reconciliation happens.
 ```
 npm install
 npm run dev      # http://localhost:5173 (Vite)
-npm run build    # static bundle -> dist/ (do not push dist/ to main; gh-pages is the deploy target)
+npm run build    # static bundle -> dist/ (dist/ is git-ignored; CI builds and deploys from main)
 ```
 
 ## Refreshing data from `perseus_db`
@@ -58,18 +40,17 @@ The export pipeline lives in the upstream `perseus_db` repo. To refresh:
 1. `python3 scripts/48_export_api.py .` from `perseus_db`
 2. `cp -r perseus_db/api/* public/api/`
 3. Re-run `perseus_db/scripts/50_raster_image_overlays.sh` if spatial inputs changed and copy `public/raster/`
-4. Commit and push to main (current settings will not auto-deploy; see workflow note above)
+4. Open a PR to main; on merge, CI builds and auto-deploys the refreshed data
 
 ## Submitting changes
 
-* Open a pull request against `main`, not gh-pages.
+* Open a pull request against `main`.
 * Describe the data version touched and any engine/methods doc updates needed.
-* If your change reconciles main with the gh-pages v1.3 features, call that out explicitly in the PR title so the workflow trigger can be flipped back at merge time.
+* Let the `build` check pass before merging; merging deploys to production.
 
 ## Issues
 
-Use the issue templates in `.github/ISSUE_TEMPLATE/`. If the issue is about the
-source/deploy desync, tag it with `desync`.
+Use the issue templates in `.github/ISSUE_TEMPLATE/`.
 
 ## Contact
 
