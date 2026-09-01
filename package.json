@@ -11,9 +11,9 @@
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
-    "maplibre-gl": "^5.24.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "maplibre-gl": "^6.6.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "shpjs": "^6.1.0"
   },
   "devDependencies": {
