@@ -5,6 +5,75 @@ The source under `main` and the deployed bundle under `gh-pages` are
 https://holoros.github.io/perseus-forest-intelligence/ via the Pages Action,
 and the build reproduces the deployed bundle. Entries are most recent first.
 
+### v1.38 · 2026-07-02 (deployed) · layered views, Faustmann economics, Forest Health v6, citations
+* Reconstructed from the commit history (22 Jun to 2 Jul 2026) during the Phase 0 cleanup; no entry was written at the time.
+* Layered Landowner and Researcher views; Scenario runner retired in favor of Build a run.
+* Economics: discount rate control, Faustmann rotation (single rotation NPV and LEV, net of cost), market anchored carbon prices, region aware stumpage with confidence and thin market flags, carbon NPV flow basis.
+* Landowner tools: AOI specific My forest report with inline SVG visuals.
+* Forest Health v6: mortality grounded stress from measured FIA GRM, surface grid, ecoregion, county, hex and landowner rollups.
+* Models: cross model ensemble tab and harmonized products (#92), FVS gompit production engine (#94, #95), data driven YC confidence band (#86), canonical CONUS YC producers (#87), remeasurement anchored realized reserve line (#90), FIADB anchored spatial biomass for WA, GA, ME and MN (#96, #100).
+* Maps: ownership, standing value, class partial and value CV rasters re-warped to the ESRI:102003 base grid; harvest layers refreshed to v5.
+* Citations: Zenodo DOI registry, Data and cite page, CITATION.cff references, DOI badge.
+* Hardening: security, accessibility and SEO red team pass (#101); metric and Imperial units through stumpage and economics.
+
+### v1.37 · 2026-06-21 (deployed)
+* Prototype Guo Surveillance box: near-term observed disturbance by named agent (insect/disease/weather/animal/human) from FIA rates, alongside the long-term assessment engine.
+* Add handoff docs (handoff, demo guide, red-team, Guo alignment, launch architecture, competitive analysis) and run-service scaffold.
+
+### v1.36 · 2026-06-21 (deployed)
+* Refinements: lead with Build a run (scenario tab to research), first-run hint, climate transparency note, regional price adjustment, ensemble charts embedded in downloadable report.
+
+### v1.35 · 2026-06-21 (deployed)
+* GrowthChart: aggregate uncertainty bands by model class (one envelope per family) + thin/fade member lines when dense; far more readable engine compare.
+
+### v1.34 · 2026-06-21 (deployed)
+* Build a run: data-source selector (FIA / TreeMap / upload inventory CSV) wired into run-spec; data-agnostic input story GUI-side.
+
+### v1.33 · 2026-06-21 (deployed)
+* AOI report: valuation band (per-acre NPV range across markets x management) with sensitivity readout.
+
+### v1.32 · 2026-06-21 (deployed)
+* Link AOI to Build-a-run: 'Run scenarios' jumps a drawn/selected area into the multi-model run builder pre-set to its state; RunBuilder accepts initState.
+
+### v1.31 · 2026-06-21 (deployed)
+* Scorecard: add disturbance/climate risk criterion (lower-is-better) to the multi-criteria framework + report; emphasis weights extended.
+
+### v1.30 · 2026-06-21 (deployed)
+* Build a run: one-click downloadable report (recommendation, multi-criteria scorecard, multi-model detail, run-spec) HTML/print-to-PDF; shared scoring.
+
+### v1.29 · 2026-06-21 (deployed)
+* AOI report: surrounding-area neighborhood sample + disturbance/climate stress vs surroundings + sensitivity readout.
+
+### v1.28 · 2026-06-21 (deployed)
+* Build a run: expand future policy scenarios (LSOG/old-growth, compliance carbon, proforestation, public restrictions) flowing through economics, recommendation, and scorecard.
+
+### v1.27 · 2026-06-21 (deployed)
+* Build a run: multi-criteria scorecard (economics/carbon/ES/resilience/agreement, emphasis-weighted MCDA) + policy as a scenario driver.
+
+### v1.26 · 2026-06-21 (deployed)
+* Build a run: GUI-driven economics + recommendation per scenario, HPC-queue submit animation for subscriber path, data-aware metric/management options.
+
+### v1.25 · 2026-06-21 (deployed)
+* Build a run: AOI to models to scenarios to submit flow; resolves real multi-model ensemble client-side, shows the Cardinal run-spec.
+
+### v1.24.1 · 2026-06-21 (deployed)
+* Scenario runner: guard missing-curve edge case.
+
+### v1.24 · 2026-06-21 (deployed)
+* Scenario runner: add ecosystem-service payments to valuation (timber + carbon + ES total NPV) feeding the recommendation.
+
+### v1.23 · 2026-06-21 (deployed)
+* Scenario runner: multi-region selection with blended curves/economics; user-driven scale across ecoregions and states.
+
+### v1.22 · 2026-06-21 (deployed)
+* Scenario runner: add decision-support recommendation headline synthesizing carbon-vs-timber trade-off with price sensitivity.
+
+### v1.21 · 2026-06-21 (deployed)
+* Scenario runner: add economics (timber vs carbon value + NPV, price-scenario toggle); markets differentiator live in the browser.
+
+### v1.20 · 2026-06-21 (deployed)
+* Add Scenario runner: launch-vision front door (place x data source x models x assumptions), real per-L3 yield projections, free/subscriber framing.
+
 ### v1.19 — 2026-06-20 (deployed) — landowner-by-unit + filled counties (wiring)
 * **Filled county map layer.** When the county unit is selected and county polygons
   are available, the map now renders filled county polygons colored by HRR priority
