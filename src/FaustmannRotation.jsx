@@ -52,7 +52,7 @@ function Scatter({ rows }){
           fillOpacity={r.carbon_floor>0?0.55:0.9}
           strokeWidth={r.carbon_floor>0?1:0}
           style={{fill:col(r.ft), stroke:r.carbon_floor>0?"var(--ink)":"none"}}>
-          <title>{`${r.ft} · ${r.eco} · ${r.owner}\nR_opt ${r.R_opt} yr · SEV $${r.sev_opt.toFixed(0)} ${fmtUnit("per ac")}\ncarbon floor ${r.carbon_floor} ${fmtUnit("lb C/ac")} · vol@R ${r.vol_at_R}`}</title>
+          <title>{`${r.ft} · ${r.eco} · ${r.owner}\nR_opt ${r.R_opt} yr · SEV $${r.sev_opt.toFixed(0)} ${fmtUnit("per ac")}\ncarbon floor ${r.carbon_floor} tons AGB ac⁻¹ (rotation mean) · vol@R ${r.vol_at_R} ft³ ac⁻¹`}</title>
         </circle>
       ))}
     </svg>
@@ -78,6 +78,14 @@ export default function FaustmannRotation({ data, state }){
 
   return (
     <div>
+      {data.meta && data.meta.known_issue && (
+        <div role="note" className="note" style={{margin:"4px 4px 10px",padding:"8px 10px",color:"var(--ink, #e8eef2)",
+          border:"1px solid var(--warn, #d9a441)",borderLeftWidth:3,borderRadius:6,background:"transparent"}}>
+          <b>Known data issue: soil expectation values are overstated.</b> These precomputed SEVs reproduce
+          exactly with a stumpage of $12 per ft³, about 17 times the Maine blended price, so dollar values
+          and optimal rotations on this tab are not reliable until the source table is regenerated. Use
+          <b> Build a run</b> for land values at current prices.
+        </div>)}
       <div className="controls" style={{marginTop:0}}>
         <select value={owner} onChange={e=>setOwner(e.target.value)} title="Owner">
           <option value="all">all owners</option>
@@ -107,10 +115,10 @@ export default function FaustmannRotation({ data, state }){
         <table className="tbl">
           <thead><tr>
             <th>forest type</th><th>eco</th>
-            <th>owner</th><th>floor ({fmtUnit("lb C/ac")})</th>
+            <th>owner</th><th>floor, rotation mean AGB (tons ac⁻¹)</th>
             <th>R_opt (yr)</th>
             <th>SEV ({fmtUnit("$/ac")})</th>
-            <th>vol@R</th>
+            <th>vol@R (ft³ ac⁻¹)</th>
           </tr></thead>
           <tbody>
             {rows.slice().sort((a,b)=>b.sev_opt-a.sev_opt).map((r,i) => (
