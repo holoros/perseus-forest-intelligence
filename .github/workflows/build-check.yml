@@ -38,6 +38,13 @@ jobs:
         run: python3 scripts/check_restricted_fields.py public docs
       - name: API data integrity (strict, structural only)
         run: python3 scripts/check_api_integrity.py public/api --strict
+      - name: Raster manifest matches public/raster (once the manifest exists)
+        run: |
+          if [ -f scripts/build_raster_manifest.py ]; then
+            python3 scripts/build_raster_manifest.py --check
+          else
+            echo "no raster manifest yet; skipping"
+          fi
       - name: Version consistency
         run: node scripts/check_versions.mjs
       - name: Unit tests (Vitest)
