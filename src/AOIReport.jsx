@@ -7,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import MiniChart from "./MiniChart.jsx";
 import StandOutlook from "./StandOutlook.jsx";
 import { openReport } from "./report.js";
-import { conv, fmtArea as fmtAreaU } from "./units.js";
+import { conv, fmtUnit, fmtArea as fmtAreaU } from "./units.js";
 import { pointInGeometry } from "./geo.js";
 
 const valAt = (curve, age) => { const h = (curve||[]).find(([a])=>a===age); return h?h[1]:null; };
@@ -21,8 +21,12 @@ const OWN_COL = { "Private (Family/Corporate)":"#3fb68b", "State / Local":"#6bae
   "National Forest":"#8da0cb", "Other Federal":"#3C5488", "Tribal":"#8c510a" };
 const FT_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d"];
 // Band coloring. Risk: low=good(green). Habitat/biodiversity: high=good(green).
-const BAND_GOOD_HIGH = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
-const BAND_GOOD_LOW  = { "Low":"#3fb68b", "Moderate":"#e6ab02", "High":"#d9534f" };
+// Bands are status marks, so they use the semantic tokens (theme-aware).
+const BAND_GOOD_HIGH = { "High":"var(--ok)", "Moderate":"var(--warn)", "Low":"var(--alert)" };
+const BAND_GOOD_LOW  = { "Low":"var(--ok)", "Moderate":"var(--warn)", "High":"var(--alert)" };
+// Inline line icons (replace emoji); stroke follows text color via .ico.
+const IcoTree = () => <svg className="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l-6 8h3.5L5 17h14l-4.5-6H18z"/><path d="M12 17v4"/></svg>;
+const IcoChev = ({ open }) => <svg className={"ico pn-chev" + (open ? " open" : "")} viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>;
 
 // Six outcome axes (all "high = good"). `pctl` = displayed as ecoregion
 // percentile; biodiversity is an absolute stand-diversity index. Each index[k]
@@ -50,12 +54,13 @@ function radarNarrative(index){
 
 // Letter grade + color from a percentile (0..1). Centered so the regional
 // median (~0.5) reads as a C: top of region = A, bottom = F.
+// Grades are status marks: semantic tokens, outlined (never filled), theme-aware.
 const GRADE = p => p==null ? null
-  : p>=0.80 ? {letter:"A", color:"#2e9e6b"}
-  : p>=0.60 ? {letter:"B", color:"#5cb85c"}
-  : p>=0.40 ? {letter:"C", color:"#e6ab02"}
-  : p>=0.20 ? {letter:"D", color:"#e08a3c"}
-  :           {letter:"F", color:"#d9534f"};
+  : p>=0.80 ? {letter:"A", color:"var(--ok)"}
+  : p>=0.60 ? {letter:"B", color:"var(--ok)"}
+  : p>=0.40 ? {letter:"C", color:"var(--ink-2)"}
+  : p>=0.20 ? {letter:"D", color:"var(--warn)"}
+  :           {letter:"F", color:"var(--alert)"};
 
 // Composite scorecard: one overall letter grade from the region-relative axes,
 // plus a per-axis colored letter chip. Each chip's tooltip compares the AOI to
@@ -70,10 +75,8 @@ function Scorecard({ index }){
   const g = GRADE(comp);
   return (
     <div style={{display:"flex",alignItems:"center",gap:11,margin:"2px 6px 8px"}}>
-      <div title={`Composite of ${axes.length} region-relative outcomes`} style={{flex:"0 0 auto",
-        width:48,height:48,borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",
-        background:g.color+"22",border:`2px solid ${g.color}`}}>
-        <span style={{fontSize:25,fontWeight:700,color:g.color,lineHeight:1}}>{g.letter}</span>
+      <div className="pn-grade" title={`Composite of ${axes.length} region-relative outcomes`} style={{color:g.color}}>
+        <b>{g.letter}</b>
       </div>
       <div style={{flex:1,minWidth:0}}>
         <div style={{fontSize:12,color:"var(--ink)",fontWeight:600}}>
@@ -84,9 +87,8 @@ function Scorecard({ index }){
             const tip = (o && o.ref!=null)
               ? `${lab}: this area ${ord(Math.round(v*100))} · state avg ${ord(Math.round(o.ref*100))} · ecoregion median 50th`
               : `${lab}: this area ${ord(Math.round(v*100))} pct of ecoregion`;
-            return <span key={k} title={tip} style={{fontSize:10.5,padding:"1px 7px",borderRadius:9,
-              background:gg.color+"22",color:gg.color,border:`1px solid ${gg.color}66`,whiteSpace:"nowrap"}}>
-              {lab} {gg.letter}</span>;
+            return <span key={k} className="pn-gchip" title={tip} style={{color:gg.color}}>
+              <span style={{color:"var(--ink-2)"}}>{lab}</span> <b>{gg.letter}</b></span>;
           })}
         </div>
       </div>
@@ -167,7 +169,7 @@ function ConditionRadar({ index, allCurves, age0 }){
   const future = (pathway && canFuture) ? projectFuture(index, allCurves, age0, horizon, pathway) : null;
   const rings = [0.25,0.5,0.75,1].map((f,k) =>
     <circle key={k} cx={C} cy={C} r={R*f} fill="none"
-      stroke={f===0.5?"#6a8190":"var(--line)"} strokeWidth={f===0.5?1:0.6}
+      stroke={f===0.5?"var(--axis)":"var(--line)"} strokeWidth={f===0.5?1:0.6}
       strokeDasharray={f===0.5?"3 3":"0"}/>);
   const spokes = AXES6.map((_,i) => { const [x,y]=pt(i,R);
     return <line key={i} x1={C} y1={C} x2={x} y2={y} stroke="var(--line)" strokeWidth="0.6"/>; });
@@ -187,73 +189,73 @@ function ConditionRadar({ index, allCurves, age0 }){
     if(!a || a.lo==null || a.hi==null || a.lo===a.hi) return null;
     const [x1,y1]=pt(i, R*clamp(a.lo)), [x2,y2]=pt(i, R*clamp(a.hi));
     const cap=2.4, nx=Math.cos(ang(i)+Math.PI/2)*cap, ny=Math.sin(ang(i)+Math.PI/2)*cap;
-    return <g key={"e"+i} stroke="#bfe6cf" strokeWidth="1.1" opacity="0.8">
+    return <g key={"e"+i} stroke="var(--accent)" strokeWidth="1.1" opacity="0.55">
       <line x1={x1} y1={y1} x2={x2} y2={y2}/>
       <line x1={x1-nx} y1={y1-ny} x2={x1+nx} y2={y1+ny}/>
       <line x1={x2-nx} y1={y2-ny} x2={x2+nx} y2={y2+ny}/></g>; });
   const labels = AXES6.map(([k,lab],i) => { const [x,y]=pt(i, R+15);
     const anc = Math.abs(x-C)<5 ? "middle" : (x>C ? "start" : "end");
     return <text key={k} x={x} y={y+3} textAnchor={anc} fontSize="9.5"
-      fill={axV(ax(i))!=null?"var(--ink)":"#8194a4"}>{lab}</text>; });
+      fill={axV(ax(i))!=null?"var(--ink)":"var(--mut2)"}>{lab}</text>; });
   const dots = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
-    return <circle key={i} cx={x} cy={y} r={hi===i?4.2:3} fill="#3fb68b" stroke="#0b1015" strokeWidth="0.5"/>; });
+    return <circle key={i} cx={x} cy={y} r={hi===i?4.2:3} fill="var(--accent)" stroke="var(--panel)" strokeWidth="0.5"/>; });
   const hits = AXES6.map((_,i) => { const [x,y]=pt(i, R*val(i));
     return <circle key={"h"+i} cx={x} cy={y} r="11" fill="transparent" style={{cursor:"pointer"}}
       onMouseEnter={()=>setHi(i)} onMouseLeave={()=>setHi(null)}/>; });
   let tip = null;
   if(hi!=null){ const [k,lab,pctl]=AXES6[hi]; const a=ax(hi); const v=axV(a); const [x,y]=pt(hi, R*val(hi));
-    const band = (a&&a.lo!=null&&a.hi!=null&&a.lo!==a.hi) ? ` (${Math.round(a.lo*100)}–${Math.round(a.hi*100)})` : "";
+    const band = (a&&a.lo!=null&&a.hi!=null&&a.lo!==a.hi) ? ` (${Math.round(a.lo*100)} to ${Math.round(a.hi*100)})` : "";
     const refTxt = (a&&a.ref!=null) ? ` · state ${Math.round(a.ref*100)}th` : "";
     const txt = v==null ? `${lab}: n/a`
       : pctl ? `${lab}: ${Math.round(v*100)}th pct${band}${refTxt}`
              : `${lab}: ${Math.round(v*100)}% (stand index)`;
     const w = txt.length*4.7 + 10, tx = Math.max(2, Math.min(220-w, x-w/2));
     tip = <g style={{pointerEvents:"none"}}>
-      <rect x={tx} y={y-22} width={w} height="15" rx="3" fill="rgba(15,20,25,0.94)" stroke="var(--line)"/>
-      <text x={tx+5} y={y-11} fontSize="9" fill="#e8eef2">{txt}</text></g>;
+      <rect x={tx} y={y-22} width={w} height="15" rx="3" fill="var(--panel)" stroke="var(--line-strong)"/>
+      <text x={tx+5} y={y-11} fontSize="9" fill="var(--ink)">{txt}</text></g>;
   }
-  const chip = (on, col) => ({ fontSize:11, padding:"2px 8px", borderRadius:9, cursor:"pointer",
-    border:`1px solid ${on?(col||"#3fb68b"):"var(--line)"}`, background:on?((col||"#3fb68b")+"22"):"transparent",
-    color:on?(col||"#3fb68b"):"var(--mut)", whiteSpace:"nowrap", userSelect:"none" });
-  const futCol = pathway ? FUT_COL[pathway] : "#3fb68b";
+  // Chips share the panel chip style (one functional accent); the legend below
+  // carries each overlay's series color.
+  const chip = (on) => "pn-chip soft" + (on ? " on" : "");
+  const futCol = pathway ? FUT_COL[pathway] : "var(--accent)";
   const legend = [
-    ["this area", "#3fb68b", false],
+    ["this area", "var(--accent)", false],
     (ctx.surrounding && hasBroad) && ["surrounding", "#7a9bd6", true],
-    (ctx.state && hasRef) && ["state avg", "#9aa7b0", true],
+    (ctx.state && hasRef) && ["state avg", "var(--context)", true],
     future && [`${pathway} +${horizon}y`, futCol, true],
   ].filter(Boolean);
   return (
     <div>
       <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 2px"}}>
-        <span style={{fontSize:10.5,color:"#8194a4"}}>Compare to:</span>
-        {hasBroad && <span style={chip(ctx.surrounding,"#7a9bd6")} onClick={()=>setCtx(c=>({...c,surrounding:!c.surrounding}))}>Surrounding</span>}
-        {hasRef && <span style={chip(ctx.state,"#9aa7b0")} onClick={()=>setCtx(c=>({...c,state:!c.state}))}>State avg</span>}
+        <span style={{fontSize:10.5,color:"var(--mut)"}}>Compare to:</span>
+        {hasBroad && <span className={chip(ctx.surrounding)} onClick={()=>setCtx(c=>({...c,surrounding:!c.surrounding}))}>Surrounding</span>}
+        {hasRef && <span className={chip(ctx.state)} onClick={()=>setCtx(c=>({...c,state:!c.state}))}>State avg</span>}
       </div>
       <div style={{display:"flex",flexWrap:"wrap",gap:"4px 6px",alignItems:"center",margin:"0 6px 2px"}}>
-        <span style={{fontSize:10.5,color:"#8194a4"}}>Outlook:</span>
-        <span style={chip(pathway===null)} onClick={()=>setPathway(null)}>Now</span>
-        <span style={chip(pathway==="reserve",FUT_COL.reserve)} title={canFuture?"":"ecoregion curves unavailable here"}
+        <span style={{fontSize:10.5,color:"var(--mut)"}}>Outlook:</span>
+        <span className={chip(pathway===null)} onClick={()=>setPathway(null)}>Now</span>
+        <span className={chip(pathway==="reserve")} title={canFuture?"":"ecoregion curves unavailable here"}
           onClick={()=>canFuture&&setPathway(pathway==="reserve"?null:"reserve")}>Reserve</span>
-        <span style={chip(pathway==="managed",FUT_COL.managed)} title={canFuture?"":"ecoregion curves unavailable here"}
+        <span className={chip(pathway==="managed")} title={canFuture?"":"ecoregion curves unavailable here"}
           onClick={()=>canFuture&&setPathway(pathway==="managed"?null:"managed")}>Managed</span>
         {pathway && <>
-          <span style={chip(horizon===30)} onClick={()=>setHorizon(30)}>+30y</span>
-          <span style={chip(horizon===50)} onClick={()=>setHorizon(50)}>+50y</span>
+          <span className={chip(horizon===30)} onClick={()=>setHorizon(30)}>+30y</span>
+          <span className={chip(horizon===50)} onClick={()=>setHorizon(50)}>+50y</span>
         </>}
       </div>
       <svg viewBox="0 0 220 228" style={{width:"100%",maxWidth:290,display:"block",margin:"0 auto"}}>
         {rings}{spokes}
-        {refPoly && <polygon points={refPoly} fill="none" stroke="#9aa7b0" strokeWidth="1.1" strokeDasharray="4 3" opacity="0.85"/>}
+        {refPoly && <polygon points={refPoly} fill="none" stroke="var(--context)" strokeWidth="1.1" strokeDasharray="4 3" opacity="0.85"/>}
         {broadPoly && <polygon points={broadPoly} fill="none" stroke="#7a9bd6" strokeWidth="1.2" strokeDasharray="2 2" opacity="0.9"/>}
         {futPoly && <polygon points={futPoly} fill={futCol} fillOpacity="0.10" stroke={futCol} strokeWidth="1.5" strokeDasharray="5 3"/>}
-        <polygon points={poly} fill="#3fb68b" fillOpacity={future?"0.10":"0.20"} stroke="#3fb68b" strokeWidth="1.8"/>
+        <polygon points={poly} fill="var(--accent)" fillOpacity={future?"0.10":"0.20"} stroke="var(--accent)" strokeWidth="1.8"/>
         {futPoly && futMoved.map(i => { const [x,y]=pt(i, R*clamp(future[AXES6[i][0]].v));
-          return <circle key={"f"+i} cx={x} cy={y} r="2.6" fill={futCol} stroke="#0b1015" strokeWidth="0.5"/>; })}
+          return <circle key={"f"+i} cx={x} cy={y} r="2.6" fill={futCol} stroke="var(--panel)" strokeWidth="0.5"/>; })}
         {ebars}{dots}{labels}{hits}{tip}
       </svg>
       <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 10px",margin:"1px 0 0"}}>
         {legend.map(([lab,col,dash],k)=>(
-          <span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10.5,color:"#8194a4"}}>
+          <span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10.5,color:"var(--mut)"}}>
             <svg width="14" height="6"><line x1="0" y1="3" x2="14" y2="3" stroke={col} strokeWidth={dash?"1.2":"1.8"} strokeDasharray={dash?"3 2":"0"}/></svg>{lab}</span>
         ))}
       </div>
@@ -280,28 +282,28 @@ function RDTrajectory({ series }){
   const inBand = latest>=RD_LO && latest<=RD_HI;
   const pos = latest<RD_LO ? "below" : latest>RD_HI ? "above" : "within";
   const msg = pos==="within"
-    ? `Latest RD ${latest.toFixed(2)} sits in the 0.30–0.60 sweet spot; near-optimal growth with low density-driven mortality.`
+    ? `Latest RD ${latest.toFixed(2)} sits in the 0.30 to 0.60 sweet spot; near-optimal growth with low density-driven mortality.`
     : pos==="below"
-    ? `Latest RD ${latest.toFixed(2)} is below the 0.30–0.60 sweet spot; understocked; growing space is available.`
-    : `Latest RD ${latest.toFixed(2)} is above the 0.30–0.60 sweet spot; dense; competition raises mortality and disturbance risk (a thinning candidate).`;
+    ? `Latest RD ${latest.toFixed(2)} is below the 0.30 to 0.60 sweet spot; understocked; growing space is available.`
+    : `Latest RD ${latest.toFixed(2)} is above the 0.30 to 0.60 sweet spot; dense; competition raises mortality and disturbance risk (a thinning candidate).`;
   return (
     <div style={{margin:"4px 6px 6px"}}>
       <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Relative density over time · 2016 → 2022</div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:340,display:"block",margin:"0 auto"}}>
-        <rect x={x0} y={sy(RD_HI)} width={x1-x0} height={sy(RD_LO)-sy(RD_HI)} fill="#3fb68b" opacity="0.13"/>
-        <line x1={x0} y1={sy(RD_HI)} x2={x1} y2={sy(RD_HI)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
-        <line x1={x0} y1={sy(RD_LO)} x2={x1} y2={sy(RD_LO)} stroke="#3fb68b" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
-        <text x={x1+3} y={sy(0.45)+3} fontSize="8" fill="#3fb68b">sweet spot</text>
-        <text x={x1+3} y={sy(0.45)+13} fontSize="7.5" fill="#8194a4">0.30–0.60</text>
+        <rect x={x0} y={sy(RD_HI)} width={x1-x0} height={sy(RD_LO)-sy(RD_HI)} fill="var(--accent)" opacity="0.13"/>
+        <line x1={x0} y1={sy(RD_HI)} x2={x1} y2={sy(RD_HI)} stroke="var(--accent)" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
+        <line x1={x0} y1={sy(RD_LO)} x2={x1} y2={sy(RD_LO)} stroke="var(--accent)" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
+        <text x={x1+3} y={sy(0.45)+3} fontSize="8" fill="var(--accent)">sweet spot</text>
+        <text x={x1+3} y={sy(0.45)+13} fontSize="7.5" fill="var(--mut)">0.30 to 0.60</text>
         <line x1={x0} y1={y0} x2={x0} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
         <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="var(--line)" strokeWidth="0.6"/>
         {[0,0.3,0.6,0.9].filter(t=>t<=yMax).map((t,k)=>(
-          <text key={k} x={x0-4} y={sy(t)+3} fontSize="8" textAnchor="end" fill="#8194a4">{t.toFixed(1)}</text>
+          <text key={k} x={x0-4} y={sy(t)+3} fontSize="8" textAnchor="end" fill="var(--mut)">{t.toFixed(1)}</text>
         ))}
-        <polyline points={line} fill="none" stroke="#1d7e0f" strokeWidth="1.8"/>
+        <polyline points={line} fill="none" stroke="var(--accent)" strokeWidth="1.8"/>
         {pts.map((p,k)=>(<g key={k}>
-          <circle cx={sx(p.year)} cy={sy(p.rd)} r="3.2" fill={inBand&&k===pts.length-1?"#3fb68b":"#1d7e0f"} stroke="#0b1015" strokeWidth="0.5"/>
-          <text x={sx(p.year)} y={y1+12} fontSize="8.5" textAnchor="middle" fill="#8194a4">{p.year}</text>
+          <circle cx={sx(p.year)} cy={sy(p.rd)} r="3.2" fill="var(--accent)" stroke={inBand&&k===pts.length-1?"var(--ink)":"var(--panel)"} strokeWidth={inBand&&k===pts.length-1?1:0.5}/>
+          <text x={sx(p.year)} y={y1+12} fontSize="8.5" textAnchor="middle" fill="var(--mut)">{p.year}</text>
           <text x={sx(p.year)} y={sy(p.rd)-6} fontSize="8" textAnchor="middle" fill="var(--ink)">{p.rd.toFixed(2)}</text>
         </g>))}
       </svg>
@@ -334,13 +336,13 @@ function StructureTrajectory({ series }){
         const first=v[0].v, last=v[v.length-1].v, d=last-first;
         const thr = 0.03*Math.abs(first||1);
         const arrow = d>thr ? "↑" : d<-thr ? "↓" : "→";
-        const col = d>thr ? "#1d7e0f" : d<-thr ? "#d9734f" : "#8194a4";
+        const col = "var(--ink-2)";   // direction reads from the arrow; color stays neutral
         return (
           <div key={k} style={{display:"flex",alignItems:"center",gap:6,margin:"1px 0"}}>
             <span style={{fontSize:11,minWidth:86,color:"var(--ink)"}}>{label}</span>
             <svg viewBox={`0 0 ${W} ${H}`} style={{flex:1,height:24}}>
-              <polyline points={line} fill="none" stroke="#1d7e0f" strokeWidth="1.6"/>
-              {v.map((p,i)=>(<circle key={i} cx={sx(p.year)} cy={sy(p.v)} r="2.3" fill="#1d7e0f"/>))}
+              <polyline points={line} fill="none" stroke="var(--accent)" strokeWidth="1.6"/>
+              {v.map((p,i)=>(<circle key={i} cx={sx(p.year)} cy={sy(p.v)} r="2.3" fill="var(--accent)"/>))}
               <text x={x1+5} y={(y0+y1)/2+3.5} fontSize="10.5" fill={col}>{last} {arrow}</text>
             </svg>
           </div>
@@ -363,7 +365,7 @@ const PRIO = [
   ["habitat","Habitat"], ["biodiversity","Biodiversity"], ["resilience","Resilience"],
 ];
 const fitBand = f => f==null?null : f<0.34?"Low":f<0.67?"Moderate":"High";
-const FIT_COL = { "High":"#3fb68b", "Moderate":"#e6ab02", "Low":"#d9734f" };
+const FIT_COL = { "High":"var(--ok)", "Moderate":"var(--warn)", "Low":"var(--alert)" };
 const ord = n => { const s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
 
 // One plain-language takeaway at the top of an AOI: forest type, stocking read,
@@ -431,7 +433,7 @@ function recommendPathway(rows){
   // Resilience override: if resilience matters and the area is fragile, fold in
   // risk-reduction regardless of the production/conservation balance.
   if(resW >= 0.18 && resG!=null && resG < 0.4){
-    why += " Because resilience is a priority and this area ranks low on it, add risk-reduction treatments (thinning to the 0.30–0.60 RD sweet spot, fuels work).";
+    why += " Because resilience is a priority and this area ranks low on it, add risk-reduction treatments (thinning to the 0.30 to 0.60 RD sweet spot, fuels work).";
   }
   return { lean, why };
 }
@@ -500,8 +502,8 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
           <React.Fragment key={k}>
             <span style={{fontSize:11.5,color:"var(--ink)"}}>{lab}</span>
             <input type="range" min="0" max="3" step="1" value={w[k]}
-              onChange={e=>setk(k, +e.target.value)} style={{width:"100%",accentColor:"#3fb68b"}}/>
-            <span style={{fontSize:10.5,color:"#8194a4",width:34,textAlign:"right"}}>
+              onChange={e=>setk(k, +e.target.value)} style={{width:"100%",accentColor:"var(--accent)"}}/>
+            <span style={{fontSize:10.5,color:"var(--mut)",width:34,textAlign:"right"}}>
               {["off","×1","×2","×3"][w[k]]}</span>
           </React.Fragment>
         ))}
@@ -511,15 +513,15 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
           <div className="aoi-bar-row" title="Weighted region-relative fit across the outcomes you value">
             <span className="aoi-bar-lab" style={{fontWeight:600}}>Priority fit</span>
             <span className="aoi-bar-track"><span className="aoi-bar-fill"
-              style={{width:`${fit*100}%`, background: FIT_COL[band] || "#888"}}/></span>
+              style={{width:`${fit*100}%`, background: FIT_COL[band] || "var(--context)"}}/></span>
             <span className="aoi-bar-pct" style={{color:FIT_COL[band]}}>{Math.round(fit*100)}th</span>
           </div>
           {active.length>0 && (
             <div style={{display:"flex",flexWrap:"wrap",gap:"3px 5px",margin:"4px 0 2px"}}>
               {active.map((r,i)=>(
-                <span key={r.k} style={{fontSize:10.5,padding:"1px 6px",borderRadius:9,
-                  background:i===0?"rgba(63,182,139,0.18)":"rgba(120,140,150,0.13)",
-                  color:i===0?"#bfe6cf":"#9fb0ba",border:"1px solid var(--line)"}}>
+                <span key={r.k} style={{fontSize:10.5,padding:"1px 6px",borderRadius:"var(--r)",
+                  background:i===0?"var(--accent-tint)":"var(--panel-2)",
+                  color:i===0?"var(--ink)":"var(--ink-2)",border:"1px solid var(--line)"}}>
                   {r.lab} {ord(Math.round(r.g*100))}
                 </span>
               ))}
@@ -534,13 +536,13 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
             <div style={{margin:"6px 0 0"}}>
               <div style={{position:"relative",height:8,background:"var(--bg)",borderRadius:3,margin:"2px 0"}}>
                 <div style={{position:"absolute",left:`${fitLo*100}%`,width:`${(fitHi-fitLo)*100}%`,top:0,bottom:0,
-                  background:(FIT_COL[band]||"#888")+"55",borderRadius:3}}/>
+                  background:FIT_COL[band]||"var(--context)",opacity:0.35,borderRadius:3}}/>
                 <div style={{position:"absolute",left:`calc(${fit*100}% - 1px)`,top:-2,bottom:-2,width:2,background:"var(--ink)"}}/>
               </div>
               <div className="note" style={{margin:"2px 0 0"}}>
                 Model uncertainty: across the engine ensemble{mspread && mspread.value && axV(index.value)!=null ? " (carbon and timber value)" : " (carbon)"},
                 your priority-fit spans <b style={{color:"var(--ink)"}}>{ord(Math.round(fitLo*100))}</b> to <b style={{color:"var(--ink)"}}>{ord(Math.round(fitHi*100))}</b> percentile,
-                <b style={{color: bandRobust ? "#3fb68b" : "#e6ab02"}}> {bandRobust ? "robust to model choice" : "sensitive to which model you trust"}</b>.
+                <b style={{color: bandRobust ? "var(--ok)" : "var(--warn)"}}> {bandRobust ? "robust to model choice" : "sensitive to which model you trust"}</b>.
                 <i style={{opacity:.7,fontStyle:"normal"}}> Projected axes at {year}, {bucket}; observed axes held.</i>
               </div>
             </div>
@@ -660,7 +662,7 @@ function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, set
   const fmtV = v => Math.abs(v) >= 100 ? Math.round(v).toLocaleString()
     : (Math.abs(v) >= 1 ? v.toFixed(1) : v.toFixed(2));
   const agree = cv < 0.20 ? "strong agreement" : cv < 0.45 ? "moderate divergence" : "wide divergence";
-  const agreeCol = cv < 0.20 ? "#3fb68b" : cv < 0.45 ? "#e6ab02" : "#d9534f";
+  const agreeCol = cv < 0.20 ? "var(--ok)" : cv < 0.45 ? "var(--warn)" : "var(--alert)";
 
   // FIA reconciliation (item 6): compare the ensemble at the FIA inventory year
   // to the published FIA observed stock, where an anchor exists for this state.
@@ -689,24 +691,24 @@ function ModelAgreement({ state, metric, setMetric, bucket, setBucket, year, set
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:330,display:"block",margin:"0 auto"}}>
         <line x1={px(0)} y1={axY} x2={px(100)} y2={axY} stroke="var(--line)" strokeWidth="2"/>
-        <line x1={px(X(mean))} y1={axY-9} x2={px(X(mean))} y2={axY+9} stroke="#cdd6dd" strokeWidth="1.4"/>
-        <text x={px(X(mean))} y={axY+20} fontSize="8" textAnchor="middle" fill="#9fb0ba">ens. mean</text>
-        {fams.map(f => { const col = FAMILY_COL[f.fam] || "#888";
+        <line x1={px(X(mean))} y1={axY-9} x2={px(X(mean))} y2={axY+9} stroke="var(--ink-2)" strokeWidth="1.4"/>
+        <text x={px(X(mean))} y={axY+20} fontSize="8" textAnchor="middle" fill="var(--mut)">ens. mean</text>
+        {fams.map(f => { const col = FAMILY_COL[f.fam] || "var(--context)";
           return (
             <g key={f.fam}>
               <line x1={px(X(f.lo))} y1={axY} x2={px(X(f.hi))} y2={axY} stroke={col} strokeWidth="1.2" opacity="0.5"/>
-              <circle cx={px(X(f.mean))} cy={axY} r="4" fill={col} stroke="#0b1015" strokeWidth="0.5"/>
+              <circle cx={px(X(f.mean))} cy={axY} r="4" fill={col} stroke="var(--panel)" strokeWidth="0.5"/>
               <title>{`${FAMILY_LAB[f.fam]||f.fam}: mean ${fmtV(f.mean)} (n=${f.n}${f.n>1?`, ${fmtV(f.lo)} to ${fmtV(f.hi)}`:""})`}</title>
             </g>
           );
         })}
-        <text x={px(0)} y={axY-13} fontSize="8" textAnchor="start" fill="#8194a4">{fmtV(lo)}</text>
-        <text x={px(100)} y={axY-13} fontSize="8" textAnchor="end" fill="#8194a4">{fmtV(hi)}</text>
+        <text x={px(0)} y={axY-13} fontSize="8" textAnchor="start" fill="var(--mut)">{fmtV(lo)}</text>
+        <text x={px(100)} y={axY-13} fontSize="8" textAnchor="end" fill="var(--mut)">{fmtV(hi)}</text>
       </svg>
       <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:"2px 10px",margin:"1px 0 0"}}>
         {fams.map(f => (
-          <span key={f.fam} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10.5,color:"#8194a4"}}>
-            <i style={{width:9,height:9,borderRadius:"50%",background:FAMILY_COL[f.fam]||"#888",display:"inline-block"}}/>
+          <span key={f.fam} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10.5,color:"var(--mut)"}}>
+            <i className="pn-sw" style={{background:FAMILY_COL[f.fam]||"var(--context)"}}/>
             {FAMILY_LAB[f.fam]||f.fam}{f.n>1?` (${f.n})`:""}
           </span>
         ))}
@@ -756,13 +758,12 @@ function Collapsible({ title, subtitle, defaultOpen = false, children }){
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div style={{margin:"4px 0 0"}}>
-      <button onClick={()=>setOpen(o=>!o)} style={{display:"flex",alignItems:"center",gap:7,width:"100%",
+      <button className="pn-coll" onClick={()=>setOpen(o=>!o)} aria-expanded={open} style={{display:"flex",alignItems:"center",gap:7,width:"100%",
         background:"transparent",border:"none",borderTop:"1px solid var(--line)",padding:"7px 4px 5px",
         cursor:"pointer",font:"inherit",textAlign:"left"}}>
-        <span style={{fontSize:9,color:"#8194a4",transform:open?"rotate(90deg)":"none",
-          transition:"transform .15s",display:"inline-block"}}>▶</span>
+        <IcoChev open={open}/>
         <span style={{fontSize:11,fontWeight:600,letterSpacing:".03em",textTransform:"uppercase",color:"var(--mut)"}}>{title}</span>
-        {subtitle && <span style={{fontSize:10.5,color:"#8194a4",fontWeight:400,marginLeft:"auto"}}>{subtitle}</span>}
+        {subtitle && <span style={{fontSize:10.5,color:"var(--mut)",fontWeight:400,marginLeft:"auto"}}>{subtitle}</span>}
       </button>
       {open && <div style={{padding:"2px 2px 0"}}>{children}</div>}
     </div>
@@ -814,7 +815,7 @@ function SimilarAreas({ state, hrr }){
           <div key={r.st} className="aoi-bar-row">
             <span className="aoi-bar-lab" style={{fontWeight:r.me?700:400}}>{r.st}{r.me?" (your area)":""}</span>
             <span className="aoi-bar-track"><span className="aoi-bar-fill"
-              style={{width:`${(r.v||0)/maxv*100}%`, background:r.me?"#1d7e0f":"#74c476"}}/></span>
+              style={{width:`${(r.v||0)/maxv*100}%`, background:r.me?"var(--accent)":"var(--context)"}}/></span>
             <span className="aoi-bar-pct">{f1(r.v)}</span>
           </div>
         ))}
@@ -926,7 +927,7 @@ function ValuationBand({ node }){
     <div style={{margin:"6px 0 0"}}>
       <div className="aoi-sub">Potential value band · per-acre NPV across markets &amp; management (illustrative)</div>
       <div style={{position:"relative",height:24,margin:"6px 8px 2px"}}>
-        <div style={{position:"absolute",top:10,left:0,right:0,height:4,background:"linear-gradient(90deg,#d98a3c,#2e9e6b)",borderRadius:2}}/>
+        <div style={{position:"absolute",top:10,left:0,right:0,height:4,background:"var(--line-strong)",borderRadius:2}}/>
         {mBase!=null && <div title="managed, base prices" style={{position:"absolute",top:5,left:pos(mBase)+"%",width:2,height:14,background:"#d98a3c"}}/>}
         {rBase!=null && <div title="reserve, base carbon" style={{position:"absolute",top:5,left:pos(rBase)+"%",width:2,height:14,background:"#2e9e6b"}}/>}
       </div>
@@ -959,8 +960,7 @@ function AreaBriefing({ aoi }){
   return (
     <div style={{margin:"0 6px 8px"}}>
       {rec && (
-        <div style={{padding:"7px 10px",borderRadius:6,background:"rgba(63,182,139,0.13)",
-          border:"1px solid var(--line)",fontSize:13,lineHeight:1.4,marginBottom:6}}>
+        <div className="pn-tint" style={{padding:"7px 10px",fontSize:13,lineHeight:1.4,marginBottom:6}}>
           <b>Suggested direction (equal priorities): {rec.lean}.</b> {rec.why}{" "}
           <i style={{opacity:.7,fontStyle:"normal"}}>Adjust the priorities dial below to tailor this.</i>
         </div>
@@ -969,15 +969,15 @@ function AreaBriefing({ aoi }){
         <div style={{marginBottom:4}}>
           <div className="aoi-sub" style={{borderTop:"none",marginTop:0}}>Reserve vs managed at 50 years</div>
           <div className="aoi-grid">
-            <div className="aoi-row"><span className="aoi-k">Reserve (no harvest)</span><span className="aoi-v">{agb50.toFixed(0)} ton/ac AGB</span></div>
-            <div className="aoi-row"><span className="aoi-k">Managed (harvest)</span><span className="aoi-v">{agb50h.toFixed(0)} ton/ac standing + harvest income</span></div>
+            <div className="aoi-row"><span className="aoi-k">Reserve (no harvest)</span><span className="aoi-v">{agb50.toFixed(0)} {fmtUnit("ton/ac")} AGB</span></div>
+            <div className="aoi-row"><span className="aoi-k">Managed (harvest)</span><span className="aoi-v">{agb50h.toFixed(0)} {fmtUnit("ton/ac")} standing + harvest income</span></div>
           </div>
-          <div className="note" style={{margin:"2px 0 0"}}>Reserve keeps about {Math.max(0,Math.round(agb50-agb50h))} ton/ac more standing biomass at 50 yr; managed realizes periodic harvest income instead.</div>
+          <div className="note" style={{margin:"2px 0 0"}}>Reserve keeps about {Math.max(0,Math.round(agb50-agb50h))} {fmtUnit("ton/ac")} more standing biomass at 50 yr; managed realizes periodic harvest income instead.</div>
         </div>
       )}
       {cVal!=null && (
         <div className="note" style={{margin:"2px 0 0"}}>
-          Illustrative carbon asset value of standing biomass at age 50: about ${cVal.toLocaleString()}/ac (AGB × 0.47 C × 3.667 CO2e × $15/tCO2e; price illustrative, not a quote).
+          Illustrative carbon asset value of standing biomass at age 50: about ${cVal.toLocaleString()} ac⁻¹ (AGB × 0.47 C × 3.667 CO₂e × $15 tCO₂e⁻¹; price illustrative, not a quote).
         </div>
       )}
     </div>
@@ -990,7 +990,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
   const [mmYear, setMmYear] = useState(2050);
   if(!aoi) return null;
   const cv = (v, u, d=0) => { const c = conv(v, u, units); return `${c.value.toFixed(d)} ${c.unit}`; };
-  const price = (v, u) => { const c = conv(v, u, units); return `$${Math.round(c.value)}/${c.unit.replace("$/","")}`; };
+  const price = (v, u) => { const c = conv(v, u, units); return `$${Math.round(c.value)} ${c.unit.replace(/^\$\s*/,"")}`; };
   const { name, l3code, l3name, l1, centroid, nVerts, curves, area_m2, state, plotStats, landscape, geom } = aoi;
   const l3node = l3yields && l3yields.l3 && l3code ? l3yields.l3[l3code] : null;
   const unt = (curves && curves.untreated) || [];
@@ -998,7 +998,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
   const agb50 = valAt(unt, 50), agb50h = valAt(har, 50);
   const series = [
     { label: "untreated", color: "#3fb68b", pts: unt.map(([a,v]) => [a, null, v, null]) },
-    { label: "harvested", color: "#e6ab02", pts: har.map(([a,v]) => [a, null, v, null]) },
+    { label: "harvested", color: "#d98a3c", pts: har.map(([a,v]) => [a, null, v, null]) },
   ].filter(s => s.pts.length);
   const Row = ({k,v}) => <div className="aoi-row"><span className="aoi-k">{k}</span><span className="aoi-v">{v}</span></div>;
 
@@ -1011,17 +1011,16 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
             onClick={()=>openReport(aoi, stumpage, units, {bucket:mmBucket, year:mmYear})} title="open a full printable area report (save or print to PDF)">Report ↗</button>
           <button className="mini-btn" style={{marginTop:0,marginRight:6}}
             onClick={()=>downloadCsv(aoi)} title="download this summary as CSV">CSV ↓</button>
-          {onMyForest && <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",borderColor:"var(--accent)",color:"var(--accent)",fontWeight:600}} onClick={onMyForest} title="plain-language one-page summary for this area with ecoregion and state context">🌲 My forest</button>}
-          {onRun && state && <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",borderColor:"#8a5cd1",fontWeight:600}}
+          {onMyForest && <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",borderColor:"var(--accent)",color:"var(--accent)",fontWeight:600}} onClick={onMyForest} title="plain-language one-page summary for this area with ecoregion and state context"><span className="pn-btn"><IcoTree/>My forest</span></button>}
+          {onRun && state && <button className="mini-btn" style={{marginTop:0,marginRight:6,borderStyle:"solid",fontWeight:600}}
             onClick={()=>onRun(state)} title="run the full multi-model scenario ensemble for this area">Run scenarios →</button>}
           {onClose && <button className="aoi-x" onClick={onClose} title="close">×</button>}
         </span>
       </div>
 
       {plainHeadline(aoi) && (
-        <div style={{margin:"2px 6px 8px",padding:"7px 10px",borderRadius:6,
-          background:"rgba(63,182,139,0.10)",border:"1px solid var(--line)",
-          fontSize:13.5,lineHeight:1.35,color:"var(--ink)"}}>
+        <div className="pn-tint" style={{margin:"2px 6px 8px",padding:"7px 10px",
+          fontSize:13.5,lineHeight:1.35}}>
           {plainHeadline(aoi)}
         </div>
       )}
@@ -1037,7 +1036,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
       </div>
 
       {plotStats && plotStats.n > 0 && (
-       <Collapsible title="Forest attributes" subtitle={`${plotStats.n} FIA plots${plotStats.invYears?` · ${plotStats.invYears[0]}–${plotStats.invYears[1]}`:""}`}>
+       <Collapsible title="Forest attributes" subtitle={`${plotStats.n} FIA plots${plotStats.invYears?` · ${plotStats.invYears[0]} to ${plotStats.invYears[1]}`:""}`}>
         <div className="aoi-grid">
           {plotStats.meanAge != null && <Row k="Mean stand age" v={`${plotStats.meanAge.toFixed(0)} yr`}/>}
           {plotStats.meanBA != null && <Row k="Mean live BA" v={cv(plotStats.meanBA,"sq ft/ac")}/>}
@@ -1049,7 +1048,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <div key={o.label} className="aoi-bar-row" title={`${o.n} plots`}>
                 <span className="aoi-bar-lab">{o.label}</span>
                 <span className="aoi-bar-track"><span className="aoi-bar-fill"
-                  style={{width:`${o.pct}%`, background: OWN_COL[o.label] || "#888"}}/></span>
+                  style={{width:`${o.pct}%`, background: OWN_COL[o.label] || "var(--context)"}}/></span>
                 <span className="aoi-bar-pct">{o.pct.toFixed(0)}%</span>
               </div>
             ))}
@@ -1088,7 +1087,8 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <div style={{margin:"2px 6px 4px",fontSize:12.5,color:"var(--ink)"}}>{radarNarrative(landscape.index)}</div>
             )}
             <div className="note" style={{margin:"0 0 4px",textAlign:"center"}}>
-              Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Use <b>Compare to</b> to overlay the surrounding area and state average, and <b>Outlook</b> to morph the radar to a reserve or managed future. Whiskers show the within-area spread. The future is a scenario direction from the ecoregion reserve/managed yield curves (carbon, resilience, timber value move; other axes held), not a re-ranked percentile. Resilience = low disturbance risk; biodiversity is a stand diversity index.
+              <p>Each axis = this area's percentile within its ecoregion (dashed ring = regional median). Use <b>Compare to</b> to overlay the surrounding area and state average, and <b>Outlook</b> to morph the radar to a reserve or managed future. Whiskers show the within-area spread.</p>
+              <p>The future is a scenario direction from the ecoregion reserve/managed yield curves (carbon, resilience, timber value move; other axes held), not a re-ranked percentile. Resilience = low disturbance risk; biodiversity is a stand diversity index.</p>
             </div>
             <PriorityDial index={landscape.index} state={state} bucket={mmBucket} year={mmYear}/>
           </div>
@@ -1108,7 +1108,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <div key={o.label} className="aoi-bar-row" title={`${o.n} sampled cells`}>
                 <span className="aoi-bar-lab">{o.label}</span>
                 <span className="aoi-bar-track"><span className="aoi-bar-fill"
-                  style={{width:`${o.pct}%`, background: OWN_COL[o.label] || "#888"}}/></span>
+                  style={{width:`${o.pct}%`, background: OWN_COL[o.label] || "var(--context)"}}/></span>
                 <span className="aoi-bar-pct">{o.pct.toFixed(0)}%</span>
               </div>
             ))}
@@ -1120,7 +1120,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <span className="aoi-bar-lab">Disturbance risk (2022)</span>
               <span className="aoi-bar-track"><span className="aoi-bar-fill"
                 style={{width:`${Math.min(100, landscape.risk.mean/0.72*100)}%`,
-                        background: BAND_GOOD_LOW[landscape.risk.band] || "#888"}}/></span>
+                        background: BAND_GOOD_LOW[landscape.risk.band] || "var(--context)"}}/></span>
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_LOW[landscape.risk.band]}}>{landscape.risk.band}</span>
             </div>
           )}
@@ -1129,7 +1129,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <span className="aoi-bar-lab">Habitat quality <i style={{opacity:.6,fontStyle:"normal"}}>~</i></span>
               <span className="aoi-bar-track"><span className="aoi-bar-fill"
                 style={{width:`${landscape.habitat.score*100}%`,
-                        background: BAND_GOOD_HIGH[landscape.habitat.band] || "#888"}}/></span>
+                        background: BAND_GOOD_HIGH[landscape.habitat.band] || "var(--context)"}}/></span>
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.habitat.band]}}>{landscape.habitat.band}</span>
             </div>
           )}
@@ -1138,7 +1138,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <span className="aoi-bar-lab">Biodiversity <i style={{opacity:.6,fontStyle:"normal"}}>~</i></span>
               <span className="aoi-bar-track"><span className="aoi-bar-fill"
                 style={{width:`${landscape.biodiversity.score*100}%`,
-                        background: BAND_GOOD_HIGH[landscape.biodiversity.band] || "#888"}}/></span>
+                        background: BAND_GOOD_HIGH[landscape.biodiversity.band] || "var(--context)"}}/></span>
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.biodiversity.band]}}>{landscape.biodiversity.band}</span>
             </div>
           )}
@@ -1147,7 +1147,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <span className="aoi-bar-lab">Site productivity (CSPI)</span>
               <span className="aoi-bar-track"><span className="aoi-bar-fill"
                 style={{width:`${landscape.siteProductivity.rel*100}%`,
-                        background: BAND_GOOD_HIGH[landscape.siteProductivity.band] || "#888"}}/></span>
+                        background: BAND_GOOD_HIGH[landscape.siteProductivity.band] || "var(--context)"}}/></span>
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.siteProductivity.band]}}>{landscape.siteProductivity.band}</span>
             </div>
           )}
@@ -1156,7 +1156,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <span className="aoi-bar-lab">Species value (SVI)</span>
               <span className="aoi-bar-track"><span className="aoi-bar-fill"
                 style={{width:`${landscape.speciesValue.rel*100}%`,
-                        background: BAND_GOOD_HIGH[landscape.speciesValue.band] || "#888"}}/></span>
+                        background: BAND_GOOD_HIGH[landscape.speciesValue.band] || "var(--context)"}}/></span>
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.speciesValue.band]}}>{landscape.speciesValue.band}</span>
             </div>
           )}
@@ -1164,7 +1164,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
             <div className="aoi-bar-row" title="Relative stand density / stocking (TreeMap relative density) within this area">
               <span className="aoi-bar-lab">Relative density (stocking)</span>
               <span className="aoi-bar-track"><span className="aoi-bar-fill"
-                style={{width:`${landscape.relDensity.rel*100}%`, background:"#42b540"}}/></span>
+                style={{width:`${landscape.relDensity.rel*100}%`, background:"var(--accent)"}}/></span>
               <span className="aoi-bar-pct">{landscape.relDensity.band}</span>
             </div>
           )}
@@ -1173,7 +1173,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
               <span className="aoi-bar-lab">Sawtimber share</span>
               <span className="aoi-bar-track"><span className="aoi-bar-fill"
                 style={{width:`${landscape.sawtimberShare.rel*100}%`,
-                        background: BAND_GOOD_HIGH[landscape.sawtimberShare.band] || "#888"}}/></span>
+                        background: BAND_GOOD_HIGH[landscape.sawtimberShare.band] || "var(--context)"}}/></span>
               <span className="aoi-bar-pct" style={{color:BAND_GOOD_HIGH[landscape.sawtimberShare.band]}}>{landscape.sawtimberShare.band}</span>
             </div>
           )}
@@ -1190,7 +1190,7 @@ export default function AOIReport({ aoi, stumpage, onClose, units = "imperial", 
         <div className="note" style={{margin:"4px 0 2px"}}>
           Landowner, forest cover, and disturbance risk are sampled from the CONUS rasters inside this area.
           Habitat and biodiversity (<i>~</i>) are indicative composites of forest continuity, structural maturity,
-          and forest-type diversity, refine with field inventory.
+          and forest-type diversity; refine with field inventory.
         </div>
         </Collapsible>
       </>)}
