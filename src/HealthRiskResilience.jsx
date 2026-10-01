@@ -27,7 +27,7 @@ const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d))
 // National distribution across tracked species: ~17 to 61, median 32, p90 ~45.
 // Bands chosen on that distribution so "Higher" really is the upper tail.
 function vccBand(v) {
-  if (v == null) return { label: "n/a", color: "var(--mut,#8a93a0)" };
+  if (v == null) return { label: "n/a", color: "var(--context)" };
   if (v >= 42) return { label: "Higher", color: "#c85a5a" };
   if (v >= 34) return { label: "Moderate", color: "#e08a1e" };
   return { label: "Lower", color: "#4f9d8a" };
@@ -114,12 +114,12 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
             </div>
             <div style={{ fontSize: 11, color: "var(--mut)" }}>
               priority forest area · CONUS (national)
-              {bd.length === 2 ? ` · 90% band ${bd[0]}–${bd[1]}%` : ""}
+              {bd.length === 2 ? ` · 90% band ${bd[0]} to ${bd[1]}%` : ""}
             </div>
           </div>
           <div style={{ fontSize: 12, color: "var(--mut)", maxWidth: 320 }}>
             <b>What this is:</b> the share of the nation's forest most likely to need management
-            attention — forest that is both highly stressed (climate exposure, sensitivity, and
+            attention: forest that is both highly stressed (climate exposure, sensitivity, and
             recent observed disturbance) and low in resilience (younger, less stocked, low adaptive
             capacity). The big number is the CONUS total; your selected state is shown below the map.
             National baseline <b>{fmt(nat.priority_share_pct, 1)}%</b>; sensitive to the
@@ -144,12 +144,12 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
                     const y = i * 18 + 11, x = (p) => L + (p / hi) * W;
                     return (
                       <g key={k}>
-                        <text x={L - 4} y={y + 3} textAnchor="end" fill="var(--mut,#8a93a0)">{lbl}</text>
+                        <text x={L - 4} y={y + 3} textAnchor="end" fill="var(--mut)">{lbl}</text>
                         <line x1={x(bdk[0])} x2={x(bdk[1])} y1={y} y2={y} stroke="#985356" strokeWidth={2} />
                         <line x1={x(bdk[0])} x2={x(bdk[0])} y1={y - 3} y2={y + 3} stroke="#985356" strokeWidth={1.5} />
                         <line x1={x(bdk[1])} x2={x(bdk[1])} y1={y - 3} y2={y + 3} stroke="#985356" strokeWidth={1.5} />
                         <circle cx={x(v)} cy={y} r={3.5} fill="#c85a5a" />
-                        <text x={x(bdk[1]) + 6} y={y + 3} fill="var(--fg,#cdd)">{fmt(v, 0)}% [{fmt(bdk[0], 0)}–{fmt(bdk[1], 0)}]</text>
+                        <text x={x(bdk[1]) + 6} y={y + 3} fill="var(--ink)">{fmt(v, 0)}% [{fmt(bdk[0], 0)} to {fmt(bdk[1], 0)}]</text>
                       </g>
                     );
                   })}
@@ -186,7 +186,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
             <b>{state}</b> · priority <b>{fmt(selRow.priority_pct, 1)}%</b> ·
             stress {fmt(selRow.stress_mean, 3)} · resilience {fmt(selRow.resil_mean, 3)} ·
             climate exposure {fmt(selRow.ce_mean, 0)}
-            {selRow.mort_frac_mean != null ? <> · measured mortality {fmt(selRow.mort_frac_mean * 100, 2)}%/yr</> : null} ·{" "}
+            {selRow.mort_frac_mean != null ? <> · measured mortality {fmt(selRow.mort_frac_mean * 100, 2)}% yr⁻¹</> : null} ·{" "}
             <span style={{ color: "var(--mut)" }}>n = {selRow.n_plots?.toLocaleString()} plots</span>
           </div>
         </div>
@@ -195,7 +195,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
       {/* Bivariate key for the map surface: stress class (x) by resilience class (y). */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-          Map colors — stress × resilience. Deep red = high stress, low resilience (priority).
+          Map colors: stress × resilience. Deep red = high stress, low resilience (priority).
         </div>
         <svg width="92" height="92" viewBox="0 0 92 92" style={{ fontSize: 8 }}>
           {(() => {
@@ -216,9 +216,8 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
           <span style={{ color: "var(--mut)" }}>Map unit:</span>
           {[["surface", "Surface"], ["hex", "Hexes"], ["county", "Counties"], ["ecoregion", "Ecoregion"]].map(([k, lbl]) => (
             <button key={k} onClick={() => onUnit(k)}
-              style={{ fontSize: 11, padding: "1px 8px", borderRadius: 3, cursor: "pointer",
-                border: "1px solid var(--bd,#345)", background: (unit || "surface") === k ? "#3a6ea5" : "transparent",
-                color: (unit || "surface") === k ? "#fff" : "var(--fg,#cdd)" }}>{lbl}</button>
+              className={"chip pn-chip" + ((unit || "surface") === k ? " on" : "")}
+              aria-pressed={(unit || "surface") === k}>{lbl}</button>
           ))}
         </div>
       )}
@@ -227,26 +226,27 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
       {landData && landData.landowners && (
         <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
           <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-            By ownership — priority share of forest <span style={{ opacity: .7 }}>(click to query)</span>
+            By ownership: priority share of forest <span style={{ opacity: .7 }}>(click to query)</span>
           </div>
           {Object.entries(landData.landowners).sort((a, b) => b[1].priority_pct - a[1].priority_pct).map(([nm, d]) => (
             <div key={nm} onClick={() => setSelOwn(selOwn === nm ? null : nm)}
               style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1, cursor: "pointer",
-                background: selOwn === nm ? "rgba(58,110,165,0.18)" : "transparent", borderRadius: 3, padding: "1px 2px" }}>
+                background: selOwn === nm ? "var(--accent-tint)" : "transparent", borderRadius: 3, padding: "1px 2px",
+                transition: "background-color var(--dur) var(--ease)" }}>
               <span style={{ width: 96, fontWeight: selOwn === nm ? 700 : 400 }}>{nm}</span>
-              <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
+              <span style={{ flex: 1, background: "var(--panel-2)", height: 9, borderRadius: 2, overflow: "hidden" }}>
                 <span style={{ display: "block", height: "100%", width: `${Math.min(100, d.priority_pct * 4)}%`, background: rampColor(d.priority_pct) }} />
               </span>
               <span style={{ width: 30, textAlign: "right" }}>{fmt(d.priority_pct, 0)}%</span>
             </div>
           ))}
           {selOwn && landData.landowners[selOwn] && (
-            <div style={{ fontSize: 10, marginTop: 5, padding: "5px 7px", borderRadius: 4, background: "rgba(58,110,165,0.12)" }}>
+            <div className="pn-tint" style={{ fontSize: 10, marginTop: 5, padding: "5px 7px" }}>
               <b>{selOwn}</b>: priority {fmt(landData.landowners[selOwn].priority_pct, 1)}% · stress {fmt(landData.landowners[selOwn].stress_mean, 3)} · resilience {fmt(landData.landowners[selOwn].resil_mean, 3)} · n = {landData.landowners[selOwn].n != null ? landData.landowners[selOwn].n.toLocaleString() : "–"} plots.
             </div>
           )}
           <div style={{ fontSize: 9.5, color: "var(--mut)", marginTop: 3 }}>
-            Private and state/local forest carries more priority area than federal/National Forest. These are national aggregates; a per-state ownership filter needs per-state ownership data.
+            Private and state or local forest carries more priority area than federal or National Forest. These are national aggregates; a per-state ownership filter needs per-state ownership data.
           </div>
         </div>
       )}
@@ -266,12 +266,12 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
         return (
           <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
             <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-              By EPA Level III ecoregion — highest priority share ({rowsE.length} ecoregions){landEco ? " · dominant owner" : ""}
+              By EPA Level III ecoregion: highest priority share ({rowsE.length} ecoregions){landEco ? " · dominant owner" : ""}
             </div>
             {top.map((e) => { const to = topOwn(e.code); return (
               <div key={e.code} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
                 <span style={{ width: 138, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
-                <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}>
+                <span style={{ flex: 1, background: "var(--panel-2)", height: 9, borderRadius: 2, overflow: "hidden" }}>
                   <span style={{ display: "block", height: "100%", width: `${Math.min(100, e.priority_pct / maxE * 100)}%`, background: rampColor(e.priority_pct) }} />
                 </span>
                 <span style={{ width: 36, textAlign: "right" }}>{fmt(e.priority_pct, 0)}%{e.priority_pct >= 99.5 ? "*" : ""}</span>
@@ -295,13 +295,13 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
         return (
           <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
             <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-              {state} detail — what drives the score
+              {state} detail: what drives the score
             </div>
             <div style={{ fontSize: 10.5, marginBottom: 1 }}><b>Top species by biomass &amp; their climate vulnerability</b></div>
             <div style={{ fontSize: 9.5, color: "var(--mut)", marginBottom: 4 }}>
               Each species placed by its climate vulnerability (Potter 2017 score, x) and its share of biomass (y).
-              The upper right is abundant <i>and</i> vulnerable — the species to act on. Colored by vulnerability:{" "}
-              <span style={{ color: "#4f9d8a" }}>● Lower</span> <span style={{ color: "#e08a1e" }}>● Moderate</span> <span style={{ color: "#c85a5a" }}>● Higher</span> (US median ≈ 32).
+              The upper right is abundant <i>and</i> vulnerable: the species to act on. Colored by vulnerability:{" "}
+              <span className="pn-th-sw"><i className="pn-sw" style={{ background: "#4f9d8a" }} />Lower</span>{" "}<span className="pn-th-sw"><i className="pn-sw" style={{ background: "#e08a1e" }} />Moderate</span>{" "}<span className="pn-th-sw"><i className="pn-sw" style={{ background: "#c85a5a" }} />Higher</span> (US median ≈ 32).
             </div>
             {/* Quadrant scatter: vulnerability (x) vs biomass share (y). Upper-right = priority. */}
             {(() => {
@@ -322,15 +322,15 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
               return (
                 <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ fontSize: 9, fontVariantNumeric: "tabular-nums", marginBottom: 4 }}>
                   <rect x={modX} y={M.t} width={(W - M.r) - modX} height={(H - M.b) - M.t} fill="rgba(200,90,90,0.07)" />
-                  <line x1={M.l} y1={H - M.b} x2={W - M.r} y2={H - M.b} stroke="var(--line,#345)" strokeWidth={0.7} />
-                  <line x1={M.l} y1={M.t} x2={M.l} y2={H - M.b} stroke="var(--line,#345)" strokeWidth={0.7} />
-                  <line x1={medX} y1={M.t} x2={medX} y2={H - M.b} stroke="var(--mut,#8a93a0)" strokeDasharray="3 3" strokeWidth={0.7} />
-                  <text x={medX} y={M.t - 2} textAnchor="middle" fill="var(--mut,#8a93a0)" fontSize={7.5}>US median</text>
-                  {[vlo, (vlo + vhi) / 2, vhi].map((t, i) => <text key={i} x={px(t)} y={H - M.b + 11} textAnchor="middle" fill="var(--mut,#8a93a0)">{Math.round(t)}</text>)}
-                  {[0, smax / 2, smax].map((t, i) => <text key={i} x={M.l - 3} y={py(t) + 3} textAnchor="end" fill="var(--mut,#8a93a0)">{Math.round(t)}%</text>)}
-                  <text x={(M.l + W - M.r) / 2} y={H - 1} textAnchor="middle" fill="var(--mut,#8a93a0)">climate vulnerability →</text>
-                  <text transform={`translate(9 ${(M.t + H - M.b) / 2}) rotate(-90)`} textAnchor="middle" fill="var(--mut,#8a93a0)" fontSize={8}>biomass share →</text>
-                  <text x={W - M.r - 2} y={M.t + 8} textAnchor="end" fill="#c85a5a" fontSize={7.5} opacity={0.85}>abundant &amp; vulnerable</text>
+                  <line x1={M.l} y1={H - M.b} x2={W - M.r} y2={H - M.b} stroke="var(--axis)" strokeWidth={0.7} />
+                  <line x1={M.l} y1={M.t} x2={M.l} y2={H - M.b} stroke="var(--axis)" strokeWidth={0.7} />
+                  <line x1={medX} y1={M.t} x2={medX} y2={H - M.b} stroke="var(--mut)" strokeDasharray="3 3" strokeWidth={0.7} />
+                  <text x={medX} y={M.t - 2} textAnchor="middle" fill="var(--mut)" fontSize={7.5}>US median</text>
+                  {[vlo, (vlo + vhi) / 2, vhi].map((t, i) => <text key={i} x={px(t)} y={H - M.b + 11} textAnchor="middle" fill="var(--mut)">{Math.round(t)}</text>)}
+                  {[0, smax / 2, smax].map((t, i) => <text key={i} x={M.l - 3} y={py(t) + 3} textAnchor="end" fill="var(--mut)">{Math.round(t)}%</text>)}
+                  <text x={(M.l + W - M.r) / 2} y={H - 1} textAnchor="middle" fill="var(--mut)">climate vulnerability →</text>
+                  <text transform={`translate(9 ${(M.t + H - M.b) / 2}) rotate(-90)`} textAnchor="middle" fill="var(--mut)" fontSize={8}>biomass share →</text>
+                  <text x={W - M.r - 2} y={M.t + 8} textAnchor="end" fill="var(--mut)" fontSize={7.5}>abundant &amp; vulnerable</text>
                   {lab.map(({ s, x, y }) => {
                     const vb = vccBand(s.vcc), cy = py(s.share_pct);
                     const short = s.common.replace(/^eastern /, "e. ").replace(/^western /, "w. ")
@@ -339,10 +339,10 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
                     const right = x > (M.l + (W - M.r)) * 0.6; // points on the right get left-side labels
                     return (
                       <g key={s.spcd}>
-                        <circle cx={x} cy={cy} r={4.5} fill={vb.color} stroke="#0b1015" strokeWidth={0.6}>
+                        <circle cx={x} cy={cy} r={4.5} fill={vb.color} stroke="var(--panel)" strokeWidth={0.6}>
                           <title>{`${s.common}: ${fmt(s.share_pct, 0)}% of biomass, vulnerability ${fmt(s.vcc, 0)} (${vb.label})`}</title>
                         </circle>
-                        <text x={right ? x - 6 : x + 6} y={y + 3} textAnchor={right ? "end" : "start"} fill="var(--fg,#cdd)" fontSize={8}>{txt}</text>
+                        <text x={right ? x - 6 : x + 6} y={y + 3} textAnchor={right ? "end" : "start"} fill="var(--ink)" fontSize={8}>{txt}</text>
                       </g>
                     );
                   })}
@@ -355,12 +355,12 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
               return (
               <div key={sp.spcd} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, marginBottom: 1 }}>
                 <span style={{ width: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sp.common}</span>
-                <span style={{ flex: 1, background: "var(--bg2,#1b2530)", height: 9, borderRadius: 2, overflow: "hidden" }}
+                <span style={{ flex: 1, background: "var(--panel-2)", height: 9, borderRadius: 2, overflow: "hidden" }}
                   title={`${sp.common}: ${fmt(sp.share_pct,0)}% of biomass · vulnerability ${sp.vcc==null?"n/a":fmt(sp.vcc,0)} (${vb.label})`}>
                   <span style={{ display: "block", height: "100%", width: `${Math.min(100, sp.share_pct * 3)}%`, background: vb.color }} />
                 </span>
                 <span style={{ width: 30, textAlign: "right" }}>{fmt(sp.share_pct, 0)}%</span>
-                <span style={{ width: 78, textAlign: "right", color: vb.color, fontWeight: 600 }}>
+                <span style={{ width: 78, textAlign: "right", color: "var(--ink-2)", fontWeight: 600 }}>
                   {vb.label}{sp.vcc != null ? ` ${fmt(sp.vcc, 0)}` : ""}
                 </span>
               </div>
@@ -371,17 +371,16 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
               const watch = sps.filter((s) => s.vcc != null && s.vcc >= 38 && s.share_pct >= 8)
                 .sort((a, b) => (b.vcc * b.share_pct) - (a.vcc * a.share_pct));
               return (
-                <div style={{ fontSize: 9.5, marginTop: 5, padding: "5px 7px", borderRadius: 5,
-                  background: "rgba(200,90,90,0.08)", border: "1px solid var(--line,#2a3a47)", lineHeight: 1.4 }}>
-                  <b style={{ color: "var(--fg,#ddd)" }}>What to do with this:</b>{" "}
+                <div className="pn-quiet" style={{ fontSize: 9.5, marginTop: 5, padding: "5px 7px", lineHeight: 1.4 }}>
+                  <b style={{ color: "var(--ink)" }}>What to do with this:</b>{" "}
                   {watch.length
-                    ? <>{watch.map((s) => s.common).join(", ")} {watch.length > 1 ? "are" : "is"} both abundant and climate-vulnerable here — the clearest priority. Favor regenerating and retaining the lower-vulnerability species, diversify away from heavy reliance on the flagged ones, and watch them in the near-term disturbance feed.</>
+                    ? <>{watch.map((s) => s.common).join(", ")} {watch.length > 1 ? "are" : "is"} both abundant and climate-vulnerable here: the clearest priority. Favor regenerating and retaining the lower-vulnerability species, diversify away from heavy reliance on the flagged ones, and watch them in the near-term disturbance feed.</>
                     : <>No single abundant species here is highly vulnerable; vulnerability is spread across species, so broad diversification and maintaining structure matter more than targeting one species.</>}
                 </div>
               );
             })()}
             <div style={{ fontSize: 10, marginTop: 6, color: "var(--mut)" }}>
-              <b style={{ color: "var(--fg,#ddd)" }}>Observed disturbance:</b>{" "}
+              <b style={{ color: "var(--ink)" }}>Observed disturbance:</b>{" "}
               {ag.disturbed_pct != null ? `${fmt(ag.disturbed_pct, 0)}% of plots` : "–"}
               {agentRows.length ? " · " + agentRows.map(([k, v]) => `${k} ${fmt(v, 0)}%`).join(", ") : ""}
               {dd.dead_live_pct != null && <> · dead/live biomass {fmt(dd.dead_live_pct, 0)}%</>}
@@ -393,7 +392,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
       {/* Stress vs resilience scatter (the two axes behind the priority class) */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-          Stress vs resilience by state — priority is high stress, low resilience (shaded, lower right)
+          Stress vs resilience by state: priority is high stress, low resilience (shaded, lower right)
         </div>
         {(() => {
           const sw = 320, sh = 210, m = { l: 30, r: 10, t: 10, b: 24 };
@@ -413,11 +412,11 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
               {/* priority quadrant: high stress (x > mx), low resilience (y < my) */}
               <rect x={px(mx)} y={py(y1)} width={px(x1) - px(mx)} height={py(my) - py(y1)} fill="#cc3b22" opacity={0.08} />
               {/* median dividers */}
-              <line x1={px(mx)} y1={py(y0)} x2={px(mx)} y2={py(y1)} stroke="var(--mut,#8a93a0)" strokeWidth={0.5} strokeDasharray="3 3" />
-              <line x1={px(x0)} y1={py(my)} x2={px(x1)} y2={py(my)} stroke="var(--mut,#8a93a0)" strokeWidth={0.5} strokeDasharray="3 3" />
+              <line x1={px(mx)} y1={py(y0)} x2={px(mx)} y2={py(y1)} stroke="var(--mut)" strokeWidth={0.5} strokeDasharray="3 3" />
+              <line x1={px(x0)} y1={py(my)} x2={px(x1)} y2={py(my)} stroke="var(--mut)" strokeWidth={0.5} strokeDasharray="3 3" />
               {/* axes */}
-              <line x1={m.l} y1={py(y0)} x2={sw - m.r} y2={py(y0)} stroke="var(--mut,#8a93a0)" strokeWidth={0.6} />
-              <line x1={m.l} y1={m.t} x2={m.l} y2={py(y0)} stroke="var(--mut,#8a93a0)" strokeWidth={0.6} />
+              <line x1={m.l} y1={py(y0)} x2={sw - m.r} y2={py(y0)} stroke="var(--mut)" strokeWidth={0.6} />
+              <line x1={m.l} y1={m.t} x2={m.l} y2={py(y0)} stroke="var(--mut)" strokeWidth={0.6} />
               {/* points */}
               {rows.map((r) => {
                 const on = r.st === state;
@@ -425,17 +424,17 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
                   <g key={r.st} style={{ cursor: onPickState ? "pointer" : "default" }}
                     onClick={() => onPickState && onPickState(r.st)}>
                     <circle cx={px(r.stress_mean)} cy={py(r.resil_mean)} r={on ? 4 : 2.6}
-                      fill={rampColor(r.priority_pct)} stroke={on ? "var(--fg,#fff)" : "#0b1015"}
+                      fill={rampColor(r.priority_pct)} stroke={on ? "var(--ink)" : "var(--panel)"}
                       strokeWidth={on ? 1.2 : 0.3}>
                       <title>{`${r.st} · priority ${fmt(r.priority_pct, 1)}% · stress ${fmt(r.stress_mean, 3)} · resilience ${fmt(r.resil_mean, 3)}`}</title>
                     </circle>
-                    {on && <text x={px(r.stress_mean) + 5} y={py(r.resil_mean) - 5} fill="var(--fg,#e8edf2)" fontWeight={700}>{r.st}</text>}
+                    {on && <text x={px(r.stress_mean) + 5} y={py(r.resil_mean) - 5} fill="var(--ink)" fontWeight={700}>{r.st}</text>}
                   </g>
                 );
               })}
               {/* axis labels */}
-              <text x={(m.l + sw - m.r) / 2} y={sh - 4} textAnchor="middle" fill="var(--mut,#8a93a0)">stress &#8594;</text>
-              <text x={9} y={(m.t + py(y0)) / 2} textAnchor="middle" fill="var(--mut,#8a93a0)"
+              <text x={(m.l + sw - m.r) / 2} y={sh - 4} textAnchor="middle" fill="var(--mut)">stress &#8594;</text>
+              <text x={9} y={(m.t + py(y0)) / 2} textAnchor="middle" fill="var(--mut)"
                 transform={`rotate(-90 9 ${(m.t + py(y0)) / 2})`}>resilience &#8594;</text>
             </svg>
           );
@@ -463,15 +462,15 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
               <g key={r.st} style={{ cursor: onPickState ? "pointer" : "default" }}
                 onClick={() => onPickState && onPickState(r.st)}>
                 <text x={labW - 4} y={y + rowH - 4} textAnchor="end"
-                  fill={on ? "var(--fg,#e8edf2)" : "var(--mut,#8a93a0)"}
+                  fill={on ? "var(--ink)" : "var(--mut)"}
                   fontWeight={on ? 700 : 400}>
                   {r.st}
                 </text>
                 <rect x={labW} y={y} width={Math.max(1, w)} height={rowH - 4}
                   rx={1.5} fill={rampColor(r.priority_pct)}
-                  stroke={on ? "var(--fg,#fff)" : "none"} strokeWidth={on ? 1 : 0} />
+                  stroke={on ? "var(--ink)" : "none"} strokeWidth={on ? 1 : 0} />
                 <text x={labW + w + 3} y={y + rowH - 4}
-                  fill={on ? "var(--fg,#e8edf2)" : "var(--mut,#8a93a0)"}
+                  fill={on ? "var(--ink)" : "var(--mut)"}
                   fontWeight={on ? 700 : 400}>
                   {fmt(r.priority_pct, 0)}
                 </text>
