@@ -1,13 +1,35 @@
 // Lightweight dependency-free SVG growth-curve chart.
 // v0.70 interactions: hover scrubber with per-engine values, click-to-isolate,
 // download-as-PNG button.
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { fmtUnit } from "./units.js";
+
+// Okabe-Ito model-family palette, shared by every PERSEUS chart that colors by engine family.
+// Families beyond these six read as context grey so the palette never exceeds six hues.
+const FAMILY_COL = { CBM:"#0072B2", FVS:"#E69F00", CEM:"#009E73", YC:"#CC79A7", LANDIS:"#56B4E9", OSM:"#D55E00" };
+const famCol = cls => FAMILY_COL[cls] || "var(--context)";
+const PNG_PROPS = ["fill","stroke","stroke-width","stroke-opacity","fill-opacity","opacity",
+  "font-size","font-weight","font-family","font-style","font-variant-numeric"];
 
 export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
                                       showBands, showInvBand, hiddenEngines, yMode,
                                       overlayNode, overlayLabel,
                                       isolatedEngine, onIsolate, xMax }){
-  const W=560,H=320,L=48,R=86,T=14,B=30;
+  // Track the rendered width so the viewBox maps 1:1 to CSS px and chart text holds its
+  // 10 px floor from phone to desktop (the chart caps at 720 px via .chartcard svg).
+  const [box, setBox] = useState(null);
+  const [W, setW] = useState(560);
+  useEffect(() => {
+    if(!box || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(([e]) => {
+      const cw = Math.round(Math.min(e.contentRect.width, 720));
+      if(cw > 0) setW(Math.max(320, cw));
+    });
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [box]);
+  const H = W < 500 ? Math.round(250 + (W - 320) * 0.35) : 320;
+  const L=50,R=96,T=36,B=36;
   const svgRef = useRef(null);
   const [hoverX, setHoverX] = useState(null);
 
@@ -41,7 +63,8 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   // Per-engine shade within a class, so several same-family lines (e.g. the 3
   // national FVS engines, all orange) are distinguishable rather than a tangle.
   const _shift = (hex, f) => { // f in [-1,1]: <0 darken, >0 lighten
-    const h = (hex && hex[0]==="#" && hex.length>=7) ? hex : "#bbbbbb";
+    if(!(hex && hex[0]==="#" && hex.length>=7)) return hex;  // token colors (context grey) stay flat
+    const h = hex;
     const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
     const adj = c => Math.round(f>=0 ? c+(255-c)*f : c*(1+f));
     return `rgb(${adj(r)},${adj(g)},${adj(b)})`;
@@ -49,7 +72,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   const _members = {};
   [...drawSet, ...drawOverlay].forEach(s=>{ (_members[s.cls]=_members[s.cls]||[]); if(!_members[s.cls].includes(s.model)) _members[s.cls].push(s.model); });
   const shadeFor = s => {
-    const base = classCol[s.cls] || "#bbb";
+    const base = famCol(s.cls);
     const mem = _members[s.cls] || [s.model];
     if(mem.length < 2) return base;
     const i = mem.indexOf(s.model);
@@ -107,8 +130,8 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   yticks.forEach((v,i)=>{
     const yy=Y(v);
     grid.push(<g key={"g"+i}>
-      <line x1={L} y1={yy} x2={W-R} y2={yy} stroke="#2a3a47" strokeWidth="1"/>
-      <text x={L-6} y={yy+3} textAnchor="end" fill="#8aa0b0" fontSize="10">
+      <line x1={L} y1={yy} x2={W-R} y2={yy} className={i===0 && y0===0 && yMode!=="log" ? "ch-base" : "ch-grid"}/>
+      <text x={L-6} y={yy+3.5} textAnchor="end" className="ch-txt">
         {v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(ydec)}
       </text>
     </g>);
@@ -119,7 +142,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
   const xmag = Math.pow(10, Math.floor(Math.log10(xraw))), xnorm = xraw/xmag;
   const xstep = Math.max(1, (xnorm<1.5?1:xnorm<3?2:xnorm<7?5:10)*xmag);
   const xticks=[]; for(let t=Math.ceil(x0/xstep)*xstep; t<=x1+1e-6; t+=xstep)
-    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{Math.round(t)}</text>);
+    xticks.push(<text key={"x"+t} x={X(t)} y={H-B+15} textAnchor="middle" className="ch-txt">{Math.round(t)}</text>);
   // Uncertainty bands aggregated by model CLASS (one soft envelope per family)
   // rather than one per engine — with many engines, per-engine bands stack into
   // an unreadable blob. The class envelope spans min(lo)..max(hi) across the
@@ -130,14 +153,14 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const entries = Object.entries(byCls);
     const op = entries.length <= 2 ? 0.16 : entries.length <= 4 ? 0.12 : 0.09;
     return entries.map(([cls, ser]) => {
-      const col = classCol[cls] || "#bbb";
+      const col = famCol(cls);
       const byYr = {};
       ser.forEach(s => s.pts.forEach(p => { if(p.length>=4){ (byYr[p[0]]=byYr[p[0]]||{lo:[],hi:[]}); byYr[p[0]].lo.push(p[2]); byYr[p[0]].hi.push(p[3]); } }));
       const yrs = Object.keys(byYr).map(Number).sort((a,b)=>a-b);
       if(yrs.length < 2) return null;
       const up = yrs.map((y,k)=> (k?"L":"M") + X(y).toFixed(1) + " " + Y(Math.max(...byYr[y].hi)).toFixed(1)).join(" ");
       const dn = yrs.slice().reverse().map(y=> "L" + X(y).toFixed(1) + " " + Y(Math.min(...byYr[y].lo)).toFixed(1)).join(" ");
-      return <path key={"b"+cls} d={up+" "+dn+" Z"} fill={col} opacity={op} stroke="none"><title>{cls} ensemble range</title></path>;
+      return <path key={"b"+cls} d={up+" "+dn+" Z"} style={{fill:col}} opacity={op} stroke="none"><title>{cls} ensemble range</title></path>;
     });
   })() : null;
   const INV_MODELS=["yc_hybrid_v1","yc_treemap_spatial_v1"];
@@ -174,12 +197,12 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       <path d={d} fill="none" stroke="transparent" strokeWidth="9"
             style={{cursor:"pointer"}}
             onClick={()=> !dashed && onIsolate && onIsolate(s.model)}>
-        <title>{`${tag} (${s.cls}) — click to isolate`}</title>
+        <title>{`${tag} (${s.cls}): click to isolate`}</title>
       </path>
-      {op > 0 && <path d={d} fill="none" stroke={col} strokeWidth={sw}
+      {op > 0 && <path d={d} fill="none" strokeWidth={sw}
             opacity={op}
             strokeDasharray={dashFor(s)}
-            style={{pointerEvents:"none"}}/>}
+            style={{stroke:col, pointerEvents:"none"}}/>}
     </g>;
   };
   // Collision-avoided trailing labels: stack each line's end label in the right
@@ -188,7 +211,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     .map(({s,dashed})=>({ model:s.model, col:shadeFor(s), dash:dashFor(s), dashed,
       y0:Math.max(T+5, Math.min(H-B-3, Y(s.pts[s.pts.length-1][1]))) }))
     .sort((a,b)=>a.y0-b.y0);
-  { const top=T+4, bot=H-B-3, GAP=9.5;
+  { const top=T+4, bot=H-B-3, GAP=11.5;
     // pass 1: top-down, never overlapping
     let prev = top - GAP;
     for(const it of labelItems){ it.ly = Math.max(it.y0, prev + GAP); prev = it.ly; }
@@ -210,7 +233,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     const famMap = {};
     drawSet.forEach(s => { (famMap[s.cls]=famMap[s.cls]||[]).push(Y(s.pts[s.pts.length-1][1])); });
     famLabels = Object.entries(famMap).map(([cls,ys]) => { ys.sort((a,b)=>a-b);
-      return { cls, n: ys.length, col: classCol[cls] || "#bbb", dash: DASH[cls]!=null?DASH[cls]:"0",
+      return { cls, n: ys.length, col: famCol(cls), dash: DASH[cls]!=null?DASH[cls]:"0",
         y0: Math.max(T+5, Math.min(H-B-3, ys[Math.floor(ys.length/2)])) }; })
       .sort((a,b)=>a.y0-b.y0);
     let prev = T+4-13; for(const it of famLabels){ it.ly = Math.max(it.y0, prev+13); prev = it.ly; }
@@ -248,20 +271,20 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
         }
       });
       med = smooth3(med); lo = smooth3(lo); hi = smooth3(hi);
-      return { cls, col: classCol[cls] || "#bbb", dash: DASH[cls]!=null?DASH[cls]:"0", med, lo, hi, single: ser.length < 2 };
+      return { cls, col: famCol(cls), dash: DASH[cls]!=null?DASH[cls]:"0", med, lo, hi, single: ser.length < 2 };
     }).filter(f => f.med.length >= 2);
   })() : [];
   const endLabels = DENSE
     ? [...famLabels.map((it,k)=>(
          <g key={"fam"+k} style={{pointerEvents:"none"}}>
-           <line x1={W-R+1} y1={it.ly} x2={W-R+6} y2={it.ly} stroke={it.col} strokeWidth="2.4" strokeDasharray={it.dash}/>
-           <text x={W-R+9} y={it.ly+3} fill={it.col} fontSize="9" fontWeight="600" textAnchor="start">{it.cls} ({it.n})</text>
+           <line x1={W-R+1} y1={it.ly} x2={W-R+7} y2={it.ly} style={{stroke:it.col}} strokeWidth="2.4" strokeDasharray={it.dash}/>
+           <text x={W-R+10} y={it.ly+3.5} style={{fill:it.col}} className="ch-txt" fontWeight="700" textAnchor="start">{it.cls} ({it.n})</text>
          </g>))]
     : labelItems.map((it,k)=>(
         <g key={"lab"+k} style={{pointerEvents:"none"}}>
-          <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} stroke={it.col} strokeWidth="1.4" strokeDasharray={it.dash}/>
-          <text x={W-R+7} y={it.ly+2.6} fill={it.col} fontSize="7.5" textAnchor="start" opacity={it.dashed?0.7:1}>
-            {it.model.replace(/_/g," ").slice(0,15)}{it.dashed?" ·"+overlayLabel:""}</text>
+          <line x1={W-R+1} y1={it.ly} x2={W-R+5} y2={it.ly} style={{stroke:it.col}} strokeWidth="1.4" strokeDasharray={it.dash}/>
+          <text x={W-R+7} y={it.ly+3.5} style={{fill:it.col}} className="ch-txt" textAnchor="start" opacity={it.dashed?0.7:1}>
+            {it.model.replace(/_/g," ").slice(0,14)}{it.dashed?" ·"+overlayLabel:""}<title>{it.model}</title></text>
         </g>));
 
   // Hover scrubber: find the year nearest the cursor x, look up each engine's
@@ -296,11 +319,18 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     if(!svg) return;
     const cloned = svg.cloneNode(true);
     cloned.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    // The serialized image has no stylesheet, so resolve every token and class-driven paint
+    // to its computed value on the clone; the export then matches the active theme.
+    const srcEls = [svg, ...svg.querySelectorAll("*")], dstEls = [cloned, ...cloned.querySelectorAll("*")];
+    srcEls.forEach((el, k) => { const cs = getComputedStyle(el), dst = dstEls[k]; if(!dst || !dst.style) return;
+      PNG_PROPS.forEach(p => { const v = cs.getPropertyValue(p); if(v) dst.style.setProperty(p, v); }); });
+    const rootCs = getComputedStyle(document.documentElement);
+    const tok = (n, fb) => (rootCs.getPropertyValue(n) || "").trim() || fb;
     // Inline background so PNG isn't transparent
     const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     bg.setAttribute("x","0"); bg.setAttribute("y","0");
     bg.setAttribute("width",String(W)); bg.setAttribute("height",String(H));
-    bg.setAttribute("fill","#172029");
+    bg.setAttribute("fill", tok("--panel", "#141518"));
     cloned.insertBefore(bg, cloned.firstChild);
     const data = new XMLSerializer().serializeToString(cloned);
     const img = new Image();
@@ -311,7 +341,7 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       ctx.scale(SCALE, SCALE);
       ctx.drawImage(img, 0, 0);
       // Citation footer baked into the exported image so a shared PNG stays attributable.
-      ctx.fillStyle = "#5e7180"; ctx.font = "7px sans-serif"; ctx.textAlign = "left";
+      ctx.fillStyle = tok("--mut2", "#8F949A"); ctx.font = "7px sans-serif"; ctx.textAlign = "left";
       ctx.fillText("PERSEUS Forest Intelligence · DOI 10.5281/zenodo.20516949 · holoros.github.io/perseus-forest-intelligence", 4, H - 3);
       const url = canvas.toDataURL("image/png");
       const a = document.createElement("a");
@@ -368,8 +398,16 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
     return { pass, n: ser.length };
   })();
 
+  // Visible key for axis zoom and every uncertainty band drawn (named, never implied).
+  const chartNote = [
+    yMode==="log" ? "log scale" : y0 > 0 ? "y axis zoomed, does not start at 0" : null,
+    DENSE ? "bold line: family median, shaded: IQR (q25 to q75)"
+      : (showBands && bands && bands.some(Boolean)) ? "shaded: family range of engine intervals" : null,
+    invBand ? "gold: inventory-basis range" : null,
+  ].filter(Boolean).join(" · ");
+
   return (
-    <div style={{position:"relative",maxWidth:880}}>
+    <div ref={setBox} style={{position:"relative",maxWidth:880}}>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
            style={{width:"100%",height:"auto",display:"block"}}
            onMouseMove={onMouseMove} onMouseLeave={()=> setHoverX(null)}>
@@ -379,14 +417,15 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
           </clipPath>
         </defs>
         {grid}{xticks}
+        <text x={(L+W-R)/2} y={H-4} textAnchor="middle" className="ch-txt">Year</text>
         {/* Everything data-driven is clipped to the plot rectangle, so an engine
             line above the zoomed y-range (or past the gutter) can never draw over
             the axes, labels, or the controls above the chart. */}
         <g clipPath="url(#gc-plot)">
           {invBand}{!DENSE && bands}
           {fiaRef!=null && fiaRef >= y0 && fiaRef <= y1 && <>
-            <line x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} stroke="#9fb3c0" strokeDasharray="5 4" strokeWidth="1"/>
-            <text x={L+4} y={Y(fiaRef)-4} fill="#8aa0b0" fontSize="10">FIA observed {fiaRef} Tg{fiaYear?` (${fiaYear})`:""}</text>
+            <line key="fia-line" x1={L} y1={Y(fiaRef)} x2={W-R} y2={Y(fiaRef)} style={{stroke:"var(--accent)"}} strokeDasharray="5 4" strokeWidth="1.4"/>
+            <text x={L+4} y={Y(fiaRef)-5} className="ch-txt ch-halo" style={{fill:"var(--accent)"}} fontWeight="700">FIA observed {fiaRef} {fmtUnit("Tg C")}{fiaYear?` (${fiaYear})`:""}</text>
           </>}
           {drawSet.map((s,i)=> drawLine(s, i, false, DENSE))}
           {drawOverlay.map((s,i)=> drawLine(s, i, true, DENSE))}
@@ -395,37 +434,33 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
             const dn = f.lo.slice().reverse().map(p=> "L" + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
             const medD = f.med.map((p,k)=> (k?"L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
             return <g key={"fs"+i} style={{pointerEvents:"none"}}>
-              {!f.single && <path d={up + " " + dn + " Z"} fill={f.col} opacity="0.13" stroke="none"/>}
-              <path d={medD} fill="none" stroke={f.col} strokeWidth="2.6" strokeDasharray={f.dash} opacity="0.97"/>
+              {!f.single && <path d={up + " " + dn + " Z"} style={{fill:f.col}} opacity="0.13" stroke="none"/>}
+              <path d={medD} fill="none" style={{stroke:f.col}} strokeWidth="2.6" strokeDasharray={f.dash} opacity="0.97"/>
             </g>;
           })}
         </g>
         {endLabels}
         {hoverX != null && (
           <line x1={hoverX} y1={T} x2={hoverX} y2={H-B}
-                stroke="#ffffff" strokeOpacity="0.3" strokeWidth="1"
-                strokeDasharray="3 3" style={{pointerEvents:"none"}}/>
+                strokeOpacity="0.45" strokeWidth="1"
+                strokeDasharray="3 3" style={{stroke:"var(--ink)", pointerEvents:"none"}}/>
         )}
-        <text x={L} y={T} fill="#8aa0b0" fontSize="10">{unit||""}</text>
+        <text x={L-6} y={13} className="ch-ttl" textAnchor="start">{fmtUnit(unit)||""}</text>
+        {chartNote && <text x={L-6} y={27} textAnchor="start" className="ch-note">{chartNote}</text>}
       </svg>
       {bioCheck && bioCheck.n > 0 && (
         <div style={{fontSize:10.5,color:"var(--mut)",marginTop:2,display:"flex",alignItems:"center",gap:6}}>
           <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",
-            background: bioCheck.pass===bioCheck.n ? "#2e9e6b" : bioCheck.pass >= bioCheck.n*0.6 ? "#e0a72e" : "#c0504d"}}/>
+            background: bioCheck.pass===bioCheck.n ? "var(--ok)" : bioCheck.pass >= bioCheck.n*0.6 ? "var(--warn)" : "var(--alert)"}}/>
           Biological-plausibility screen: <b style={{color:"var(--ink)"}}>{bioCheck.pass}/{bioCheck.n}</b> visible trajectories are non-negative and monotone or single-peaked
           <span title="A fast shape check in the spirit of the Bakuzis law-like relationships; the full Bakuzis-matrix assessment runs on Cardinal." style={{cursor:"help"}}>ⓘ</span>
         </div>
       )}
       {hoverX != null && hoverYear != null && (
-        <div style={{
-          position:"absolute", top:8,
-          left: hoverX/W*100 + "%", transform: hoverX/W > 0.7 ? "translateX(-100%)" : "none",
-          background:"rgba(15,20,25,0.92)", color:"#e8eef2",
-          border:"1px solid var(--line)", borderRadius:6,
-          padding:"4px 8px", fontSize:11, pointerEvents:"none",
-          maxWidth: 220, fontVariantNumeric:"tabular-nums"
+        <div className="ch-tip" style={{
+          left: hoverX/W*100 + "%", transform: hoverX/W > 0.7 ? "translateX(-100%)" : "none"
         }}>
-          <div style={{color:"#8aa0b0", marginBottom:2}}>year {hoverYear}</div>
+          <div className="yr">year {hoverYear}</div>
           {drawSet.slice(0, 8).map(s => {
             const v = valueAt(s, hoverYear);
             if(v == null) return null;
@@ -442,23 +477,14 @@ export default function GrowthChart({ node, fiaRef, fiaYear, unit, classCol,
       )}
       <div style={{position:"absolute", top:6, right:8, display:"flex", gap:6}}>
         {isolatedEngine && (
-          <button onClick={()=> onIsolate && onIsolate(null)}
-            style={{background:"transparent",color:"#f4c430",
-              border:"1px dashed #f4c430",borderRadius:5,
-              padding:"1px 7px",fontSize:10,cursor:"pointer"}}>
+          <button className="ch-btn on" onClick={()=> onIsolate && onIsolate(null)}>
             isolating · clear
           </button>
         )}
-        <button onClick={downloadCsv} title="Download the visible engine series as CSV"
-          style={{background:"var(--panel)", color:"var(--mut)",
-            border:"1px solid var(--line)", borderRadius:5,
-            padding:"1px 7px", fontSize:10, cursor:"pointer"}}>
+        <button className="ch-btn" onClick={downloadCsv} title="Download the visible engine series as CSV">
           ↓ CSV
         </button>
-        <button onClick={downloadPng}
-          style={{background:"var(--panel)", color:"var(--mut)",
-            border:"1px solid var(--line)", borderRadius:5,
-            padding:"1px 7px", fontSize:10, cursor:"pointer"}}>
+        <button className="ch-btn" onClick={downloadPng} title="Download the chart as PNG">
           ↓ PNG
         </button>
       </div>
