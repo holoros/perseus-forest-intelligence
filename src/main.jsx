@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import "@fontsource-variable/inter";
 import "./styles.css";
+import "./charts.css";
+import "./panels.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 // Theme: an explicit choice (header toggle) wins; otherwise follow the OS setting.
