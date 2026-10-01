@@ -58,6 +58,14 @@ export default function FaustmannRotation({ data, state }){
 
   return (
     <div>
+      {data.meta && data.meta.known_issue && (
+        <div role="note" className="note" style={{margin:"4px 4px 10px",padding:"8px 10px",color:"var(--ink, #e8eef2)",
+          border:"1px solid var(--warn, #d9a441)",borderLeftWidth:3,borderRadius:6,background:"transparent"}}>
+          <b>Known data issue: soil expectation values are overstated.</b> These precomputed SEVs reproduce
+          exactly with a stumpage of $12 per ft³, about 17 times the Maine blended price, so dollar values
+          and optimal rotations on this tab are not reliable until the source table is regenerated. Use
+          <b> Build a run</b> for land values at current prices.
+        </div>)}
       <div className="controls" style={{marginTop:0}}>
         <select value={owner} onChange={e=>setOwner(e.target.value)} title="Owner">
           <option value="all">all owners</option>
