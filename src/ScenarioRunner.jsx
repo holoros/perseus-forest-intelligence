@@ -4,12 +4,13 @@
 // subscriber tier (chips) runs the full multi-model ensemble on demand for the
 // user's exact area and data. Self-contained; uses yield_curves_by_l3.json.
 import { useState } from "react";
+import { fmtUnit } from "./units.js";
 
 const MGMT = [["reserve", "Reserve (no harvest)", "untreated", "#2e9e6b"],
               ["baseline", "Managed (harvest)", "harvested", "#d98a3c"]];
-const METRICS = [["agb_tonac", "Above-ground biomass (ton/ac)"],
-                 ["carbon_lbac", "Carbon (lb/ac)"],
-                 ["voltot_cuftac", "Total volume (cu ft/ac)"]];
+const METRICS = [["agb_tonac", "Above-ground biomass (ton ac⁻¹)"],
+                 ["carbon_lbac", "Carbon (lb ac⁻¹)"],
+                 ["voltot_cuftac", "Total volume (ft³ ac⁻¹)"]];
 const MODELS = [["yield", "Yield curves", true], ["fvs", "FVS", false], ["cbm", "CBM", false],
                 ["cem", "CEM", false], ["landis", "LANDIS", false]];
 const SOURCES = [["fia", "FIA", true], ["treemap", "TreeMap", false], ["user", "Your inventory", false]];
@@ -22,7 +23,7 @@ const PRICE_PATHS = {
 };
 const SAW_FRACTION = 0.55, DISCOUNT = 0.04;
 // Ecosystem-service payments (user-set $/ac/yr; intact forest delivers more, managed gets a fraction).
-const ES_LEVELS = [["none", "None", 0], ["mod", "$5/ac/yr", 5], ["high", "$15/ac/yr", 15]];
+const ES_LEVELS = [["none", "None", 0], ["mod", "$5 ac⁻¹ yr⁻¹", 5], ["high", "$15 ac⁻¹ yr⁻¹", 15]];
 const ES_MANAGED_FRAC = 0.5;
 const annuity = (age, r) => (1 - Math.pow(1 + r, -age)) / r;
 const fmt = (v, d = 0) => (v == null || isNaN(v) ? "–" : Number(v).toLocaleString(undefined, { maximumFractionDigits: d }));
@@ -124,14 +125,14 @@ export default function ScenarioRunner({ yields }) {
   const flips = carbonLean !== (((eResHi.npvC || 0) + esNPVfull) > ((eBasHi.npvH || 0) + esNPVmanaged));
   const esClause = esAnnual ? " with ecosystem-service payments" : "";
   const decision = carbonLean
-    ? `At ${p.label.toLowerCase()} market prices${esClause}, this forest is worth more standing: keeping it intact pencils out higher (~$${fmt(reserveTotal)}/ac NPV) than harvesting (~$${fmt(managedTotal)}/ac). A reserve or light-touch strategy looks favorable here${flips ? ", though that can flip toward harvest if timber prices run high." : "."}`
-    : `At ${p.label.toLowerCase()} market prices${esAnnual ? " even with ecosystem-service payments" : ""}, active management pays: harvesting pencils out higher (~$${fmt(managedTotal)}/ac NPV) than keeping it standing (~$${fmt(reserveTotal)}/ac). A managed strategy looks favorable here${flips ? ", though keeping it standing can win if carbon or ES payments rise." : "."}`;
+    ? `At ${p.label.toLowerCase()} market prices${esClause}, this forest is worth more standing: keeping it intact pencils out higher (~$${fmt(reserveTotal)} ac⁻¹ NPV) than harvesting (~$${fmt(managedTotal)} ac⁻¹). A reserve or light-touch strategy looks favorable here${flips ? ", though that can flip toward harvest if timber prices run high." : "."}`
+    : `At ${p.label.toLowerCase()} market prices${esAnnual ? " even with ecosystem-service payments" : ""}, active management pays: harvesting pencils out higher (~$${fmt(managedTotal)} ac⁻¹ NPV) than keeping it standing (~$${fmt(reserveTotal)} ac⁻¹). A managed strategy looks favorable here${flips ? ", though keeping it standing can win if carbon or ES payments rise." : "."}`;
 
-  const chip = (on, okCol) => ({ fontSize: 11, padding: "2px 9px", borderRadius: 4, cursor: "pointer",
-    border: `1px solid ${on ? (okCol || "#3a6ea5") : "var(--bd,#345)"}`,
-    background: on ? (okCol || "#3a6ea5") : "transparent", color: on ? "#fff" : "var(--fg,#cdd)" });
+  // Chip state is a class (panels.css .pn-chip / .on): one functional accent for every
+  // selected chip; a management chip keys to its series color with a small swatch.
+  const chipCls = (on, extra = "") => "chip pn-chip" + (on ? " on" : "") + (extra ? " " + extra : "");
   // a11y: make non-button clickable chips keyboard-operable (WCAG 2.1.1 / 4.1.2) + tap-sized (.chip).
-  const clickable = (fn, style, label) => ({ style, className: "chip", onClick: fn, role: "button", tabIndex: 0, "aria-label": label,
+  const clickable = (fn, cls, label, style) => ({ style, className: cls, onClick: fn, role: "button", tabIndex: 0, "aria-label": label,
     onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(e); } } });
 
   return (
@@ -145,13 +146,13 @@ export default function ScenarioRunner({ yields }) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
           <span style={{ color: "var(--mut)" }}>Your area:</span>
           {selCodes.map((c) => (
-            <span key={c} style={{ ...chip(true), display: "inline-flex", gap: 5, alignItems: "center" }}>
+            <span key={c} className={chipCls(true)} style={{ display: "inline-flex", gap: 5, alignItems: "center", cursor: "default" }}>
               {l3[c].name}
-              {selCodes.length > 1 && <span {...clickable(() => setSel((s) => ({ ...s, [c]: false })), { cursor: "pointer", fontWeight: 700 }, `Remove ${l3[c].name}`)}>×</span>}
+              {selCodes.length > 1 && <span {...clickable(() => setSel((s) => ({ ...s, [c]: false })), undefined, `Remove ${l3[c].name}`, { cursor: "pointer", fontWeight: 700 })}>×</span>}
             </span>
           ))}
           <select value="" onChange={(e) => { if (e.target.value) setSel((s) => ({ ...s, [e.target.value]: true })); }}
-            style={{ background: "var(--panel)", color: "var(--ink)", border: "1px solid var(--line)", borderRadius: 5, padding: "2px 6px", fontSize: 11, maxWidth: 200 }}>
+            className="pn-sel" style={{ maxWidth: 200 }}>
             <option value="">+ add ecoregion…</option>
             {codes.filter((c) => !selCodes.includes(c)).map((c) => <option key={c} value={c}>{l3[c].name}</option>)}
           </select>
@@ -159,16 +160,16 @@ export default function ScenarioRunner({ yields }) {
         <div className="note" style={{ marginTop: 4 }}>Select any combination to represent an ownership that spans regions or states, at any scale. Results blend across the areas you pick. A map-drawn AOI or uploaded inventory drives this directly for subscribers.</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginTop: 6 }}>
           <span style={{ color: "var(--mut)" }}>Data source:</span>
-          {SOURCES.map(([k, lbl, on]) => <span key={k} style={{ ...chip(k === "fia"), cursor: on ? "pointer" : "default", opacity: on ? 1 : 0.5 }} title={on ? "" : "subscriber / on-demand"}>{lbl}{!on ? " ◦" : ""}</span>)}
+          {SOURCES.map(([k, lbl, on]) => <span key={k} className={chipCls(k === "fia", on ? "" : "off")} title={on ? "" : "subscriber, on demand"}>{lbl}{!on ? " ◦" : ""}</span>)}
         </div>
       </div>
 
       {/* models */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
-        <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>Models</div>
+        <div className="eyebrow pn-step">Models</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {MODELS.map(([k, lbl, on]) => <span key={k} style={{ ...chip(k === "yield", on ? "#2e9e6b" : null), cursor: on ? "default" : "default", opacity: on ? 1 : 0.55 }}
-            title={on ? "precomputed (free)" : "full multi-model run — subscriber / on-demand"}>{lbl}{!on ? " ◦" : ""}</span>)}
+          {MODELS.map(([k, lbl, on]) => <span key={k} className={chipCls(k === "yield", on ? "" : "off")} style={{ cursor: "default" }}
+            title={on ? "precomputed (free)" : "full multi-model run: subscriber, on demand"}>{lbl}{!on ? " ◦" : ""}</span>)}
         </div>
         <div className="note" style={{ marginTop: 4 }}>Yield curves run instantly (free tier). FVS, CBM, CEM, LANDIS run on demand for subscribers (◦).</div>
       </div>
@@ -177,33 +178,33 @@ export default function ScenarioRunner({ yields }) {
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Management:</span>
-          {MGMT.map(([k, lbl, , col]) => <span key={k} {...clickable(() => toggle(k), chip(mgmts[k], col), `Toggle management ${lbl}`)} aria-pressed={!!mgmts[k]}>{lbl}</span>)}
+          {MGMT.map(([k, lbl, , col]) => <span key={k} {...clickable(() => toggle(k), chipCls(mgmts[k], "soft"), `Toggle management ${lbl}`)} aria-pressed={!!mgmts[k]}><i className="pn-sw" style={{ background: col, opacity: mgmts[k] ? 1 : 0.45 }} />{lbl}</span>)}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Climate:</span>
-          {CLIMATE.map(([k, lbl]) => <span key={k} {...clickable(() => setClimate(k), { ...chip(climate === k), opacity: k === "historic" ? 1 : 0.6 }, `Climate ${lbl}`)} aria-pressed={climate === k}
+          {CLIMATE.map(([k, lbl]) => <span key={k} {...clickable(() => setClimate(k), chipCls(climate === k), `Climate ${lbl}`, { opacity: k === "historic" ? 1 : 0.6 })} aria-pressed={climate === k}
             title={k === "historic" ? "" : "calibrated climate scaling in progress (CEM run)"}>{lbl}{k !== "historic" ? " ◦" : ""}</span>)}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Output:</span>
           <select value={metric} onChange={(e) => setMetric(e.target.value)}
-            style={{ background: "var(--panel)", color: "var(--ink)", border: "1px solid var(--line)", borderRadius: 5, padding: "2px 6px", fontSize: 11 }}>
+            className="pn-sel">
             {METRICS.map(([k, lbl]) => <option key={k} value={k}>{lbl}</option>)}
           </select>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11, marginBottom: 6 }}>
           <span style={{ color: "var(--mut)" }}>Market prices:</span>
-          {Object.entries(PRICE_PATHS).map(([k, v]) => <span key={k} {...clickable(() => setPrice(k), chip(price === k), `Market prices ${v.label}`)} aria-pressed={price === k}>{v.label}</span>)}
-          <span style={{ color: "var(--mut)" }}>· carbon ${p.carbon}/tCO2e</span>
+          {Object.entries(PRICE_PATHS).map(([k, v]) => <span key={k} {...clickable(() => setPrice(k), chipCls(price === k), `Market prices ${v.label}`)} aria-pressed={price === k}>{v.label}</span>)}
+          <span style={{ color: "var(--mut)" }}>· carbon ${p.carbon} tCO₂e⁻¹</span>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", fontSize: 11 }}>
           <span style={{ color: "var(--mut)" }}>Ecosystem-service payments:</span>
-          {ES_LEVELS.map(([k, lbl]) => <span key={k} {...clickable(() => setEs(k), chip(es === k), `Ecosystem-service payment ${lbl}`)} aria-pressed={es === k}>{lbl}</span>)}
+          {ES_LEVELS.map(([k, lbl]) => <span key={k} {...clickable(() => setEs(k), chipCls(es === k), `Ecosystem-service payment ${lbl}`)} aria-pressed={es === k}>{lbl}</span>)}
         </div>
       </div>
 
       {/* decision headline */}
-      <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8, borderLeft: "3px solid " + (carbonLean ? "#2e9e6b" : "#d98a3c") }}>
+      <div className="chartcard pn-rec" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", marginBottom: 2 }}>Recommendation</div>
         <div style={{ fontSize: 12 }}>{decision}</div>
       </div>
@@ -214,10 +215,10 @@ export default function ScenarioRunner({ yields }) {
           {node && node.name} · {METRICS.find(([k]) => k === metric)[1]} vs stand age{climate !== "historic" ? ` · ${climate} (climate scaling pending)` : ""}
         </div>
         <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ fontSize: 9, fontVariantNumeric: "tabular-nums" }}>
-          <line x1={m.l} y1={H - m.b} x2={W - m.r} y2={H - m.b} stroke="var(--line,#345)" strokeWidth={0.6} />
-          <line x1={m.l} y1={m.t} x2={m.l} y2={H - m.b} stroke="var(--line,#345)" strokeWidth={0.6} />
-          {[0, 0.5, 1].map((f, i) => <text key={i} x={m.l - 4} y={py(y1 * f) + 3} textAnchor="end" fill="var(--mut,#8a93a0)">{fmt(y1 * f)}</text>)}
-          {[x0, (x0 + x1) / 2, x1].map((t, i) => <text key={i} x={px(t)} y={H - m.b + 14} textAnchor="middle" fill="var(--mut,#8a93a0)">{fmt(t)}</text>)}
+          <line x1={m.l} y1={H - m.b} x2={W - m.r} y2={H - m.b} stroke="var(--axis)" strokeWidth={0.6} />
+          <line x1={m.l} y1={m.t} x2={m.l} y2={H - m.b} stroke="var(--axis)" strokeWidth={0.6} />
+          {[0, 0.5, 1].map((f, i) => <text key={i} x={m.l - 4} y={py(y1 * f) + 3} textAnchor="end" fill="var(--mut)">{fmt(y1 * f)}</text>)}
+          {[x0, (x0 + x1) / 2, x1].map((t, i) => <text key={i} x={px(t)} y={H - m.b + 14} textAnchor="middle" fill="var(--mut)">{fmt(t)}</text>)}
           {series.map((s) => (
             <g key={s.k}>
               <polyline points={s.pts.map((p) => `${px(p[0])},${py(p[1])}`).join(" ")} fill="none" stroke={s.col} strokeWidth={2} />
@@ -227,7 +228,7 @@ export default function ScenarioRunner({ yields }) {
         </svg>
         {takeaway && <div className="note" style={{ marginTop: 4 }}>{takeaway}</div>}
         <div className="note" style={{ marginTop: 4, color: "var(--mut)" }}>
-          Free: precomputed yield projections shown above. Subscriber: run the full ensemble (FVS, CBM, CEM, LANDIS) on demand for your exact area, your own inventory, and custom climate and management — at any scale.
+          Free: precomputed yield projections shown above. Subscriber: run the full ensemble (FVS, CBM, CEM, LANDIS) on demand for your exact area, your own inventory, and custom climate and management, at any scale.
         </div>
       </div>
 
@@ -235,26 +236,27 @@ export default function ScenarioRunner({ yields }) {
       {econRows.length > 0 && (
         <div className="chartcard" style={{ padding: "8px 10px", marginTop: 8 }}>
           <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>
-            Net present value per acre · age {esAge} · {p.label} market{esAnnual ? ` · ES $${esAnnual}/ac/yr` : ""}
+            Net present value per acre · age {esAge} · {p.label} market{esAnnual ? ` · ES $${esAnnual} ac⁻¹ yr⁻¹` : ""}
           </div>
-          <table style={{ width: "100%", fontSize: 11, borderCollapse: "collapse", fontVariantNumeric: "tabular-nums" }}>
+          <table className="tbl pn-tbl">
+            <caption><b>Net present value by management.</b> Values in {fmtUnit("$/ac")}.</caption>
             <thead>
-              <tr style={{ color: "var(--mut)", textAlign: "right" }}>
-                <th style={{ textAlign: "left", fontWeight: 500 }}>Management</th>
-                <th style={{ fontWeight: 500 }}>Timber</th>
-                <th style={{ fontWeight: 500 }}>Carbon</th>
-                <th style={{ fontWeight: 500 }}>Eco-services</th>
-                <th style={{ fontWeight: 500 }}>Total NPV</th>
+              <tr>
+                <th>Management</th>
+                <th>Timber ({fmtUnit("$/ac")})</th>
+                <th>Carbon ({fmtUnit("$/ac")})</th>
+                <th>Eco-services ({fmtUnit("$/ac")})</th>
+                <th>Total NPV ({fmtUnit("$/ac")})</th>
               </tr>
             </thead>
             <tbody>
               {econRows.map((r) => (
-                <tr key={r.k} style={{ textAlign: "right", borderTop: "1px solid var(--line,#345)" }}>
-                  <td style={{ textAlign: "left", color: r.col, fontWeight: 600 }}>{r.lbl.split(" ")[0]}</td>
-                  <td>${fmt(r.e.npvH)}</td>
-                  <td>${fmt(r.e.npvC)}</td>
-                  <td>${fmt(r.esv)}</td>
-                  <td style={{ fontWeight: 600 }}>${fmt(r.total)}</td>
+                <tr key={r.k}>
+                  <td><span className="pn-th-sw"><i className="pn-sw" style={{ background: r.col }} />{r.lbl.split(" ")[0]}</span></td>
+                  <td>{fmt(r.e.npvH)}</td>
+                  <td>{fmt(r.e.npvC)}</td>
+                  <td>{fmt(r.esv)}</td>
+                  <td style={{ fontWeight: 700 }}>{fmt(r.total)}</td>
                 </tr>
               ))}
             </tbody>

@@ -4,21 +4,22 @@
 
 const esc = (x) => String(x == null ? "" : x).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 function vccLabel(v) { if (v == null) return "n/a"; if (v >= 42) return "higher"; if (v >= 34) return "moderate"; return "lower"; }
-function vccColor(v) { if (v == null) return "#999"; if (v >= 42) return "#c85a5a"; if (v >= 34) return "#e08a1e"; return "#4f9d8a"; }
+function vccColor(v) { if (v == null) return "#9AA0A6"; if (v >= 42) return "#c85a5a"; if (v >= 34) return "#e08a1e"; return "#4f9d8a"; }
 
 // Horizontal bar chart. items: [{label, value, color, valueLabel}].
 function svgBars(items, opts = {}) {
   if (!items.length) return "";
   const W = opts.w || 460, rowH = 22, pad = 4, labelW = opts.labelW || 120;
+  // Literal colors here mirror the report token block (light print page).
   const max = opts.max || Math.max(...items.map(i => i.value), 1);
   const H = items.length * rowH + pad * 2, barX = labelW, barW = W - labelW - 52;
-  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;font-family:Helvetica,Arial,sans-serif">`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;font-family:Inter,system-ui,Helvetica,Arial,sans-serif">`;
   items.forEach((it, i) => {
     const y = pad + i * rowH, w = Math.max(1, it.value / max * barW);
-    s += `<text x="${labelW - 6}" y="${y + 14}" text-anchor="end" font-size="11" fill="#333">${esc(it.label)}</text>`;
-    s += `<rect x="${barX}" y="${y + 4}" width="${barW}" height="13" rx="2" fill="#eee"/>`;
-    s += `<rect x="${barX}" y="${y + 4}" width="${w.toFixed(1)}" height="13" rx="2" fill="${it.color || "#3a7d5d"}"/>`;
-    s += `<text x="${barX + w + 5}" y="${y + 14}" font-size="11" fill="#444">${esc(it.valueLabel != null ? it.valueLabel : it.value)}</text>`;
+    s += `<text x="${labelW - 6}" y="${y + 14}" text-anchor="end" font-size="11" fill="#141517">${esc(it.label)}</text>`;
+    s += `<rect x="${barX}" y="${y + 4}" width="${barW}" height="13" rx="2" fill="#F1F1EF"/>`;
+    s += `<rect x="${barX}" y="${y + 4}" width="${w.toFixed(1)}" height="13" rx="2" fill="${it.color || "#1A3D28"}"/>`;
+    s += `<text x="${barX + w + 5}" y="${y + 14}" font-size="11" fill="#4A4F56">${esc(it.valueLabel != null ? it.valueLabel : it.value)}</text>`;
   });
   return s + "</svg>";
 }
@@ -35,22 +36,22 @@ function svgQuadrant(sp) {
   const medX = px(32), modX = px(38);
   const lab = pts.map(s => ({ s, x: px(s.vcc), y: py(s.share_pct) })).sort((a, b) => a.y - b.y);
   for (let i = 1; i < lab.length; i++) if (lab[i].y - lab[i - 1].y < 13) lab[i].y = lab[i - 1].y + 13;
-  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;font-family:Helvetica,Arial,sans-serif">`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;font-family:Inter,system-ui,Helvetica,Arial,sans-serif">`;
   s += `<rect x="${modX.toFixed(1)}" y="${M.t}" width="${((W - M.r) - modX).toFixed(1)}" height="${(H - M.b) - M.t}" fill="rgba(200,90,90,0.08)"/>`;
-  s += `<line x1="${M.l}" y1="${H - M.b}" x2="${W - M.r}" y2="${H - M.b}" stroke="#bbb"/><line x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${H - M.b}" stroke="#bbb"/>`;
-  s += `<line x1="${medX.toFixed(1)}" y1="${M.t}" x2="${medX.toFixed(1)}" y2="${H - M.b}" stroke="#999" stroke-dasharray="3 3"/>`;
-  s += `<text x="${medX.toFixed(1)}" y="${M.t - 4}" text-anchor="middle" font-size="9" fill="#888">US median</text>`;
-  s += `<text x="${W - M.r - 2}" y="${M.t + 9}" text-anchor="end" font-size="9" fill="#c0504d">abundant &amp; vulnerable</text>`;
-  [vlo, (vlo + vhi) / 2, vhi].forEach(t => { s += `<text x="${px(t).toFixed(1)}" y="${H - M.b + 13}" text-anchor="middle" font-size="9" fill="#888">${Math.round(t)}</text>`; });
-  [0, smax / 2, smax].forEach(t => { s += `<text x="${M.l - 4}" y="${(py(t) + 3).toFixed(1)}" text-anchor="end" font-size="9" fill="#888">${Math.round(t)}%</text>`; });
-  s += `<text x="${((M.l + W - M.r) / 2).toFixed(1)}" y="${H - 2}" text-anchor="middle" font-size="10" fill="#555">climate vulnerability &rarr;</text>`;
-  s += `<text transform="translate(11 ${((M.t + H - M.b) / 2).toFixed(1)}) rotate(-90)" text-anchor="middle" font-size="10" fill="#555">biomass share &uarr;</text>`;
+  s += `<line x1="${M.l}" y1="${H - M.b}" x2="${W - M.r}" y2="${H - M.b}" stroke="#C3C5C1"/><line x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${H - M.b}" stroke="#C3C5C1"/>`;
+  s += `<line x1="${medX.toFixed(1)}" y1="${M.t}" x2="${medX.toFixed(1)}" y2="${H - M.b}" stroke="#9AA0A6" stroke-dasharray="3 3"/>`;
+  s += `<text x="${medX.toFixed(1)}" y="${M.t - 4}" text-anchor="middle" font-size="9" fill="#5F646B">US median</text>`;
+  s += `<text x="${W - M.r - 2}" y="${M.t + 9}" text-anchor="end" font-size="9" fill="#5F646B">abundant &amp; vulnerable</text>`;
+  [vlo, (vlo + vhi) / 2, vhi].forEach(t => { s += `<text x="${px(t).toFixed(1)}" y="${H - M.b + 13}" text-anchor="middle" font-size="9" fill="#5F646B">${Math.round(t)}</text>`; });
+  [0, smax / 2, smax].forEach(t => { s += `<text x="${M.l - 4}" y="${(py(t) + 3).toFixed(1)}" text-anchor="end" font-size="9" fill="#5F646B">${Math.round(t)}%</text>`; });
+  s += `<text x="${((M.l + W - M.r) / 2).toFixed(1)}" y="${H - 2}" text-anchor="middle" font-size="10" fill="#4A4F56">climate vulnerability &rarr;</text>`;
+  s += `<text transform="translate(11 ${((M.t + H - M.b) / 2).toFixed(1)}) rotate(-90)" text-anchor="middle" font-size="10" fill="#4A4F56">biomass share &uarr;</text>`;
   lab.forEach(({ s: sp1, x, y }) => {
     const cy = py(sp1.share_pct), right = x > (M.l + (W - M.r)) * 0.62;
     const short = sp1.common.replace(/^eastern /, "e. ").replace(/^western /, "w. ").replace(/^northern /, "n. ").replace(/^southern /, "s. ");
     const txt = short.length > 13 ? short.slice(0, 12) + "…" : short;
     s += `<circle cx="${x.toFixed(1)}" cy="${cy.toFixed(1)}" r="4.5" fill="${vccColor(sp1.vcc)}" stroke="#fff" stroke-width="0.8"/>`;
-    s += `<text x="${(right ? x - 6 : x + 6).toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="${right ? "end" : "start"}" font-size="10" fill="#333">${esc(txt)}</text>`;
+    s += `<text x="${(right ? x - 6 : x + 6).toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="${right ? "end" : "start"}" font-size="10" fill="#141517">${esc(txt)}</text>`;
   });
   return s + "</svg>";
 }
@@ -58,7 +59,7 @@ function svgQuadrant(sp) {
 export function openMyForestReport(state, stateName, hrr, detail, stumpageM3, aoi, hrrEco, econ) {
   const s = hrr && hrr.states && hrr.states[state];
   const dd = detail && detail.states && detail.states[state];
-  if (!s) { alert("Forest summary data is still loading — try again in a moment."); return; }
+  if (!s) { alert("Forest summary data is still loading; try again in a moment."); return; }
   const nat = (hrr.national && hrr.national.priority_share_pct) || 11.8;
   const scen = (hrr.national && hrr.national.scenario_priority_share_pct) || {};
   const pri = s.priority_pct;
@@ -88,8 +89,8 @@ export function openMyForestReport(state, stateName, hrr, detail, stumpageM3, ao
   const priBars = svgBars([
     { label: aoi && eco ? (aoi.l3name || "Your ecoregion") : stateName, value: aoi && eco ? eco.priority_pct : pri, color: "#c0504d", valueLabel: Math.round(aoi && eco ? eco.priority_pct : pri) + "%" },
     { label: stateName + " (state)", value: pri, color: "#d98a3c", valueLabel: Math.round(pri) + "%" },
-    { label: "National average", value: nat, color: "#888", valueLabel: nat + "%" },
-    { label: "Highest state", value: maxStatePri, color: "#bbb", valueLabel: Math.round(maxStatePri) + "%" },
+    { label: "National average", value: nat, color: "#9AA0A6", valueLabel: nat + "%" },
+    { label: "Highest state", value: maxStatePri, color: "#C3C5C1", valueLabel: Math.round(maxStatePri) + "%" },
   ], { max: maxStatePri * 1.12, labelW: 150 });
   const agentItems = [["Insects", ag.insect], ["Disease", ag.disease], ["Weather", ag.weather], ["Animals", ag.animal], ["Fire", ag.fire]]
     .filter(([, v]) => v > 0).map(([l, v]) => ({ label: l, value: v, color: "#8a6d3b", valueLabel: v.toFixed(1) + "%" }));
@@ -99,18 +100,18 @@ export function openMyForestReport(state, stateName, hrr, detail, stumpageM3, ao
   const aoiBlock = aoi ? `
 <h2>Your area</h2>
 <p>${acres ? `About <b>${acres.toLocaleString()} acres</b> ` : ""}near <b>${aoi.centroid ? aoi.centroid[1].toFixed(3) + "&deg;, " + aoi.centroid[0].toFixed(3) + "&deg;" : ""}</b>${aoi.l3name ? `, in the <b>${esc(aoi.l3name)}</b> ecoregion of ${esc(stateName)}` : `, ${esc(stateName)}`}.${ftop ? ` The most common forest type here is <b>${esc(ftop.name || ftop)}</b>${ftop.share_pct ? ` (${Math.round(ftop.share_pct)}% of plots)` : ""}.` : ""}</p>
-${eco ? `<p><b>Ecoregion context.</b> Across the ${esc(aoi.l3name || "local")} ecoregion, <b>${Math.round(eco.priority_pct)}%</b> of forest is priority area (high stress, low resilience) &mdash; <b>${cmp(eco.priority_pct)}</b> the national average of ${nat}%. This is the backdrop your stand sits in.</p>` : ""}` : "";
+${eco ? `<p><b>Ecoregion context.</b> Across the ${esc(aoi.l3name || "local")} ecoregion, <b>${Math.round(eco.priority_pct)}%</b> of forest is priority area (high stress, low resilience): <b>${cmp(eco.priority_pct)}</b> the national average of ${nat}%. This is the backdrop your stand sits in.</p>` : ""}` : "";
 
   const speciesRows = sp.slice(0, 6).map(x =>
-    `<tr><td>${esc(x.common)}</td><td style="text-align:right">${Math.round(x.share_pct)}%</td><td style="text-align:right"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${vccColor(x.vcc)};margin-right:5px"></span>${x.vcc == null ? "&ndash;" : Math.round(x.vcc)} (${vccLabel(x.vcc)})</td></tr>`).join("");
+    `<tr><td>${esc(x.common)}</td><td>${Math.round(x.share_pct)}</td><td><span class="sw" style="background:${vccColor(x.vcc)}"></span>${x.vcc == null ? "&ndash;" : Math.round(x.vcc)} (${vccLabel(x.vcc)})</td></tr>`).join("");
 
   const actions = [];
   if (pri > nat) actions.push("Your forest carries an above-average share of stressed, low-resilience area. A stand health assessment with a licensed forester is a sensible first step.");
   if (watch.length) actions.push(`Your most abundant climate-vulnerable species ${watch.length > 1 ? "are" : "is"} <b>${watch.map(w => esc(w.common)).join(", ")}</b>. Favor regenerating and retaining lower-vulnerability species and avoid leaning further on the vulnerable ones.`);
   if ((ag.disturbed_pct || 0) > 10) actions.push(`Recent disturbance has touched ${Math.round(ag.disturbed_pct)}% of plots in your area. Watch the leading agents and plan salvage or sanitation only where warranted.`);
-  if (mortPct != null && mortPct > 1.2) actions.push(`Measured tree mortality here (${mortPct.toFixed(1)}%/yr) is on the higher side; track standing-dead and consider a cut that captures value before further loss.`);
+  if (mortPct != null && mortPct > 1.2) actions.push(`Measured tree mortality here (${mortPct.toFixed(1)}% yr⁻¹) is on the higher side; track standing-dead and consider a cut that captures value before further loss.`);
   actions.push("Maintain a mix of species, sizes, and ages. Diversity is the cheapest insurance against climate and pest risk.");
-  if (mbf) actions.push(`If you are weighing a harvest, recent blended stumpage in ${esc(stateName)} runs about <b>$${mbf}/MBF</b> ($${Math.round(stumpageM3)}/m³); a forester can tell you whether your stand is at a value-maximizing age.`);
+  if (mbf) actions.push(`If you are weighing a harvest, recent blended stumpage in ${esc(stateName)} runs about <b>$${mbf} MBF⁻¹</b> ($${Math.round(stumpageM3)} m⁻³); a forester can tell you whether your stand is at a value-maximizing age.`);
 
   // One-sentence-cluster synthesis tying health + conditions + the value tension together.
   // Honest by construction: it points to Build a run for the harvest-vs-hold NPV rather than
@@ -125,39 +126,45 @@ ${eco ? `<p><b>Ecoregion context.</b> Across the ${esc(aoi.l3name || "local")} e
     : " Conditions look relatively stable, so there is room to plan deliberately.";
   const watchClause = watch.length ? ` Keep an eye on <b>${watch.map(w => esc(w.common)).join(" and ")}</b> as abundant but climate-vulnerable.` : "";
   const econClause = stumpageM3 != null
-    ? ` On value, ${esc(stateName)} stumpage runs about <b>$${Math.round(stumpageM3)}/m&sup3;</b> (multi-year median); because carbon payments can rival timber income at compliance prices, model the harvest-versus-hold tradeoff in <b>Build a run</b> before committing.`
+    ? ` On value, ${esc(stateName)} stumpage runs about <b>$${Math.round(stumpageM3)} m⁻³</b> (multi-year median); because carbon payments can rival timber income at compliance prices, model the harvest-versus-hold tradeoff in <b>Build a run</b> before committing.`
     : "";
-  const bottomLine = `Your forest ${attention}.${urgency}${watchClause}${econClause}`;
+  // The value clause sits in its own short paragraph so the bottom line stays readable.
+  const bottomLine = `Your forest ${attention}.${urgency}${watchClause}${econClause ? `</p><p>${econClause.trim()}` : ""}`;
 
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>My forest — ${esc(stateName)}</title>
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>My forest: ${esc(stateName)}</title>
 <style>
- body{font-family:Georgia,serif;max-width:760px;margin:28px auto;padding:0 18px;color:#1a1a1a;line-height:1.5}
- h1{font-size:23px;margin:0 0 2px} .sub{color:#666;font-size:12px;margin-bottom:14px}
- h2{font-size:14px;border-bottom:1px solid #ccc;padding-bottom:3px;margin:20px 0 8px}
- .big{font-size:30px;font-weight:700;line-height:1} .big small{font-size:13px;font-weight:400;color:#555}
- table{border-collapse:collapse;width:100%;font-size:12.5px;margin:4px 0} th,td{border:1px solid #ddd;padding:4px 8px;text-align:left}
- th{background:#f4f4f4} ul{margin:6px 0;padding-left:20px} li{margin:5px 0;font-size:13px}
- .muted{color:#666;font-size:11px;margin-top:18px} .pill{display:inline-block;background:#eef5f0;color:#2e6b4f;border-radius:10px;padding:1px 9px;font-size:11px}
- .fig{margin:8px 0 4px} .cap{font-size:10.5px;color:#777;margin:0 0 4px}
+ :root{--bg:#FFFFFF;--ink:#141517;--ink-2:#4A4F56;--mut:#5F646B;--line:#DADBD7;--line-strong:#C3C5C1;--accent:#1A3D28;--accent-tint:#E6EFE8}
+ body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:760px;margin:28px auto;padding:0 18px;color:var(--ink);background:var(--bg);line-height:1.5}
+ h1{font-size:23px;margin:0 0 2px;color:var(--accent)} .sub{color:var(--mut);font-size:12px;margin-bottom:14px}
+ h2{font-size:14px;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:3px;margin:20px 0 8px}
+ .big{font-size:30px;font-weight:700;line-height:1} .big small{font-size:13px;font-weight:400;color:var(--ink-2)}
+ table{border-collapse:collapse;width:100%;font-size:12.5px;margin:4px 0;font-variant-numeric:tabular-nums;border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong)}
+ caption{caption-side:top;text-align:left;font-size:12px;color:var(--ink-2);padding:0 0 6px} caption b{color:var(--ink)}
+ th{font-weight:700;text-align:center;vertical-align:middle;padding:5px 8px;border-bottom:1px solid var(--line-strong)} td{text-align:center;vertical-align:middle;padding:4px 8px}
+ .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+ ul{margin:6px 0;padding-left:20px} li{margin:5px 0;font-size:13px}
+ .muted{color:var(--mut);font-size:11px;margin-top:18px} .pill{display:inline-block;background:var(--accent-tint);color:var(--accent);border:1px solid var(--line);border-radius:6px;padding:1px 9px;font-size:11px}
+ .fig{margin:8px 0 4px} .cap{font-size:10.5px;color:var(--mut);margin:0 0 4px}
  .grid2{display:flex;gap:18px;flex-wrap:wrap} .grid2>div{flex:1;min-width:230px}
  .stat{display:inline-block;margin-right:18px;font-size:12.5px} .stat b{font-size:15px}
- .bottomline{background:#f3f7f4;border-left:4px solid #2e6b4f;border-radius:0 6px 6px 0;padding:9px 13px;margin:10px 0 4px;font-size:13.5px;line-height:1.5}
- .bottomline b.bl{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#2e6b4f;display:block;margin-bottom:2px}
+ .bottomline{background:var(--accent-tint);border-left:2px solid var(--accent);border-radius:0 6px 6px 0;padding:9px 13px;margin:10px 0 4px;font-size:13.5px;line-height:1.5}
+ .bottomline p{margin:0 0 6px} .bottomline p:last-child{margin:0}
+ .bottomline b.bl{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:2px}
  @media print{body{margin:0} h2{page-break-after:avoid}}
 </style></head><body>
-<h1>Your forest at a glance${aoi ? "" : ` — ${esc(stateName)}`}</h1>
+<h1>Your forest at a glance${aoi ? "" : `: ${esc(stateName)}`}</h1>
 <div class="sub">PERSEUS Forest Intelligence &middot; ${date}${aoi ? ` &middot; ${esc(aoi.l3name || stateName)}, ${esc(stateName)}` : ` &middot; based on ${s.n_plots ? s.n_plots.toLocaleString() : ""} FIA plots in ${esc(stateName)}`}</div>
-<div class="bottomline"><b class="bl">Bottom line</b>${bottomLine}</div>
+<div class="bottomline"><b class="bl">Bottom line</b><p>${bottomLine}</p></div>
 ${aoiBlock}
 
-<h2>${aoi ? `${esc(stateName)} — state context` : "Health"}</h2>
+<h2>${aoi ? `${esc(stateName)}: state context` : "Health"}</h2>
 <p><span class="big">${Math.round(pri)}%<small> of ${esc(stateName)}'s forest is priority area</small></span></p>
 <div class="fig">${priBars}</div>
 <p class="cap">Priority area = forest both highly stressed and low in resilience. ${esc(stateName)} is <b>${vs}</b> the national average.</p>
 <p>
- <span class="stat">Stress <b>${s.stress_mean != null ? s.stress_mean.toFixed(2) : "–"}</b><span class="muted" style="margin:0"> /1</span></span>
- <span class="stat">Resilience <b>${s.resil_mean != null ? s.resil_mean.toFixed(2) : "–"}</b><span class="muted" style="margin:0"> /1</span></span>
- ${mortPct != null ? `<span class="stat">Measured mortality <b>${mortPct.toFixed(1)}%</b>/yr</span>` : ""}
+ <span class="stat">Stress <b>${s.stress_mean != null ? s.stress_mean.toFixed(2) : "–"}</b><span class="muted" style="margin:0"> of 1</span></span>
+ <span class="stat">Resilience <b>${s.resil_mean != null ? s.resil_mean.toFixed(2) : "–"}</b><span class="muted" style="margin:0"> of 1</span></span>
+ ${mortPct != null ? `<span class="stat">Measured mortality <b>${mortPct.toFixed(1)}%</b> yr⁻¹</span>` : ""}
  <span class="stat">Sample <b>${s.n_plots ? s.n_plots.toLocaleString() : "–"}</b> plots</span>
 </p>
 ${scen.current != null ? `<p class="cap">Looking ahead: under warming, the national priority share rises from about ${Math.round(scen.current)}% today toward ${scen.rcp45 != null ? Math.round(scen.rcp45) + "% (RCP4.5)" : ""}${scen.rcp85 != null ? ` and ${Math.round(scen.rcp85)}% (RCP8.5)` : ""}. Your area's relative standing is more stable than the absolute number.</p>` : ""}
@@ -165,8 +172,8 @@ ${scen.current != null ? `<p class="cap">Looking ahead: under warming, the natio
 <p class="cap"><b>How confident is this?</b> Health, species, and mortality come from <b>${np ? np.toLocaleString() : "the available"}</b> FIA plots (<b>${healthConf}</b> confidence). The stumpage value is ${stConf}${stDet && stDet.n_min ? `, based on roughly ${stDet.n_min} recent transactions` : ""}. These are estimates to start a conversation, not an appraisal or a stand exam of your specific land.</p>
 
 <h2>Your species and their climate vulnerability</h2>
-${quad ? `<div class="fig">${quad}</div><p class="cap">Each dot is a species placed by its climate vulnerability (x) and share of your biomass (y). The shaded upper-right is abundant <i>and</i> vulnerable — the species to act on first. Color: <span style="color:#4f9d8a">&#9679; lower</span> <span style="color:#e08a1e">&#9679; moderate</span> <span style="color:#c85a5a">&#9679; higher</span> (US median ≈ 32).</p>` : ""}
-<table><thead><tr><th>Species (by biomass)</th><th style="text-align:right">Share</th><th style="text-align:right">Vulnerability (VCC)</th></tr></thead><tbody>${speciesRows || '<tr><td colspan="3">Species detail not available for this area.</td></tr>'}</tbody></table>
+${quad ? `<div class="fig">${quad}</div><p class="cap">Each dot is a species placed by its climate vulnerability (x) and share of your biomass (y). The shaded upper-right is abundant <i>and</i> vulnerable: the species to act on first. Color: <span class="sw" style="background:#4f9d8a"></span>lower <span class="sw" style="background:#e08a1e"></span>moderate <span class="sw" style="background:#c85a5a"></span>higher (US median ≈ 32).</p>` : ""}
+<table><caption><b>Leading species.</b> Share of live biomass and Potter (2017) climate vulnerability score.</caption><thead><tr><th>Species (by biomass)</th><th>Share (%)</th><th>Vulnerability (VCC)</th></tr></thead><tbody>${speciesRows || '<tr><td colspan="3">Species detail not available for this area.</td></tr>'}</tbody></table>
 ${watch.length ? `<p><span class="pill">watch list</span> ${watch.map(w => esc(w.common)).join(", ")} ${watch.length > 1 ? "are" : "is"} both abundant and climate-vulnerable here.</p>` : ""}
 
 <h2>Forest conditions</h2>

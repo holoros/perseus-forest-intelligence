@@ -4,6 +4,11 @@
 // path animates a Cardinal HPC submission of the same run-spec. Economics and a
 // plain-language recommendation come from the per-L3 yield curves.
 import { useState, useEffect } from "react";
+import { fmtUnit } from "./units.js";
+
+// Inline line icons (replace emoji); stroke follows text color via .ico.
+const IcoServer = () => <svg className="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="6" rx="1"/><rect x="4" y="14" width="16" height="6" rx="1"/><path d="M8 7h.01M8 17h.01"/></svg>;
+const IcoDown = () => <svg className="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>;
 
 const STATES = ["AK","AL","AR","AZ","CA","CO","CT","DE","FL","GA","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VA","VT","WA","WI","WV","WY"];
 const MODELS = [["fvs","FVS","FVS"],["cbm","CBM","CBM"],["cem","CEM","CEM"],["yield","Yield curves","YC"],["landis","LANDIS","LANDIS"]];
@@ -14,7 +19,7 @@ const MGMTS = [["reserve","Reserve (no harvest)","reserve (no harvest)","untreat
                ["conservation","Managed (conservation)","managed (conservation)","harvested"],
                ["extensive","Managed (extensive)","managed (extensive)","harvested"]];
 const CLIMATES = [["historic","Historic"],["baseline_2020","2020 baseline"],["rcp45","RCP4.5"],["rcp85","RCP8.5"]];
-const METRICS = [["agc_live_total","Carbon, live (t/ac)"],["merch_vol_mcf","Merch. volume (MCF)"],
+const METRICS = [["agc_live_total","Carbon, live (t ac⁻¹)"],["merch_vol_mcf","Merch. volume (MCF)"],
                  ["standing_value_musd","Standing value ($M)"],["es_bundle_score","Ecosystem-service score"],
                  ["mean_stand_age","Mean stand age (yr)"],["total_ecosystem_c","Total ecosystem C"]];
 // Price scenarios apply a low/base/high band to the REAL per-state stumpage (timber side)
@@ -24,7 +29,7 @@ const METRICS = [["agc_live_total","Carbon, live (t/ac)"],["merch_vol_mcf","Merc
 // CA compliance price ceiling (~$95). The EPA social cost of carbon (~$190) is a societal
 // value, not a landowner payment, so it is cited in the note rather than used as a price.
 const PRICE_PATHS = { low:{mult:0.7,carbon:15,label:"Low"}, base:{mult:1.0,carbon:35,label:"Base"}, high:{mult:1.4,carbon:95,label:"High"} };
-const ES_LEVELS = [["none","None",0],["mod","$5/ac/yr",5],["high","$15/ac/yr",15]];
+const ES_LEVELS = [["none","None",0],["mod","$5 ac⁻¹ yr⁻¹",5],["high","$15 ac⁻¹ yr⁻¹",15]];
 const ES_MANAGED_FRAC = 0.5;
 const M3_PER_CUFT = 1/35.3147;            // yield-curve merch volume is cu ft/ac; stumpage is $/m3
 const DISC_RATES = [["0.03","3%"],["0.04","4%"],["0.05","5%"],["0.07","7%"]];
@@ -135,11 +140,11 @@ function MultiLineChart({ rows }) {
   const px=v=>m.l+(v-x0)/((x1-x0)||1)*(W-m.l-m.r), py=v=>(H-m.b)-(v-y0)/((y1-y0)||1)*(H-m.t-m.b);
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{fontSize:9,fontVariantNumeric:"tabular-nums"}}>
-      <line x1={m.l} y1={H-m.b} x2={W-m.r} y2={H-m.b} stroke="var(--line,#345)" strokeWidth={0.6}/>
-      <line x1={m.l} y1={m.t} x2={m.l} y2={H-m.b} stroke="var(--line,#345)" strokeWidth={0.6}/>
-      {[y0,(y0+y1)/2,y1].map((t,i)=><text key={i} x={m.l-4} y={py(t)+3} textAnchor="end" fill="var(--mut,#8a93a0)">{fmt(t)}</text>)}
-      {[x0,Math.round((x0+x1)/2),x1].map((t,i)=><text key={i} x={px(t)} y={H-m.b+13} textAnchor="middle" fill="var(--mut,#8a93a0)">{t}</text>)}
-      {rows.map((r,i)=><polyline key={i} points={r.pts.map(p=>`${px(p[0])},${py(p[1])}`).join(" ")} fill="none" stroke={CLS_COL[r.cls]||"#888"} strokeWidth={1.5} opacity={0.85}/>)}
+      <line x1={m.l} y1={H-m.b} x2={W-m.r} y2={H-m.b} stroke="var(--axis)" strokeWidth={0.6}/>
+      <line x1={m.l} y1={m.t} x2={m.l} y2={H-m.b} stroke="var(--axis)" strokeWidth={0.6}/>
+      {[y0,(y0+y1)/2,y1].map((t,i)=><text key={i} x={m.l-4} y={py(t)+3} textAnchor="end" fill="var(--mut)">{fmt(t)}</text>)}
+      {[x0,Math.round((x0+x1)/2),x1].map((t,i)=><text key={i} x={px(t)} y={H-m.b+13} textAnchor="middle" fill="var(--mut)">{t}</text>)}
+      {rows.map((r,i)=><polyline key={i} points={r.pts.map(p=>`${px(p[0])},${py(p[1])}`).join(" ")} fill="none" stroke={CLS_COL[r.cls]||"var(--context)"} strokeWidth={1.5} opacity={0.85}/>)}
     </svg>
   );
 }
@@ -151,11 +156,11 @@ function svgFor(rows){
   const xs=rows.flatMap(r=>r.pts.map(p=>p[0])), ys=rows.flatMap(r=>r.pts.map(p=>p[1]));
   const x0=Math.min(...xs),x1=Math.max(...xs),y1=Math.max(...ys,1)*1.05,y0=Math.min(...ys,0);
   const px=v=>m.l+(v-x0)/((x1-x0)||1)*(W-m.l-m.r), py=v=>(H-m.b)-(v-y0)/((y1-y0)||1)*(H-m.t-m.b);
-  const ax=`<line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#ccc"/><line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}" stroke="#ccc"/>`;
-  const yl=[y0,(y0+y1)/2,y1].map(t=>`<text x="${m.l-4}" y="${(py(t)+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#666">${Math.round(t)}</text>`).join("");
-  const xlb=[x0,Math.round((x0+x1)/2),x1].map(t=>`<text x="${px(t).toFixed(1)}" y="${H-m.b+13}" text-anchor="middle" font-size="9" fill="#666">${t}</text>`).join("");
-  const lines=rows.map(r=>`<polyline points="${r.pts.map(p=>px(p[0]).toFixed(1)+','+py(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="${CLS_COL[r.cls]||'#888'}" stroke-width="1.3" opacity="0.85"/>`).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;border:1px solid #eee">${ax}${yl}${xlb}${lines}</svg>`;
+  const ax=`<line x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}" stroke="#C3C5C1"/><line x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}" stroke="#C3C5C1"/>`;
+  const yl=[y0,(y0+y1)/2,y1].map(t=>`<text x="${m.l-4}" y="${(py(t)+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#5F646B">${Math.round(t)}</text>`).join("");
+  const xlb=[x0,Math.round((x0+x1)/2),x1].map(t=>`<text x="${px(t).toFixed(1)}" y="${H-m.b+13}" text-anchor="middle" font-size="9" fill="#5F646B">${t}</text>`).join("");
+  const lines=rows.map(r=>`<polyline points="${r.pts.map(p=>px(p[0]).toFixed(1)+','+py(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="${CLS_COL[r.cls]||'#9AA0A6'}" stroke-width="1.3" opacity="0.85"/>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;border:1px solid #DADBD7">${ax}${yl}${xlb}${lines}</svg>`;
 }
 
 export default function RunBuilder({ initState, units = "imperial", simple = false }) {
@@ -288,8 +293,8 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
   const carbonLean = reserveTotal>managedTotal;
   const polClause = policy!=="none" ? ` under ${(POLICIES.find(([k])=>k===policy)||[])[1].toLowerCase()}` : "";
   const decision = repNode ? (carbonLean
-    ? `At ${p.label.toLowerCase()} prices${esAnnual?" with ES payments":""}${polClause}, this forest is worth more standing (~${mpa(reserveTotal)}/${PER} NPV) than harvested (~${mpa(managedTotal)}/${PER}). A reserve or light-touch strategy looks favorable.`
-    : `At ${p.label.toLowerCase()} prices${esAnnual?" even with ES payments":""}${polClause}, active management pays (~${mpa(managedTotal)}/${PER} NPV) over keeping it standing (~${mpa(reserveTotal)}/${PER}). A managed strategy looks favorable.`) : null;
+    ? `At ${p.label.toLowerCase()} prices${esAnnual?" with ES payments":""}${polClause}, this forest is worth more standing (~${mpa(reserveTotal)} ${PER}⁻¹ NPV) than harvested (~${mpa(managedTotal)} ${PER}⁻¹). A reserve or light-touch strategy looks favorable.`
+    : `At ${p.label.toLowerCase()} prices${esAnnual?" even with ES payments":""}${polClause}, active management pays (~${mpa(managedTotal)} ${PER}⁻¹ NPV) over keeping it standing (~${mpa(reserveTotal)} ${PER}⁻¹). A managed strategy looks favorable.`) : null;
 
   // Decision sensitivity: the carbon-price and discount-rate thresholds at which the
   // reserve-vs-managed recommendation flips. Carbon NPV is linear in price, so the carbon
@@ -324,10 +329,10 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
     const cDir = carbonLean ? "falls below" : "rises above";
     const dDir = carbonLean ? "rises above" : "falls below";
     const parts = [];
-    if(carbonFlip!=null) parts.push(`carbon ${cDir} ~$${Math.round(carbonFlip)}/tCO₂e`);
+    if(carbonFlip!=null) parts.push(`carbon ${cDir} ~$${Math.round(carbonFlip)} tCO₂e⁻¹`);
     if(discFlip!=null) parts.push(`the discount rate ${dDir} ~${(discFlip*100).toFixed(1)}%`);
-    if(!parts.length) return `What flips it: this call is robust to carbon price and discount rate across the plausible range (tested $0–300/tCO₂e, 1–12% discount).`;
-    return `What flips it: the recommendation tips toward ${other} if ${parts.join(" or ")} (now $${p.carbon}/tCO₂e, ${(disc*100).toFixed(0)}% discount).`;
+    if(!parts.length) return `What flips it: this call is robust to carbon price and discount rate across the plausible range (tested $0 to 300 tCO₂e⁻¹, 1% to 12% discount).`;
+    return `What flips it: the recommendation tips toward ${other} if ${parts.join(" or ")} (now $${p.carbon} tCO₂e⁻¹, ${(disc*100).toFixed(0)}% discount).`;
   })();
 
   function submitHPC() {
@@ -351,26 +356,31 @@ export default function RunBuilder({ initState, units = "imperial", simple = fal
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
     const date = new Date().toLocaleDateString();
     const scoreRows = scored.map(({ r, score }) => { const c=r.criteria; const isBest=score>=best-0.001;
-      return `<tr${isBest?' style="background:#eaf7f0;font-weight:600"':''}><td>${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>$${fmt(c.econ)}</td><td>$${fmt(c.carbon)}</td><td>$${fmt(c.es)}</td><td>${c.resil!=null?Math.round(c.resil*100):"&ndash;"}</td><td>${c.risk!=null?Math.round(c.risk*100):"&ndash;"}</td><td>${c.agree!=null?Math.round(c.agree*100)+"%":"&ndash;"}</td><td>${Math.round(score)}${isBest?" &#9733;":""}</td></tr>`; }).join("");
+      return `<tr${isBest?' class="best"':''}><td>${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>${fmt(c.econ)}</td><td>${fmt(c.carbon)}</td><td>${fmt(c.es)}</td><td>${c.resil!=null?Math.round(c.resil*100):"&ndash;"}</td><td>${c.risk!=null?Math.round(c.risk*100):"&ndash;"}</td><td>${c.agree!=null?Math.round(c.agree*100):"&ndash;"}</td><td>${Math.round(score)}${isBest?" &#9733;":""}</td></tr>`; }).join("");
     const scnRows = run.results.map((r,i) => { const present=r.engines.filter(e=>e.rows.length); const eng=present.map(e=>`${e.cls} (${e.rows.length})`).join(", ");
-      return `<tr><td>${i+1}. ${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>${eng||"&mdash;"}</td><td>timber $${fmt(r.econ.npvH)}, carbon $${fmt(r.econ.npvC)}, ES $${fmt(r.econ.esv)}, <b>total $${fmt(r.econ.total)}</b></td></tr>`; }).join("");
-    const html = `<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Forest Scenario Report &mdash; ${st}</title>
-<style>body{font-family:Georgia,serif;max-width:760px;margin:32px auto;padding:0 16px;color:#1a1a1a;line-height:1.5}h1{font-size:21px;margin-bottom:2px}h2{font-size:14px;border-bottom:1px solid #ccc;padding-bottom:3px;margin-top:22px}table{border-collapse:collapse;width:100%;font-size:12px;margin:6px 0}th,td{border:1px solid #ccc;padding:4px 7px;text-align:left}.muted{color:#666;font-size:11px}.rec{border-left:4px solid #2e9e6b;padding:8px 12px;background:#f6fbf8;margin:10px 0}pre{background:#f5f5f5;padding:8px;font-size:10px;overflow:auto;white-space:pre-wrap}@media print{body{margin:0}}</style></head><body>
+      return `<tr><td>${i+1}. ${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td><td>${eng||"&mdash;"}</td><td>timber ${fmt(r.econ.npvH)}, carbon ${fmt(r.econ.npvC)}, ES ${fmt(r.econ.esv)}, <b>total ${fmt(r.econ.total)}</b></td></tr>`; }).join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>PERSEUS Forest Scenario Report: ${st}</title>
+<style>:root{--bg:#FFFFFF;--ink:#141517;--ink-2:#4A4F56;--mut:#5F646B;--line:#DADBD7;--line-strong:#C3C5C1;--accent:#1A3D28;--accent-tint:#E6EFE8;--panel-2:#F4F4F2}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:760px;margin:32px auto;padding:0 16px;color:var(--ink);background:var(--bg);line-height:1.5}h1{font-size:21px;margin-bottom:2px;color:var(--accent)}h2{font-size:14px;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:3px;margin-top:22px}
+table{border-collapse:collapse;width:100%;font-size:12px;margin:6px 0;font-variant-numeric:tabular-nums;border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong)}caption{caption-side:top;text-align:left;font-size:12px;color:var(--ink-2);padding:0 0 6px}caption b{color:var(--ink)}th{font-weight:700;text-align:center;vertical-align:middle;padding:5px 8px;border-bottom:1px solid var(--line-strong)}td{text-align:center;vertical-align:middle;padding:4px 8px}tr.best{background:var(--accent-tint);font-weight:600}
+.muted{color:var(--mut);font-size:11px}.rec{border-left:2px solid var(--accent);padding:8px 12px;background:var(--accent-tint);margin:10px 0}pre{background:var(--panel-2);border:1px solid var(--line);padding:8px;font-size:10px;overflow:auto;white-space:pre-wrap}@media print{body{margin:0}}</style></head><body>
 <h1>PERSEUS Forest Scenario Report</h1>
 <div class="muted">Area: ${st} &middot; Generated ${date} &middot; Decision-support prototype (illustrative)</div>
 <div class="rec"><b>Recommendation.</b> ${decision?esc(decision):"Run scenarios to generate a recommendation."}</div>
 <h2>Assumptions</h2>
-<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${st} blended stumpage $${fmt(stumpageM3,0)}/m³ (multi-year real median; ${priceConf}${stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""}${lowSample?", thin market — indicative only":""})${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon}/tCO2e (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+"/ac/yr"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
+<p>Models: ${selModels.map(([,l])=>l).join(", ")}. Output metric: ${(METRICS.find(([k])=>k===metric)||[])[1]}. Timber price: ${st} blended stumpage $${fmt(stumpageM3,0)} m⁻³ (multi-year real median; ${priceConf}${stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""}${lowSample?"; thin market, indicative only":""})${p.label!=="Base"?` × ${p.mult} (${p.label})`:""}. Carbon price: $${p.carbon} tCO₂e⁻¹ (illustrative). Ecosystem-service payment: ${esAnnual?("$"+esAnnual+" ac⁻¹ yr⁻¹"):"none"}. Discount rate: ${(disc*100).toFixed(0)}%. Policy: ${(POLICIES.find(([k])=>k===policy)||[])[1]}. Decision emphasis: ${(EMPH_LABELS.find(([k])=>k===emphasis)||[])[1]}. Horizon: 2100.</p>
 <h2>Multi-criteria scorecard</h2>
-<table><thead><tr><th>Scenario</th><th>Total $/ac</th><th>Carbon $</th><th>Eco-svc $</th><th>Resilience</th><th>Risk</th><th>Model agreement</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
+<table><caption><b>Scorecard by scenario.</b> NPV per acre; resilience, risk and score on a 0 to 100 scale; &#9733; marks the best score.</caption><thead><tr><th>Scenario</th><th>Total ($ ac⁻¹)</th><th>Carbon ($ ac⁻¹)</th><th>Eco-svc ($ ac⁻¹)</th><th>Resilience</th><th>Risk</th><th>Model agreement (%)</th><th>Score</th></tr></thead><tbody>${scoreRows}</tbody></table>
 <h2>Scenario detail (multi-model ensemble)</h2>
-<table><thead><tr><th>Scenario</th><th>Engines (model runs)</th><th>Economics (NPV per acre)</th></tr></thead><tbody>${scnRows}</tbody></table>
+<table><caption><b>Engines and economics by scenario.</b> Model runs per engine family in parentheses.</caption><thead><tr><th>Scenario</th><th>Engines (model runs)</th><th>Economics (NPV, $ ac⁻¹)</th></tr></thead><tbody>${scnRows}</tbody></table>
 <h2>Ensemble trajectories</h2>
 ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px 0 2px">Scenario ${i+1}: ${esc((MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1])} &middot; ${(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</div>${svgFor(r.engines.flatMap(e=>e.rows))}`).join("")}
 <h2>Run specification (Cardinal contract)</h2>
 <pre>${esc(JSON.stringify(spec,null,2))}</pre>
 <h2>Methods &amp; caveats</h2>
-<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs. Carbon value is the flow-basis NPV of annual net sequestration (the discounted stream of yearly carbon gain), which is how a carbon program pays a landowner; this keeps early sequestration in the value rather than discounting a single horizon stock. The carbon price is anchored to voluntary and compliance market benchmarks (the EPA social cost of carbon, ~$190/tCO2e, is higher but is a societal value, not a payment); ecosystem-service payments and policy effects are illustrative. Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
+<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs.</p>
+<p class="muted">Carbon value is the flow-basis NPV of annual net sequestration (the discounted stream of yearly carbon gain), which is how a carbon program pays a landowner; this keeps early sequestration in the value rather than discounting a single horizon stock. The carbon price is anchored to voluntary and compliance market benchmarks (the EPA social cost of carbon, ~$190 tCO₂e⁻¹, is higher but is a societal value, not a payment); ecosystem-service payments and policy effects are illustrative.</p>
+<p class="muted">Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
 </body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
@@ -382,25 +392,27 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
   const setScn=(i,k,v)=>setScenarios(s=>s.map((r,j)=>j===i?{...r,[k]:v}:r));
   const addScn=()=>setScenarios(s=>[...s,{mgmt:(availMgmts[0]||MGMTS[0])[0],climate:"rcp45"}]);
   const rmScn=(i)=>setScenarios(s=>s.length>1?s.filter((_,j)=>j!==i):s);
-  const sel={background:"var(--panel)",color:"var(--ink)",border:"1px solid var(--line)",borderRadius:5,padding:"2px 6px",fontSize:11};
-  const chip=(on,col)=>({fontSize:11,padding:"2px 9px",borderRadius:4,cursor:"pointer",border:`1px solid ${on?(col||"#3a6ea5"):"var(--bd,#345)"}`,background:on?(col||"#3a6ea5"):"transparent",color:on?"#fff":"var(--fg,#cdd)"});
+  // Chip state is a class (panels.css .pn-chip / .on): one functional accent for every
+  // selected chip. A model chip keys to its series color with a small swatch instead.
+  const chip=(on)=>({__cls:"pn-chip"+(on?" on":"")});
   // a11y: make non-button clickable chips keyboard-operable (WCAG 2.1.1 / 4.1.2).
   // Spread onto a <span> to add role=button, focusability, and Enter/Space activation.
-  const clickable=(fn,style,label)=>({style,className:"chip",onClick:fn,role:"button",tabIndex:0,"aria-label":label,
-    onKeyDown:e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(e); } }});
-  const HPC_STEP={submitting:["Submitting run-spec to Cardinal…",15],queued:["Queued on SLURM (PUOM0008)…",40],running:["Running ensemble: FVS, CBM, CEM, yield…",75],complete:["Complete — results delivered",100]};
+  const clickable=(fn,style,label)=>{ const { __cls, ...rest } = style || {};
+    return {style:rest,className:"chip"+(__cls?" "+__cls:""),onClick:fn,role:"button",tabIndex:0,"aria-label":label,
+    onKeyDown:e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(e); } }}; };
+  const HPC_STEP={submitting:["Submitting run-spec to Cardinal…",15],queued:["Queued on SLURM (PUOM0008)…",40],running:["Running ensemble: FVS, CBM, CEM, yield…",75],complete:["Complete: results delivered",100]};
 
   return (
     <div>
       <div className="who" style={{marginBottom:6}}><b>Build a run</b> <span style={{color:"var(--mut)"}}>· select an area, choose models, build scenarios, submit</span></div>
-      <div className="note" style={{margin:"0 0 8px",padding:"6px 9px",borderRadius:6,background:"rgba(63,182,139,0.08)",border:"1px solid var(--line)"}}>New here? Pick a state, keep the default models and the two scenarios, and press <b>Run free</b>. Then change the market, policy, or emphasis and watch the recommendation update.</div>
+      <div className="note pn-tint" style={{margin:"0 0 8px",padding:"6px 9px"}}>New here? Pick a state, keep the default models and the two scenarios, and press <b>Run free</b>. Then change the market, policy, or emphasis and watch the recommendation update.</div>
 
       {/* 1. area */}
       <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
-        <div style={{fontSize:11,color:"var(--mut)",marginBottom:4}}>1 · Area of interest</div>
+        <div className="eyebrow pn-step">1 · Area of interest</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",fontSize:11}}>
           <span style={{color:"var(--mut)"}}>State (ownership):</span>
-          <select value={st} onChange={e=>setSt(e.target.value)} style={sel}>{STATES.map(s=><option key={s} value={s}>{s}</option>)}</select>
+          <select value={st} onChange={e=>setSt(e.target.value)} className="pn-sel">{STATES.map(s=><option key={s} value={s}>{s}</option>)}</select>
           <span style={{color:"var(--mut)"}}>{series===null?"loading area data…":`${availMetrics.length} metrics available`}</span>
         </div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
@@ -409,21 +421,21 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
           {dataSource==="user" && <input type="file" accept=".csv,.txt" onChange={onUpload} style={{fontSize:10}}/>}
         </div>
         {dataSource==="user" && upload && <div className="note" style={{marginTop:3}}>Loaded {upload.name}: {upload.rows} rows × {upload.cols} columns. A subscriber run initializes stands from this inventory on Cardinal.</div>}
-        {dataSource!=="fia" && <div className="note" style={{marginTop:3,color:"#8a5cd1"}}>{dataSource==="treemap"?"TreeMap":"Your inventory"} drives a subscriber Cardinal run; the free preview below uses precomputed FIA results for {st}.</div>}
+        {dataSource!=="fia" && <div className="note" style={{marginTop:3,color:"var(--ink-2)"}}>{dataSource==="treemap"?"TreeMap":"Your inventory"} drives a subscriber Cardinal run; the free preview below uses precomputed FIA results for {st}.</div>}
         <div className="note" style={{marginTop:4}}>States are the precomputed unit here. A subscriber run takes a drawn AOI or uploaded inventory at any scale, crossing state lines, and resolves the same way.</div>
       </div>
 
       {/* surveillance (near-term, Guo framework) */}
       {distAgents.length > 0 && (
         <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
-          <div style={{fontSize:11,color:"var(--mut)",marginBottom:4}}>Forest-health surveillance · near-term · observed disturbance by agent ({st})</div>
+          <div className="eyebrow pn-step">Forest-health surveillance · near-term · observed disturbance by agent ({st})</div>
           {anyDist!=null && <div style={{fontSize:12,marginBottom:5}}>Any disturbance affects <b>{anyDist.toFixed(1)}%</b> of forest area (FIA).</div>}
           {distAgents.map(a=>(
             <div key={a.k} style={{display:"flex",alignItems:"center",gap:8,fontSize:11,marginBottom:3}}>
               <span style={{width:58,color:"var(--mut)"}}>{a.lbl}</span>
-              <div style={{flex:1,height:9,background:"var(--panel)",borderRadius:3,overflow:"hidden"}}>
-                <div style={{height:"100%",width:Math.max(2,a.v/distMax*100)+"%",background:a.col}}/>
-              </div>
+              <span className="pn-track">
+                <span style={{width:Math.max(2,a.v/distMax*100)+"%",background:a.col}}/>
+              </span>
               <span style={{width:42,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{a.v.toFixed(1)}%</span>
             </div>
           ))}
@@ -433,29 +445,29 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
 
       {/* 2. models */}
       <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
-        <div style={{fontSize:11,color:"var(--mut)",marginBottom:4}}>2 · Models &amp; output</div>
+        <div className="eyebrow pn-step">2 · Models &amp; output</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-          {MODELS.map(([k,lbl,cls])=><span key={k} {...clickable(()=>setModels(m=>({...m,[k]:!m[k]})),chip(models[k],CLS_COL[cls]),`Toggle model ${lbl}`)} aria-pressed={!!models[k]}>{lbl}</span>)}
+          {MODELS.map(([k,lbl,cls])=><span key={k} {...clickable(()=>setModels(m=>({...m,[k]:!m[k]})),{__cls:"pn-chip soft"+(models[k]?" on":"")},`Toggle model ${lbl}`)} aria-pressed={!!models[k]}><i className="pn-sw" style={{background:CLS_COL[cls],opacity:models[k]?1:0.45}}/>{lbl}</span>)}
         </div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
           <span style={{color:"var(--mut)"}}>Output metric:</span>
-          <select value={metric} onChange={e=>setMetric(e.target.value)} style={sel}>{availMetrics.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
+          <select value={metric} onChange={e=>setMetric(e.target.value)} className="pn-sel">{availMetrics.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
         </div>
       </div>
 
       {/* 3. scenarios */}
       <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
-        <div style={{fontSize:11,color:"var(--mut)",marginBottom:4}}>3 · Scenarios (management × climate)</div>
+        <div className="eyebrow pn-step">3 · Scenarios (management × climate)</div>
         {scenarios.map((sc,i)=>(
           <div key={i} style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginBottom:4}}>
             <span style={{color:"var(--mut)",width:14}}>{i+1}</span>
-            <select value={sc.mgmt} onChange={e=>setScn(i,"mgmt",e.target.value)} style={sel}>{(availMgmts.length?availMgmts:MGMTS).map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
-            <select value={sc.climate} onChange={e=>setScn(i,"climate",e.target.value)} style={sel}>{CLIMATES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
+            <select value={sc.mgmt} onChange={e=>setScn(i,"mgmt",e.target.value)} className="pn-sel">{(availMgmts.length?availMgmts:MGMTS).map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
+            <select value={sc.climate} onChange={e=>setScn(i,"climate",e.target.value)} className="pn-sel">{CLIMATES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
             {scenarios.length>1 && <span {...clickable(()=>rmScn(i),{cursor:"pointer",color:"var(--mut)",fontWeight:700},"Remove scenario")}>×</span>}
           </div>
         ))}
-        <span {...clickable(addScn,{...chip(false),display:"inline-block",marginTop:2},"Add scenario")}>+ add scenario</span>
-        <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Timber value uses real per-state blended stumpage, and carbon a market-anchored price (voluntary/compliance); ES payments and policy multipliers are illustrative.</div>
+        <span {...clickable(addScn,{...chip(false),display:"inline-flex",marginTop:2},"Add scenario")}>+ add scenario</span>
+        <div className="note" style={{marginTop:6}}>Climate pathways currently share the baseline yield curves for most engines; calibrated climate scaling (CEM) is in progress, so historic and RCP may read similarly until it lands. Timber value uses real per-state blended stumpage, and carbon a market-anchored price (voluntary or compliance); ES payments and policy multipliers are illustrative.</div>
         <details open={!simple} style={{marginTop:8}}>
           <summary style={{fontSize:11,color:"var(--mut)",cursor:"pointer"}}>Market, ecosystem-service, policy &amp; discount rate</summary>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
@@ -464,20 +476,20 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <span style={{color:"var(--mut)",marginLeft:6}}>ES:</span>
             {ES_LEVELS.map(([k,lbl])=><span key={k} {...clickable(()=>setEs(k),chip(es===k),`Ecosystem-service payment ${lbl}`)} aria-pressed={es===k}>{lbl}</span>)}
           </div>
-          <div className="note" style={{marginTop:2}}>Timber priced from <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)}/m³</b> <span style={{color:"var(--mut)"}}>(multi-year real median; {priceConf}{stDetail&&stDetail.region?`, ${stDetail.saw_share*100|0}% sawtimber mix`:""}{stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})</span>{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}.{lowSample && <span style={{color:"#c0792b"}}> Thin market (n≈{stDetail.n_min}) — treat this price as indicative.</span>} <span style={{color:"#8a5cd1"}}>Carbon ${p.carbon}/tCO₂e, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
+          <div className="note" style={{marginTop:2}}>Timber priced from <b>{st}</b> blended stumpage <b>${fmt(stumpageM3,0)} m⁻³</b> <span style={{color:"var(--mut)"}}>(multi-year real median; {priceConf}{stDetail&&stDetail.region?`, ${stDetail.saw_share*100|0}% sawtimber mix`:""}{stDetail&&stDetail.n_min?`, n≈${stDetail.n_min}`:""})</span>{price!=="base" ? ` × ${p.mult} (${p.label})` : ""}.{lowSample && <span style={{color:"var(--warn)"}}> Thin market (n≈{stDetail.n_min}): treat this price as indicative.</span>} <span>Carbon ${p.carbon} tCO₂e⁻¹, market-anchored (voluntary ~15, CA compliance ~35, ceiling ~95; societal cost ~190). ES illustrative.</span></div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
             <span style={{color:"var(--mut)"}}>Policy:</span>
-            <select value={policy} onChange={e=>setPolicy(e.target.value)} style={sel}>{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
+            <select value={policy} onChange={e=>setPolicy(e.target.value)} className="pn-sel">{POLICIES.map(([k,lbl])=><option key={k} value={k}>{lbl}</option>)}</select>
             <span style={{color:"var(--mut)",marginLeft:6}}>Discount rate:</span>
             {DISC_RATES.map(([k,lbl])=><span key={k} {...clickable(()=>setDisc(+k),chip(disc===+k),`Discount rate ${lbl}`)} aria-pressed={disc===+k}>{lbl}</span>)}
           </div>
           {!simple && (
           <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",fontSize:11,marginTop:6}}>
-            <span style={{color:"var(--mut)"}}>Rotation costs ($/ac):</span>
+            <span style={{color:"var(--mut)"}}>Rotation costs ({fmtUnit("$/ac")}):</span>
             <span style={{color:"var(--mut)"}}>establishment</span>
-            <input type="number" min="0" step="50" value={estCost} onChange={e=>setEstCost(Math.max(0,+e.target.value||0))} style={{...sel,width:70}}/>
+            <input type="number" min="0" step="50" value={estCost} onChange={e=>setEstCost(Math.max(0,+e.target.value||0))} className="pn-sel" style={{width:70}}/>
             <span style={{color:"var(--mut)"}}>annual mgmt</span>
-            <input type="number" min="0" step="1" value={mgmtCost} onChange={e=>setMgmtCost(Math.max(0,+e.target.value||0))} style={{...sel,width:60}}/>
+            <input type="number" min="0" step="1" value={mgmtCost} onChange={e=>setMgmtCost(Math.max(0,+e.target.value||0))} className="pn-sel" style={{width:60}}/>
             <span style={{color:"var(--mut)",fontSize:10}}>net Faustmann; 0 = gross of costs</span>
           </div>)}
         </details>
@@ -486,30 +498,30 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
 
       {/* 4. submit */}
       <div className="chartcard" style={{padding:"8px 10px",marginBottom:8}}>
-        <div style={{fontSize:11,color:"var(--mut)",marginBottom:4}}>4 · Submit</div>
+        <div className="eyebrow pn-step">4 · Submit</div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button onClick={runFree} disabled={!selModels.length||series===null} className="mini-btn" style={{borderStyle:"solid",fontSize:12,padding:"4px 12px"}}>Run free (precomputed)</button>
-          <button onClick={submitHPC} disabled={!selModels.length||series===null||hpc==="submitting"||hpc==="queued"||hpc==="running"} className="mini-btn" style={{borderStyle:"solid",fontSize:12,padding:"4px 12px",borderColor:"#8a5cd1",color:hpc==="idle"||hpc==="complete"?"var(--ink)":"#8a5cd1"}}>⚡ Submit custom run to Cardinal (subscriber)</button>
+          <button onClick={submitHPC} disabled={!selModels.length||series===null||hpc==="submitting"||hpc==="queued"||hpc==="running"} className="mini-btn pn-btn" style={{borderStyle:"solid",fontSize:12,padding:"4px 12px",borderColor:"var(--line-strong)",color:hpc==="idle"||hpc==="complete"?"var(--ink)":"var(--accent)"}}><IcoServer/>Submit custom run to Cardinal (subscriber)</button>
         </div>
         {hpc!=="idle" && (
           <div style={{marginTop:8}}>
             <div style={{fontSize:11,marginBottom:3}}>{HPC_STEP[hpc][0]}</div>
-            <div style={{height:6,background:"var(--panel)",borderRadius:3,overflow:"hidden"}}>
-              <div style={{height:"100%",width:HPC_STEP[hpc][1]+"%",background:"#8a5cd1",transition:"width 0.6s"}}/>
+            <div className="pn-prog" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={HPC_STEP[hpc][1]}>
+              <i style={{transform:`scaleX(${HPC_STEP[hpc][1]/100})`}}/>
             </div>
           </div>
         )}
         <details style={{marginTop:6}}>
           <summary style={{fontSize:11,color:"var(--mut)",cursor:"pointer"}}>view run-spec (the Cardinal contract)</summary>
-          <pre style={{fontSize:10,overflow:"auto",background:"var(--panel)",padding:8,borderRadius:5,marginTop:4}}>{JSON.stringify(spec,null,2)}</pre>
+          <pre style={{fontSize:10,overflow:"auto",background:"var(--panel-2)",border:"1px solid var(--line)",color:"var(--ink-2)",padding:8,borderRadius:"var(--r)",marginTop:4}}>{JSON.stringify(spec,null,2)}</pre>
         </details>
       </div>
 
       {/* results */}
       {run && run.status==="no_data" && <div className="note" style={{padding:8}}>No precomputed series for {st}. A subscriber run would compute this live on Cardinal.</div>}
-      {run && run.results && <div style={{margin:"2px 0 8px"}}><button onClick={generateReport} className="mini-btn" style={{borderStyle:"solid",fontSize:12,padding:"4px 12px"}}>⬇ Download report (HTML · print to PDF)</button></div>}
+      {run && run.results && <div style={{margin:"2px 0 8px"}}><button onClick={generateReport} className="mini-btn pn-btn" style={{borderStyle:"solid",fontSize:12,padding:"4px 12px"}}><IcoDown/>Download report (HTML · print to PDF)</button></div>}
       {run && run.results && decision && (
-        <div className="chartcard" style={{padding:"8px 10px",marginBottom:8,borderLeft:"3px solid "+(carbonLean?"#2e9e6b":"#d98a3c")}}>
+        <div className="chartcard pn-rec" style={{padding:"8px 10px",marginBottom:8}}>
           <div style={{fontSize:11,fontWeight:600,marginBottom:2}}>Recommendation {hpc==="complete"?"· delivered from Cardinal":"· free precomputed"}</div>
           <div style={{fontSize:12}}>{decision}</div>
           {sensText && <div style={{fontSize:11,color:"var(--mut)",marginTop:4,borderTop:"1px solid var(--line)",paddingTop:4}}>{sensText}</div>}
@@ -522,9 +534,9 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <div style={{fontSize:11,fontWeight:600,marginBottom:2}}>Scenario {i+1}: {(MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1]} · {(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</div>
             <div style={{fontSize:10,color:"var(--mut)",marginBottom:2}}>{(METRICS.find(([k])=>k===metric)||[])[1]} · {allRows.length} model runs across {present.length} engines</div>
             <MultiLineChart rows={allRows}/>
-            <div style={{display:"flex",flexWrap:"wrap",gap:10,fontSize:10,marginTop:2}}>{present.map(e=><span key={e.cls} style={{color:CLS_COL[e.cls]}}>● {e.cls} ({e.rows.length})</span>)}</div>
+            <div className="pn-key">{present.map(e=><span key={e.cls}><i className="pn-sw" style={{background:CLS_COL[e.cls]}}/>{e.cls} ({e.rows.length})</span>)}</div>
             {repNode && (r.econ.npvH!=null||r.econ.npvC!=null) && (
-              <div className="note" style={{marginTop:4}}>Economics (NPV/{PER}, {p.label} market{esAnnual?`, ES $${esAnnual}/ac/yr`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span style={{color:"#8a5cd1"}}>carbon market-anchored</span></span>{r.sc.mgmt!=="reserve" && r.econ.rotation ? <span style={{color:"var(--mut)"}}> · optimal rotation <b>{r.econ.rotation} yr</b>, Faustmann land value {mpa(r.econ.lev)}/{PER}</span> : null}</div>
+              <div className="note" style={{marginTop:4}}>Economics (NPV, {fmtUnit("$/"+PER)}; {p.label} market{esAnnual?`, ES $${esAnnual} ac⁻¹ yr⁻¹`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span>carbon market-anchored</span></span>{r.sc.mgmt!=="reserve" && r.econ.rotation ? <span style={{color:"var(--mut)"}}> · optimal rotation <b>{r.econ.rotation} yr</b>, Faustmann land value {mpa(r.econ.lev)} {PER}⁻¹</span> : null}</div>
             )}
           </div>
         );
@@ -538,28 +550,30 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
               <span style={{color:"var(--mut)"}}>Emphasis:</span>
               {EMPH_LABELS.map(([k,lbl])=><span key={k} {...clickable(()=>setEmphasis(k),chip(emphasis===k),`Decision emphasis ${lbl}`)} aria-pressed={emphasis===k}>{lbl}</span>)}
             </div>
-            <table style={{width:"100%",fontSize:11,borderCollapse:"collapse",fontVariantNumeric:"tabular-nums"}}>
-              <thead><tr style={{color:"var(--mut)",textAlign:"right"}}>
-                <th style={{textAlign:"left",fontWeight:500}}>Scenario</th>
-                <th style={{fontWeight:500}}>Total $/{PER}</th><th style={{fontWeight:500}}>Carbon $</th><th style={{fontWeight:500}}>Eco-svc $</th>
-                <th style={{fontWeight:500}}>Resilience</th><th style={{fontWeight:500}}>Risk</th><th style={{fontWeight:500}}>Agreement</th><th style={{fontWeight:500}}>Score</th>
+            <table className="tbl pn-tbl">
+              <caption><b>Scorecard by scenario.</b> NPV in {fmtUnit("$/"+PER)}; resilience, risk and score on a 0 to 100 scale; ★ marks the best score.</caption>
+              <thead><tr>
+                <th>Scenario</th>
+                <th>Total ({fmtUnit("$/"+PER)})</th><th>Carbon ({fmtUnit("$/"+PER)})</th><th>Eco-svc ({fmtUnit("$/"+PER)})</th>
+                <th>Resilience</th><th>Risk</th><th>Agreement (%)</th><th>Score</th>
               </tr></thead>
               <tbody>
                 {scored.map(({r,score},i)=>{ const c=r.criteria; const isBest=score>=best-0.001;
+                  const num=(v)=>fmt(v == null ? v : v * UA);
                   return (
-                    <tr key={i} style={{textAlign:"right",borderTop:"1px solid var(--line,#345)",background:isBest?"rgba(46,158,107,0.12)":"transparent"}}>
-                      <td style={{textAlign:"left"}}>{(MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1]} · {(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td>
-                      <td>{mpa(c.econ)}</td><td>{mpa(c.carbon)}</td><td>{mpa(c.es)}</td>
+                    <tr key={i} className={isBest?"is-best":undefined}>
+                      <td>{(MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1]} · {(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td>
+                      <td>{num(c.econ)}</td><td>{num(c.carbon)}</td><td>{num(c.es)}</td>
                       <td>{c.resil!=null?Math.round(c.resil*100):"–"}</td>
-                      <td style={{color:c.risk!=null?(c.risk>0.4?"#c0504d":"var(--ink)"):"var(--mut)"}}>{c.risk!=null?Math.round(c.risk*100):"–"}</td>
-                      <td>{c.agree!=null?Math.round(c.agree*100)+"%":"–"}</td>
-                      <td style={{fontWeight:700,color:isBest?"#2e9e6b":"var(--ink)"}}>{Math.round(score)}{isBest?" ★":""}</td>
+                      <td style={{color:c.risk!=null?(c.risk>0.4?"var(--alert)":"var(--ink)"):"var(--mut)"}}>{c.risk!=null?Math.round(c.risk*100):"–"}</td>
+                      <td>{c.agree!=null?Math.round(c.agree*100):"–"}</td>
+                      <td style={{color:isBest?"var(--accent)":"var(--ink)"}}>{Math.round(score)}{isBest?" ★":""}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-            <div className="note" style={{marginTop:4}}>Each scenario scored 0–100 across economic value, carbon, ecosystem services, resilience, disturbance/climate risk (lower is better), and cross-model agreement, weighted by your emphasis. Resilience and risk come from the state HRR layer with an illustrative management adjustment. This is the multi-criteria, multi-model basis that sets PERSEUS apart from single-objective tools.</div>
+            <div className="note" style={{marginTop:4}}>Each scenario scored 0 to 100 across economic value, carbon, ecosystem services, resilience, disturbance and climate risk (lower is better), and cross-model agreement, weighted by your emphasis. Resilience and risk come from the state HRR layer with an illustrative management adjustment. This is the multi-criteria, multi-model basis that sets PERSEUS apart from single-objective tools.</div>
           </div>
         );
       })()}
