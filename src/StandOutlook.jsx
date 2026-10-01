@@ -32,7 +32,7 @@ function interp(curve, age) {
   }
   return curve[curve.length - 1][1];
 }
-const fmt = (v) => v == null ? "—" : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString()
+const fmt = (v) => v == null ? "n/a" : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString()
   : Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1));
 
 // stumpage -> $/cu ft for the AOI's state (approx; sawlog $/MBF, pulpwood $/cord)

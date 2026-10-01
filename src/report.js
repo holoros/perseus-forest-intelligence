@@ -17,7 +17,7 @@ const interp = (curve, age) => {
 const esc = (s) => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 import { conv, unitLabel, fmtArea as fmtAreaU } from "./units.js";
 import { FAMILY_COL } from "./palette.js";
-const num = (v,d=0) => v==null?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:d});
+const num = (v,d=0) => v==null?"n/a":Number(v).toLocaleString(undefined,{maximumFractionDigits:d});
 
 // ---- multi-model ensemble helpers (mirror the Engine-compare default filter) ----
 const REP_OUTLIER = m => (/(fvs.*(native|jenkins))/i.test(m) && !/(anchored|calibrated)/i.test(m)) || /wear_nh/i.test(m);
@@ -65,8 +65,8 @@ function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
   const { name, l3code, l3name, l1, centroid, area_m2, state, plotStats, landscape, allCurves } = aoi || {};
   const today = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
   const ps = plotStats, ls = landscape || {};
-  const cvNum = (v, u, d=0) => v==null?"—":`${conv(v,u,system).value.toFixed(d)} ${conv(v,u,system).unit}`;
-  const price = (v, u) => v==null?"—":`$${Math.round(conv(v,u,system).value)} ${conv(v,u,system).unit.replace(/^\$\s*/,"")}`;
+  const cvNum = (v, u, d=0) => v==null?"n/a":`${conv(v,u,system).value.toFixed(d)} ${conv(v,u,system).unit}`;
+  const price = (v, u) => v==null?"n/a":`$${Math.round(conv(v,u,system).value)} ${conv(v,u,system).unit.replace(/^\$\s*/,"")}`;
 
   const row = (k,v) => `<tr><td class="k">${esc(k)}</td><td class="v">${v}</td></tr>`;
   const bar = (label, pct, color) => `<div class="bar"><span class="bl">${esc(label)}</span>
@@ -135,8 +135,8 @@ function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
   let html = `<table class="kv">`;
   if(area_m2) html += row("Area", fmtAreaU(area_m2, system));
   if(centroid) html += row("Centroid", `${centroid[1].toFixed(3)}°, ${centroid[0].toFixed(3)}°`);
-  html += row("State", esc(state||"—"));
-  html += row("EPA L3 ecoregion", l3code?`${esc(l3code)} ${esc(l3name||"")}`:"—");
+  html += row("State", esc(state||"n/a"));
+  html += row("EPA L3 ecoregion", l3code?`${esc(l3code)} ${esc(l3name||"")}`:"n/a");
   if(l1) html += row("Biome (L1)", esc(l1));
   html += `</table>`;
 
