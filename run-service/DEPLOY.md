@@ -39,7 +39,9 @@ insert only succeeds for a user with an active subscription who is under their m
 3. Enable Auth (email magic-link or OAuth). Profiles auto-create via the `on_auth_user_created`
    trigger.
 4. Set function secrets (**[YOU]** supply the values):
-   `supabase secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... PADDLE_WEBHOOK_SECRET=... CARDINAL_DISPATCH_URL=...`
+   `supabase secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... PADDLE_WEBHOOK_SECRET=... CARDINAL_DISPATCH_URL=... PERSEUS_DISPATCH_SECRET=...`
+   `PERSEUS_DISPATCH_SECRET` is a dedicated random value (`openssl rand -hex 32`), set identically on the
+   backend host. Never reuse or derive it from a Supabase key.
 5. Deploy functions:
    `supabase functions deploy paddle-webhook --no-verify-jwt`
    `supabase functions deploy submit-run`

@@ -2,19 +2,22 @@
 PERSEUS run service — backend API skeleton.
 
 Endpoints:
-  POST /run            submit a scenario run-spec; validates, checks entitlement, enqueues
+  POST /run            free-tier request against the precompute store (no compute)
+  POST /internal/dispatch   subscriber run handed over by the submit-run edge function,
+                       authenticated with the PERSEUS_DISPATCH_SECRET shared secret
   GET  /run/{id}       run status
   GET  /run/{id}/result   results when complete
 
 This is a reviewable skeleton. The free tier reads the precompute store (handled
 client-side / static). The subscriber tier enqueues an on-demand Cardinal job via
-cardinal_dispatch. Auth/entitlement is a stub: wire it to the real account/billing
-provider (the team configures payment; this service only checks an entitlement flag).
+cardinal_dispatch. Entitlement is decided in the database (RLS on public.runs) by the
+submit-run edge function; this service trusts only callers that present the dedicated
+dispatch secret and fails closed when the secret is unset or entitlement is unknown.
 
 Run locally:  uvicorn app:app --reload
 """
 from __future__ import annotations
-import json, uuid, time
+import hmac, json, os, uuid, time
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
@@ -38,18 +41,45 @@ class RunRequest(BaseModel):
     user: Optional[str] = None
 
 
+class DispatchRequest(BaseModel):
+    run_id: str
+    spec: dict
+
+
+MIN_SECRET_LEN = 32
+
+
+def _dispatch_secret() -> str:
+    return os.environ.get("PERSEUS_DISPATCH_SECRET", "")
+
+
+def verify_internal_key(presented: Optional[str]) -> None:
+    """Constant time check of the X-Internal-Key header against the dedicated secret.
+
+    Fails closed: an unset or short secret rejects every call rather than accepting any.
+    """
+    secret = _dispatch_secret()
+    if len(secret) < MIN_SECRET_LEN:
+        raise HTTPException(503, "dispatch secret not configured")
+    if not presented or not hmac.compare_digest(presented.encode(), secret.encode()):
+        raise HTTPException(401, "invalid internal key")
+
+
 def check_entitlement(tier: str, user: Optional[str]) -> None:
-    """Stub. Subscriber/custom runs require an entitled account. Wire to billing."""
-    if tier == "subscriber":
-        if not user:
-            raise HTTPException(401, "subscriber runs require an account")
-        if not _is_entitled(user):
-            raise HTTPException(402, "active subscription required")
+    """Subscriber runs never enter through the public /run endpoint.
+
+    A client supplied user id or X-User header is not proof of identity, so the public
+    endpoint serves the free tier only. Subscriber runs arrive via /internal/dispatch after
+    the database entitlement gate in submit-run.
+    """
+    if tier != "free":
+        raise HTTPException(403, "subscriber runs are submitted through the authenticated submit-run function")
 
 
 def _is_entitled(user: str) -> bool:
-    # TODO: look up the account's subscription status from the accounts/billing store.
-    return True  # skeleton: allow
+    """Fail closed. Entitlement lives in Supabase (subscriptions plus RLS); this backend has
+    no trusted view of it, so it never grants entitlement on its own."""
+    return False
 
 
 @app.post("/run")
@@ -65,11 +95,18 @@ def submit_run(req: RunRequest, x_user: Optional[str] = Header(default=None)):
                      "spec": spec, "submitted": time.time(),
                      "note": "free tier resolves against the precompute store"}
         return {"id": rid, "status": "complete", "mode": "precomputed"}
-    # Subscriber tier: enqueue an on-demand Cardinal run.
-    slurm_id = dispatch.submit(spec, rid)  # returns Cardinal job id (stubbed)
+    raise HTTPException(403, "unsupported tier")  # unreachable after check_entitlement
+
+
+@app.post("/internal/dispatch")
+def internal_dispatch(req: DispatchRequest, x_internal_key: Optional[str] = Header(default=None)):
+    """Subscriber run from the submit-run edge function (already entitlement gated)."""
+    verify_internal_key(x_internal_key)
+    rid = dispatch.safe_run_id(req.run_id)
+    job_id = dispatch.submit(req.spec, rid)  # returns compute job id (stubbed)
     JOBS[rid] = {"id": rid, "status": "queued", "mode": "ondemand",
-                 "slurm_id": slurm_id, "spec": spec, "submitted": time.time()}
-    return {"id": rid, "status": "queued", "mode": "ondemand"}
+                 "slurm_id": job_id, "spec": req.spec, "submitted": time.time()}
+    return {"id": rid, "status": "queued", "mode": "ondemand", "job_id": job_id}
 
 
 @app.get("/run/{rid}")
