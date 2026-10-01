@@ -3,12 +3,15 @@
 // The subscriber "Submit custom run to Cardinal" path. Flow:
 //   1. Authenticate the caller (JWT from the browser; RLS still applies).
 //   2. Insert a run row AS THE USER (anon/JWT client) so the RLS entitlement policy
-//      (active subscription AND under monthly quota) is the gate -- no app-side tier check.
-//   3. With the service role, hand the run-spec to the Cardinal dispatcher and record
-//      the SLURM job id; increment the user's monthly quota.
+//      (active subscription) plus the quota trigger is the gate -- no app-side tier check.
+//   3. With the service role, hand the run-spec to the dispatcher and record the job id.
+//      The monthly quota is taken atomically by the runs_take_quota trigger at step 2 and
+//      refunded only if the backend refuses the run.
 //
 // Secrets: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
-//          CARDINAL_DISPATCH_URL (the run-service backend that owns the SSH/SLURM keys).
+//          CARDINAL_DISPATCH_URL (the run-service backend that owns the SSH/SLURM keys),
+//          PERSEUS_DISPATCH_SECRET (a dedicated random shared secret, at least 32 bytes,
+//          set identically on the backend; never derived from any Supabase key).
 //
 // Deploy: supabase functions deploy submit-run
 
@@ -17,9 +20,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const URL_ = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const DISPATCH = Deno.env.get("CARDINAL_DISPATCH_URL")!; // backend/cardinal_dispatch endpoint
+const DISPATCH = Deno.env.get("CARDINAL_DISPATCH_URL")!; // backend POST /internal/dispatch
+const DISPATCH_SECRET = Deno.env.get("PERSEUS_DISPATCH_SECRET") || "";
 
 Deno.serve(async (req) => {
+  if (DISPATCH_SECRET.length < 32) return new Response("dispatch secret not configured", { status: 500 });
   if (req.method !== "POST") return new Response("method", { status: 405 });
   const jwt = req.headers.get("Authorization") || "";
   if (!jwt.startsWith("Bearer ")) return new Response("unauthorized", { status: 401 });
@@ -31,32 +36,40 @@ Deno.serve(async (req) => {
   const asUser = createClient(URL_, ANON, { global: { headers: { Authorization: jwt } } });
   const { data: run, error } = await asUser
     .from("runs")
-    .insert({ spec, tier: "subscriber", status: "queued" })
+    .insert({ user_id: (await asUser.auth.getUser()).data.user?.id, spec })
     .select("id, user_id")
     .single();
   if (error) {
     // RLS rejection = not entitled or over quota.
-    return new Response(JSON.stringify({ error: "not_entitled_or_over_quota", detail: error.message }),
+    return new Response(JSON.stringify({ error: "not_entitled_or_over_quota" }),
       { status: 402, headers: { "content-type": "application/json" } });
   }
 
-  // Service-role from here: dispatch to Cardinal and record the job id + quota.
+  // Service-role from here. The quota was already taken atomically by the runs_take_quota
+  // trigger on insert; refund it only when the backend clearly refused the run.
   const svc = createClient(URL_, SERVICE);
+  let r: Response;
   try {
-    const r = await fetch(DISPATCH, {
+    r = await fetch(DISPATCH, {
       method: "POST",
-      headers: { "content-type": "application/json", "x-internal-key": SERVICE.slice(0, 8) },
+      headers: { "content-type": "application/json", "x-internal-key": DISPATCH_SECRET },
       body: JSON.stringify({ run_id: run.id, spec }),
     });
-    const j = await r.json();
-    await svc.from("runs").update({
-      status: "dispatched", cardinal_job_id: j.job_id ?? null, updated_at: new Date().toISOString(),
-    }).eq("id", run.id);
-    await svc.rpc("increment_run_quota", { p_user: run.user_id });
-    return new Response(JSON.stringify({ run_id: run.id, status: "dispatched", job_id: j.job_id }),
-      { status: 202, headers: { "content-type": "application/json" } });
   } catch (e) {
-    await svc.from("runs").update({ status: "failed", error: String(e) }).eq("id", run.id);
-    return new Response(JSON.stringify({ run_id: run.id, error: "dispatch_failed" }), { status: 502 });
+    // Network failure: the backend may or may not have the run; do not refund blindly.
+    await svc.from("runs").update({ status: "failed", error: `dispatch unreachable: ${e}` }).eq("id", run.id);
+    return new Response(JSON.stringify({ run_id: run.id, error: "dispatch_unreachable" }), { status: 502 });
   }
+  if (!r.ok) {
+    await svc.from("runs").update({ status: "failed", error: `dispatch HTTP ${r.status}` }).eq("id", run.id);
+    await svc.rpc("refund_run_quota", { p_user: run.user_id });
+    return new Response(JSON.stringify({ run_id: run.id, error: "dispatch_refused" }), { status: 502 });
+  }
+  // Accepted. A malformed body does not undo an accepted job; record it without a job id.
+  const j = await r.json().catch(() => ({}));
+  await svc.from("runs").update({
+    status: "dispatched", cardinal_job_id: j.job_id ?? null, updated_at: new Date().toISOString(),
+  }).eq("id", run.id);
+  return new Response(JSON.stringify({ run_id: run.id, status: "dispatched", job_id: j.job_id ?? null }),
+    { status: 202, headers: { "content-type": "application/json" } });
 });
