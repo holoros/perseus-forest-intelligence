@@ -11,12 +11,23 @@ import MiniChart from "./MiniChart.jsx";
 import { conv, unitLabel } from "./units.js";
 
 const BASE = import.meta.env.BASE_URL;
+// Okabe-Ito scenario colors (categorical), ordered from no harvest to intensive harvest.
 const SCEN = [
-  { key: "reserve (no harvest)",   short: "Reserve",      color: "#3fb68b" },
-  { key: "managed (conservation)", short: "Conservation", color: "#6baed6" },
-  { key: "managed (harvest)",      short: "Harvest",      color: "#e6ab02" },
-  { key: "managed (intensive)",    short: "Intensive",    color: "#d95f02" },
+  { key: "reserve (no harvest)",   short: "Reserve",      color: "#009E73" },
+  { key: "managed (conservation)", short: "Conservation", color: "#56B4E9" },
+  { key: "managed (harvest)",      short: "Harvest",      color: "#E69F00" },
+  { key: "managed (intensive)",    short: "Intensive",    color: "#D55E00" },
 ];
+// House table on main and taste alike: centered cells, bold centered header, three rules
+// (above header, below header, below last row), no interior rules. so-table carries the
+// taste-ui hover tint; the inline rules override main's right-aligned, ruled rows.
+const RULE = "1px solid var(--line-strong, var(--line))";
+const TBL = { margin:"10px 8px 0", width:"calc(100% - 16px)", borderCollapse:"collapse",
+  borderTop:RULE, borderBottom:RULE, fontVariantNumeric:"tabular-nums" };
+const TH = { textAlign:"center", verticalAlign:"middle", fontWeight:700, color:"var(--ink)",
+  padding:"4px 6px", borderBottom:RULE };
+const TD = { textAlign:"center", verticalAlign:"middle", padding:"3px 6px", borderBottom:"none", color:"var(--ink)" };
+const CAP = { captionSide:"top", textAlign:"left", fontSize:12, color:"var(--ink-2, var(--mut))", padding:"0 0 6px" };
 
 // Series-store points are [year, v] or [year, lo, mid, hi]; MiniChart wants 4-tuples.
 const toPts = pts => (pts || []).filter(p => p && (p.length === 2 ? p[1] != null : p[2] != null))
@@ -73,7 +84,7 @@ export default function WoodProducts({ series, meta, state, units = "imperial" }
       h: h ? val(h) : null, hYear: h ? h[0] : null,
       c: c ? val(c) : null, cYear: c ? c[0] : null };
   }).filter(r => r.n1 != null || r.h != null || r.c != null);
-  const yr = k => { const ys = [...new Set(rows.map(r => r[k]).filter(Boolean))]; return ys.length ? ys.join("/") : ""; };
+  const yr = k => { const ys = [...new Set(rows.map(r => r[k]).filter(Boolean))]; return ys.length ? ys.join(" and ") : ""; };
 
   return (
     <div>
@@ -83,7 +94,7 @@ export default function WoodProducts({ series, meta, state, units = "imperial" }
       </div>
       {netSeries.length ? (
         <div className="chartcard" style={{padding:"6px 8px"}}>
-          <MiniChart series={netSeries} unit={u("net_forest_hwp_c")} xlabel="Year"/>
+          <MiniChart series={netSeries} unit={`Carbon stock (${u("net_forest_hwp_c")})`} xlabel="Year"/>
         </div>
       ) : <div className="note">No forest + wood products series for {state}.</div>}
       <div className="lgd" style={{marginTop:8}}>
@@ -96,28 +107,29 @@ export default function WoodProducts({ series, meta, state, units = "imperial" }
             {mm("hwp_carbon_stock").label} ({u("hwp_carbon_stock")}), CBM pathway</span>
         </div>
         <div className="chartcard" style={{padding:"6px 8px"}}>
-          <MiniChart series={hwpSeries} unit={u("hwp_carbon_stock")} xlabel="Year" height={170}/>
+          <MiniChart series={hwpSeries} unit={`Carbon stock (${u("hwp_carbon_stock")})`} xlabel="Year" height={170}/>
         </div>
       </>)}
 
       {rows.length > 0 && (
-        <table className="so-table" style={{margin:"10px 8px 0",width:"calc(100% - 16px)"}}>
+        <table className="so-table" style={TBL}>
+          <caption style={CAP}><b style={{color:"var(--ink)"}}>Carbon by scenario at the end of each projection</b>, state totals</caption>
           <thead><tr>
-            <th>Scenario</th>
-            <th title={mm("net_forest_hwp_c").label}>Forest + HWP {yr("nYear")}</th>
-            <th>Change since start</th>
-            <th>vs reserve</th>
-            <th title={mm("hwp_carbon_stock").label}>HWP pool {yr("hYear")}</th>
-            <th title={mm("net_climate_carbon").label}>Net climate C {yr("cYear")}</th>
+            <th style={TH}>Scenario</th>
+            <th style={TH} title={mm("net_forest_hwp_c").label}>Forest + HWP {yr("nYear")} ({u("net_forest_hwp_c")})</th>
+            <th style={TH}>Change since start ({u("net_forest_hwp_c")})</th>
+            <th style={TH}>vs reserve ({u("net_forest_hwp_c")})</th>
+            <th style={TH} title={mm("hwp_carbon_stock").label}>HWP pool {yr("hYear")} ({u("hwp_carbon_stock")})</th>
+            <th style={TH} title={mm("net_climate_carbon").label}>Net climate C {yr("cYear")} ({u("net_climate_carbon")})</th>
           </tr></thead>
           <tbody>{rows.map(r => (
             <tr key={r.s.key}>
-              <td>{r.s.key}</td>
-              <td>{fmt(cv(r.n1, "net_forest_hwp_c"))}</td>
-              <td>{r.n0 != null && r.n1 != null ? signed(cv(r.n1 - r.n0, "net_forest_hwp_c")) : "n/a"}</td>
-              <td>{r.vsRes != null ? signed(cv(r.vsRes, "net_forest_hwp_c")) : "n/a"}</td>
-              <td>{fmt(cv(r.h, "hwp_carbon_stock"))}</td>
-              <td>{signed(cv(r.c, "net_climate_carbon"))}</td>
+              <td style={TD}><i aria-hidden="true" style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:r.s.color,marginRight:5}}/>{r.s.key}</td>
+              <td style={TD}>{fmt(cv(r.n1, "net_forest_hwp_c"))}</td>
+              <td style={TD}>{r.n0 != null && r.n1 != null ? signed(cv(r.n1 - r.n0, "net_forest_hwp_c")) : "n/a"}</td>
+              <td style={TD}>{r.vsRes != null ? signed(cv(r.vsRes, "net_forest_hwp_c")) : "n/a"}</td>
+              <td style={TD}>{fmt(cv(r.h, "hwp_carbon_stock"))}</td>
+              <td style={TD}>{signed(cv(r.c, "net_climate_carbon"))}</td>
             </tr>))}
           </tbody>
         </table>
