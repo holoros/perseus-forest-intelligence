@@ -102,7 +102,10 @@ def submit_run(req: RunRequest, x_user: Optional[str] = Header(default=None)):
 def internal_dispatch(req: DispatchRequest, x_internal_key: Optional[str] = Header(default=None)):
     """Subscriber run from the submit-run edge function (already entitlement gated)."""
     verify_internal_key(x_internal_key)
-    rid = dispatch.safe_run_id(req.run_id)
+    try:
+        rid = dispatch.safe_run_id(req.run_id)
+    except ValueError:
+        raise HTTPException(400, "invalid run id")
     job_id = dispatch.submit(req.spec, rid)  # returns compute job id (stubbed)
     JOBS[rid] = {"id": rid, "status": "queued", "mode": "ondemand",
                  "slurm_id": job_id, "spec": req.spec, "submitted": time.time()}

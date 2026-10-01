@@ -32,48 +32,45 @@ Deno.serve(async (req) => {
   const data = evt.data || {};
   const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
-  // Map the Paddle customer to a PERSEUS user ONLY through custom_data.user_id, which the
-  // front end sets at checkout from the signed-in session. No email fallback: an email in a
-  // webhook payload is customer-editable and must never grant entitlement to an account.
+  // Map the Paddle customer to a PERSEUS user ONLY through custom_data.user_id. No email
+  // fallback: an email in a webhook payload is customer-editable and must never grant
+  // entitlement. custom_data is still client supplied if checkout opens in the browser, so
+  // before launch create the checkout transaction server side (bound to the JWT's user) or
+  // sign custom_data; apply_paddle_event already refuses to move a subscription between
+  // users and derives tier from all of a user's subscriptions, which limits the damage.
   const uid = typeof data?.custom_data?.user_id === "string" ? data.custom_data.user_id : null;
   if (!uid || !/^[0-9a-f-]{36}$/i.test(uid)) return new Response("no user_id in custom_data", { status: 202 });
 
-  // Idempotency: record the event id once; a duplicate is acknowledged and ignored.
   const eventId = typeof evt.event_id === "string" ? evt.event_id : null;
   if (!eventId) return new Response("missing event_id", { status: 400 });
-  const { error: dupErr } = await sb.from("paddle_events")
-    .insert({ event_id: eventId, event_type: type, occurred_at: evt.occurred_at ?? null });
-  if (dupErr?.code === "23505") return new Response("duplicate", { status: 200 });
-  if (dupErr) return new Response("event log unavailable", { status: 500 }); // Paddle retries
+  const occurred = new Date(evt.occurred_at ?? "");
+  if (Number.isNaN(occurred.getTime())) return new Response("bad occurred_at", { status: 400 });
+  const periodEnd = data.current_billing_period?.ends_at ? new Date(data.current_billing_period.ends_at) : null;
+  if (periodEnd && Number.isNaN(periodEnd.getTime())) return new Response("bad period end", { status: 400 });
+  if (typeof data.id !== "string" || !data.id) return new Response("missing subscription id", { status: 400 });
 
-  const status = ACTIVE.has(type) ? (data.status || "active")
+  const STATUSES = new Set(["active", "trialing", "past_due", "paused", "canceled"]);
+  const raw_status = ACTIVE.has(type) ? (data.status || "active")
     : INACTIVE.has(type) ? (data.status || "canceled") : null;
+  const status = raw_status && STATUSES.has(raw_status) ? raw_status : null;
 
-  if (status) {
-    // Out of order delivery guard: never let an older event overwrite newer state.
-    const occurred = evt.occurred_at ? new Date(evt.occurred_at).toISOString() : new Date().toISOString();
-    const { data: cur } = await sb.from("subscriptions").select("last_event_at")
-      .eq("paddle_subscription_id", data.id).maybeSingle();
-    if (cur?.last_event_at && new Date(cur.last_event_at) > new Date(occurred))
-      return new Response("stale event ignored", { status: 200 });
-
-    await sb.from("subscriptions").upsert({
-      user_id: uid,
-      paddle_subscription_id: data.id,
-      paddle_customer_id: data.customer_id,
-      status,
-      plan: data.items?.[0]?.price?.product_id ?? data.plan,
-      current_period_end: data.current_billing_period?.ends_at ?? null,
-      last_event_at: occurred,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "paddle_subscription_id" });
-
-    const entitled = status === "active" || status === "trialing";
-    await sb.from("profiles").update({
-      tier: entitled ? "subscriber" : "free",
-      quota_monthly: entitled ? 50 : 0, // plan default; adjust per price tier
-      updated_at: new Date().toISOString(),
-    }).eq("id", uid);
+  // One transaction in the database: record the event id, apply it (never older over
+  // newer, never moving a subscription to another user), recompute the profile tier from
+  // all of the user's subscriptions. Any error rolls back, so Paddle's retry can apply it.
+  const { data: outcome, error } = await sb.rpc("apply_paddle_event", {
+    p_event_id: eventId, p_event_type: type, p_occurred: occurred.toISOString(), p_user: uid,
+    p_sub_id: data.id, p_customer_id: data.customer_id ?? null, p_status: status,
+    p_plan: data.items?.[0]?.price?.product_id ?? data.plan ?? null,
+    p_period_end: periodEnd ? periodEnd.toISOString() : null,
+  });
+  if (error) {
+    // 42501 = subscription already bound to a different user. Acknowledge (2xx stops
+    // Paddle retrying), apply nothing, and surface it in the function logs for review.
+    if (error.code === "42501") {
+      console.error(`paddle-webhook: user mismatch on ${data.id} (event ${eventId})`);
+      return new Response("subscription user mismatch, not applied", { status: 202 });
+    }
+    return new Response("apply failed", { status: 500 }); // nothing recorded; Paddle retries
   }
-  return new Response("ok", { status: 200 });
+  return new Response(String(outcome ?? "ok"), { status: 200 });
 });

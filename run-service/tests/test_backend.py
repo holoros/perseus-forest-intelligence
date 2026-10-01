@@ -98,3 +98,9 @@ def test_ssh_uses_argv_without_shell(monkeypatch):
 def test_no_shell_true_in_backend():
     for f in BACKEND.glob("*.py"):
         assert "shell=True" not in f.read_text(), f
+
+
+def test_internal_dispatch_bad_run_id_is_400(client):
+    r = client.post("/internal/dispatch", json={"run_id": "../../etc", "spec": SPEC},
+                    headers={"x-internal-key": SECRET})
+    assert r.status_code == 400
