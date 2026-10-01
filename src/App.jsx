@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
-import maplibregl from "maplibre-gl";
 import GrowthChart from "./GrowthChart.jsx";
 import SVGMap from "./SVGMap.jsx";
 import DivergenceHeatmap from "./DivergenceHeatmap.jsx";
@@ -28,7 +27,6 @@ const CARBON = ["agc_live_total","live_c_total","tree_c_total","agb_dry","total_
 // Tier B layer A: LANDIS total live biomass + species mosaics for Maine (30 m,
 // derived from cbm_maine LANDIS-II runs). Three timesteps (base / +5 / +10).
 const LANDIS_STATES = ["ME"];
-const LANDIS_BOUNDS = [[-71.8317,47.7314],[-66.0072,47.7314],[-66.0072,42.4894],[-71.8317,42.4894]];
 const LANDIS_STEPS = [0,5,10];
 const LANDIS_LAYERS = [
   { file:"me_total_biomass", label:"Total live biomass", abs:true },
@@ -432,7 +430,6 @@ function parseHash(){ const p = new URLSearchParams(window.location.hash.replace
            tab:p.get("tab"), conus:p.get("conus"), hscen:p.get("hscen") }; }
 
 export default function App(){
-  const mapEl = useRef(null), map = useRef(null);
   const initRef = useRef(parseHash());      // one-shot URL deep-link restore
   const [meta,setMeta] = useState(null);
   const [states,setStates] = useState(null);
@@ -443,7 +440,6 @@ export default function App(){
   const [bucket,setBucket] = useState("managed (harvest)");
   const [showBands,setShowBands] = useState(true);  // v0.63: default ON
   const [showInvBand,setShowInvBand] = useState(false); // FIADB vs TreeMap inventory range
-  const [mapReady,setMapReady] = useState(false);
   const [rasterOn,setRasterOn] = useState(false);
   const [rasterT,setRasterT] = useState(0);
   const [rasterLayer,setRasterLayer] = useState("me_total_biomass");
@@ -479,7 +475,6 @@ export default function App(){
     document.documentElement.dataset.theme = next; setThemeNow(next);
     try{ window.localStorage.setItem("perseus-theme", next); }catch(e){ /* storage blocked */ }
   };
-  const [mapEngine,setMapEngine] = useState("svg"); // svg (default robust) | maplibre
   // v0.66 scenario focus + simplification
   const [scenarioFocus,setScenarioFocus] = useState("all"); // all | harvest_baseline | libcbm_reduced | ...
   const [showAllEngines,setShowAllEngines] = useState(false); // false = auto-hide noisy variants
@@ -585,102 +580,7 @@ export default function App(){
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
       ft.properties.focal = FOCAL.includes(st) ? 1 : 0; });
     setGeoData(geo);
-    // SVG is the default robust map; maplibre stays available for raster overlays.
-    if(mapEngine !== "maplibre"){ setMapReady(true); return; }
-    const mp = new maplibregl.Map({ container: mapEl.current,
-      style:{ version:8, sources:{},
-        layers:[{id:"bg",type:"background",paint:{"background-color":"#0b1015"}}] },
-      center:[-96,38], zoom:3, attributionControl:false });
-    map.current = mp;
-    // Defensive: force resize after layout in case the grid container hadn't
-    // settled when maplibre measured (some browsers race on grid + ResizeObserver).
-    setTimeout(()=>{ try{ mp.resize(); }catch(e){} }, 250);
-    window.addEventListener("resize", ()=>{ try{ mp.resize(); }catch(e){} });
-    mp.on("load",()=>{
-      mp.addSource("states",{ type:"geojson", data:geo, promoteId:"state" });
-      mp.addLayer({ id:"fill", type:"fill", source:"states", paint:{
-        "fill-color":["case",["==",["get","engines"],0],"#2a3a47",
-          ["step",["get","engines"],"#9ad9b8",4,"#54b88a",6,"#2f9e6a",20,"#1b7a4d"]],
-        "fill-opacity":["case",["==",["get","focal"],1],0.98,
-          ["case",["==",["get","hasSeries"],1],0.85,0.55]] }});
-      mp.addLayer({ id:"line", type:"line", source:"states",
-        paint:{"line-color":"#0b1015","line-width":0.7} });
-      mp.addLayer({ id:"focalline", type:"line", source:"states",
-        filter:["==",["get","focal"],1],
-        paint:{"line-color":"#f4c430","line-width":1.8} });
-      mp.addLayer({ id:"sel", type:"line", source:"states",
-        filter:["==",["get","state"],sel],
-        paint:{"line-color":"#ffffff","line-width":2.4} });
-      mp.fitBounds([[-125,24],[-66,50]],{padding:24,duration:0});
-      const pop = new maplibregl.Popup({closeButton:false,closeOnClick:false});
-      mp.on("mousemove","fill",(e)=>{ const p=e.features[0].properties;
-        mp.getCanvas().style.cursor = p.hasSeries? "pointer":"";
-        pop.setLngLat(e.lngLat).setHTML(
-          `<b>${p.state}</b> · ${p.engines||0} engines${p.hasSeries?"":" · no model data"}`).addTo(mp); });
-      mp.on("mouseleave","fill",()=>{ pop.remove(); mp.getCanvas().style.cursor=""; });
-      mp.on("click","fill",(e)=>{ const p=e.features[0].properties;
-        if(p.hasSeries) setSel(p.state); });
-      setMapReady(true);
-    });
-  })().catch(console.error); return ()=> map.current && map.current.remove(); },[]);
-
-  // ---- selected-state outline ----
-  useEffect(()=>{ const mp=map.current; if(mp && mp.getLayer && mp.getLayer("sel"))
-    mp.setFilter("sel",["==",["get","state"],sel]); },[sel]);
-
-  // ---- map mode: re-paint per-state by carbon at chosen year/scenario ----
-  // Uses maplibre feature-state (keyed by state code via promoteId:"state")
-  // which avoids mutating the geojson source.
-  useEffect(()=>{ const mp=map.current; if(!mp || !mapReady || !mp.getLayer("fill")) return;
-    try{
-      if(mapMode === "coverage"){
-        mp.setPaintProperty("fill","fill-color",
-          ["case",["==",["get","engines"],0],"#2a3a47",
-           ["step",["get","engines"],"#9ad9b8",4,"#54b88a",6,"#2f9e6a",20,"#1b7a4d"]]);
-        mp.setPaintProperty("fill","fill-opacity",
-          ["case",["==",["get","focal"],1],0.98,
-           ["case",["==",["get","hasSeries"],1],0.85,0.55]]);
-        return;
-      }
-      // carbon mode: set feature-state per state code, then color by it
-      const yrKey = String(mapYear);
-      const allStates = Object.keys(states || {});
-      // Set carbon for every state via feature-state (null if no data)
-      const geoFeatures = mp.getSource("states") && mp.getSource("states")._data && mp.getSource("states")._data.features;
-      const featureStates = geoFeatures ? geoFeatures.map(ft=>ft.properties.state) : allStates;
-      featureStates.forEach(st=>{
-        const v = (timeline && timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]);
-        mp.setFeatureState({source:"states", id: st}, {carbonTg: (v != null ? v : -1)});
-      });
-      mp.setPaintProperty("fill","fill-color",
-        ["case",["<",["coalesce",["feature-state","carbonTg"],-1],0],"#2a3a47",
-         ["interpolate",["linear"],["feature-state","carbonTg"],
-           0,"#edf8e9", 100,"#bae4b3", 300,"#74c476", 500,"#31a354", 1000,"#005a32"]]);
-      mp.setPaintProperty("fill","fill-opacity",
-        ["case",["<",["coalesce",["feature-state","carbonTg"],-1],0],0.35,0.92]);
-    }catch(err){ console.warn("[map] repaint error", err); }
-  },[mapMode, mapYear, mapScenario, mapReady, timeline, states]);
-
-  // ---- Tier B layer A: LANDIS biomass image source (Maine only) ----
-  useEffect(()=>{ const mp=map.current; if(!mp || !mapReady) return;
-    const show = rasterOn && LANDIS_STATES.includes(sel);
-    const url = `${BASE}raster/${rasterLayer}_t${rasterT}.png`;
-    if(show){
-      try{
-        if(!mp.getSource("mebio")){
-          mp.addSource("mebio",{type:"image",url,coordinates:LANDIS_BOUNDS});
-          mp.addLayer({id:"mebio",type:"raster",source:"mebio",paint:{"raster-opacity":rasterOpacity}});
-        } else { mp.getSource("mebio").updateImage({url,coordinates:LANDIS_BOUNDS}); }
-        if(mp.getLayer("mebio")){
-          mp.moveLayer("mebio");   // keep on top so the forest base / state fill don't hide it
-          mp.setPaintProperty("mebio","raster-opacity",rasterOpacity);
-        }
-      }catch(e){ console.error("LANDIS biomass layer failed to add", e); }
-    } else {
-      if(mp.getLayer("mebio")) mp.removeLayer("mebio");
-      if(mp.getSource("mebio")) mp.removeSource("mebio");
-    }
-  },[mapReady,rasterOn,rasterT,rasterLayer,sel,rasterOpacity]);
+  })().catch(console.error); },[]);
 
   // ---- Tier B layer B: gcbm raster overlays (per-state, 2022 snapshot) ----
   // Lazy-load per-state bounds.json; turn bounds into a coordinates polygon.
@@ -690,9 +590,7 @@ export default function App(){
     j(`raster/${stLow}_bounds.json`).then(b=>{
       // v0.69+: store raw json so SVGMap can handle both formats
       // (Albers meters {x0,y0,x1,y1} OR legacy WGS84 corners {ul,ur,lr,ll}).
-      // maplibre code path still needs the legacy 4-point format.
       if(b.x0 != null){
-        // synthesize the maplibre 4-point format from the meter extent if needed
         setGcbmBounds(prev=>({...prev,[stLow]: b}));
       } else {
         const coords = [[b.ul[0],b.ul[1]],[b.ur[0],b.ur[1]],[b.lr[0],b.lr[1]],[b.ll[0],b.ll[1]]];
@@ -701,23 +599,6 @@ export default function App(){
       }
     }).catch(()=>{});
   },[gcbmOn,sel,gcbmBounds]);
-  useEffect(()=>{ const mp=map.current; if(!mp || !mapReady) return;
-    const stLow = sel.toLowerCase();
-    const eligible = states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel);
-    const coords = gcbmBounds[stLow];
-    const show = gcbmOn && eligible && !!coords;
-    const url = `${BASE}raster/${stLow}_${gcbmLayer}.png`;
-    if(show){
-      if(!mp.getSource("stgcbm")){
-        mp.addSource("stgcbm",{type:"image",url,coordinates:coords});
-        mp.addLayer({id:"stgcbm",type:"raster",source:"stgcbm",paint:{"raster-opacity":gcbmOpacity}},"focalline");
-      } else { mp.getSource("stgcbm").updateImage({url,coordinates:coords}); }
-      if(mp.getLayer("stgcbm")) mp.setPaintProperty("stgcbm","raster-opacity",gcbmOpacity);
-    } else {
-      if(mp.getLayer("stgcbm")) mp.removeLayer("stgcbm");
-      if(mp.getSource("stgcbm")) mp.removeSource("stgcbm");
-    }
-  },[mapReady,gcbmOn,sel,gcbmLayer,gcbmOpacity,gcbmBounds,states]);
 
   // ---- load series for selected state ----
   useEffect(()=>{ if(!states || !states[sel] || !states[sel].has_series){ setSeries(null); return; }
@@ -1296,9 +1177,7 @@ export default function App(){
             : mapMode === "coverage"
             ? "Coverage: engines per state"
             : `Carbon: libcbm AGC (Tg C), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
-          {mapEngine === "maplibre"
-            ? <div id="map" ref={mapEl}></div>
-            : (()=>{
+          {(()=>{
                 const stLow = sel.toLowerCase();
                 const stOverlayActive = gcbmOn && states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel) && gcbmBounds[stLow];
                 const stOverlayUrl = stOverlayActive ? `${BASE}raster/${stLow}_${gcbmLayer}.png` : null;
