@@ -268,3 +268,21 @@ a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible
   .detail{padding:8px 16px}
   html,body{overflow-x:hidden}
 }
+/* Header nav: wraps instead of overflowing; links read as quiet text until hovered. */
+.topnav{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin-left:4px;align-items:center;min-width:0}
+.navlink{color:var(--mut);text-decoration:none;transition:color var(--dur) var(--ease)}
+.navlink:hover{color:var(--ink)}
+.linkbtn{display:inline-flex;align-items:center;gap:5px}
+/* Intro card above the tabs: accent tint, hairline, mode aware text. */
+.intro-card{margin:0 4px 8px;padding:8px 11px;border-radius:var(--r);background:var(--accent-tint);
+  border:1px solid var(--line);font-size:12.5px;line-height:1.5;color:var(--ink);
+  display:flex;gap:8px;align-items:flex-start}
+.intro-x{background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:16px;line-height:1;
+  transition:color var(--dur) var(--ease)}
+.intro-x:hover{color:var(--ink)}
+@media (max-width:760px){
+  header.top{padding:8px 16px}
+  header.top .brandbar{margin-left:0}
+  .topnav{margin-left:0;width:100%}
+  header.top .stat{width:100%}
+}
