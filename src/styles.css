@@ -288,5 +288,23 @@ a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible
 }
 /* Active tab keeps its contrast while hovered (hover rule is more specific than .tab.on). */
 .tab.on:hover:not(:disabled){color:var(--on-accent);background:var(--accent-hover);border-color:var(--accent-hover)}
-/* Map title sits bottom right so the control panel never covers it. */
-.maptitle{top:auto;left:auto;bottom:12px;right:12px}
+/* Map title keeps the top left corner; the control panel sits just below it so it never
+   covers the title, and the bottom stays free for the legends. */
+.maptitle{top:8px;left:12px;right:12px;bottom:auto;background:transparent;padding:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.map-ctrl{top:30px}
+.inspect-pop{top:72px}
+/* Phone: the map panel stacks (title, controls, map, legends) instead of layering them,
+   so controls and legends never cover the map or each other. */
+@media (max-width:760px){
+  html,body,#root{height:auto}
+  .app{height:auto;min-height:100%}
+  .main{flex:none;grid-template-rows:auto auto}
+  .detail{overflow:visible}
+  .mapwrap{display:flex;flex-direction:column;gap:8px;padding:8px 16px 12px;min-height:0;overflow:visible}
+  .mapwrap .maptitle,.mapwrap .map-ctrl,.mapwrap .legend,.mapwrap .maploading{position:static;transform:none;max-width:none;margin:0}
+  .mapwrap .maptitle{order:0}
+  .mapwrap .map-ctrl{order:1;justify-content:flex-start}
+  .mapwrap #map{order:2;position:relative !important;inset:auto !important;height:300px;padding:0 !important}
+  .mapwrap .legend{order:3}
+}
