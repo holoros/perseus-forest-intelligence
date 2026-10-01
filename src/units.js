@@ -6,7 +6,7 @@ const FACTORS = {
   "ton/ac":   ["Mg/ha", 2.241702],
   "ton C/ac": ["Mg C/ha", 2.241702],
   "sq ft/ac": ["m²/ha", 0.2295684],
-  "cu ft/ac": ["m³/ha", 0.0699742],
+  "cu ft/ac": ["m³/ha", 0.06997245],
   "$/ac":     ["$/ha", 2.471054],
   "$/MBF":    ["$/m³", 1/2.359737],   // 1 MBF ≈ 2.36 m³
   "$/cord":   ["$/m³", 1/2.54858],    // 1 cord ≈ 2.55 m³ solid wood
