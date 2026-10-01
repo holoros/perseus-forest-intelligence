@@ -20,6 +20,7 @@ import GlossaryPanel from "./GlossaryPanel.jsx";
 import { openMyForestReport } from "./myForest.js";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
+import { FAMILY_COL, CONTEXT_COL } from "./palette.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -395,7 +396,7 @@ const GCBM_LAYERS = [
   { key:"lcms_2022",     label:"LCMS disturbance cause (2022)",
     ramp:["#fdae61","#d73027","#fc8d59","#fee08b","#762a83"], lo:"natural", hi:"anthrop." },
 ];
-const CLASS_COL = { CBM:"#0072B2", FVS:"#E69F00", CEM:"#009E73", YC:"#CC79A7", LANDIS:"#56B4E9", OSM:"#D55E00", HCM:"#9AA0A6", FIA:"#9AA0A6", VCC:"#9AA0A6", "?":"#9AA0A6" };
+const CLASS_COL = { ...FAMILY_COL, HCM:CONTEXT_COL, FIA:CONTEXT_COL, VCC:CONTEXT_COL, "?":CONTEXT_COL };
 // Per-class line style (must match GrowthChart DASH) so the legend keys the chart.
 const CLASS_DASH = { CEM:"0", CBM:"7 3", FVS:"4 3", YC:"1.5 3", LANDIS:"9 3 2 3",
   OSM:"6 2", ES:"2 2", ECON:"7 2 2 2", FIA:"0" };
@@ -1481,7 +1482,7 @@ export default function App(){
           {tab!=="health" && mapMode === "coverage" && (
             <div className="legend">
               <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid var(--map-focal)"}}></i>PERSEUS focal (ME · IN · GA)</div>
-              <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
+              <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6 to 19 &nbsp;<i style={{background:"#54b88a"}}></i>4 to 5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1 to 3</div>
               <div><i style={{background:"var(--nodata)",border:"1px solid var(--line-strong)"}}></i>no model data yet</div>
               {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest cover (NLCD 2023)</div>}
             </div>)}
@@ -1658,7 +1659,7 @@ export default function App(){
                 </select>)}
               <select value={yMode} onChange={e=>setYMode(e.target.value)} title="Y-axis scaling">
                 <option value="full">Y: full range</option>
-                <option value="auto">Y: zoom to median (q10–q90)</option>
+                <option value="auto">Y: zoom to median (q10 to q90)</option>
                 <option value="log">Y: log scale</option>
               </select>
               <select value={xHorizon} onChange={e=>setXHorizon(e.target.value)} title="Time horizon (x-axis)">

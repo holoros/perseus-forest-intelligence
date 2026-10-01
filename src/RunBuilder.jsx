@@ -5,6 +5,7 @@
 // plain-language recommendation come from the per-L3 yield curves.
 import { useState, useEffect } from "react";
 import { fmtUnit } from "./units.js";
+import { FAMILY_COL } from "./palette.js";
 
 // Inline line icons (replace emoji); stroke follows text color via .ico.
 const IcoServer = () => <svg className="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="6" rx="1"/><rect x="4" y="14" width="16" height="6" rx="1"/><path d="M8 7h.01M8 17h.01"/></svg>;
@@ -12,7 +13,7 @@ const IcoDown = () => <svg className="ico" viewBox="0 0 24 24" aria-hidden="true
 
 const STATES = ["AK","AL","AR","AZ","CA","CO","CT","DE","FL","GA","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VA","VT","WA","WI","WV","WY"];
 const MODELS = [["fvs","FVS","FVS"],["cbm","CBM","CBM"],["cem","CEM","CEM"],["yield","Yield curves","YC"],["landis","LANDIS","LANDIS"]];
-const CLS_COL = { FVS:"#3a6ea5", CBM:"#8a5cd1", CEM:"#d98a3c", YC:"#2e9e6b", LANDIS:"#c0504d" };
+const CLS_COL = FAMILY_COL;
 const MGMTS = [["reserve","Reserve (no harvest)","reserve (no harvest)","untreated"],
                ["baseline","Managed (harvest)","managed (harvest)","harvested"],
                ["intensive","Managed (intensive)","managed (intensive)","harvested"],
@@ -54,7 +55,7 @@ function carbonFlowNPV(carb, price, disc){
   }
   return {npv, age:carb[carb.length-1][0]};
 }
-const fmt = (v,d=0)=>(v==null||isNaN(v)?"–":Number(v).toLocaleString(undefined,{maximumFractionDigits:d}));
+const fmt = (v,d=0)=>(v==null||isNaN(v)?"n/a":Number(v).toLocaleString(undefined,{maximumFractionDigits:d}));
 // Policy as a scenario driver
 // Future policy scenarios. Forestry, unlike ag, trends toward restricting management.
 const POLICIES = [
@@ -564,9 +565,9 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
                     <tr key={i} className={isBest?"is-best":undefined}>
                       <td>{(MGMTS.find(([k])=>k===r.sc.mgmt)||[])[1]} · {(CLIMATES.find(([k])=>k===r.sc.climate)||[])[1]}</td>
                       <td>{num(c.econ)}</td><td>{num(c.carbon)}</td><td>{num(c.es)}</td>
-                      <td>{c.resil!=null?Math.round(c.resil*100):"–"}</td>
-                      <td style={{color:c.risk!=null?(c.risk>0.4?"var(--alert)":"var(--ink)"):"var(--mut)"}}>{c.risk!=null?Math.round(c.risk*100):"–"}</td>
-                      <td>{c.agree!=null?Math.round(c.agree*100):"–"}</td>
+                      <td>{c.resil!=null?Math.round(c.resil*100):"n/a"}</td>
+                      <td style={{color:c.risk!=null?(c.risk>0.4?"var(--alert)":"var(--ink)"):"var(--mut)"}}>{c.risk!=null?Math.round(c.risk*100):"n/a"}</td>
+                      <td>{c.agree!=null?Math.round(c.agree*100):"n/a"}</td>
                       <td style={{color:isBest?"var(--accent)":"var(--ink)"}}>{Math.round(score)}{isBest?" ★":""}</td>
                     </tr>
                   );

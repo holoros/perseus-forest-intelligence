@@ -21,7 +21,7 @@ function rampColor(pct) {
   return stops[Math.min(i, stops.length - 1)];
 }
 
-const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
+const fmt = (v, d = 1) => (v == null || isNaN(v) ? "n/a" : Number(v).toFixed(d));
 
 // Plain-language band for a Potter (2017) species climate-vulnerability score (VCC).
 // National distribution across tracked species: ~17 to 61, median 32, p90 ~45.
@@ -242,7 +242,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
           ))}
           {selOwn && landData.landowners[selOwn] && (
             <div className="pn-tint" style={{ fontSize: 10, marginTop: 5, padding: "5px 7px" }}>
-              <b>{selOwn}</b>: priority {fmt(landData.landowners[selOwn].priority_pct, 1)}% · stress {fmt(landData.landowners[selOwn].stress_mean, 3)} · resilience {fmt(landData.landowners[selOwn].resil_mean, 3)} · n = {landData.landowners[selOwn].n != null ? landData.landowners[selOwn].n.toLocaleString() : "–"} plots.
+              <b>{selOwn}</b>: priority {fmt(landData.landowners[selOwn].priority_pct, 1)}% · stress {fmt(landData.landowners[selOwn].stress_mean, 3)} · resilience {fmt(landData.landowners[selOwn].resil_mean, 3)} · n = {landData.landowners[selOwn].n != null ? landData.landowners[selOwn].n.toLocaleString() : "n/a"} plots.
             </div>
           )}
           <div style={{ fontSize: 9.5, color: "var(--mut)", marginTop: 3 }}>
@@ -381,7 +381,7 @@ export default function HealthRiskResilience({ data, detail, ecoData, landData, 
             })()}
             <div style={{ fontSize: 10, marginTop: 6, color: "var(--mut)" }}>
               <b style={{ color: "var(--ink)" }}>Observed disturbance:</b>{" "}
-              {ag.disturbed_pct != null ? `${fmt(ag.disturbed_pct, 0)}% of plots` : "–"}
+              {ag.disturbed_pct != null ? `${fmt(ag.disturbed_pct, 0)}% of plots` : "n/a"}
               {agentRows.length ? " · " + agentRows.map(([k, v]) => `${k} ${fmt(v, 0)}%`).join(", ") : ""}
               {dd.dead_live_pct != null && <> · dead/live biomass {fmt(dd.dead_live_pct, 0)}%</>}
             </div>

@@ -16,6 +16,7 @@ const interp = (curve, age) => {
 };
 const esc = (s) => String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 import { conv, unitLabel, fmtArea as fmtAreaU } from "./units.js";
+import { FAMILY_COL } from "./palette.js";
 const num = (v,d=0) => v==null?"—":Number(v).toLocaleString(undefined,{maximumFractionDigits:d});
 
 // ---- multi-model ensemble helpers (mirror the Engine-compare default filter) ----
@@ -202,7 +203,7 @@ function buildReportHTML(aoi, stumpage, system = "imperial", model = null){
   let modelSec = "";
   if(model && model.metrics && model.metrics.length){
     const FAM = { CBM:"CBM", CEM:"CEM", FVS:"FVS", LANDIS:"LANDIS", YC:"Yield curves" };
-    const FCOL = { CBM:"#2e9e6b", CEM:"#3b7fb8", FVS:"#c08a1e", LANDIS:"#b5562a", YC:"#6b6fae" };
+    const FCOL = FAMILY_COL;
     const fmtv = v => Math.abs(v)>=100 ? Math.round(v).toLocaleString() : (Math.abs(v)>=1 ? v.toFixed(1) : v.toFixed(2));
     const barSvg = (e) => {
       const W=300, H=22, ml=5, mr=5, ax=12, span=(e.hi-e.lo)||1;

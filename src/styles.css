@@ -58,7 +58,7 @@ header.top .brandbar{margin-left:auto;display:flex;align-items:center;gap:9px;
 header.top .brandbar a{display:flex;align-items:center}
 header.top .brandbar img{height:26px;width:auto;display:block;transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease);cursor:pointer}
 header.top .brandbar a:hover img{opacity:.75;transform:scale(1.06)}
-header.top .stat{margin-left:18px;color:var(--accent);font-size:12.5px;font-variant-numeric:tabular-nums}
+header.top .stat{margin-left:18px;color:var(--mut);font-size:12.5px;font-variant-numeric:tabular-nums}
 header.top .state-pick{background:var(--panel);color:var(--ink);border:1px solid var(--line);
   border-radius:7px;padding:5px 8px;font-size:12.5px;max-width:380px}
 header.top .state-pick:hover{border-color:var(--accent)}
@@ -286,3 +286,7 @@ a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible
   .topnav{margin-left:0;width:100%}
   header.top .stat{width:100%}
 }
+/* Active tab keeps its contrast while hovered (hover rule is more specific than .tab.on). */
+.tab.on:hover:not(:disabled){color:var(--on-accent);background:var(--accent-hover);border-color:var(--accent-hover)}
+/* Map title sits bottom right so the control panel never covers it. */
+.maptitle{top:auto;left:auto;bottom:12px;right:12px}

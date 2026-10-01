@@ -26,7 +26,7 @@ const SAW_FRACTION = 0.55, DISCOUNT = 0.04;
 const ES_LEVELS = [["none", "None", 0], ["mod", "$5 ac⁻¹ yr⁻¹", 5], ["high", "$15 ac⁻¹ yr⁻¹", 15]];
 const ES_MANAGED_FRAC = 0.5;
 const annuity = (age, r) => (1 - Math.pow(1 + r, -age)) / r;
-const fmt = (v, d = 0) => (v == null || isNaN(v) ? "–" : Number(v).toLocaleString(undefined, { maximumFractionDigits: d }));
+const fmt = (v, d = 0) => (v == null || isNaN(v) ? "n/a" : Number(v).toLocaleString(undefined, { maximumFractionDigits: d }));
 // Economics at the final curve age for one management series.
 function econAt(node, curveKey, p) {
   const cm = node && node.curves || {};

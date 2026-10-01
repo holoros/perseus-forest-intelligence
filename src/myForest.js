@@ -162,10 +162,10 @@ ${aoiBlock}
 <div class="fig">${priBars}</div>
 <p class="cap">Priority area = forest both highly stressed and low in resilience. ${esc(stateName)} is <b>${vs}</b> the national average.</p>
 <p>
- <span class="stat">Stress <b>${s.stress_mean != null ? s.stress_mean.toFixed(2) : "–"}</b><span class="muted" style="margin:0"> of 1</span></span>
- <span class="stat">Resilience <b>${s.resil_mean != null ? s.resil_mean.toFixed(2) : "–"}</b><span class="muted" style="margin:0"> of 1</span></span>
+ <span class="stat">Stress <b>${s.stress_mean != null ? s.stress_mean.toFixed(2) : "n/a"}</b><span class="muted" style="margin:0"> of 1</span></span>
+ <span class="stat">Resilience <b>${s.resil_mean != null ? s.resil_mean.toFixed(2) : "n/a"}</b><span class="muted" style="margin:0"> of 1</span></span>
  ${mortPct != null ? `<span class="stat">Measured mortality <b>${mortPct.toFixed(1)}%</b> yr⁻¹</span>` : ""}
- <span class="stat">Sample <b>${s.n_plots ? s.n_plots.toLocaleString() : "–"}</b> plots</span>
+ <span class="stat">Sample <b>${s.n_plots ? s.n_plots.toLocaleString() : "n/a"}</b> plots</span>
 </p>
 ${scen.current != null ? `<p class="cap">Looking ahead: under warming, the national priority share rises from about ${Math.round(scen.current)}% today toward ${scen.rcp45 != null ? Math.round(scen.rcp45) + "% (RCP4.5)" : ""}${scen.rcp85 != null ? ` and ${Math.round(scen.rcp85)}% (RCP8.5)` : ""}. Your area's relative standing is more stable than the absolute number.</p>` : ""}
 

@@ -3,10 +3,11 @@
 // download-as-PNG button.
 import { useEffect, useRef, useState } from "react";
 import { fmtUnit } from "./units.js";
+import { FAMILY_COL } from "./palette.js";
 
 // Okabe-Ito model-family palette, shared by every PERSEUS chart that colors by engine family.
 // Families beyond these six read as context grey so the palette never exceeds six hues.
-const FAMILY_COL = { CBM:"#0072B2", FVS:"#E69F00", CEM:"#009E73", YC:"#CC79A7", LANDIS:"#56B4E9", OSM:"#D55E00" };
+// FAMILY_COL comes from palette.js (shared Okabe-Ito mapping)
 const famCol = cls => FAMILY_COL[cls] || "var(--context)";
 const PNG_PROPS = ["fill","stroke","stroke-width","stroke-opacity","fill-opacity","opacity",
   "font-size","font-weight","font-family","font-style","font-variant-numeric"];

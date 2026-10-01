@@ -9,6 +9,7 @@ import StandOutlook from "./StandOutlook.jsx";
 import { openReport } from "./report.js";
 import { conv, fmtUnit, fmtArea as fmtAreaU } from "./units.js";
 import { pointInGeometry } from "./geo.js";
+import { FAMILY_COL } from "./palette.js";
 
 const valAt = (curve, age) => { const h = (curve||[]).find(([a])=>a===age); return h?h[1]:null; };
 const fmtArea = (m2) => {
@@ -562,7 +563,7 @@ function PriorityDial({ index, state, bucket = "managed (harvest)", year = 2050 
 // place along it, so structural uncertainty is explicit. Engines are filtered to
 // the same default view as the Engine-compare tab (uncalibrated FVS variants and
 // retired wear_nh series dropped).
-const FAMILY_COL = { CBM:"#3fb68b", CEM:"#6baed6", FVS:"#e6ab02", LANDIS:"#d95f02", YC:"#8da0cb" };
+// FAMILY_COL comes from palette.js (shared Okabe-Ito mapping)
 const FAMILY_LAB = { CBM:"CBM", CEM:"CEM", FVS:"FVS", LANDIS:"LANDIS", YC:"Yield curves" };
 const MM_YEARS = [2030, 2050, 2075, 2100];
 const MM_GROUP_ORDER = ["carbon", "economic", "timber"];
@@ -801,7 +802,7 @@ function SimilarAreas({ state, hrr }){
     : me.priority_pct<med*0.85 ? "lower than" : "in line with";
   const rows = [{ st: me.st, v: me.priority_pct, me: true }, ...peers.map(p=>({ st: p.st, v: p.priority_pct }))];
   const maxv = Math.max(...rows.map(r=>r.v||0)) || 1;
-  const f1 = v => (v==null ? "–" : v.toFixed(1)), f0 = v => (v==null ? "–" : v.toFixed(0));
+  const f1 = v => (v==null ? "n/a" : v.toFixed(1)), f0 = v => (v==null ? "n/a" : v.toFixed(0));
   return (
     <div style={{margin:"4px 0 0"}}>
       <div className="aoi-sub">Similar areas · state-level forest health</div>
