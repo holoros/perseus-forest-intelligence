@@ -1,8 +1,9 @@
 name: Build check (no deploy)
 
-# Verifies that main builds with npm and that the shipped api/ data has no
-# structural corruption (parse errors / NaN / Inf). Runs on push and PR; the
-# deploy workflow handles publishing separately.
+# Verifies that main builds, that the shipped public/ data has no structural
+# corruption and no restricted data fingerprints, that versions agree, and that
+# the unit tests pass. Runs on push and PR; the deploy workflow publishes
+# separately. The smoke job is informational and never blocks a merge.
 
 on:
   push:
@@ -10,6 +11,14 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      smoke_url:
+        description: "Also smoke test this deployed base URL (optional)"
+        required: false
+        default: "https://holoros.github.io/perseus-forest-intelligence/"
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -24,9 +33,26 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci
+      - name: Restricted data tripwire (public/ and docs/)
+        run: python3 scripts/check_restricted_fields.py public docs
       - name: API data integrity (strict, structural only)
         run: python3 scripts/check_api_integrity.py public/api --strict
+      - name: Raster manifest matches public/raster (once the manifest exists)
+        run: |
+          if [ -f scripts/build_raster_manifest.py ]; then
+            python3 scripts/build_raster_manifest.py --check
+          else
+            echo "no raster manifest yet; skipping"
+          fi
+      - name: Version consistency
+        run: node scripts/check_versions.mjs
+      - name: Unit tests (Vitest)
+        run: npm test
+      - name: Script tests (pytest)
+        run: |
+          python3 -m pip install --quiet pytest
+          python3 -m pytest -q tests/py
       - name: Build
         run: npm run build
       - name: Report dist size
@@ -39,3 +65,71 @@ jobs:
             echo "dist/ not produced"
             exit 1
           fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 3
+
+  run-service:
+    # Backend scaffold tests: FastAPI pytest, Paddle signature tests, and the
+    # schema.sql RLS tests against a throwaway Postgres 16.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      PERSEUS_PG_DSN: postgresql://postgres:ci-only@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Skip when the run-service tests are absent
+        id: has
+        run: echo "tests=$([ -d run-service/tests ] && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+      - name: pytest (backend + RLS)
+        if: steps.has.outputs.tests == 'yes'
+        run: |
+          python3 -m pip install --quiet -r run-service/requirements-dev.txt
+          python3 -m pytest -q run-service/tests
+      - name: Paddle signature tests (node:test)
+        if: steps.has.outputs.tests == 'yes'
+        run: node --experimental-strip-types --test run-service/tests/paddle_verify.test.ts
+
+  smoke:
+    # Optional: serves the built bundle locally and runs scripts/smoke.mjs against
+    # it; on manual dispatch also smoke tests the deployed site. Never blocks.
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Smoke test the local preview
+        run: |
+          npx vite preview --port 4173 --strictPort &
+          for i in $(seq 1 30); do curl -sf http://localhost:4173/ >/dev/null && break; sleep 1; done
+          node scripts/smoke.mjs http://localhost:4173/
+      - name: Smoke test the deployed site
+        if: github.event_name == 'workflow_dispatch' && inputs.smoke_url != ''
+        env:
+          SMOKE_URL: ${{ inputs.smoke_url }}
+        run: node scripts/smoke.mjs "$SMOKE_URL"
