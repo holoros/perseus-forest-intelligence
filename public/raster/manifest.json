@@ -1,0 +1,757 @@
+{
+ "generated_at": "2026-10-01T09:47:46Z",
+ "count": 107,
+ "total_bytes": 137512863,
+ "base_url": null,
+ "files": [
+  {
+   "path": "conus_alstk_2016.png",
+   "bytes": 898781,
+   "sha256": "a6ca6b6eaba79636bad010b98e267a63689457e2537f2a1235b369e920fbb200",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_alstk_2020.png",
+   "bytes": 902371,
+   "sha256": "2ae4a59e979f1b54f0ab07569f5835f67ba2b761a906cac797590f3b8b58becc",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_alstk_2022.png",
+   "bytes": 900014,
+   "sha256": "64b2e13baafa3c1434d22322b7d6f4b9b72fdd5d12f3ee052efaf2d422a9b403",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_asym_agb.png",
+   "bytes": 800967,
+   "sha256": "190d880bec408c2df7126868fe903d9fcd768afdab6676389ac26bfba6e3c942",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_bgi.png",
+   "bytes": 599912,
+   "sha256": "fe97ab5dc0eab2c63911cae696a37cde47f28dedbce353d6663f5282a3566232",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_canopy_height.png",
+   "bytes": 219431,
+   "sha256": "eff426bd3daab14a0a5e777411e77b64350802feaeef7dd9eb92e19698aff7b4",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_climate_stress.png",
+   "bytes": 61365,
+   "sha256": "8a114637572fdf95f45c75a60a5a32b1924ef688d93b1e4d9c7abdc0fe61e5c4",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_csi.png",
+   "bytes": 21392,
+   "sha256": "3b765891d73cc06e9e309fad37fa2319b417e7159bb28beec430cf760274f257",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_expected_removal.png",
+   "bytes": 321462,
+   "sha256": "d2669dea3e7b6c8a5476192412340bc6095c4aa7a83a33370e051fc50e42f3bd",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_forest_change_0823.png",
+   "bytes": 189864,
+   "sha256": "0efcf80fbf5499da7309c768d6045dfe378a9c15e0223dad780692f53191a829",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_forest_nonforest.png",
+   "bytes": 146444,
+   "sha256": "6dd0c8687a93c72e3a67e9790b4f5e1a72f1956faf9d009eb6d023ec42825038",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_forest_nonforest_2023.png",
+   "bytes": 128204,
+   "sha256": "5cab3bd80318e8bf81b6b55dd2009e7ed65266b3d2cf31f85ccba38cd9d63fa3",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_fortype_2022.png",
+   "bytes": 134658,
+   "sha256": "a9e13970441cee1862438f1213ca1d73b31f06b40b4079322c2a04767427adb3",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_gedi_agbd.png",
+   "bytes": 375682,
+   "sha256": "44c4773cd57798dd5020b87d5a06bffd1cbfa9540d9b81101d14070673187c3f",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_gfc_lossyear.png",
+   "bytes": 182954,
+   "sha256": "f80bf00e326e18c61c585d0cf87a8efa3289d937c5979a7fe492a65654c92184",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_harvest_intensity_cc.png",
+   "bytes": 120548,
+   "sha256": "4faaaa9d3099c5cdee5021c04aff636efa681995df55d36a1cfa520b7604ed1c",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_hcs_v4_class_partial.png",
+   "bytes": 162066,
+   "sha256": "c07c5fcecfedbf55c4285a0ff53005bf203a5305b8c69e04bc6058a24a4d33ec",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_hcs_v4_intensity_clearcut.png",
+   "bytes": 57623,
+   "sha256": "afc5e171083a31cef1e3e6c6d9cb4275b72f9826a2d53e04393650fd59c49dda",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_hcs_v4_intensity_partial.png",
+   "bytes": 56242,
+   "sha256": "4f0dcd3f26405a4e651090a4d5f48eeab28a2b99ea2ed695362cf978b8930489",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_hybrid_agc2022.png",
+   "bytes": 35934,
+   "sha256": "a8f859891a20fc62dccb94069794e1a4cd31ccb1f023248d94a53d491f09ded1",
+   "width": 252,
+   "height": 166
+  },
+  {
+   "path": "conus_hybrid_dagc100.png",
+   "bytes": 52277,
+   "sha256": "2e23f50f132a928875f4d9b1e09648a7287f71b5f1f87ffdcb114a8379d5b0ef",
+   "width": 252,
+   "height": 166
+  },
+  {
+   "path": "conus_lcms_2022.png",
+   "bytes": 9437,
+   "sha256": "314d06a680636abf8647650a7cff83dd8f54bb2831483fd8f22e65d1d474f984",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_nlcd_fnf.png",
+   "bytes": 116654,
+   "sha256": "5684bfde837e69fc86e5204c92900d499a90492d0dd7a1cbcaa44fa841e04753",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_ownership.png",
+   "bytes": 231169,
+   "sha256": "dba57570f544bae846a6da03cba2d7c92cec63688bb6cc7a7881140816e785ac",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_animals_2022.png",
+   "bytes": 1249370,
+   "sha256": "15bd124afda595b3f18691186cf1bbd0018a728dcb80a28f0469cacdaf3787b6",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_disease_2022.png",
+   "bytes": 1324935,
+   "sha256": "dc3c97b2abc49c142868497d022b0e5f6a6fb87c4fcd77612119a52436e186c2",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_disturbance_2022.png",
+   "bytes": 1169586,
+   "sha256": "395fc8bcd463e7c68a30cf3e1777a9142c4255c539d98830c0037c1df94cd8a3",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_fire_2022.png",
+   "bytes": 1302470,
+   "sha256": "6bc284607d9200f6c75cbd139c35ee74a53ee8cd5ea021f8ef7fdb990a9ba3f0",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_harvest_any.png",
+   "bytes": 872692,
+   "sha256": "8d45b1b9a46072ae41f456c56c7b92beef03b143c6b4dfb1c7c1c70eb098eee3",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_harvest_clearcut.png",
+   "bytes": 45246,
+   "sha256": "59ba24b195ee7f4125c936d8e1e60ecb2854850926d2388651f91dad429dc5d1",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_harvest_partial.png",
+   "bytes": 52011,
+   "sha256": "1c2044b35bf4f9a66e0ff35753b969b8aede75cf90bd99da88600164752f0e16",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_insect_2022.png",
+   "bytes": 1251634,
+   "sha256": "c83eff58be3f6a7673acc941bd559324bb9b025892c0b944cacb20ebdd6e2cdc",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_veg_2022.png",
+   "bytes": 1334540,
+   "sha256": "557acaf1e1fdfdd4f857ff15cb6265fab4436a5e65bf60aa32476fe81c857848",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_p_weather_2022.png",
+   "bytes": 1316204,
+   "sha256": "3779b088d3cdab17fa5922ea6f15e34a338875fad980ce1cc62dc4421c5870c8",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_qmd_2016.png",
+   "bytes": 215281,
+   "sha256": "f2d65af73671e75c0d9e67e12aadd2684f3a1cd7fc71724cb10a74caa28e1614",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_qmd_2020.png",
+   "bytes": 1152678,
+   "sha256": "313f7273e9a7272141921e5b70d62f08157a6f2017e97566a6e4b60bab53864b",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_qmd_2022.png",
+   "bytes": 1151733,
+   "sha256": "25e83919202074ea8d739d7a2e858e5ee983281b0f46c201b2565aac2df51f0f",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_rd_2016.png",
+   "bytes": 1078122,
+   "sha256": "f58f5eec6c87ca5cd0f53949f510b168f96f6cd31d5792c2c500f5efa08722f7",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_rd_2020.png",
+   "bytes": 865454,
+   "sha256": "46263e4a5c8aab00de260194f08fdbcfddba925df0770bfa74432c6f8d83186a",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_rd_2022.png",
+   "bytes": 861087,
+   "sha256": "b21592489dc0a73e3528db955ceed4be57ada84007fefefd8507dd2f8d7cd525",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_rd_treemap.png",
+   "bytes": 1078122,
+   "sha256": "f58f5eec6c87ca5cd0f53949f510b168f96f6cd31d5792c2c500f5efa08722f7",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_sawtimber_share.png",
+   "bytes": 37976,
+   "sha256": "26599a93f1836900737df6ff464aec451105fe1fe2abfc3ef25880b4541a72f7",
+   "width": 252,
+   "height": 166
+  },
+  {
+   "path": "conus_sdimax_treemap.png",
+   "bytes": 1090899,
+   "sha256": "0330105ead2efd365e72e0fc3f564537efc15936f98d8717196abda46402211a",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_site_productivity.png",
+   "bytes": 41235,
+   "sha256": "c721695f94ecc31a1a8e31181fa1bd01a59dfcaa0166073b84c241ac467f3e09",
+   "width": 1600,
+   "height": 1807
+  },
+  {
+   "path": "conus_species_value_index.png",
+   "bytes": 50805,
+   "sha256": "7731d67c651652502b273a07861a194d03a6232848bda61bbac5bd68ebb7498c",
+   "width": 1600,
+   "height": 1040
+  },
+  {
+   "path": "conus_standht_2016.png",
+   "bytes": 1099687,
+   "sha256": "e2f5a008a01e221e1281d3f809d6f2e30892a19cca38006cc81545e675bacdb4",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_standht_2020.png",
+   "bytes": 262727,
+   "sha256": "df5d4549c02c761cf9a9d550817e57dd271d53ba3b05cdc8b6024d83a783f90a",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_standht_2022.png",
+   "bytes": 1085607,
+   "sha256": "df67572e614e8180bf44bae4a06fdd69c38c728ab87bbebc05faedc594ce129e",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_standing_value.png",
+   "bytes": 192583,
+   "sha256": "47e5093627d6caa456bd37ce472dee47881bf79f0c9fc4093592f51845f65e1b",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_standing_value_2016.png",
+   "bytes": 249692,
+   "sha256": "d27d566dff6b65bca4bdd7d2fb657afaa8d37d102b36fb9c058db1852f052f5b",
+   "width": 1600,
+   "height": 1001
+  },
+  {
+   "path": "conus_standing_value_2020.png",
+   "bytes": 247219,
+   "sha256": "cc90f4e6c2e8649d8d3811716ac3e25789ba70b0d439a4756f2e15c70cb9b63b",
+   "width": 1600,
+   "height": 1001
+  },
+  {
+   "path": "conus_standing_value_change_1622.png",
+   "bytes": 303218,
+   "sha256": "a6a86eaab31912c6c3b593684f3bb8a4cb515cc059a9f126ac714ec866f487b3",
+   "width": 1600,
+   "height": 1001
+  },
+  {
+   "path": "conus_standing_value_cv.png",
+   "bytes": 58181,
+   "sha256": "35f0cb5b5e640a5386d2276214e8967d101ff01f61e7534336d7e39d43079187",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_value_at_risk.png",
+   "bytes": 487269,
+   "sha256": "8143c01599fdae77977db800b909d0a59be26fdecd8d1dee3d389fb66a1ad2a4",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "conus_volume_removed.png",
+   "bytes": 495702,
+   "sha256": "2baa412db4a3e16a3d0c24354bc9f1d5de4fb5dd2a3ea8067e01f8d74f136466",
+   "width": 1600,
+   "height": 1057
+  },
+  {
+   "path": "external/cspi_v3_conus_30m.png",
+   "bytes": 1248637,
+   "sha256": "57006d64de7896e76290ea2c805ce71ce1050fa339aca656fad7c4efaed95600",
+   "width": 2700,
+   "height": 1500
+  },
+  {
+   "path": "ga_balive_2022.png",
+   "bytes": 4583477,
+   "sha256": "02940dccca531a36320dcd960e40ebf50b49f2347f030b3f9917c0a7161db67e",
+   "width": 1500,
+   "height": 1561
+  },
+  {
+   "path": "ga_carbon_l_2022.png",
+   "bytes": 4059232,
+   "sha256": "0757523b6637efaf61e23ceff4862e2f7db3c9bada7b0b16ca2a2f7185c8c404",
+   "width": 1500,
+   "height": 1561
+  },
+  {
+   "path": "ga_dombio_l_2022.png",
+   "bytes": 3940891,
+   "sha256": "d65db56a0795ffbdf7100b4bd4d6510f8f1dd7db59e13347adb3ec4cdc055c47",
+   "width": 1500,
+   "height": 1561
+  },
+  {
+   "path": "ga_fortypcd_2022.png",
+   "bytes": 4088351,
+   "sha256": "b121cdf8deee30f043a45bcf8dd37520aaf00b6e3964020f53e389587bd84525",
+   "width": 1500,
+   "height": 1561
+  },
+  {
+   "path": "ga_lcms_2022.png",
+   "bytes": 97787,
+   "sha256": "57ea519b62064edb36a2cbbb014f34d7faa460c945240f9a76a156ab3c258e70",
+   "width": 1500,
+   "height": 1561
+  },
+  {
+   "path": "ga_stdage_2022.png",
+   "bytes": 3522231,
+   "sha256": "5d899dd81c1fa8feb0b6cd61f9526d81d43c3edc9375827a216165ce5cf46b32",
+   "width": 1500,
+   "height": 1561
+  },
+  {
+   "path": "id_balive_2022.png",
+   "bytes": 3655329,
+   "sha256": "1b1bb927bd46db498a2cf59bf89a5dfa5f687c912e8dc0871aef7cac2ffab5ef",
+   "width": 1500,
+   "height": 2422
+  },
+  {
+   "path": "id_carbon_l_2022.png",
+   "bytes": 3246366,
+   "sha256": "322f8fc10bf711e267b2aa7c7e7ae229fbff8a01fe3baf40475b168e58a8c65f",
+   "width": 1500,
+   "height": 2422
+  },
+  {
+   "path": "id_dombio_l_2022.png",
+   "bytes": 3269105,
+   "sha256": "28f7ffc08f128f1c122bc002e8dfe6f517b2974642116aa390881fdcf32dfca3",
+   "width": 1500,
+   "height": 2422
+  },
+  {
+   "path": "id_fortypcd_2022.png",
+   "bytes": 2368959,
+   "sha256": "1690f84fe6f0da08ad890f35b3ce3b9b8140408719389b5fec4b7d2db210e4a0",
+   "width": 1500,
+   "height": 2422
+  },
+  {
+   "path": "id_lcms_2022.png",
+   "bytes": 56873,
+   "sha256": "789d7cdc258b350f9fa3429f1ece2586aca20a2be20922a171125c3011fc2336",
+   "width": 1500,
+   "height": 2422
+  },
+  {
+   "path": "id_stdage_2022.png",
+   "bytes": 3082349,
+   "sha256": "714f53945d05f5ea7aad8b856e71125008bb51ed51d6794ef5e3bd12ce727d81",
+   "width": 1500,
+   "height": 2422
+  },
+  {
+   "path": "in_balive_2022.png",
+   "bytes": 5467803,
+   "sha256": "e730e5cb3976d80858e3a4f9f43bbb533c4fdddfdee2f6ae0e55faf660dbd8d4",
+   "width": 1500,
+   "height": 2597
+  },
+  {
+   "path": "in_carbon_l_2022.png",
+   "bytes": 4917432,
+   "sha256": "1856eca2fdf75cd0d7d2de6b93dccb0b2bae68b7b58743f8ddee9acfd4a26fb4",
+   "width": 1500,
+   "height": 2597
+  },
+  {
+   "path": "in_dombio_l_2022.png",
+   "bytes": 4892885,
+   "sha256": "4d63f047e0996e80605d978a9cdaf7fa380b475d1130989901b6e4c6ac1ebc0a",
+   "width": 1500,
+   "height": 2597
+  },
+  {
+   "path": "in_fortypcd_2022.png",
+   "bytes": 1674312,
+   "sha256": "d259e6db4ff6ec7fb33b858a8d34d27874b46eecca7a978ebcd3da38a1f9c420",
+   "width": 1500,
+   "height": 2597
+  },
+  {
+   "path": "in_lcms_2022.png",
+   "bytes": 30483,
+   "sha256": "980ab9435c252534484704fa91fe9ab0d70127908af87c6ec1538c3c734f5b71",
+   "width": 1500,
+   "height": 2597
+  },
+  {
+   "path": "in_stdage_2022.png",
+   "bytes": 4231615,
+   "sha256": "193ed28e2c5762226c135108400129f52623053392e73e5ff6fbfb5488cb8873",
+   "width": 1500,
+   "height": 2597
+  },
+  {
+   "path": "me_BF_t0.png",
+   "bytes": 792048,
+   "sha256": "0735b89f5c5553d279be338e1187450ff2e581b1e085bc351ce79758f33285e0",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_BF_t10.png",
+   "bytes": 596741,
+   "sha256": "9e7678de2433dbf42f3b8bb1a885901689061fb3f3dc6612cad95bf2ca7eac42",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_BF_t5.png",
+   "bytes": 622253,
+   "sha256": "b5baaf1e769491cc4aaa04ef1cf3f71fdc360df0f07d2d6aea2ff733da2310cd",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_PINE_t0.png",
+   "bytes": 779462,
+   "sha256": "f13240a46c3ff6ae902aa7faabff8a1b3705cc2dfc0dc1a50cc173eb6457b88b",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_PINE_t10.png",
+   "bytes": 567059,
+   "sha256": "6f047d5b6ceac1e9350eadd007d1f68b41538b06754ff049c8e4c785955eda7c",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_PINE_t5.png",
+   "bytes": 587826,
+   "sha256": "ada013835a2a0c066dc61f3c7eaca55e16aad34a4c92fc6c9129defcbf2a7ece",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_RM_t0.png",
+   "bytes": 784595,
+   "sha256": "da519839fbb80c4a05830fd6b3737bfedf0822c96c359531346bc282dffa776f",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_RM_t10.png",
+   "bytes": 607003,
+   "sha256": "10163fbc9302a8309e6e554887e762ca39b6ca882d838ec711a874a2efee6203",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_RM_t5.png",
+   "bytes": 611265,
+   "sha256": "bad684f4626228df000792ff2d6e75dccd4ade14b2909a1877b5184995347890",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_RS_t0.png",
+   "bytes": 805954,
+   "sha256": "edc8f208f25e29ed6ff6d6648f13305efda5d8260c10b3a5d881eae2778ff76b",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_RS_t10.png",
+   "bytes": 606681,
+   "sha256": "74374af392435b5db34329c52da6e1fc7db2eabf269a0c4f0cf1467d8816292f",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_RS_t5.png",
+   "bytes": 615753,
+   "sha256": "0c797c3d80d756a5fb2c4e235fe311f7b57a2691db87068fc2eb61fcb7256694",
+   "width": 1000,
+   "height": 900
+  },
+  {
+   "path": "me_total_biomass_t0.png",
+   "bytes": 1562146,
+   "sha256": "6a6e881d18b6b30a216e84bc9bb75726bbde13bd69859333384e94e52aba4aad",
+   "width": 1500,
+   "height": 1350
+  },
+  {
+   "path": "me_total_biomass_t10.png",
+   "bytes": 1484739,
+   "sha256": "3b97547296139a6791189088d1e9a8510f4b5b22c5f253c11b3b324f42cf8e13",
+   "width": 1500,
+   "height": 1350
+  },
+  {
+   "path": "me_total_biomass_t5.png",
+   "bytes": 1442848,
+   "sha256": "1025b4bd0cfa2bde664649d4fa17ef854418bb4c7e087e27f543a6a4d4fa9a0a",
+   "width": 1500,
+   "height": 1350
+  },
+  {
+   "path": "mn_balive_2022.png",
+   "bytes": 3562533,
+   "sha256": "92fe3233e1394b8502b36b76f42e46f057beccaf38fe235d5e0b2bdc5da4b3e9",
+   "width": 1500,
+   "height": 1685
+  },
+  {
+   "path": "mn_carbon_l_2022.png",
+   "bytes": 3253191,
+   "sha256": "d27fc1494f33ea09931f36ae9bb912b9da0d4e7a1c898fdbd9d5d236b5d2847c",
+   "width": 1500,
+   "height": 1685
+  },
+  {
+   "path": "mn_dombio_l_2022.png",
+   "bytes": 3010616,
+   "sha256": "d593e9de562d61c409d0d922f713f67f704d3a9c11c38e762fe9ce820e56fd41",
+   "width": 1500,
+   "height": 1685
+  },
+  {
+   "path": "mn_fortypcd_2022.png",
+   "bytes": 2058437,
+   "sha256": "e67ec3ed9bed93dd69e5033d30e50e2f3b54ef6b5b530d0d9eab642276200f30",
+   "width": 1500,
+   "height": 1685
+  },
+  {
+   "path": "mn_lcms_2022.png",
+   "bytes": 22647,
+   "sha256": "4254f9903437e63d787dd5622bd7714c510c5c45d7c248cf4903420f2a7ad831",
+   "width": 1500,
+   "height": 1685
+  },
+  {
+   "path": "mn_stdage_2022.png",
+   "bytes": 2740695,
+   "sha256": "6eb4f718269ae90c452bb5c21237ed0bd2ca0187f30624f3c203e9a9a0abc2e2",
+   "width": 1500,
+   "height": 1685
+  },
+  {
+   "path": "or_balive_2022.png",
+   "bytes": 2468976,
+   "sha256": "9e01ec05aeaf10ce86a7bfa40df862cf457843d0b4f7d5cc50389601a2f3b9bc",
+   "width": 1500,
+   "height": 1264
+  },
+  {
+   "path": "or_carbon_l_2022.png",
+   "bytes": 2332419,
+   "sha256": "d3dc4f24fe64e2866242cd08096caec7d78a4a83da3128bd26df79129f5711d2",
+   "width": 1500,
+   "height": 1264
+  },
+  {
+   "path": "or_dombio_l_2022.png",
+   "bytes": 2406446,
+   "sha256": "5bfa50b8dbfb164dc7f5db94d8e73a4804c5ee81536f00f6ac72ff0789ac38b7",
+   "width": 1500,
+   "height": 1264
+  },
+  {
+   "path": "or_fortypcd_2022.png",
+   "bytes": 1719060,
+   "sha256": "d010c47b75a6ddfe06926f26e79948fafc97d8137bfd216043b4c9b576ddd039",
+   "width": 1500,
+   "height": 1264
+  },
+  {
+   "path": "or_lcms_2022.png",
+   "bytes": 42549,
+   "sha256": "3d06e3aea1533a0afed855b8792cfb4e7945b75b7db4762674b0fbaa0929bc5e",
+   "width": 1500,
+   "height": 1264
+  },
+  {
+   "path": "or_stdage_2022.png",
+   "bytes": 2261897,
+   "sha256": "9d41ca19edd295e62153b81ab8caa29b934d265771a4c9d6c6ecf8c8a3f14573",
+   "width": 1500,
+   "height": 1264
+  },
+  {
+   "path": "wa_balive_2022.png",
+   "bytes": 2644790,
+   "sha256": "ac12a7599ba4f6ad06f3c791db8ce64574026d8b886b2f3264d94e97e224af97",
+   "width": 1500,
+   "height": 1094
+  },
+  {
+   "path": "wa_carbon_l_2022.png",
+   "bytes": 2559963,
+   "sha256": "5bc5ec8c2cbf85facd4fa7c00a6ead5eac64573718b911ff6f3793e9f00b5969",
+   "width": 1500,
+   "height": 1094
+  },
+  {
+   "path": "wa_dombio_l_2022.png",
+   "bytes": 2587846,
+   "sha256": "afc232f0ce208ac7e37f29f29bcf23a0d3db84372970f1ea83ee1da88342d20c",
+   "width": 1500,
+   "height": 1094
+  },
+  {
+   "path": "wa_fortypcd_2022.png",
+   "bytes": 1849168,
+   "sha256": "474639c0f546e58e5090ec07af337e5c8d7cc9d55c9fc9878a44e14d747a5520",
+   "width": 1500,
+   "height": 1094
+  },
+  {
+   "path": "wa_lcms_2022.png",
+   "bytes": 46635,
+   "sha256": "dec1669fc3420077b3ff9137668cef8beb3bed5a809f05bb1e0445db80665d4c",
+   "width": 1500,
+   "height": 1094
+  },
+  {
+   "path": "wa_stdage_2022.png",
+   "bytes": 2295089,
+   "sha256": "f58e51479c603c67c5036db05f2a19ddea2a1c309fdca83b8cc98700087d93f5",
+   "width": 1500,
+   "height": 1094
+  }
+ ]
+}
