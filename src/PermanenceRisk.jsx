@@ -14,7 +14,13 @@ const BUCKETS = {
   dist:  "reserve (no harvest, disturbance-exposed)",
   mort:  "reserve (no harvest, mortality-stressed)",
 };
-const COL = { base:"#66c2a5", dist:"#e6a23c", mort:"#e05a5a" };
+// Okabe-Ito scenario colors (categorical, not status): bluish green, orange, reddish purple.
+const COL = { base:"#009E73", dist:"#E69F00", mort:"#CC79A7" };
+// Verdict colors are status marks: tokens with fallbacks equal to main's literals.
+const STATUS = { hi:"var(--alert, #e05a5a)", mod:"var(--warn, #e6a23c)", lo:"var(--ok, #66c2a5)", na:"var(--mut2, #8aa0b0)" };
+const EASE = "var(--dur, 200ms) var(--ease, cubic-bezier(0.25,1,0.5,1))";
+// display-only unit form: exponents as literal superscripts (Mm3 to Mm³)
+const showUnit = u => String(u).replace(/(\b[A-Za-z]*m)3\b/g, "$1³").replace(/(\b[A-Za-z]*m)2\b/g, "$1²");
 
 // carbon-stock metrics this view makes sense for, in preference order
 const PREF = ["agc_live_total","agb_dry","agc_live_ag","bgc_live_total","vol_stem"];
@@ -83,13 +89,13 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
 
   if(!series) return <div className="empty">No model series for this state yet.</div>;
   if(!metric || !data)
-    return <div className="empty">Permanence scenarios (disturbance-exposed / mortality-stressed reserve) are not available for {stateName||state} yet. They ship with the v1.4 carbon buckets — ME, GA, IN, MN and the focal states carry them.</div>;
+    return <div className="empty">Permanence scenarios (disturbance-exposed or mortality-stressed reserve) are not available for {stateName||state} yet. They ship with the v1.4 carbon buckets: ME, GA, IN, MN and the focal states carry them.</div>;
 
-  const unit = (meta && meta.metrics && meta.metrics[metric] && meta.metrics[metric].unit) || "Tg C";
+  const unit = showUnit((meta && meta.metrics && meta.metrics[metric] && meta.metrics[metric].unit) || "Tg C");
   const label = (meta && meta.metrics && meta.metrics[metric] && meta.metrics[metric].label) || metric;
 
   // ---- chart geometry ----
-  const W=560,H=300,L=52,R=120,T=16,B=30;
+  const W=560,H=310,L=52,R=120,T=24,B=36;
   const lines = [["base",data.base],["dist",data.dist],["mort",data.mort]].filter(([,l])=>l.length);
   const xs=[], ys=[];
   lines.forEach(([,l])=>l.forEach(p=>{ xs.push(p[0]); ys.push(p[1]); }));
@@ -116,80 +122,88 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
 
   const sparse = data.bEnd < 25 || (data.distPct!=null && data.distPct < -5);
   const verdict = (()=>{
-    if(sparse) return { t:"Reversal risk: not characterized", d:`This state's forested carbon base is small (${data.bEnd!=null?data.bEnd.toFixed(0):"—"} ${unit}), so the cross-engine reserve median is noisy and the reversal signal is not reliable here (sparse-woodland edge case).`, c:"#8aa0b0" };
+    if(sparse) return { t:"Reversal risk: not characterized", d:`This state's forested carbon base is small (${data.bEnd!=null?data.bEnd.toFixed(0):"n/a"} ${unit}), so the cross-engine reserve median is noisy and the reversal signal is not reliable here (sparse-woodland edge case).`, c:STATUS.na };
     const dp=data.distPct, ds=data.distSource;
     const hi = (dp!=null && dp>=50) || (ds!=null && ds>=25);
     const mod = (dp!=null && dp>=20) || (ds!=null && ds>=8);
     const sourceNote = (ds!=null && ds>=8) ? ` The disturbance-exposed reserve peaks then draws down ${ds.toFixed(0)}% by ${data.endYr}, so it plateaus or turns into a partial net source rather than a durable sink.` : "";
     if(hi)
-      return { t:"Reversal risk: high", d:`The disturbance-exposed reserve ends ${dp!=null?dp.toFixed(0):"—"}% below the passive reserve at ${data.endYr}.${sourceNote} Passive storage here is strongly conditional on disturbance staying near historical rates.`, c:"#e05a5a" };
+      return { t:"Reversal risk: high", d:`The disturbance-exposed reserve ends ${dp!=null?dp.toFixed(0):"n/a"}% below the passive reserve at ${data.endYr}.${sourceNote} Passive storage here is strongly conditional on disturbance staying near historical rates.`, c:STATUS.hi };
     if(mod)
-      return { t:"Reversal risk: moderate", d:`The disturbance-exposed reserve ends ${dp!=null?dp.toFixed(0):"—"}% below the passive reserve at ${data.endYr}.${sourceNote} Stored carbon is meaningfully sensitive to elevated disturbance.`, c:"#e6a23c" };
-    return { t:"Reversal risk: lower", d:`The reserve holds most of its carbon under the stressed scenarios (within ${Math.max(dp||0,data.mortPct||0).toFixed(0)}% at ${data.endYr}). Durability is comparatively robust here.`, c:"#66c2a5" };
+      return { t:"Reversal risk: moderate", d:`The disturbance-exposed reserve ends ${dp!=null?dp.toFixed(0):"n/a"}% below the passive reserve at ${data.endYr}.${sourceNote} Stored carbon is meaningfully sensitive to elevated disturbance.`, c:STATUS.mod };
+    return { t:"Reversal risk: lower", d:`The reserve holds most of its carbon under the stressed scenarios (within ${Math.max(dp||0,data.mortPct||0).toFixed(0)}% at ${data.endYr}). Durability is comparatively robust here.`, c:STATUS.lo };
   })();
 
-  const fmt=v=> v==null?"—": (Math.abs(v)>=100? v.toFixed(0): v.toFixed(1));
+  const fmt=v=> v==null?"n/a": (Math.abs(v)>=100? v.toFixed(0): v.toFixed(1));
 
   return (
     <div style={{margin:"4px 4px 8px"}}>
       {geo && risk && (
         <div style={{marginBottom:10}}>
-          <div style={{fontSize:12.5,fontWeight:600,marginBottom:3}}>CONUS reversal risk</div>
+          <div style={{fontSize:12.5,fontWeight:600,marginBottom:4,color:"var(--ink)"}}>CONUS reversal risk</div>
           <PermanenceMap geo={geo} risk={risk} selected={state} onPick={onPick}/>
         </div>
       )}
       <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap",marginBottom:4}}>
-        <b style={{fontSize:13}}>Permanence &amp; reversal risk — {stateName||state}</b>
+        <b style={{fontSize:13,color:"var(--ink)"}}>Permanence and reversal risk: {stateName||state}</b>
         <span style={{color:"var(--mut)",fontSize:11}}>{label} · ensemble median of {data.nEng} reserve engine{data.nEng===1?"":"s"} · {unit}</span>
       </div>
 
       <div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"6px 0 8px"}}>
         <div style={{borderLeft:`3px solid ${verdict.c}`,padding:"3px 0 3px 9px",maxWidth:540}}>
           <div style={{color:verdict.c,fontSize:12.5,fontWeight:600}}>{verdict.t}</div>
-          <div style={{color:"var(--mut)",fontSize:11.5,lineHeight:1.4}}>{verdict.d}</div>
+          <div style={{color:"var(--ink-2, var(--mut))",fontSize:11.5,lineHeight:1.45}}>{verdict.d}</div>
         </div>
       </div>
 
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:6}}>
-        {[["Passive reserve @"+data.endYr, fmt(data.bEnd), unit, COL.base],
-          ["Disturbance-exposed", fmt(data.dEnd), data.distPct!=null?`▼ ${data.distPct.toFixed(0)}%`:"", COL.dist],
-          ["Mortality-stressed", fmt(data.mEnd), data.mortPct!=null?`▼ ${data.mortPct.toFixed(0)}%`:"", COL.mort]].map((c,i)=>(
-          <div key={i} style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${c[3]}55`,borderRadius:6,padding:"5px 9px",minWidth:120}}>
-            <div style={{color:"var(--mut)",fontSize:10.5}}>{c[0]}</div>
-            <div style={{fontSize:16,fontWeight:600,color:c[3],fontVariantNumeric:"tabular-nums"}}>{c[1]} <span style={{fontSize:9,color:"var(--mut)",fontWeight:400}}>{c[2]}</span></div>
-            {c[3]!==COL.base && c[2] && <div style={{fontSize:10,color:c[3]}}>{c[2]}</div>}
+        {/* Scenario tiles: neutral card, scenario color as a left key bar; value in ink so it
+            reads on both themes; the shortfall vs the passive reserve sits under the value. */}
+        {[["Passive reserve at "+data.endYr, fmt(data.bEnd), "", COL.base],
+          ["Disturbance-exposed", fmt(data.dEnd), data.distPct!=null?`${data.distPct.toFixed(0)}% below passive`:"", COL.dist],
+          ["Mortality-stressed", fmt(data.mEnd), data.mortPct!=null?`${data.mortPct.toFixed(0)}% below passive`:"", COL.mort]].map((c,i)=>(
+          <div key={i} style={{background:"var(--panel-2, rgba(255,255,255,0.03))",border:"1px solid var(--line)",
+            borderLeft:`3px solid ${c[3]}`,borderRadius:6,padding:"5px 10px",minWidth:130}}>
+            <div style={{color:"var(--mut)",fontSize:11}}>{c[0]}</div>
+            <div style={{fontSize:16,fontWeight:600,color:"var(--ink)",fontVariantNumeric:"tabular-nums"}}>{c[1]} <span style={{fontSize:10.5,color:"var(--mut)",fontWeight:400}}>{unit}</span></div>
+            {c[2] && <div style={{fontSize:11,color:"var(--ink-2, var(--mut))",fontVariantNumeric:"tabular-nums"}}>{c[2]}</div>}
           </div>
         ))}
       </div>
 
-      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}>
+      <div style={{background:"var(--panel)",border:"1px solid var(--line)",borderRadius:8,padding:"6px 6px 2px",maxWidth:720}}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block",fontVariantNumeric:"tabular-nums"}}>
         {yticks.map((v,i)=>(<g key={"y"+i}>
-          <line x1={L} y1={Y(v)} x2={W-R} y2={Y(v)} stroke="#2a3a47" strokeWidth="1"/>
-          <text x={L-6} y={Y(v)+3} textAnchor="end" fill="#8aa0b0" fontSize="10">{v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0)}</text>
+          <line x1={L} y1={Y(v)} x2={W-R} y2={Y(v)} strokeWidth="1"
+            style={{stroke: v===0 ? "var(--line-strong, #3a4a57)" : "var(--grid, #2a3a47)"}}/>
+          <text x={L-6} y={Y(v)+3.5} textAnchor="end" fontSize="10" style={{fill:"var(--axis, #8aa0b0)"}}>{v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0)}</text>
         </g>))}
-        {xticks.map((t,i)=>(<text key={"x"+i} x={X(t)} y={H-B+16} textAnchor="middle" fill="#8aa0b0" fontSize="10">{Math.round(t)}</text>))}
-        <text x={L-6} y={T+2} textAnchor="end" fill="#6a7480" fontSize="9">{unit}</text>
-        {gapPoly && <path d={gapPoly} fill={COL.dist} opacity={hl&&hl!=="dist"?0.04:0.14} stroke="none"/>}
+        {xticks.map((t,i)=>(<text key={"x"+i} x={X(t)} y={H-B+15} textAnchor="middle" fontSize="10" style={{fill:"var(--axis, #8aa0b0)"}}>{Math.round(t)}</text>))}
+        <text x={(L+W-R)/2} y={H-4} textAnchor="middle" fontSize="10" style={{fill:"var(--axis, #8aa0b0)"}}>Year</text>
+        <text x={L-6} y={12} textAnchor="start" fontSize="11" fontWeight="600" style={{fill:"var(--ink-2, #cddbe4)"}}>{label}, ensemble median ({unit})</text>
+        {gapPoly && <path d={gapPoly} opacity={hl&&hl!=="dist"?0.04:0.16}
+          style={{fill:COL.dist,stroke:"none",transition:`opacity ${EASE}`}}/>}
         {lines.map(([k,l])=>(
-          <path key={k} d={path(l)} fill="none" stroke={COL[k]}
+          <path key={k} d={path(l)} fill="none"
             strokeWidth={k==="base"?2.2:1.8} strokeDasharray={k==="base"?"0":"6 3"}
             opacity={hl&&hl!==k?0.25:0.95}
             onMouseEnter={()=>setHl(k)} onMouseLeave={()=>setHl(null)}
-            style={{cursor:"pointer"}}/>
+            style={{stroke:COL[k],cursor:"pointer",transition:`opacity ${EASE}`}}/>
         ))}
         {/* end labels */}
         {lines.map(([k,l])=>{
           const last=l[l.length-1];
           const txt={base:"passive reserve",dist:"disturbance-exposed",mort:"mortality-stressed"}[k];
           return <g key={"lab"+k} style={{pointerEvents:"none"}}>
-            <line x1={W-R+1} y1={Y(last[1])} x2={W-R+5} y2={Y(last[1])} stroke={COL[k]} strokeWidth="1.5" strokeDasharray={k==="base"?"0":"4 2"}/>
-            <text x={W-R+7} y={Y(last[1])+3} fill={COL[k]} fontSize="8.5">{txt}</text>
+            <line x1={W-R+1} y1={Y(last[1])} x2={W-R+9} y2={Y(last[1])} strokeWidth="2" strokeDasharray={k==="base"?"0":"3 2"} style={{stroke:COL[k]}}/>
+            <text x={W-R+12} y={Y(last[1])+3.5} fontSize="10" style={{fill:"var(--ink-2, #cddbe4)"}}>{txt}</text>
           </g>;
         })}
       </svg>
+      </div>
 
-      <div style={{color:"var(--mut)",fontSize:10.5,lineHeight:1.45,marginTop:4,maxWidth:560}}>
-        Reversal risk is the shortfall of a stressed no-harvest reserve against the passive reserve at {data.endYr}. The disturbance-exposed band spans historical / 2× / 3× disturbance frequency (FIA COND + GRM grounded); mortality-stressed elevates background mortality. Hover a line to isolate. Unlike single-model reversal tools, this is the cross-engine reserve median, so the risk read carries PERSEUS's multi-model spread.
+      <div style={{color:"var(--mut)",fontSize:11,lineHeight:1.5,marginTop:8,maxWidth:600}}>
+        Reversal risk is the shortfall of a stressed no-harvest reserve against the passive reserve at {data.endYr}. The disturbance-exposed band spans historical, 2× and 3× disturbance frequency (grounded in FIA COND and GRM); mortality-stressed elevates background mortality. Hover a line to isolate. Unlike single-model reversal tools, this is the cross-engine reserve median, so the risk read carries PERSEUS's multi-model spread.
       </div>
     </div>
   );

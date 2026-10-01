@@ -21,7 +21,7 @@ const geomToD=g=>{ if(!g) return ""; const polys=g.type==="Polygon"?[g.coordinat
 
 // sequential risk ramp: low (green) -> moderate (amber) -> high (red)
 const STOPS=[[0,[47,158,106]],[40,[202,161,90]],[70,[224,90,90]]];
-const rampRisk=v=>{ if(v==null||isNaN(v)) return "#2a3a47";
+const rampRisk=v=>{ if(v==null||isNaN(v)) return "var(--nodata, #2a3a47)";
   v=Math.max(0,Math.min(70,v));
   let a=STOPS[0],b=STOPS[STOPS.length-1];
   for(let i=1;i<STOPS.length;i++){ if(v<=STOPS[i][0]){ a=STOPS[i-1]; b=STOPS[i]; break; } }
@@ -29,35 +29,42 @@ const rampRisk=v=>{ if(v==null||isNaN(v)) return "#2a3a47";
   const c=a[1].map((ca,k)=>Math.round(ca+t*(b[1][k]-ca)));
   return "#"+c.map(x=>x.toString(16).padStart(2,"0")).join(""); };
 
+// sparse-base states flagged unreliable: a neutral context gray, distinct from no data
+const NOTCHAR="var(--context, #3a4654)";
+
 export default function PermanenceMap({ geo, risk, field="distPct", selected, onPick }){
   if(!geo || !geo.features || !risk) return null;
   const feats=geo.features.filter(ft=>ft.properties && ft.properties.state);
   const legendVals=[0,20,40,55,70];
+  const axisTxt={fill:"var(--axis, #8aa0b0)",fontVariantNumeric:"tabular-nums"};
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
-        <rect x="0" y="0" width={W} height={H} fill="#101820"/>
+        <rect x="0" y="0" width={W} height={H} rx={6} strokeWidth={1} style={{fill:"var(--panel-2, #101820)",stroke:"var(--line)"}}/>
         {feats.map(ft=>{
           const st=ft.properties.state, r=risk[st];
           const v=(r && r.reliable!==false)?r[field]:null;
-          const fill=(r && r.reliable===false)?"#3a4654":rampRisk(v);
+          const fill=(r && r.reliable===false)?NOTCHAR:rampRisk(v);
           const isSel=st===selected;
-          return <path key={st} d={geomToD(ft.geometry)} fill={fill}
+          return <path key={st} d={geomToD(ft.geometry)}
             fillOpacity={v!=null?0.92:0.3}
-            stroke={isSel?"#fff":"#0b1015"} strokeWidth={isSel?2:0.5}
-            style={{cursor:r?"pointer":"default"}}
+            strokeWidth={isSel?2:0.5}
+            style={{fill,stroke:isSel?"var(--map-sel, #fff)":"var(--map-edge, #0b1015)",cursor:r?"pointer":"default"}}
             onClick={()=>{ if(r && onPick) onPick(st); }}>
-            <title>{`${st}${r?(r.reliable===false?` · sparse forest base — reversal not characterized`:` · disturbance-exposed reserve ${v!=null?v.toFixed(0)+"% below passive":"—"} at ${r.endYr}`):" · no permanence data"}`}</title>
+            <title>{`${st}${r?(r.reliable===false?` · sparse forest base, reversal not characterized`:` · disturbance-exposed reserve ${v!=null?v.toFixed(0)+"% below passive":"n/a"} at ${r.endYr}`):" · no permanence data"}`}</title>
           </path>;
         })}
         {/* legend */}
-        <g transform={`translate(${W-150},${H-30})`}>
-          {legendVals.map((v,i)=>(<rect key={i} x={i*26} y={0} width={26} height={9} fill={rampRisk(v)}/>))}
-          <text x={0} y={22} fill="#8aa0b0" fontSize="9">lower</text>
-          <text x={legendVals.length*26} y={22} textAnchor="end" fill="#8aa0b0" fontSize="9">higher reversal risk</text>
+        <g transform={`translate(${W-150},${H-44})`}>
+          <text x={legendVals.length*26} y={-4} textAnchor="end" fontSize="10" style={{fill:"var(--ink-2, #cddbe4)"}}>Shortfall below passive (%)</text>
+          {legendVals.map((v,i)=>(<rect key={i} x={i*26} y={0} width={26} height={9} style={{fill:rampRisk(v)}}/>))}
+          <text x={0} y={21} fontSize="10" style={axisTxt}>0, lower</text>
+          <text x={legendVals.length*26} y={21} textAnchor="end" fontSize="10" style={axisTxt}>70+, higher</text>
+          <rect x={0} y={28} width={10} height={9} fillOpacity={0.3} style={{fill:NOTCHAR}}/>
+          <text x={14} y={36} fontSize="10" style={axisTxt}>not characterized</text>
         </g>
       </svg>
-      <div style={{color:"var(--mut)",fontSize:10.5,marginTop:2}}>
+      <div style={{color:"var(--mut)",fontSize:11,marginTop:4,lineHeight:1.5}}>
         Each state shaded by how far its disturbance-exposed no-harvest reserve falls below the passive reserve at horizon (cross-engine median). Click a state to load it. {Object.keys(risk).length} states.
       </div>
     </div>
