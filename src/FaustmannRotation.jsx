@@ -28,12 +28,12 @@ function Scatter({ rows }){
       </g>))}
       {xt.map(t => <text key={t} x={sx(t)} y={H-9} textAnchor="middle" fontSize="9" fill="var(--mut)">{t}</text>)}
       <text x={(P.l+W-P.r)/2} y={H-0.5} textAnchor="middle" fontSize="9" fill="var(--mut)">Optimal rotation R_opt (yr)</text>
-      <text x={W-P.r} y={P.t+1} textAnchor="end" fontSize="9" fill="var(--mut)">SEV ($/ac)</text>
+      <text x={W-P.r} y={P.t+1} textAnchor="end" fontSize="9" fill="var(--mut)">SEV ($ ac⁻¹)</text>
       {rows.map((r,i) => (
         <circle key={i} cx={sx(r.R_opt)} cy={sy(r.sev_opt)} r={r.carbon_floor>0?5:3.4}
           fill={col(r.ft)} fillOpacity={r.carbon_floor>0?0.55:0.9}
           stroke={r.carbon_floor>0?"#fff":"none"} strokeWidth="0.6">
-          <title>{`${r.ft} · ${r.eco} · ${r.owner}\nR_opt ${r.R_opt} yr · SEV $${r.sev_opt.toFixed(0)}/ac\ncarbon floor ${r.carbon_floor} lb C/ac · vol@R ${r.vol_at_R}`}</title>
+          <title>{`${r.ft} · ${r.eco} · ${r.owner}\nR_opt ${r.R_opt} yr · SEV $${r.sev_opt.toFixed(0)} ac⁻¹\ncarbon floor ${r.carbon_floor} tons AGB ac⁻¹ (rotation mean) · vol@R ${r.vol_at_R} ft³ ac⁻¹`}</title>
         </circle>
       ))}
     </svg>
@@ -58,6 +58,14 @@ export default function FaustmannRotation({ data, state }){
 
   return (
     <div>
+      {data.meta && data.meta.known_issue && (
+        <div role="note" className="note" style={{margin:"4px 4px 10px",padding:"8px 10px",color:"var(--ink, #e8eef2)",
+          border:"1px solid var(--warn, #d9a441)",borderLeftWidth:3,borderRadius:6,background:"transparent"}}>
+          <b>Known data issue: soil expectation values are overstated.</b> These precomputed SEVs reproduce
+          exactly with a stumpage of $12 per ft³, about 17 times the Maine blended price, so dollar values
+          and optimal rotations on this tab are not reliable until the source table is regenerated. Use
+          <b> Build a run</b> for land values at current prices.
+        </div>)}
       <div className="controls" style={{marginTop:0}}>
         <select value={owner} onChange={e=>setOwner(e.target.value)} title="Owner">
           <option value="all">all owners</option>
@@ -87,10 +95,10 @@ export default function FaustmannRotation({ data, state }){
         <table style={{borderCollapse:"collapse",fontSize:10.5,width:"100%",fontVariantNumeric:"tabular-nums"}}>
           <thead><tr style={{color:"var(--mut)",textAlign:"left"}}>
             <th style={{padding:"2px 6px"}}>forest type</th><th style={{padding:"2px 6px"}}>eco</th>
-            <th style={{padding:"2px 6px"}}>owner</th><th style={{padding:"2px 6px",textAlign:"right"}}>floor</th>
+            <th style={{padding:"2px 6px"}}>owner</th><th style={{padding:"2px 6px",textAlign:"right"}}>floor (tons ac⁻¹)</th>
             <th style={{padding:"2px 6px",textAlign:"right"}}>R_opt</th>
-            <th style={{padding:"2px 6px",textAlign:"right"}}>SEV $/ac</th>
-            <th style={{padding:"2px 6px",textAlign:"right"}}>vol@R</th>
+            <th style={{padding:"2px 6px",textAlign:"right"}}>SEV ($ ac⁻¹)</th>
+            <th style={{padding:"2px 6px",textAlign:"right"}}>vol@R (ft³ ac⁻¹)</th>
           </tr></thead>
           <tbody>
             {rows.slice().sort((a,b)=>b.sev_opt-a.sev_opt).map((r,i) => (
