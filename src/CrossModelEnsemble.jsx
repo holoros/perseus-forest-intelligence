@@ -7,12 +7,17 @@
 // from api/multimodel_state_summary.json. Reuses the dependency-free MiniChart.
 import { useState, useEffect } from "react";
 import MiniChart from "./MiniChart.jsx";
+import { fmtUnit } from "./units.js";
 
+// Okabe-Ito engine-family colors (same family, same hue in every chart). Variants inside a
+// family share the hue and differ by line style.
 const MCOL = {
-  CBM:"#6baed6", CEM:"#d95f02", FVS_default:"#3fb68b", FVS_calibrated:"#1b9e77",
-  YC:"#e6ab02", LANDIS:"#8856a7",
-  CBM_disturbed:"#9ecae1", CEM_disturbed:"#fdae6b",
+  CBM:"#0072B2", CEM:"#009E73", FVS_default:"#E69F00", FVS_calibrated:"#E69F00", FVS_gompit:"#E69F00",
+  YC:"#CC79A7", YieldCurve:"#CC79A7", LANDIS:"#56B4E9",
+  CBM_disturbed:"#0072B2", CEM_disturbed:"#009E73",
 };
+const MDASH = { FVS_default:"6 3", FVS_gompit:"1.5 2.5", CBM_disturbed:"6 3", CEM_disturbed:"6 3" };
+const tableCol = name => MCOL[name] || MCOL[name?.replace("_def","_default").replace("_cal","_calibrated")] || "var(--context)";
 const keys = o => (o && typeof o === "object") ? Object.keys(o) : [];
 
 export default function CrossModelEnsemble({ traj, summary, state }){
@@ -30,14 +35,15 @@ export default function CrossModelEnsemble({ traj, summary, state }){
 
   const series = modelKeys.map(m => ({
     label: m,
-    color: MCOL[m] || "#999",
+    color: MCOL[m] || "var(--context)",
+    dash: MDASH[m],
     pts: (node[m] || []).map(([y, v]) => [y, null, v, null]),  // bare line
   }));
   const ens = node._ensemble;
   if(ens && ens.pts){
     const idx = {}; (ens.cols || []).forEach((c, i) => { idx[c] = i; });
     series.push({
-      label: "ensemble (90% band)", color: "#8a93a0",
+      label: "ensemble mean", color: "var(--ink-2)", width: 2.4, bandName: "cross-model 90% range",
       pts: ens.pts.map(r => [r[idx.year], r[idx.lo90], r[idx.mean], r[idx.hi90]]),
     });
   }
@@ -62,23 +68,24 @@ export default function CrossModelEnsemble({ traj, summary, state }){
       </div>
 
       <div className="chartcard" style={{padding:"6px 8px"}}>
-        <MiniChart series={series} unit="AGC (TgC, anchored)" xlabel="Year"/>
+        <MiniChart series={series} unit={`Aboveground carbon (${fmtUnit("Tg C")}), anchored to 2025 FIA`} xlabel="Year"/>
       </div>
 
       {tableRows.length > 0 && (
         <div className="chartcard" style={{padding:"6px 8px", marginTop:8}}>
-          <table style={{width:"100%", fontSize:12, borderCollapse:"collapse"}}>
+          <table className="tbl">
             <thead>
-              <tr style={{color:"var(--mut)", textAlign:"right"}}>
-                <th style={{textAlign:"left"}}>Model</th><th>2100 carbon (TgC)</th><th>NPV @3%</th>
+              <tr>
+                <th>Model</th><th>2100 carbon ({fmtUnit("Tg C")})</th><th>NPV at 3%</th>
               </tr>
             </thead>
             <tbody>
               {tableRows.map(r => (
-                <tr key={r.name} style={{textAlign:"right"}}>
-                  <td style={{textAlign:"left", color: MCOL[r.name] || MCOL[r.name?.replace("_def","_default").replace("_cal","_calibrated")] || "inherit"}}>{r.name}</td>
-                  <td>{r.total != null ? r.total.toLocaleString() : "—"}</td>
-                  <td>{r.npv != null ? r.npv.toLocaleString() : "—"}</td>
+                <tr key={r.name}>
+                  <td><i style={{display:"inline-block",width:8,height:8,borderRadius:"50%",marginRight:6,
+                    verticalAlign:"middle",background:tableCol(r.name)}}/>{r.name}</td>
+                  <td>{r.total != null ? r.total.toLocaleString() : "n/a"}</td>
+                  <td>{r.npv != null ? r.npv.toLocaleString() : "n/a"}</td>
                 </tr>
               ))}
             </tbody>
@@ -89,7 +96,9 @@ export default function CrossModelEnsemble({ traj, summary, state }){
       <div className="note" style={{marginTop:6}}>
         LANDIS is shown where native LANDIS-II runs exist (9 states: IN, ME, MI, MN, NH, OH,
         VT, WA, WI). Other states show CBM, CEM, FVS (default and calibrated), and the
-        yield-curve engine. The band is the cross-model 90% range (mean ± 1.645 × between-model SD).
+        yield-curve engine. The shaded band is the cross-model 90% range (mean ± 1.645 × between-model SD).
+        Variants within a family share its color: dashed FVS is the default variant, dotted FVS the gompit variant,
+        and dashed CBM or CEM the disturbed scenario.
       </div>
     </div>
   );

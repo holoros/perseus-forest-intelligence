@@ -4,9 +4,13 @@
 // q10-q90 empirical band.
 import { useState, useEffect } from "react";
 import MiniChart from "./MiniChart.jsx";
+import { fmtUnit } from "./units.js";
 
-const FT_COL = { AB:"#e6ab02", NHWD:"#3fb68b", PINE:"#6baed6", SF:"#8da0cb",
-  EAC:"#d95f02", OAK:"#a6761d" };
+// Okabe-Ito forest-type colors, shared with the Faustmann rotation chart.
+const FT_COL = { AB:"#E69F00", NHWD:"#009E73", PINE:"#D55E00", SF:"#0072B2",
+  EAC:"#56B4E9", OAK:"#CC79A7" };
+const fmtLabel = s => typeof s !== "string" ? s
+  : s.replace(/(?<![A-Za-z])((?:\$|[A-Za-z]{1,3})(?: C)?)\/([A-Za-z]{1,3})(?:\/([A-Za-z]{1,3}))?(?![A-Za-z])/g, m => fmtUnit(m));
 const FT_LABEL = { AB:"Aspen-birch", NHWD:"Northern hardwood", PINE:"Pine",
   SF:"Spruce-fir", EAC:"Elm-ash-cottonwood", OAK:"Oak" };
 
@@ -23,7 +27,8 @@ export default function LandownerYields({ data, state }){
   const byFt = stData[owner] || {};
   const series = Object.keys(byFt).map(ft => ({
     label: FT_LABEL[ft] || ft,
-    color: FT_COL[ft] || "#aaa",
+    color: FT_COL[ft] || "var(--context)",
+    bandName: "q10 to q90 plot band",
     pts: byFt[ft].map(r => [r.age, r.q10, (r.fit!=null?r.fit:r.q50), r.q90]),
   }));
 
@@ -33,14 +38,14 @@ export default function LandownerYields({ data, state }){
         <select value={owner} onChange={e=>setOwner(e.target.value)} title="Owner class">
           {owners.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
-        <span style={{color:"var(--mut)",fontSize:12,alignSelf:"center"}}>{data.meta.metric}</span>
+        <span style={{color:"var(--mut)",fontSize:12,alignSelf:"center"}}>{fmtLabel(data.meta.metric)}</span>
       </div>
       <div className="chartcard" style={{padding:"6px 8px"}}>
-        <MiniChart series={series} unit="AGB (Mg/ha)"/>
+        <MiniChart series={series} unit={`Aboveground live biomass (${fmtUnit("Mg/ha")})`}/>
       </div>
       <div className="lgd" style={{marginTop:8}}>
         {Object.keys(byFt).map(ft =>
-          <span key={ft}><i style={{background:FT_COL[ft]||"#aaa",width:14,height:3}}/>{FT_LABEL[ft]||ft}</span>)}
+          <span key={ft}><i style={{background:FT_COL[ft]||"var(--context)",width:14,height:3}}/>{FT_LABEL[ft]||ft}</span>)}
       </div>
       <div className="note">
         Fitted yield curve (solid) with the q10 to q90 plot band (shaded), for
