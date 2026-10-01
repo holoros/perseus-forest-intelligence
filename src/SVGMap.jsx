@@ -86,7 +86,7 @@ function geomToD(geom){
 
 function pickColorCoverage(engines, focal, hasSeries){
   // Punchier, higher-contrast emerald ramp for more visual pop.
-  let fill = "#26323c";
+  let fill = "var(--nodata)";
   if(engines >= 20) fill = "#0e8a4d";
   else if(engines >= 6) fill = "#22b56e";
   else if(engines >= 4) fill = "#5bd699";
@@ -372,13 +372,13 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           <clipPath id="clip-selected-state"><path d={selPathD}/></clipPath>
         )}
         <linearGradient id="ocean-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10212e"/>
-          <stop offset="55%" stopColor="#0c1722"/>
-          <stop offset="100%" stopColor="#070d13"/>
+          <stop offset="0%" style={{stopColor:"var(--panel-2)"}}/>
+          <stop offset="55%" style={{stopColor:"var(--panel)"}}/>
+          <stop offset="100%" style={{stopColor:"var(--bg)"}}/>
         </linearGradient>
         <radialGradient id="ocean-vignette" cx="50%" cy="42%" r="70%">
-          <stop offset="0%" stopColor="#16344a" stopOpacity="0.45"/>
-          <stop offset="60%" stopColor="#0c1722" stopOpacity="0"/>
+          <stop offset="0%" stopOpacity="0.45" style={{stopColor:"var(--accent-tint)"}}/>
+          <stop offset="60%" stopOpacity="0" style={{stopColor:"var(--panel)"}}/>
         </radialGradient>
       </defs>
       <rect x="0" y="0" width={W} height={H} fill="url(#ocean-bg)"/>
@@ -399,9 +399,9 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         const code = ft.properties && ft.properties.NA_L3CODE;
         const fill = ecoFill ? ecoFill(code) : null;
         return <path key={"eco"+i} d={geomToD(ft.geometry)}
-                 fill={fill || "#2a3a47"} fillOpacity={fill ? ecoOpacity : 0.12}
-                 stroke="#0b1015" strokeWidth={0.15}
-                 style={{pointerEvents:"none"}}/>;
+                 fillOpacity={fill ? ecoOpacity : 0.12}
+                 strokeWidth={0.15}
+                 style={{fill: fill || "var(--nodata)", stroke:"var(--bg)", pointerEvents:"none"}}/>;
       })}
       {mode === "health" && hrrGrid && hrrGrid.cells && (
         <g style={{pointerEvents:"none"}}>
@@ -424,7 +424,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           {hrrHex.cells.map((c, i) => {
             const pts = c.b.map(([la, lo]) => projPath(lo, la).join(",")).join(" ");
             return <polygon key={"h" + i} points={pts}
-              fill={HRR_BIV[c.sx + "-" + c.sy]} opacity={0.9} stroke="#0b1015" strokeWidth={0.15} />;
+              fill={HRR_BIV[c.sx + "-" + c.sy]} opacity={0.9} strokeWidth={0.15} style={{stroke:"var(--bg)"}} />;
           })}
         </g>
       )}
@@ -434,8 +434,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
             const gid = ft.properties && ft.properties.GEOID;
             const c = gid != null ? countyPri[String(parseInt(gid, 10))] : null; // hrr_county keys are FIPS w/o leading zero
             return <path key={"cty" + i} d={geomToD(ft.geometry)}
-              fill={c ? rampHealth(c.priority_pct) : "#2a3a47"} fillOpacity={c ? 0.9 : 0.1}
-              stroke="#0b1015" strokeWidth={0.12} />;
+              fillOpacity={c ? 0.9 : 0.1}
+              strokeWidth={0.12} style={{fill: c ? rampHealth(c.priority_pct) : "var(--nodata)", stroke:"var(--bg)"}} />;
           })}
         </g>
       )}
@@ -445,7 +445,7 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
             const [cx, cy] = projPath(c.lon, c.lat);
             const r = Math.max(1.6, Math.sqrt(c.n) * 0.55);
             return <circle key={"c" + fips} cx={cx} cy={cy} r={r}
-              fill={rampHealth(c.priority_pct)} opacity={0.85} stroke="#0b1015" strokeWidth={0.2} />;
+              fill={rampHealth(c.priority_pct)} opacity={0.85} strokeWidth={0.2} style={{stroke:"var(--bg)"}} />;
           })}
         </g>
       )}
@@ -455,8 +455,8 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
             const code = ft.properties && ft.properties.NA_L3CODE;
             const e = code && hrrEco.ecoregions[code];
             return <path key={"eco" + i} d={geomToD(ft.geometry)}
-              fill={e ? rampHealth(e.priority_pct) : "#2a3a47"} fillOpacity={e ? 0.85 : 0.12}
-              stroke="#0b1015" strokeWidth={0.15} />;
+              fillOpacity={e ? 0.85 : 0.12}
+              strokeWidth={0.15} style={{fill: e ? rampHealth(e.priority_pct) : "var(--nodata)", stroke:"var(--bg)"}} />;
           })}
         </g>
       )}
@@ -469,14 +469,14 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         let fill, opacity;
         if(mode === "health"){
           const col = hrrSt ? rampHealth(hrrSt.priority_pct) : null;
-          fill = col || "#2a3a47";
+          fill = col || "var(--nodata)";
           // Hide state fills under a full-coverage unit (surface/hex/ecoregion);
           // strongly dim them under county dots so counties read as the unit.
           opacity = (hrrGrid || hrrHex || hrrEcoGeo) ? 0 : (hrrCounty ? 0.12 : (col ? 0.92 : 0.30));
         } else if(mode === "carbon"){
           const v = (timeline && timeline[st] && timeline[st][mapScenario] && timeline[st][mapScenario][yrKey]);
           const col = rampCarbon(v != null ? v : -1);
-          fill = col || "#2a3a47";
+          fill = col || "var(--nodata)";
           opacity = col ? 0.92 : 0.35;
         } else {
           fill = pickColorCoverage(cov.engines || 0, isFocal, hasSeries);
@@ -492,7 +492,9 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
         }
         const d = geomToD(ft.geometry);
         const isSel = st === selected;
-        const stroke = isFocal ? "#ffd23a" : (isSel ? "#ffffff" : "#0b1015");
+        // Focal and selected outlines are theme tokens (charts.css); ordinary state edges are a
+        // hairline so the pale ends of the ramps never melt into a light background.
+        const stroke = isFocal ? "var(--map-focal)" : (isSel ? "var(--map-sel)" : "var(--map-edge)");
         const sw = isSel ? 2.6 : (isFocal ? 2.2 : 0.5);
         // In health mode any state with an HRR score is pickable so the readout
         // updates on click; elsewhere only states with model series are pickable.
@@ -506,9 +508,9 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
           if(pickable && onPick) onPick(st);
         };
         return (
-          <path key={st} d={d} fill={fill} fillOpacity={opacity}
-                stroke={stroke} strokeWidth={sw}
-                style={{cursor: pickable ? "pointer" : "default"}}
+          <path key={st} d={d} fillOpacity={opacity}
+                strokeWidth={sw}
+                style={{fill, stroke, cursor: pickable ? "pointer" : "default"}}
                 // a11y: pickable states are keyboard-focusable and Enter/Space-activatable,
                 // giving the choropleth parity with the header state <select> (WCAG 2.1.1).
                 tabIndex={pickable ? 0 : undefined}
@@ -539,28 +541,26 @@ export default function SVGMap({ geo, states, focal = [], mode = "coverage",
                        dur="2s" repeatCount="indefinite"/>
             </circle>
             <circle cx={mx} cy={my} r={r} fill="#2f81f7"
-                    stroke="#ffffff" strokeWidth={1.6/view.k}/>
+                    strokeWidth={1.6/view.k} style={{stroke:"var(--panel)"}}/>
           </g>
         );
       })()}
       </g>
       {/* Zoom controls (fixed, outside the pan/zoom group) */}
-      <g transform={`translate(${W-100},${H-32})`}>
-        <rect x="0" y="0" width="92" height="22" rx="4"
-              fill="rgba(15,20,25,0.85)" stroke="#2a3a47"/>
-        <text x="10" y="15" fill="#8aa0b0" fontSize="11" fontWeight="bold"
-              style={{cursor:"pointer",userSelect:"none"}}
+      <g transform={`translate(${W-110},${H-32})`}>
+        <rect x="0" y="0" width="102" height="22" rx="4"
+              style={{fill:"var(--overlay)", stroke:"var(--line)"}}/>
+        <text x="10" y="15.5" fontSize="12" fontWeight="bold"
+              style={{fill:"var(--ink-2)",cursor:"pointer",userSelect:"none"}}
               onClick={(e)=>{ e.stopPropagation(); zoomBy(1.4); }}>+</text>
-        <text x="28" y="15" fill="#8aa0b0" fontSize="11" fontWeight="bold"
-              style={{cursor:"pointer",userSelect:"none"}}
+        <text x="28" y="15.5" fontSize="12" fontWeight="bold"
+              style={{fill:"var(--ink-2)",cursor:"pointer",userSelect:"none"}}
               onClick={(e)=>{ e.stopPropagation(); zoomBy(1/1.4); }}>−</text>
-        <text x="46" y="15" fill="#8aa0b0" fontSize="9"
-              style={{cursor:"pointer",userSelect:"none"}}
+        <text x="44" y="15" fontSize="10"
+              style={{fill:"var(--ink-2)",fontFamily:"var(--font-sans)",cursor:"pointer",userSelect:"none"}}
               onClick={(e)=>{ e.stopPropagation(); resetView(); }}>reset</text>
-        <text x="70" y="15" fill="#5e7180" fontSize="8" textAnchor="end"
-              style={{userSelect:"none"}}>{view.k.toFixed(1)}×</text>
-        <text x="86" y="15" fill="#5e7180" fontSize="8" textAnchor="end"
-              style={{userSelect:"none"}}>·</text>
+        <text x="96" y="15" fontSize="10" textAnchor="end"
+              style={{fill:"var(--mut2)",fontFamily:"var(--font-sans)",fontVariantNumeric:"tabular-nums",userSelect:"none"}}>{view.k.toFixed(1)}×</text>
       </g>
     </svg>
   );

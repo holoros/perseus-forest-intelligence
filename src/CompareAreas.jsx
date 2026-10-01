@@ -3,7 +3,7 @@
 // and climate exposure, and shows a plain-language peer comparison. Uses the existing
 // per-state HRR data (no new data dependency). Area unit is the state for now; a
 // freehand draw-an-area version is the next iteration on top of the AOI report tool.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const REGION = {
   Northeast: ["ME","NH","VT","MA","RI","CT","NY","NJ","PA"],
@@ -13,7 +13,7 @@ const REGION = {
 };
 const regionOf = (st) => Object.keys(REGION).find((r) => REGION[r].includes(st)) || "";
 
-const fmt = (v, d = 1) => (v == null || isNaN(v) ? "–" : Number(v).toFixed(d));
+const fmt = (v, d = 1) => (v == null || isNaN(v) ? "n/a" : Number(v).toFixed(d));
 
 // priority-share ramp (matches the health tab)
 function ramp(pct) {
@@ -27,6 +27,15 @@ function ramp(pct) {
 
 export default function CompareAreas({ data, state, onPickState }) {
   const [sameRegion, setSameRegion] = useState(false);
+  // Bar track follows the rendered width so labels render at true 11 px on any screen.
+  const [box, setBox] = useState(null);
+  const [boxW, setBoxW] = useState(440);
+  useEffect(() => {
+    if (!box || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(([e]) => { const cw = Math.round(Math.min(e.contentRect.width, 560)); if (cw > 0) setBoxW(Math.max(240, cw)); });
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [box]);
   if (!data || !data[state])
     return <div className="empty">Pick a state on the map to compare it to similar areas.</div>;
 
@@ -60,7 +69,7 @@ export default function CompareAreas({ data, state, onPickState }) {
 
   const maxBar = Math.max(me.priority_pct, ...peers.map((p) => p.priority_pct || 0)) || 1;
   const bars = [{ st: me.st, v: me.priority_pct, me: true }, ...peers.map((p) => ({ st: p.st, v: p.priority_pct }))];
-  const barW = 230, rowH = 18, labW = 26;
+  const labW = 30, rowH = 20, barW = boxW - labW - 44;
 
   return (
     <div>
@@ -97,39 +106,43 @@ export default function CompareAreas({ data, state, onPickState }) {
       {/* comparison bars: your area vs peers on priority share */}
       <div className="chartcard" style={{ padding: "8px 10px", marginBottom: 8 }}>
         <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>Priority forest area (% of forest)</div>
-        <svg width="100%" viewBox={`0 0 ${labW + barW + 30} ${bars.length * rowH + 4}`} style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", maxWidth: 460, display: "block" }}>
+        <div ref={setBox} style={{ width: "100%", maxWidth: 560 }}>
+        <svg width="100%" viewBox={`0 0 ${labW + barW + 44} ${bars.length * rowH + 4}`} style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-sans)", maxWidth: 560, display: "block" }}>
+          <line x1={labW} x2={labW} y1={0} y2={bars.length * rowH} style={{ stroke: "var(--line-strong)" }} strokeWidth={1} />
           {bars.map((b, i) => {
             const y = i * rowH + 2, w = ((b.v || 0) / maxBar) * barW;
             return (
               <g key={b.st} style={{ cursor: onPickState ? "pointer" : "default" }}
                 onClick={() => onPickState && onPickState(b.st)}>
-                <text x={labW - 4} y={y + rowH - 5} textAnchor="end" fontWeight={b.me ? 700 : 400}
-                  fill={b.me ? "var(--fg,#e8edf2)" : "var(--mut,#8a93a0)"}>{b.st}</text>
+                <text x={labW - 4} y={y + rowH - 6} textAnchor="end" fontWeight={b.me ? 700 : 400}
+                  style={{ fill: b.me ? "var(--ink)" : "var(--mut)" }}>{b.st}</text>
                 <rect x={labW} y={y} width={Math.max(1, w)} height={rowH - 5} rx={2}
-                  fill={ramp(b.v || 0)} stroke={b.me ? "var(--fg,#fff)" : "none"} strokeWidth={b.me ? 1.4 : 0} />
-                <text x={labW + w + 4} y={y + rowH - 5} fontWeight={b.me ? 700 : 400}
-                  fill={b.me ? "var(--fg,#e8edf2)" : "var(--mut,#8a93a0)"}>{fmt(b.v, 1)}</text>
+                  fill={ramp(b.v || 0)} fillOpacity={b.me ? 1 : 0.6}
+                  style={{ stroke: b.me ? "var(--ink)" : "var(--line-strong)" }} strokeWidth={b.me ? 1.4 : 0.5} />
+                <text x={labW + w + 4} y={y + rowH - 6} fontWeight={b.me ? 700 : 400}
+                  style={{ fill: b.me ? "var(--ink)" : "var(--mut)" }}>{fmt(b.v, 1)}</text>
               </g>
             );
           })}
         </svg>
+        </div>
       </div>
 
       {/* peer detail table */}
       <div className="chartcard" style={{ padding: "8px 10px" }}>
         <div style={{ fontSize: 11, color: "var(--mut)", marginBottom: 4 }}>How the peers line up</div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontVariantNumeric: "tabular-nums" }}>
+        <table className="tbl">
           <thead>
-            <tr style={{ color: "var(--mut)", textAlign: "right" }}>
-              <th style={{ textAlign: "left" }}>Area</th><th>Priority %</th><th>Stress</th><th>Resilience</th><th>Climate exp.</th>
+            <tr>
+              <th>Area</th><th>Priority %</th><th>Stress</th><th>Resilience</th><th>Climate exp.</th>
             </tr>
           </thead>
           <tbody>
             {[me, ...peers].map((r, i) => (
-              <tr key={r.st} style={{ borderTop: "1px solid var(--bd,#2a3a47)", textAlign: "right",
+              <tr key={r.st} style={{ borderTop: "1px solid var(--line)",
                 cursor: onPickState ? "pointer" : "default", fontWeight: r.st === state ? 700 : 400 }}
                 onClick={() => onPickState && onPickState(r.st)}>
-                <td style={{ textAlign: "left" }}>{r.st}{r.st === state ? " (your area)" : ""}</td>
+                <td>{r.st}{r.st === state ? " (your area)" : ""}</td>
                 <td>{fmt(r.priority_pct, 1)}</td><td>{fmt(r.stress_mean, 3)}</td>
                 <td>{fmt(r.resil_mean, 3)}</td><td>{fmt(r.ce_mean, 0)}</td>
               </tr>
