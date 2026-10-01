@@ -50,23 +50,33 @@ export default function EcoregionHarvest({ data, geo }){
   },[data,sortKey,asc,q]);
 
   if(!data) return <div className="empty">Ecoregion harvest summary not loaded.</div>;
+  // House table: centered cells, bold centered header, three rules (above and below the
+  // header, below the last row). border-collapse:separate so the header rules stay with the
+  // sticky header while the body scrolls.
+  const RULE="1px solid var(--line-strong, var(--line))";
   const th=(key,lbl)=>(
     <th onClick={()=>{ if(sortKey===key) setAsc(!asc); else { setSortKey(key); setAsc(false);} }}
-        style={{padding:"3px 7px",textAlign:key==="name"||key==="l1"?"left":"right",cursor:"pointer",whiteSpace:"nowrap"}}
+        style={{position:"sticky",top:0,zIndex:1,background:"var(--panel)",color:"var(--ink)",fontWeight:700,
+          padding:"5px 8px",textAlign:"center",verticalAlign:"middle",cursor:"pointer",whiteSpace:"nowrap",
+          borderTop:RULE,borderBottom:RULE}}
         title="click to sort">{lbl}{sortKey===key?(asc?" ▲":" ▼"):""}</th>);
+  const td={padding:"3px 8px",textAlign:"center",verticalAlign:"middle",color:"var(--ink)"};
+  const last=i=>i===rows.length-1?{borderBottom:RULE}:null;
+  const fieldStyle={background:"var(--panel)",color:"var(--ink)",border:"1px solid var(--line)",borderRadius:5,
+    transition:"border-color var(--dur, 200ms) var(--ease, cubic-bezier(0.25,1,0.5,1))"};
 
   return (
     <div style={{margin:"4px 4px 8px"}}>
       <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap",marginBottom:5}}>
         <b style={{fontSize:13}}>Forest summary by ecoregion</b>
-        <span style={{color:"var(--mut)",fontSize:11}}>{rows.length} EPA Level III ecoregions · ~3.1 km zonal mean · harvest probability + structure + productivity</span>
+        <span style={{color:"var(--mut)",fontSize:11}}>{rows.length} EPA Level III ecoregions · ~3.1 km zonal mean · harvest probability, structure and productivity</span>
       </div>
       {data && data.ecoregions && geo && (
         <div style={{marginBottom:8}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
             <span style={{fontSize:11,color:"var(--mut)"}}>map:</span>
             <select value={mapField} onChange={e=>setMapField(e.target.value)}
-              style={{background:"var(--panel,#172029)",color:"var(--fg,#e8eef2)",border:"1px solid var(--line,#2a3a47)",borderRadius:5,fontSize:11.5,padding:"2px 6px"}}>
+              style={{...fieldStyle,fontSize:11.5,padding:"2px 6px"}}>
               {MAPFLDS.filter(x=>Object.values(data.ecoregions).some(v=>v[x[0]]!=null)).map(x=>
                 <option key={x[0]} value={x[0]}>{x[1]}</option>)}
             </select>
@@ -75,32 +85,36 @@ export default function EcoregionHarvest({ data, geo }){
         </div>
       )}
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="filter by ecoregion or biome…"
-        style={{width:"min(320px,90%)",padding:"4px 8px",marginBottom:6,fontSize:12,
-          background:"var(--panel,#172029)",color:"var(--fg,#e8eef2)",border:"1px solid var(--line,#2a3a47)",borderRadius:5}}/>
-      <div style={{maxHeight:420,overflow:"auto",border:"1px solid var(--line,#2a3a47)",borderRadius:6}}>
-        <table style={{borderCollapse:"collapse",fontSize:11,width:"100%",fontVariantNumeric:"tabular-nums"}}>
-          <thead><tr style={{color:"var(--mut)",position:"sticky",top:0,background:"var(--panel,#172029)"}}>
+        aria-label="filter ecoregions"
+        style={{...fieldStyle,width:"min(320px,90%)",padding:"4px 8px",marginBottom:8,fontSize:12}}/>
+      <div style={{fontSize:12,color:"var(--ink-2, var(--mut))",margin:"0 0 6px"}}>
+        <b style={{color:"var(--ink)"}}>Ecoregion means.</b> Harvest probability (0 to 1, shaded low blue to high red), forest structure and productivity; click a column to sort.
+      </div>
+      <div style={{maxHeight:420,overflow:"auto"}}>
+        <table className="tbl" aria-label="Forest summary by ecoregion"
+          style={{borderCollapse:"separate",borderSpacing:0,border:"none",fontSize:11.5,width:"100%",fontVariantNumeric:"tabular-nums"}}>
+          <thead><tr>
             {th("code","L3")}{th("name","Ecoregion")}{th("l1","Biome (L1)")}
             {PCOLS.map(([k,l])=>th(k,l))}{SCOLS.map(([k,l])=>th(k,l))}
           </tr></thead>
           <tbody>
-            {rows.map(r=>(
-              <tr key={r.code} style={{borderTop:"1px solid var(--line,#22303a)"}}>
-                <td style={{padding:"2px 7px",color:"var(--mut)"}}>{r.code}</td>
-                <td style={{padding:"2px 7px"}}>{r.name}</td>
-                <td style={{padding:"2px 7px",color:"var(--mut)",fontSize:10}}>{(r.l1||"").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}</td>
+            {rows.map((r,i)=>(
+              <tr key={r.code}>
+                <td style={{...td,...last(i),color:"var(--mut)"}}>{r.code}</td>
+                <td style={{...td,...last(i)}}>{r.name}</td>
+                <td style={{...td,...last(i),color:"var(--mut)",fontSize:10.5}}>{(r.l1||"").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}</td>
                 {PCOLS.map(([k])=>(
-                  <td key={k} style={{padding:"2px 7px",textAlign:"right",background:shade(r[k])}}>
-                    {r[k]!=null?r[k].toFixed(2):"—"}</td>))}
+                  <td key={k} style={{...td,...last(i),background:shade(r[k])}}>
+                    {r[k]!=null?r[k].toFixed(2):"n/a"}</td>))}
                 {SCOLS.map(([k])=>(
-                  <td key={k} style={{padding:"2px 7px",textAlign:"right",color:"var(--fg,#dfe7ec)"}}>
-                    {r[k]!=null?r[k].toFixed(k==="qmd_in"?1:0):"—"}</td>))}
+                  <td key={k} style={{...td,...last(i)}}>
+                    {r[k]!=null?r[k].toFixed(k==="qmd_in"?1:0):"n/a"}</td>))}
               </tr>))}
           </tbody>
         </table>
       </div>
-      <div style={{color:"var(--mut)",fontSize:10.5,marginTop:5,maxWidth:600,lineHeight:1.45}}>
-        Mean modeled harvest probability per EPA Level III ecoregion, zonal-averaged from the CONUS harvest-probability rasters. P(any) is the chance a forested pixel is harvested in the window; the stand-replacement vs partial split shows the silvicultural character — high stand-replacement with low partial means clearcut-dominated regions, the reverse means selection/partial systems. Forest structure is the TreeMap 2022 zonal mean; productivity is the climate-sensitive productivity index (CSPI, 0-100) warped to the same grid. Click a column to sort.
+      <div style={{color:"var(--mut)",fontSize:11,marginTop:8,maxWidth:600,lineHeight:1.5}}>
+        Mean modeled harvest probability per EPA Level III ecoregion, zonal-averaged from the CONUS harvest-probability rasters. P(any) is the chance a forested pixel is harvested in the window; the stand-replacement vs partial split shows the silvicultural character: high stand-replacement with low partial means clearcut-dominated regions, the reverse means selection or partial systems. Forest structure is the TreeMap 2022 zonal mean; productivity is the climate-sensitive productivity index (CSPI, 0 to 100) warped to the same grid. Click a column to sort.
       </div>
     </div>
   );

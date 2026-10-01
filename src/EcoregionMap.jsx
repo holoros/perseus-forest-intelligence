@@ -16,7 +16,7 @@ const ringToD=r=>{ let d=""; for(let i=0;i<r.length;i++){ const [x,y]=projPath(r
 const geomToD=g=>{ if(!g) return ""; const polys=g.type==="Polygon"?[g.coordinates]:g.coordinates; return polys.map(p=>p.map(ringToD).join(" ")).join(" "); };
 // sequential blue->amber->red, value normalized 0..1
 const STOPS=[[0,[47,98,158]],[0.5,[202,161,90]],[1,[224,90,90]]];
-const ramp=t=>{ if(t==null||isNaN(t)) return "#2a3a47"; t=Math.max(0,Math.min(1,t));
+const ramp=t=>{ if(t==null||isNaN(t)) return "var(--nodata, #2a3a47)"; t=Math.max(0,Math.min(1,t));
   let a=STOPS[0],b=STOPS[STOPS.length-1];
   for(let i=1;i<STOPS.length;i++){ if(t<=STOPS[i][0]){ a=STOPS[i-1]; b=STOPS[i]; break; } }
   const f=(t-a[0])/((b[0]-a[0])||1); const c=a[1].map((ca,k)=>Math.round(ca+f*(b[1][k]-ca)));
@@ -30,21 +30,21 @@ export default function EcoregionMap({ geo, eco, field, label, fmt }){
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
-        <rect width={W} height={H} fill="#101820"/>
+        <rect width={W} height={H} rx={6} style={{fill:"var(--panel-2, #101820)",stroke:"var(--line)"}} strokeWidth={1}/>
         {feats.map((ft,i)=>{
           const code=ft.properties.NA_L3CODE; const r=eco[code]; const v=r?r[field]:null;
           const t=(v!=null&&isFinite(v))?(v-lo)/span:null;
-          return <path key={code+i} d={geomToD(ft.geometry)} fill={ramp(t)} fillOpacity={v!=null?0.92:0.18}
-            stroke="#0b1015" strokeWidth="0.3">
+          return <path key={code+i} d={geomToD(ft.geometry)} fillOpacity={v!=null?0.92:0.18}
+            strokeWidth="0.3" style={{fill:ramp(t),stroke:"var(--map-edge, #0b1015)"}}>
             <title>{`${r?r.name:code}${v!=null?` · ${label}: ${fmt?fmt(v):v}`:" · no data"}`}</title>
           </path>;
         })}
         <g transform={`translate(${W-150},${H-30})`}>
-          {[0,0.25,0.5,0.75,1].map((t,i)=>(<rect key={i} x={i*26} y={0} width={26} height={9} fill={ramp(t)}/>))}
-          <text x={0} y={22} fill="#8aa0b0" fontSize="9">{fmt?fmt(lo):lo.toFixed(1)}</text>
-          <text x={130} y={22} textAnchor="end" fill="#8aa0b0" fontSize="9">{fmt?fmt(hi):hi.toFixed(1)}</text>
+          {[0,0.25,0.5,0.75,1].map((t,i)=>(<rect key={i} x={i*26} y={0} width={26} height={9} style={{fill:ramp(t)}}/>))}
+          <text x={0} y={22} fontSize="10" style={{fill:"var(--axis, #8aa0b0)",fontVariantNumeric:"tabular-nums"}}>{fmt?fmt(lo):lo.toFixed(1)}</text>
+          <text x={130} y={22} textAnchor="end" fontSize="10" style={{fill:"var(--axis, #8aa0b0)",fontVariantNumeric:"tabular-nums"}}>{fmt?fmt(hi):hi.toFixed(1)}</text>
         </g>
-        <text x={12} y={20} fill="#cddbe4" fontSize="13" fontWeight="bold">{label} by ecoregion</text>
+        <text x={12} y={22} fontSize="13" fontWeight="bold" style={{fill:"var(--ink-2, #cddbe4)"}}>{label} by ecoregion</text>
       </svg>
     </div>
   );
