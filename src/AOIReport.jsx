@@ -243,7 +243,7 @@ function ConditionRadar({ index, allCurves, age0 }){
           <span className={chip(horizon===50)} onClick={()=>setHorizon(50)}>+50y</span>
         </>}
       </div>
-      <svg viewBox="0 0 220 228" style={{width:"100%",maxWidth:290,display:"block",margin:"0 auto"}}>
+      <svg viewBox="0 0 220 228" style={{width:"100%",maxWidth:290,display:"block",margin:"0 auto",overflow:"visible"}}>
         {rings}{spokes}
         {refPoly && <polygon points={refPoly} fill="none" stroke="var(--context)" strokeWidth="1.1" strokeDasharray="4 3" opacity="0.85"/>}
         {broadPoly && <polygon points={broadPoly} fill="none" stroke="#7a9bd6" strokeWidth="1.2" strokeDasharray="2 2" opacity="0.9"/>}
@@ -289,7 +289,7 @@ function RDTrajectory({ series }){
   return (
     <div style={{margin:"4px 6px 6px"}}>
       <div className="aoi-sub" style={{borderTop:"none",marginTop:2}}>Relative density over time · 2016 → 2022</div>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:340,display:"block",margin:"0 auto"}}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",maxWidth:340,display:"block",margin:"0 auto",overflow:"visible"}}>
         <rect x={x0} y={sy(RD_HI)} width={x1-x0} height={sy(RD_LO)-sy(RD_HI)} fill="var(--accent)" opacity="0.13"/>
         <line x1={x0} y1={sy(RD_HI)} x2={x1} y2={sy(RD_HI)} stroke="var(--accent)" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
         <line x1={x0} y1={sy(RD_LO)} x2={x1} y2={sy(RD_LO)} stroke="var(--accent)" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.6"/>
