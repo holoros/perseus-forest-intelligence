@@ -72,9 +72,25 @@ export default function FaustmannRotation({ data, state }){
       <div className="note">Faustmann optimal-rotation runs cover {data.meta.state} only.</div></div>;
 
   const rows = rowsAll.filter(r => (owner==="all"||r.owner===owner) && (treatment==="all"||r.treatment===treatment));
-  // carbon-floor effect: mean R_opt with vs without a floor, same filter
-  const noFloor = rows.filter(r=>r.carbon_floor===0), floor = rows.filter(r=>r.carbon_floor>0);
-  const meanR = a => a.length ? (a.reduce((s,r)=>s+r.R_opt,0)/a.length) : null;
+  // Cost of the carbon floor, paired within each forest type x ecoregion x owner x
+  // treatment cell: every floored row is compared with the same cell's no-floor row,
+  // so the cell mix cannot drive the difference.
+  const cellKey = r => `${r.ft}|${r.eco}|${r.owner}|${r.treatment}`;
+  const base = new Map(rows.filter(r=>r.carbon_floor===0).map(r=>[cellKey(r), r]));
+  const pairs = rows.filter(r=>r.carbon_floor>0 && base.has(cellKey(r))).map(r => {
+    const b = base.get(cellKey(r));
+    const dSEV = b.sev_opt - r.sev_opt, dAGB = r.mean_agb - b.mean_agb;
+    return { dR: r.R_opt - b.R_opt, dSEV, dAGB, ratio: dAGB > 0 ? dSEV/dAGB : null };
+  });
+  const median = a => { const v = a.filter(x=>x!=null && isFinite(x)).sort((x,y)=>x-y);
+    if(!v.length) return null; const m = Math.floor(v.length/2);
+    return v.length%2 ? v[m] : (v[m-1]+v[m])/2; };
+  const mdR = median(pairs.map(p=>p.dR)), mdSEV = median(pairs.map(p=>p.dSEV)),
+        mdAGB = median(pairs.map(p=>p.dAGB)), mdRatio = median(pairs.map(p=>p.ratio));
+  // short ton AGB to t CO2e: 0.907185 Mg per short ton x 0.45 C fraction (as in the
+  // source script) x 44/12
+  const CO2E_PER_STON_AGB = 0.907185 * 0.45 * 44/12;
+  const pr = data.meta && data.meta.params;
 
   return (
     <div>
@@ -104,11 +120,25 @@ export default function FaustmannRotation({ data, state }){
         {[...new Set(rows.map(r=>r.ft))].map(ft =>
           <span key={ft}><i style={{background:col(ft),width:10,height:10,borderRadius:"50%"}}/>{ft}</span>)}
       </div>
-      {meanR(noFloor)!=null && meanR(floor)!=null && (
-        <div className="note">
-          Carbon-floor effect: mean optimal rotation rises from
-          <b> {meanR(noFloor).toFixed(0)} yr</b> (no floor) to
-          <b> {meanR(floor).toFixed(0)} yr</b> with a carbon floor (larger, outlined points).
+      {pairs.length > 0 && !(data.meta && data.meta.known_issue) && (
+        <div className="chartcard" style={{padding:"7px 9px",marginTop:8,borderLeft:"3px solid var(--warn, #caa15a)"}}>
+          <div style={{fontSize:12.5,fontWeight:600,color:"var(--warn, #caa15a)",marginBottom:5}}>Cost of the carbon floor</div>
+          <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
+            {[["Rotation", `+${mdR.toFixed(0)} yr`, "longer"],
+              ["Soil expectation value", `$${mdSEV.toFixed(0)} ac⁻¹`, "forgone"],
+              ["Standing biomass", `+${mdAGB.toFixed(1)} tons ac⁻¹`, "carried (rotation mean)"]
+             ].map((c,i)=>(
+              <div key={i} style={{minWidth:130}}>
+                <div style={{fontSize:12,fontWeight:600}}>{c[1]}</div>
+                <div style={{color:"var(--mut)",fontSize:10.5}}>{c[0]} {c[2]}</div>
+              </div>))}
+          </div>
+          <div className="note" style={{marginTop:5}}>
+            Medians over {pairs.length} paired cells (each floored row against the same cell without a floor).
+            {mdRatio!=null && <> Implied cost: about <b>${mdRatio.toFixed(0)} of soil expectation value per additional ton ac⁻¹</b> of
+            standing biomass, roughly ${(mdRatio/CO2E_PER_STON_AGB).toFixed(0)} per t CO₂e held (C fraction 0.45). A within-model
+            ratio, not a market carbon price.</>}
+          </div>
         </div>
       )}
       <div className="chartcard" style={{padding:"4px 8px",marginTop:8,maxHeight:200,overflow:"auto"}}>
@@ -138,8 +168,11 @@ export default function FaustmannRotation({ data, state }){
       <div className="note">
         Each point is one forest-type / ecoregion / owner combination: optimal
         Faustmann rotation age vs soil expectation value. Larger outlined points
-        carry a carbon-floor constraint. Source: {data.meta.source}. Data:
-        api/faustmann_rotation.json.
+        carry a carbon-floor constraint.
+        {pr && <> Prices: ${pr.price_usd_ft3.toFixed(2)} ft⁻³ of merchantable volume ({pr.price_usd_m3} $ m⁻³ Maine blend),
+        regeneration cost ${pr.regen_cost_usd_ac} ac⁻¹, {(pr.discount_rate*100).toFixed(0)}% real discount rate.
+        One blended price on all volume favors short rotations; R_opt = 20 yr is the lower edge of the search.</>}
+        {" "}Source: {data.meta.source}. Data: api/faustmann_rotation.json.
       </div>
     </div>
   );
