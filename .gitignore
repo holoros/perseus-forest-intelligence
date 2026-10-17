@@ -1,9 +1,28 @@
 node_modules/
 dist/
+coverage/
 *.log
 .vite/
+.DS_Store
 
-# secrets / local env
+# secrets / local env (the committed templates are *.example)
 .env
-.env.local
+.env.*
+!.env.example
 run-service/.env
+*.pem
+*.key
+*token*
+!**/*token*.md
+
+# python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# dated backups and local scratch never belong in the public repo
+*_PREV*
+_private/
+restricted/
+
+# Workflows under .github/workflows/ ARE tracked on purpose; do not ignore them.
