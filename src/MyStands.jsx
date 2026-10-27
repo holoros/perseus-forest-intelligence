@@ -118,15 +118,15 @@ export default function MyStands({ series, metric, bucket, unit, stateName, land
     const yt=[]; for(let v=Math.ceil(y0/step)*step; v<=y1; v+=step) yt.push(v);
     svg=(
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
-        <rect width={W} height={H} fill="#172029"/>
-        {yt.map((v,i)=>(<g key={i}><line x1={L} y1={Y(v)} x2={W-R} y2={Y(v)} stroke="#2a3a47"/>
-          <text x={L-7} y={Y(v)+4} textAnchor="end" fill="#b6c6d0" fontSize="12">{v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0)}</text></g>))}
-        <text x={L} y={T-6} fill="#cddbe4" fontSize="12.5" fontWeight="600">{unit||""}</text>
-        {band && <path d={band} fill="#6aa9c0" opacity="0.15"/>}
-        {medLine && <path d={medLine} fill="none" stroke="#6aa9c0" strokeWidth="1.8" strokeDasharray="5 3"/>}
-        {rows.map((r,i)=>{ const m=medAt(activeEnv,r.year); const c=m==null?"#e8eef2":(r.value>=m?"#7bdca0":"#e6a23c");
-          return <g key={i}><circle cx={X(r.year)} cy={Y(r.value)} r="3.4" fill={c} stroke="#0c1217" strokeWidth="0.8"><title>{`${r.label?r.label+" · ":""}${r.year}: ${r.value} ${unit||""}${m!=null?` (regional median ${m.toFixed(1)})`:""}`}</title></circle></g>; })}
-        <text x={W-R} y={H-B+18} textAnchor="end" fill="#73879a" fontSize="10">{xmode==="age"?"stand age (yr)":"year"} · your stands vs {xmode==="age"?"landowner yield":stateName+" model"} median (dashed) + range (band)</text>
+        <rect width={W} height={H} fill="var(--panel)"/>
+        {yt.map((v,i)=>(<g key={i}><line x1={L} y1={Y(v)} x2={W-R} y2={Y(v)} stroke="var(--grid)"/>
+          <text x={L-7} y={Y(v)+4} textAnchor="end" fill="var(--axis)" fontSize="12">{v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0)}</text></g>))}
+        <text x={L} y={T-6} fill="var(--ink)" fontSize="12.5" fontWeight="600">{unit||""}</text>
+        {band && <path d={band} fill="var(--context)" opacity="0.25"/>}
+        {medLine && <path d={medLine} fill="none" stroke="var(--context)" strokeWidth="1.8" strokeDasharray="5 3"/>}
+        {rows.map((r,i)=>{ const m=medAt(activeEnv,r.year); const c=m==null?"var(--context)":(r.value>=m?"var(--ok)":"var(--warn)");
+          return <g key={i}><circle cx={X(r.year)} cy={Y(r.value)} r="3.4" fill={c} stroke="var(--bg)" strokeWidth="0.8"><title>{`${r.label?r.label+" · ":""}${r.year}: ${r.value} ${unit||""}${m!=null?` (regional median ${m.toFixed(1)})`:""}`}</title></circle></g>; })}
+        <text x={W-R} y={H-B+18} textAnchor="end" fill="var(--mut2)" fontSize="10">{xmode==="age"?"stand age (yr)":"year"} · your stands vs {xmode==="age"?"landowner yield":stateName+" model"} median (dashed) + range (band)</text>
       </svg>);
   }
 
@@ -139,30 +139,30 @@ export default function MyStands({ series, metric, bucket, unit, stateName, land
       </div>
       <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:8}}>
         <button onClick={()=>fileRef.current && fileRef.current.click()}
-          style={{background:"var(--panel,#172029)",color:"var(--fg,#e8eef2)",border:"1px solid var(--line,#2a3a47)",borderRadius:6,padding:"5px 12px",fontSize:12.5,cursor:"pointer"}}>
+          style={{background:"var(--panel)",color:"var(--ink)",border:"1px solid var(--line)",borderRadius:6,padding:"5px 12px",fontSize:12.5,cursor:"pointer"}}>
           ↑ Upload CSV
         </button>
         <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" onChange={onFile} style={{display:"none"}}/>
         {fname && <span style={{color:"var(--mut)",fontSize:11}}>{fname} · {rows.length} rows</span>}
-        <span style={{display:"inline-flex",border:"1px solid var(--line,#2a3a47)",borderRadius:6,overflow:"hidden"}}>
+        <span style={{display:"inline-flex",border:"1px solid var(--line)",borderRadius:6,overflow:"hidden"}}>
           {["year","age"].map(m=>(
             <button key={m} onClick={()=>setXmode(m)}
-              style={{background:xmode===m?"#2f6f5e":"transparent",color:xmode===m?"#eafff6":"var(--mut)",
+              style={{background:xmode===m?"var(--accent)":"transparent",color:xmode===m?"var(--on-accent)":"var(--mut)",
                 border:"none",padding:"4px 10px",fontSize:11.5,cursor:"pointer"}}>
               {m==="year"?"by year":"by age"}</button>))}
         </span>
         <span style={{color:"var(--mut)",fontSize:10.5}}>columns: a year (or age) column and a value column ({unit||"metric units"}); an optional stand id/label.</span>
       </div>
-      {err && <div className="note" style={{color:"#e6a23c"}}>Could not read that file: {err}. Expecting a CSV with a year/age column and a value column.</div>}
+      {err && <div className="note" style={{color:"var(--warn)"}}>Could not read that file: {err}. Expecting a CSV with a year/age column and a value column.</div>}
       {xmode==="year" && !node && <div className="empty">No multi-model series for {stateName} in the current metric/management — pick a state and carbon metric to get a comparison envelope.</div>}
-      {xmode==="age" && !ageEnv.length && <div className="note" style={{color:"#8aa0b0"}}>No landowner yield curves for {stateName} yet (currently Maine), so age-mode shows your stands without a reference band. The points still plot on a stand-age axis.</div>}
+      {xmode==="age" && !ageEnv.length && <div className="note" style={{color:"var(--mut)"}}>No landowner yield curves for {stateName} yet (currently Maine), so age-mode shows your stands without a reference band. The points still plot on a stand-age axis.</div>}
 
       {stats && (
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
           {[["Stands plotted", stats.n, ""],
             ["Above regional median", `${stats.pctAbove.toFixed(0)}%`, `${stats.above}/${stats.n}`],
             ["Mean deviation", `${stats.meanDev>=0?"+":""}${stats.meanDev.toFixed(0)}%`, "vs model median"]].map((c,i)=>(
-            <div key={i} style={{background:"rgba(255,255,255,0.03)",border:"1px solid var(--line,#2a3a47)",borderRadius:6,padding:"5px 10px",minWidth:120}}>
+            <div key={i} style={{background:"var(--panel-2)",border:"1px solid var(--line)",borderRadius:6,padding:"5px 10px",minWidth:120}}>
               <div style={{color:"var(--mut)",fontSize:10.5}}>{c[0]}</div>
               <div style={{fontSize:16,fontWeight:600}}>{c[1]} <span style={{fontSize:10,color:"var(--mut)",fontWeight:400}}>{c[2]}</span></div>
             </div>))}
