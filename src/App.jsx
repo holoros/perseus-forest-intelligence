@@ -13,6 +13,7 @@ const FaustmannRotation = lazy(() => import("./FaustmannRotation.jsx"));
 const EcoregionHarvest = lazy(() => import("./EcoregionHarvest.jsx"));
 const PermanenceRisk = lazy(() => import("./PermanenceRisk.jsx"));
 const WoodProducts = lazy(() => import("./WoodProducts.jsx"));
+const AgbYieldCurves = lazy(() => import("./AgbYieldCurves.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
@@ -524,6 +525,7 @@ export default function App(){
   const [faustmann,setFaustmann] = useState(null);
   const [ecoHarvest,setEcoHarvest] = useState(null); // harvest prob + structure by EPA L3 ecoregion
   const [permRisk,setPermRisk] = useState(null);
+  const [agbYc,setAgbYc] = useState(null);   // FIA remeasurement AGB yield curves (ME, NH, VT, MI, WI, MN)
   const [hrr,setHrr] = useState(null);
   const [hrrGrid,setHrrGrid] = useState(null);
   const [hrrDetail,setHrrDetail] = useState(null); // per-state drill-down: top species, agents, dead/live
@@ -583,6 +585,7 @@ export default function App(){
     j("api/faustmann_rotation.json").then(setFaustmann).catch(()=>{});
     j("api/ecoregion_harvest_summary.json").then(setEcoHarvest).catch(()=>{});
     j("api/permanence_risk.json").then(d=>setPermRisk(d && d.states)).catch(()=>{});
+    j("api/agb_yield_curves_fia.json").then(setAgbYc).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -657,9 +660,10 @@ export default function App(){
       health: !!(hrr && hrr.national),
       compare: !!(hrr && hrr.states),
       ecoharvest: !!ecoHarvest,
+      agbyc: !!(agbYc && agbYc.states && agbYc.states[sel]),
     };
     if(!ok[tab]) setTab(ok.compare ? "compare" : "engines");
-  },[sel,series,divergence,stumpage,landis,spatialAnch,landowner,faustmann,hrr,ecoHarvest]);
+  },[sel,series,divergence,stumpage,landis,spatialAnch,landowner,faustmann,hrr,ecoHarvest,agbYc]);
 
   // ---- lazy-load ecoregion geojson + L3 yields when a map/AOI tool needs them ----
   useEffect(()=>{
@@ -1438,7 +1442,7 @@ export default function App(){
                 Then use the three tabs: <b>Compare areas</b> (how your forest stacks up), <b>Build a run</b> (test management and climate scenarios), and <b>Forest health</b> (stress and resilience).
                 For every model engine and data layer, switch to <b>Researcher</b> up top. Unsure of a term? See <b>Glossary</b>.
                 </> : <>
-                <b>Researcher view.</b> Every engine, metric and CONUS layer is available. Open <b>Research tools</b> for engine comparison, engine spread, the cross-model ensemble, stumpage, LANDIS, spatial biomass and rotation economics.
+                <b>Researcher view.</b> Every engine, metric and CONUS layer is available. Open <b>Research tools</b> for engine comparison, engine spread, the cross-model ensemble, stumpage, LANDIS, spatial biomass, rotation economics and the FIA AGB yield curves.
                 Each chart names its uncertainty band, and <b>Methods</b> and <b>Data &amp; cite</b> link the provenance and DOIs.
                 </>}
               </span>
@@ -1454,7 +1458,8 @@ export default function App(){
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],
               ["ecoharvest","Ecoregion harvest"],
               ["permanence","Permanence / risk"],
-              ["hwp","Wood products"]]
+              ["hwp","Wood products"],
+              ["agbyc","FIA AGB yield curves"]]
               .filter(([k])=> k==="compare" || k==="runbuilder" || k==="health" || toolsOpen || tab===k)
               .map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
@@ -1468,13 +1473,14 @@ export default function App(){
                 || (k==="health" && !(hrr && hrr.national))
                 || (k==="compare" && !(hrr && hrr.states))
                 || (k==="ecoharvest" && !ecoHarvest)
+                || (k==="agbyc" && !(agbYc && agbYc.states && agbYc.states[sel]))
                 || ((k==="engines"||k==="rd"||k==="permanence") && !series);
               return <button key={k} className={"tab"+(tab===k?" on":"")} disabled={disabled}
                 onClick={()=>setTab(k)} title={disabled?"no data for this state":lbl}>{lbl}</button>;
             })}
             {!simple && (
             <button className="tab" style={{marginLeft:6,opacity:0.85}} onClick={()=>setToolsOpen(o=>!o)}
-              title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation, ecoregion harvest, permanence / reversal risk, wood products">
+              title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation, ecoregion harvest, permanence / reversal risk, wood products, FIA AGB yield curves">
               {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>)}
             {simple && cov && (
             <button className="tab" style={{marginLeft:6,borderColor:"var(--accent)",color:"var(--accent)"}}
@@ -1499,6 +1505,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="ecoharvest" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><EcoregionHarvest data={ecoHarvest} geo={ecoGeo}/></Suspense>}
           {(!aoi || researchOpen) && tab==="permanence" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta} geo={geoData} risk={permRisk} onPick={st=>setSel(st)}/></Suspense>}
           {(!aoi || researchOpen) && tab==="hwp" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><WoodProducts series={series} meta={meta} state={sel} units={units}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="agbyc" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><AgbYieldCurves data={agbYc} state={sel} stateName={cov && cov.name}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
