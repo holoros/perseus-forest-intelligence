@@ -21,6 +21,7 @@ import RunBuilder from "./RunBuilder.jsx";
 import GlossaryPanel from "./GlossaryPanel.jsx";
 import { openMyForestReport } from "./myForest.js";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
+import { rasterUrl } from "./rasterBase.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
 import { FAMILY_COL, CONTEXT_COL } from "./palette.js";
 
@@ -851,7 +852,7 @@ export default function App(){
   // Lightweight, raster-only condition index (4 axes 0..1) for ANY geometry —
   // used to add ecoregion- and state-level context rings to the AOI radar.
   const idxForGeom = async (geom, stCode2) => {
-    const R = (p) => `${BASE}raster/${p}`;
+    const R = rasterUrl;
     const FRAME = { x0:-2561585, x1:2463176, y0:-1604872.736, y1:1714610 };
     const CSPI = ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"];
     const SVI = ["#f7fcf5","#74c476","#238b45","#00441b"];
@@ -909,7 +910,7 @@ export default function App(){
     // Surrounding-landscape metrics sampled from the CONUS overlay rasters
     // (works for any location, not just the FIA-plot states).
     const FRAME = { x0:-2561585, x1:2463176, y0:-1604872.736, y1:1714610 };
-    const R = (p) => `${BASE}raster/${p}`;
+    const R = rasterUrl;
     let landscape = null;
     try{
       const CSPI_RAMP = ["#2300d1","#6b58ef","#c7c1ff","#ffc0e5","#ff7080","#d60c00"];
@@ -1190,7 +1191,7 @@ export default function App(){
           {(()=>{
                 const stLow = sel.toLowerCase();
                 const stOverlayActive = gcbmOn && states && states[sel] && states[sel].has_tier_b && !LANDIS_STATES.includes(sel) && gcbmBounds[stLow];
-                const stOverlayUrl = stOverlayActive ? `${BASE}raster/${stLow}_${gcbmLayer}.png` : null;
+                const stOverlayUrl = stOverlayActive ? rasterUrl(`${stLow}_${gcbmLayer}.png`) : null;
                 // Pass raw json if Albers-meters format, else synthesize ul/ur/lr/ll
                 const stOverlayB = stOverlayActive ? (()=>{
                   const c = gcbmBounds[stLow];
@@ -1212,7 +1213,7 @@ export default function App(){
                           mapYear={mapYear} mapScenario={mapScenario}
                           selected={sel} onPick={st=>setSel(st)}
                           conusOverlay={conusLayer !== "none" && conusBounds[conusLayer]
-                                        ? `${BASE}raster/conus_${conusLayer}.png` : null}
+                                        ? rasterUrl(`conus_${conusLayer}.png`) : null}
                           conusOverlayBounds={conusLayer !== "none" ? conusBounds[conusLayer] : null}
                           conusOverlayOpacity={conusOpacity}
                           stateOverlay={stOverlayUrl}
@@ -1223,7 +1224,7 @@ export default function App(){
                           inspectMode={inspectMode}
                           onInspect={handleInspect}
                           userLoc={userLoc}
-                          baseLayer={baseOn && conusLayer === "none" ? `${BASE}raster/conus_forest_nonforest_2023.png?v=1` : null}
+                          baseLayer={baseOn && conusLayer === "none" ? rasterUrl(`conus_forest_nonforest_2023.png?v=1`) : null}
                           baseBounds={baseBounds}
                           baseOpacity={0.82}
                           focusGeom={focusGeom}/>
