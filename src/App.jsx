@@ -14,6 +14,7 @@ const EcoregionHarvest = lazy(() => import("./EcoregionHarvest.jsx"));
 const PermanenceRisk = lazy(() => import("./PermanenceRisk.jsx"));
 const WoodProducts = lazy(() => import("./WoodProducts.jsx"));
 const AgbYieldCurves = lazy(() => import("./AgbYieldCurves.jsx"));
+const RdThresholds = lazy(() => import("./RdThresholds.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
@@ -526,6 +527,7 @@ export default function App(){
   const [ecoHarvest,setEcoHarvest] = useState(null); // harvest prob + structure by EPA L3 ecoregion
   const [permRisk,setPermRisk] = useState(null);
   const [agbYc,setAgbYc] = useState(null);   // FIA remeasurement AGB yield curves (ME, NH, VT, MI, WI, MN)
+  const [rdThr,setRdThr] = useState(null);   // relative density thresholds by forest type and EPA L3 ecoregion
   const [hrr,setHrr] = useState(null);
   const [hrrGrid,setHrrGrid] = useState(null);
   const [hrrDetail,setHrrDetail] = useState(null); // per-state drill-down: top species, agents, dead/live
@@ -586,6 +588,7 @@ export default function App(){
     j("api/ecoregion_harvest_summary.json").then(setEcoHarvest).catch(()=>{});
     j("api/permanence_risk.json").then(d=>setPermRisk(d && d.states)).catch(()=>{});
     j("api/agb_yield_curves_fia.json").then(setAgbYc).catch(()=>{});
+    j("api/rd_thresholds_l3.json").then(setRdThr).catch(()=>{});
     geo.features.forEach(ft=>{ const st=ft.properties.state; const c=s[st];
       ft.properties.engines = c ? c.engines : 0;
       ft.properties.hasSeries = (c && c.has_series) ? 1 : 0;
@@ -1689,6 +1692,7 @@ export default function App(){
                 Persistent declines appear only in the disturbance-exposed variants, where the real downside lies.</>}
             </div>
           </>)}
+          {tab==="rd" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><RdThresholds data={rdThr} state={sel} stateName={cov && cov.name}/></Suspense>}
           </>)}
         </div>
       </div>
