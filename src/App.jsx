@@ -12,6 +12,7 @@ const LandownerYields = lazy(() => import("./LandownerYields.jsx"));
 const FaustmannRotation = lazy(() => import("./FaustmannRotation.jsx"));
 const EcoregionHarvest = lazy(() => import("./EcoregionHarvest.jsx"));
 const PermanenceRisk = lazy(() => import("./PermanenceRisk.jsx"));
+const WoodProducts = lazy(() => import("./WoodProducts.jsx"));
 const AOIReport = lazy(() => import("./AOIReport.jsx"));
 import HealthRiskResilience from "./HealthRiskResilience.jsx";
 import CompareAreas from "./CompareAreas.jsx";
@@ -651,6 +652,7 @@ export default function App(){
       landowner: !!(landowner && landowner[sel]),
       faustmann: !!(faustmann && faustmann[sel]),
       permanence: !!series,
+      hwp: !!(series && (series.net_forest_hwp_c || series.hwp_carbon_stock)),
       health: !!(hrr && hrr.national),
       compare: !!(hrr && hrr.states),
       ecoharvest: !!ecoHarvest,
@@ -1450,7 +1452,8 @@ export default function App(){
               ["spatialbio","Spatial biomass"],
               ["landowner","Landowner yields"],["faustmann","Faustmann rotation"],
               ["ecoharvest","Ecoregion harvest"],
-              ["permanence","Permanence / risk"]]
+              ["permanence","Permanence / risk"],
+              ["hwp","Wood products"]]
               .filter(([k])=> k==="compare" || k==="runbuilder" || k==="health" || toolsOpen || tab===k)
               .map(([k,lbl])=>{
               const disabled = (k==="divergence" && !divergence)
@@ -1460,6 +1463,7 @@ export default function App(){
                 || (k==="spatialbio" && !(spatialAnch && spatialAnch.states && spatialAnch.states[sel]))
                 || (k==="landowner" && !(landowner && landowner[sel]))
                 || (k==="faustmann" && !(faustmann && faustmann[sel]))
+                || (k==="hwp" && !(series && (series.net_forest_hwp_c || series.hwp_carbon_stock)))
                 || (k==="health" && !(hrr && hrr.national))
                 || (k==="compare" && !(hrr && hrr.states))
                 || (k==="ecoharvest" && !ecoHarvest)
@@ -1469,7 +1473,7 @@ export default function App(){
             })}
             {!simple && (
             <button className="tab" style={{marginLeft:6,opacity:0.85}} onClick={()=>setToolsOpen(o=>!o)}
-              title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation, ecoregion harvest, permanence / reversal risk">
+              title="show or hide the research tools: engine comparison, RD trend, engine spread, stumpage, LANDIS, landowner yields, Faustmann rotation, ecoregion harvest, permanence / reversal risk, wood products">
               {toolsOpen ? "Research tools ▴" : "Research tools ▾"}</button>)}
             {simple && cov && (
             <button className="tab" style={{marginLeft:6,borderColor:"var(--accent)",color:"var(--accent)"}}
@@ -1493,6 +1497,7 @@ export default function App(){
           {(!aoi || researchOpen) && tab==="faustmann" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><FaustmannRotation data={faustmann} state={sel}/></Suspense>}
           {(!aoi || researchOpen) && tab==="ecoharvest" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><EcoregionHarvest data={ecoHarvest} geo={ecoGeo}/></Suspense>}
           {(!aoi || researchOpen) && tab==="permanence" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><PermanenceRisk series={series} state={sel} stateName={cov && cov.name} meta={meta} geo={geoData} risk={permRisk} onPick={st=>setSel(st)}/></Suspense>}
+          {(!aoi || researchOpen) && tab==="hwp" && <Suspense fallback={<div className="note" style={{padding:8}}>Loading…</div>}><WoodProducts series={series} meta={meta} state={sel} units={units}/></Suspense>}
           {(!aoi || researchOpen) && tab==="health" && <HealthRiskResilience data={hrr} detail={hrrDetail} ecoData={hrrEco} landData={hrrLand} landEco={landEco} unit={hrrUnit} onUnit={setHrrUnit} state={sel} scenario={hrrScenario} onScenario={setHrrScenario} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="compare" && <CompareAreas data={hrr && hrr.states} state={sel} onPickState={st=>{ if(hrr && hrr.states && hrr.states[st]) setSel(st); }}/>}
           {(!aoi || researchOpen) && tab==="scenario" && <ScenarioRunner yields={l3yields}/>}
