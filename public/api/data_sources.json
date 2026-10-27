@@ -1,6 +1,6 @@
 {
   "schema": "perseus_data_sources_v1",
-  "generated": "2026-07-02",
+  "generated": "2026-10-27",
   "how_to_cite": "Weiskittel, A. R. (2026). PERSEUS Forest Intelligence: a CONUS multi-model forest carbon, value, and risk decision-support tool. Center for Research on Sustainable Forests, University of Maine. holoros.github.io/perseus-forest-intelligence",
   "note": "Registry of the datasets and models behind PERSEUS. Deposited products carry a Zenodo DOI; upstream products carry their canonical citation. DOIs confirmed published via the Zenodo API 2026-07-02 (harvest_decision_v5, stumpage_price_db added this cycle).",
   "sources": {
@@ -37,7 +37,7 @@
       "doi": "10.5281/zenodo.20533718",
       "url": "https://doi.org/10.5281/zenodo.20533718",
       "license": "CC-BY-4.0",
-      "note": "Concept DOI, resolves to the latest version (v5.0.1, 10.5281/zenodo.20837629); 240 m annual harvest probability and clearcut/partial decision surfaces.",
+      "note": "Concept DOI, resolves to the latest version (v5.0.1, 10.5281/zenodo.20837629); 240 m annual harvest probability and clearcut/partial decision surfaces. The companion manuscript was withdrawn from submission on 1 October 2026 for a refit (GRM cut based harvest positive class); a revised product version is expected.",
       "applies_to": ["harvest", "layer:volume_removed"]
     },
     "stumpage_price_db": {
@@ -47,7 +47,7 @@
       "doi": "10.5281/zenodo.20836865",
       "url": "https://doi.org/10.5281/zenodo.20836865",
       "license": "CC-BY-4.0",
-      "note": "Concept DOI, resolves to the latest version (v1.0.1, 10.5281/zenodo.20837628); deposited source behind the region-aware blended stumpage (econ_params).",
+      "note": "Concept DOI, resolves to the latest version (v1.0.1, 10.5281/zenodo.20837628); deposited source behind the region-aware blended stumpage (econ_params). The companion manuscript was withdrawn from submission on 1 October 2026 for a refit (species group by region price model with a series term); a revised product version is expected.",
       "applies_to": ["stumpage", "economics"]
     },
     "treemap_2022": {

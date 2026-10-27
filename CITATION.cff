@@ -7,13 +7,15 @@ authors:
     family-names: Weiskittel
     email: aaron.weiskittel@maine.edu
     affiliation: "Center for Research on Sustainable Forests, University of Maine"
-    orcid: "https://orcid.org/0000-0002-2972-0298"
+    orcid: "https://orcid.org/0000-0003-2534-4478"
 abstract: >-
-  CONUS multi-model forest-carbon explorer covering all 48 conterminous states
-  with deep focal coverage for Maine, Indiana, and Georgia (plus multi-engine
-  series for Minnesota, Oregon, Washington, and Idaho). Built on the perseus_db
-  carbon-pool-harmonized database. Static React + Vite + MapLibre application
-  deployed via GitHub Pages.
+  CONUS multi-model forest carbon, value and risk decision-support tool covering
+  all 48 conterminous states with deep focal coverage for Maine, Indiana, and
+  Georgia (plus multi-engine series for Minnesota, Oregon, Washington, and
+  Idaho), forest health, risk and resilience, harvest and stumpage economics,
+  permanence risk, wood products carbon, FIA remeasurement AGB yield curves and
+  relative density thresholds. Built on the perseus_db carbon-pool-harmonized
+  database. Static React + Vite application deployed via GitHub Pages.
 repository-code: "https://github.com/holoros/perseus-forest-intelligence"
 url: "https://holoros.github.io/perseus-forest-intelligence/"
 keywords:
@@ -27,8 +29,8 @@ keywords:
   - FVS
   - yield-curve
 license: MIT
-version: "1.38.0"
-date-released: 2026-07-02
+version: "1.39.0"
+date-released: 2026-10-27
 references:
   - type: data
     title: "CBM-CONUS multi-model forest-carbon trajectories and reproduction code"
@@ -50,4 +52,42 @@ references:
       - given-names: Aaron
         family-names: Weiskittel
     doi: "10.5281/zenodo.20519700"
+    year: 2026
+  - type: data
+    title: "CONUS-HCS: a continental harvest decision-surface product (240 m annual harvest probability), v5"
+    authors:
+      - given-names: Aaron
+        family-names: Weiskittel
+    doi: "10.5281/zenodo.20533718"
+    year: 2026
+  - type: data
+    title: "A harmonized CONUS stumpage price database (1995-2026, 2020 USD): multi-source compilation"
+    authors:
+      - given-names: Aaron
+        family-names: Weiskittel
+    doi: "10.5281/zenodo.20836865"
+    year: 2026
+  - type: data
+    title: "Generic aboveground biomass yield curves for Maine forest types and ecoregions from FIA remeasurements"
+    authors:
+      - given-names: Aaron
+        family-names: Weiskittel
+    doi: "10.5281/zenodo.23406410"
+    year: 2026
+  - type: data
+    title: "Relative density thresholds for carbon growth and mortality across forest types and ecoregions of the conterminous United States: code, aggregated estimates and figure data"
+    authors:
+      - given-names: Emmerson
+        family-names: Chivhenge
+      - given-names: Aaron
+        family-names: Weiskittel
+      - given-names: David
+        family-names: Ray
+      - given-names: Christopher
+        family-names: Woodall
+      - given-names: Anthony
+        family-names: D'Amato
+      - given-names: Adam
+        family-names: Daigneault
+    doi: "10.5281/zenodo.23397937"
     year: 2026

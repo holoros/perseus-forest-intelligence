@@ -1,7 +1,7 @@
 {
   "name": "perseus-forest-intelligence",
   "private": true,
-  "version": "1.38.0",
+  "version": "1.39.0",
   "type": "module",
   "description": "PERSEUS Forest Intelligence — CONUS multi-model forest-carbon explorer (Tier A).",
   "scripts": {
