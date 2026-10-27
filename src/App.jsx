@@ -20,6 +20,7 @@ import GlossaryPanel from "./GlossaryPanel.jsx";
 import { openMyForestReport } from "./myForest.js";
 import { findFeature, agbAtAge, polygonCentroid, polygonAreaM2, pointInGeometry } from "./geo.js";
 import { ownershipComposition, riskSummary, forestFraction, forestTypeDiversity, rampRelative, rampValues, median, percentile } from "./rasterSample.js";
+import { FAMILY_COL, CONTEXT_COL } from "./palette.js";
 
 const BASE = import.meta.env.BASE_URL; // "./" -> resolves relative to the page
 const FOCAL = ["ME","IN","GA"];        // PERSEUS focal states
@@ -42,20 +43,20 @@ const MAP_BINS = [
   { id:"structure", label:"Forest structure",
     layers:[["fortype_2022","Forest type"],["canopy_height","Canopy height (m)"],
             ["rd_treemap","Relative density"],["sdimax_treemap","SDI max (Reineke)"],
-            ["gedi_agbd","GEDI biomass (Mg/ha)"],["asym_agb","Asymptotic AGB (max)"],
+            ["gedi_agbd","GEDI biomass (Mg ha⁻¹)"],["asym_agb","Asymptotic AGB (max)"],
             ["climate_stress","Climate Site Productivity Index (CSPI)"],["csi","Climate Site Index (CSI)"],
             ["csi_2030","CSI · 2030"],["csi_2060","CSI · 2060"],["csi_2090","CSI · 2090"],
             ["bgi","Bioclimatic Growth Index (BGI)"]] },
   { id:"landowner", label:"Landowner",
     layers:[["ownership","Ownership group"]] },
   { id:"products", label:"Stumpage / products",
-    layers:[["standing_value","Standing value 2022 ($/ac)"],
-            ["standing_value_2020","Standing value 2020 ($/ac)"],["standing_value_2016","Standing value 2016 ($/ac)"],
-            ["standing_value_cv","Value uncertainty ($/ac s.d.)"],
-            ["standing_value_change_1622","Value change 2016->2022 ($/ac)"],
+    layers:[["standing_value","Standing value 2022 ($ ac⁻¹)"],
+            ["standing_value_2020","Standing value 2020 ($ ac⁻¹)"],["standing_value_2016","Standing value 2016 ($ ac⁻¹)"],
+            ["standing_value_cv","Value uncertainty ($ ac⁻¹ s.d.)"],
+            ["standing_value_change_1622","Value change 2016 to 2022 ($ ac⁻¹)"],
             ["species_value_index","Species value index (SVI)"],
             ["sawtimber_share","Sawtimber share (%)"],
-            ["hybrid_agc2022","AG carbon 2022 (Mg C/ha)"],["hybrid_dagc100","100-yr AG carbon change"]] },
+            ["hybrid_agc2022","AG carbon 2022 (Mg C ha⁻¹)"],["hybrid_dagc100","100-yr AG carbon change"]] },
   { id:"risk", label:"Future risk",
     layers:[["p_disturbance_2022","P(disturbance) · 2022"],
             ["p_fire_2022","P(fire) · 2022"],["p_insect_2022","P(insect) · 2022"],["p_disease_2022","P(disease) · 2022"],
@@ -92,14 +93,14 @@ const CONUS_LEGENDS = {
     note: "Harris et al. 2025 collapsed US forest ownership; non-forest transparent",
   },
   hybrid_agc2022: {
-    title: "Hybrid AG carbon, 2022 (Mg C/ha)",
+    title: "Hybrid AG carbon, 2022 (Mg C ha⁻¹)",
     type: "ramp",
     ramp: ["#f7fcf5","#c7e9c0","#74c476","#31a354","#006d2c"],
     lo: "0", mid: "125", hi: "250",
     note: "Hybrid yield engine x FIA plots (anchored)",
   },
   hybrid_dagc100: {
-    title: "100-yr AG carbon change (Mg C/ha)",
+    title: "100-yr AG carbon change (Mg C ha⁻¹)",
     type: "ramp",
     ramp: ["#b2182b","#ef8a62","#f7f7f7","#67a9cf","#1b7837"],
     lo: "-60", mid: "0", hi: "+60",
@@ -164,49 +165,49 @@ const CONUS_LEGENDS = {
     type: "ramp",
     ramp: ["#ffffcc","#fed976","#fd8d3c","#f03b20","#bd0026"],
     lo: "0.0", mid: "0.35", hi: "0.72",
-    note: "TreeMap 2022 disturbance probability (fire, insect, disease, wind, etc.) — Cardinal TREEMAP_outputs_v5",
+    note: "TreeMap 2022 disturbance probability (fire, insect, disease, wind, etc.) (source: Cardinal TREEMAP_outputs_v5)",
   },
   p_fire_2022: {
     title: "P(fire), 2022",
     type: "ramp",
     ramp: ["#ffffcc","#fed976","#fd8d3c","#f03b20","#bd0026"],
     lo: "0.0", mid: "0.25", hi: "0.5+",
-    note: "TreeMap 2022 per-type probability of fire disturbance — Cardinal TREEMAP_outputs_v5",
+    note: "TreeMap 2022 per-type probability of fire disturbance (source: Cardinal TREEMAP_outputs_v5)",
   },
   p_insect_2022: {
     title: "P(insect), 2022",
     type: "ramp",
     ramp: ["#edf8fb","#9ebcda","#8c96c6","#8c6bb1","#6e016b"],
     lo: "0.0", mid: "0.25", hi: "0.5+",
-    note: "TreeMap 2022 per-type probability of insect disturbance — Cardinal TREEMAP_outputs_v5",
+    note: "TreeMap 2022 per-type probability of insect disturbance (source: Cardinal TREEMAP_outputs_v5)",
   },
   p_disease_2022: {
     title: "P(disease), 2022",
     type: "ramp",
     ramp: ["#ffffd9","#c7e9b4","#7fcdbb","#1d91c0","#0c2c84"],
     lo: "0.0", mid: "0.25", hi: "0.5+",
-    note: "TreeMap 2022 per-type probability of disease disturbance — Cardinal TREEMAP_outputs_v5",
+    note: "TreeMap 2022 per-type probability of disease disturbance (source: Cardinal TREEMAP_outputs_v5)",
   },
   p_weather_2022: {
     title: "P(weather), 2022",
     type: "ramp",
     ramp: ["#f7fbff","#c6dbef","#6baed6","#2171b5","#08306b"],
     lo: "0.0", mid: "0.25", hi: "0.5+",
-    note: "TreeMap 2022 per-type probability of weather disturbance (wind, ice, snow) — Cardinal TREEMAP_outputs_v5",
+    note: "TreeMap 2022 per-type probability of weather disturbance (wind, ice, snow) (source: Cardinal TREEMAP_outputs_v5)",
   },
   p_animals_2022: {
     title: "P(animals), 2022",
     type: "ramp",
     ramp: ["#fff5eb","#fdd0a2","#fd8d3c","#d94801","#7f2704"],
     lo: "0.0", mid: "0.25", hi: "0.5+",
-    note: "TreeMap 2022 per-type probability of animal disturbance (browse, beaver, etc.) — Cardinal TREEMAP_outputs_v5",
+    note: "TreeMap 2022 per-type probability of animal disturbance (browse, beaver, etc.) (source: Cardinal TREEMAP_outputs_v5)",
   },
   p_veg_2022: {
     title: "P(vegetation), 2022",
     type: "ramp",
     ramp: ["#f7fcf5","#c7e9c0","#74c476","#238b45","#00441b"],
     lo: "0.0", mid: "0.25", hi: "0.5+",
-    note: "TreeMap 2022 per-type probability of vegetation disturbance (competition, invasives) — Cardinal TREEMAP_outputs_v5",
+    note: "TreeMap 2022 per-type probability of vegetation disturbance (competition, invasives) (source: Cardinal TREEMAP_outputs_v5)",
   },
   p_harvest_any: {
     title: "P(harvest · any), TM2016",
@@ -275,35 +276,35 @@ const CONUS_LEGENDS = {
     note: "Future climate site index",
   },
   standing_value: {
-    title: "Standing timber value 2022 ($/ac, 2020 USD)",
+    title: "Standing timber value 2022 ($ ac⁻¹, 2020 USD)",
     type: "ramp",
     ramp: ["#f7fcf5","#74c476","#238b45","#00441b"],
     lo: "0", mid: "mid", hi: "high",
     note: "TreeMap2022 volume x stumpage price; federal/private composite",
   },
   standing_value_2020: {
-    title: "Standing timber value 2020 ($/ac, 2020 USD)",
+    title: "Standing timber value 2020 ($ ac⁻¹, 2020 USD)",
     type: "ramp",
     ramp: ["#f7fcf5","#74c476","#238b45","#00441b"],
     lo: "0", mid: "mid", hi: "high",
     note: "TreeMap2020 volume x stumpage price; shared color breaks with 2022 for comparison",
   },
   standing_value_2016: {
-    title: "Standing timber value 2016 ($/ac, 2020 USD)",
+    title: "Standing timber value 2016 ($ ac⁻¹, 2020 USD)",
     type: "ramp",
     ramp: ["#f7fcf5","#74c476","#238b45","#00441b"],
     lo: "0", mid: "mid", hi: "high",
     note: "TreeMap2016 volume x stumpage price; shared color breaks with 2022 for comparison",
   },
   standing_value_change_1622: {
-    title: "Standing value change 2016->2022 ($/ac)",
+    title: "Standing value change 2016 to 2022 ($ ac⁻¹)",
     type: "ramp",
     ramp: ["#8c510a","#dfc27d","#f5f5f5","#80cdc1","#01665e"],
     lo: "loss", mid: "0", hi: "gain",
     note: "2022 minus 2016 standing value; diverging, symmetric +/-$500/ac; national mean ~ flat (-$8/ac)",
   },
   standing_value_cv: {
-    title: "Value uncertainty (s.d., $/ac)",
+    title: "Value uncertainty (s.d., $ ac⁻¹)",
     type: "ramp",
     ramp: ["#fff5eb","#fd8d3c","#d94801","#7f2704"],
     lo: "low", mid: "mid", hi: "high",
@@ -343,14 +344,14 @@ const CONUS_LEGENDS = {
     note: "Basal-area-weighted price-anchored species value from TreeMap2022 composition; >1 = above-average commercial species value. All 2,697 species via TPO/group allocation.",
   },
   value_at_risk: {
-    title: "Value at risk of removal (value-weighted m³/ha/yr)",
+    title: "Value at risk of removal (value-weighted m³ ha⁻¹ yr⁻¹)",
     type: "ramp",
     ramp: ["#000004","#51127c","#b73779","#fc8961","#fcfdbf"],
     lo: "0", mid: "1.6", hi: "high",
     note: "Expected annual volume removed × SVI = where harvest pressure meets high-value forest. conus_hcs v4, TreeMap2022.",
   },
   volume_removed: {
-    title: "Expected volume removed (m³/ha/yr)",
+    title: "Expected volume removed (m³ ha⁻¹ yr⁻¹)",
     type: "ramp",
     ramp: ["#000004","#51127c","#b73779","#fc8961","#fcfdbf"],
     lo: "0", mid: "1.6", hi: "high",
@@ -364,7 +365,7 @@ const CONUS_LEGENDS = {
     note: "Modeled forest canopy height (TreeMap-derived).",
   },
   gedi_agbd: {
-    title: "Above-ground biomass density (Mg/ha)",
+    title: "Above-ground biomass density (Mg ha⁻¹)",
     type: "ramp",
     ramp: ["#f7fcf5","#c7e9c0","#74c476","#31a354","#006d2c"],
     lo: "0", mid: "150", hi: "300+",
@@ -382,21 +383,20 @@ const CONUS_LEGENDS = {
 // Tier B layer B: gcbm_rasters_2022 stack (per-state, 30 m) for all 6 non-ME
 // trajectory states (MN GA IN WA OR ID). Single 2022 snapshot. Six layer types.
 const GCBM_LAYERS = [
-  { key:"carbon_l_2022", label:"Live tree carbon (Mg C/ha)",
+  { key:"carbon_l_2022", label:"Live tree carbon (Mg C ha⁻¹)",
     ramp:["#f7fcf5","#c7e9c0","#74c476","#238b45","#00441b"], lo:"0", hi:"200+" },
-  { key:"balive_2022",   label:"Basal area live (sq ft/ac)",
+  { key:"balive_2022",   label:"Basal area live (ft² ac⁻¹)",
     ramp:["#f7fbff","#c6dbef","#6baed6","#2171b5","#08306b"], lo:"0", hi:"200+" },
   { key:"stdage_2022",   label:"Stand age (years)",
     ramp:["#feedde","#fdbe85","#fd8d3c","#d94701","#7f2704"], lo:"0", hi:"180+" },
-  { key:"dombio_l_2022", label:"Dead organic biomass (Mg/ha)",
+  { key:"dombio_l_2022", label:"Dead organic biomass (Mg ha⁻¹)",
     ramp:["#f7fcfd","#ccece6","#99d8c9","#66c2a4","#005824"], lo:"0", hi:"100+" },
   { key:"fortypcd_2022", label:"Forest type group (FIA)",
     ramp:["#238b45","#117733","#7570b3","#d95f02","#e6ab02"], lo:"softwood", hi:"hardwood" },
   { key:"lcms_2022",     label:"LCMS disturbance cause (2022)",
     ramp:["#fdae61","#d73027","#fc8d59","#fee08b","#762a83"], lo:"natural", hi:"anthrop." },
 ];
-const CLASS_COL = { CBM:"#66c2a5", FVS:"#fc8d62", LANDIS:"#8da0cb", OSM:"#e78ac3",
-  HCM:"#a6d854", YC:"#ffd92f", CEM:"#e5c494", FIA:"#b3b3b3", VCC:"#7570b3", "?":"#cccccc" };
+const CLASS_COL = { ...FAMILY_COL, HCM:CONTEXT_COL, FIA:CONTEXT_COL, VCC:CONTEXT_COL, "?":CONTEXT_COL };
 // Per-class line style (must match GrowthChart DASH) so the legend keys the chart.
 const CLASS_DASH = { CEM:"0", CBM:"7 3", FVS:"4 3", YC:"1.5 3", LANDIS:"9 3 2 3",
   OSM:"6 2", ES:"2 2", ECON:"7 2 2 2", FIA:"0" };
@@ -468,6 +468,17 @@ export default function App(){
   const [timeline,setTimeline] = useState(null);
   // v0.65 SVG fallback for the choropleth
   const [geoData,setGeoData] = useState(null);
+  // Theme: explicit choice persists; otherwise follows the OS (see main.jsx).
+  const [themeNow,setThemeNow] = useState(()=>{
+    const t = document.documentElement.dataset.theme;
+    if(t==="light"||t==="dark") return t;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  });
+  const toggleTheme = ()=>{
+    const next = themeNow==="dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next; setThemeNow(next);
+    try{ window.localStorage.setItem("perseus-theme", next); }catch(e){ /* storage blocked */ }
+  };
   const [mapEngine,setMapEngine] = useState("svg"); // svg (default robust) | maplibre
   // v0.66 scenario focus + simplification
   const [scenarioFocus,setScenarioFocus] = useState("all"); // all | harvest_baseline | libcbm_reduced | ...
@@ -1220,7 +1231,7 @@ export default function App(){
         <div className="welcome-overlay" role="dialog" aria-modal="true" aria-label="Choose your view">
           <div className="welcome-card">
             <div className="welcome-title">PERSEUS Forest Intelligence</div>
-            <p className="welcome-sub">Forest health, risk, value, and multi-model scenario projections across the lower 48. Choose how you want to start — you can switch any time from the top bar.</p>
+            <p className="welcome-sub">Forest health, risk, value, and multi-model scenario projections across the lower 48. Choose how you want to start; you can switch any time from the top bar.</p>
             <div className="welcome-choices">
               <button className="welcome-choice" onClick={()=>chooseAudience("landowner")}>
                 <b>I own or manage forest land</b>
@@ -1231,13 +1242,13 @@ export default function App(){
                 <span>The full surface: every model engine, all CONUS data layers, stumpage, rotation economics, and the multi-model detail.</span>
               </button>
             </div>
-            <button className="welcome-skip" onClick={()=>chooseAudience("landowner")}>Skip — just open the tool</button>
+            <button className="welcome-skip" onClick={()=>chooseAudience("landowner")}>Skip and open the tool</button>
           </div>
         </div>
       )}
       <header className="top">
         <h1>PERSEUS Forest Intelligence <span className="pill">Tier A</span></h1>
-        <span className="sub">Focal: <b style={{color:"#f4c430"}}>ME · IN · GA</b> · click map or pick a state →</span>
+        <span className="sub">Focal: <b style={{color:"var(--ink)"}}>ME · IN · GA</b> · click the map or pick a state</span>
         {seriesStates.length>0 && (
           <select className="state-pick" value={sel} onChange={e=>setSel(e.target.value)} title="Jump to state">
             {seriesStates.map(st=>{
@@ -1254,20 +1265,25 @@ export default function App(){
           <a href="https://crsf.umaine.edu" target="_blank" rel="noopener noreferrer" title="Center for Research on Sustainable Forests">
             <img src={`${BASE}logos/crsf.png`} alt="CRSF"/></a>
         </div>
-        <nav className="topnav" style={{display:"flex",gap:14,fontSize:13,marginLeft:4,alignItems:"center"}}>
+        <nav className="topnav">
           <span className="viewmode" role="group" aria-label="View mode"
             title="Landowner = a simplified view with the essentials. Researcher = the full multi-model surface and all data layers.">
             <button className={"vm"+(simple?" on":"")} onClick={()=>chooseAudience("landowner")}>Landowner</button>
             <button className={"vm"+(!simple?" on":"")} onClick={()=>chooseAudience("research")}>Researcher</button>
           </span>
-          <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Methods notes">Methods</a>
-          <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Ecoregion economics viewer">Ecoregion</a>
-          <a href={`${BASE}citation.html`} target="_blank" rel="noopener noreferrer" style={{color:"var(--mut,#6a7480)",textDecoration:"none"}} title="Data sources, DOIs, and how to cite">Data &amp; cite</a>
+          <a href={`${BASE}methods/`} target="_blank" rel="noopener noreferrer" className="navlink" title="Methods notes">Methods</a>
+          <a href={`${BASE}ecoregion.html`} target="_blank" rel="noopener noreferrer" className="navlink" title="Ecoregion economics viewer">Ecoregion</a>
+          <a href={`${BASE}citation.html`} target="_blank" rel="noopener noreferrer" className="navlink" title="Data sources, DOIs, and how to cite">Data &amp; cite</a>
           <button className="linkbtn" title="plain-language glossary and data sources" onClick={()=>setGlossaryOpen(true)}>Glossary</button>
           <button className="linkbtn" title="copy a shareable link to this exact view"
             onClick={()=>{ try{ navigator.clipboard.writeText(window.location.href);
               setLinkCopied(true); setTimeout(()=>setLinkCopied(false),1500); }catch(e){} }}>
-            {linkCopied ? "link copied ✓" : "⧉ copy link"}</button>
+            {linkCopied ? "link copied" : <><svg className="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8"/></svg> copy link</>}</button>
+          <button className="theme-tog" onClick={toggleTheme} aria-label={`switch to ${themeNow==="dark"?"light":"dark"} theme`} title="light or dark theme">
+            {themeNow==="dark"
+              ? <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg>
+              : <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5Z"/></svg>}
+            {themeNow==="dark" ? "Light" : "Dark"}</button>
         </nav>
         <span className="stat">{meta && `${meta.stats.states} states · ${meta.stats.engines} engines · ${meta.stats.metrics} metrics · ${Number(meta.stats.rows).toLocaleString()} rows`}</span>
       </header>
@@ -1276,10 +1292,10 @@ export default function App(){
         <div className="mapwrap">
           {ecoOn && !ecoGeo && <div className="maploading">loading ecoregions…</div>}
           <div className="maptitle">{tab==="health" && hrr && hrr.states
-            ? "Forest health — priority forest area (% of forest, current)"
+            ? "Forest health: priority forest area (% of forest, current)"
             : mapMode === "coverage"
-            ? "Coverage — engines per state"
-            : `Carbon — libcbm AGC (Tg), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
+            ? "Coverage: engines per state"
+            : `Carbon: libcbm AGC (Tg C), ${mapScenario.replace(/_/g," ")}, year ${mapYear}`}</div>
           {mapEngine === "maplibre"
             ? <div id="map" ref={mapEl}></div>
             : (()=>{
@@ -1410,7 +1426,7 @@ export default function App(){
               <button onClick={()=>setPlaying(p=>!p)} title={playing?"pause":"play animation"}
                 style={{background:"var(--panel)",color:"var(--ink)",border:"1px solid var(--line)",
                   borderRadius:5,padding:"2px 8px",fontSize:12,cursor:"pointer"}}>
-                {playing ? "❚❚" : "▶"}</button>
+                {playing ? <svg className="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg> : <svg className="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5Z"/></svg>}</button>
               <input type="range" min={2024} max={2074} step={5}
                 value={mapYear} onChange={e=>setMapYear(+e.target.value)}
                 title={`Year: ${mapYear}`} style={{width:140}}/>
@@ -1421,10 +1437,10 @@ export default function App(){
             <div className="inspect-pop">
               <button className="aoi-x" onClick={()=>setInspectInfo(null)} title="close">×</button>
               <div><b>{inspectInfo.lat.toFixed(3)}°, {inspectInfo.lon.toFixed(3)}°</b></div>
-              <div>State: <b>{inspectInfo.state || "—"}</b></div>
-              <div>EPA L3: {inspectInfo.l3code || "—"} {inspectInfo.l3name || ""}</div>
+              <div>State: <b>{inspectInfo.state || "n/a"}</b></div>
+              <div>EPA L3: {inspectInfo.l3code || "n/a"} {inspectInfo.l3name || ""}</div>
               {inspectInfo.l1 && <div style={{color:"var(--mut)",fontSize:10.5}}>{inspectInfo.l1}</div>}
-              <div>AGB @50yr: <b>{inspectInfo.agb50 != null ? `${inspectInfo.agb50.toFixed(0)} ton/ac` : "n/a"}</b></div>
+              <div>AGB @50yr: <b>{inspectInfo.agb50 != null ? `${inspectInfo.agb50.toFixed(0)} ton ac⁻¹` : "n/a"}</b></div>
               <div style={{display:"flex",alignItems:"center",gap:6,marginTop:6}}>
                 <span style={{fontSize:10.5,color:"var(--mut)"}}>radius</span>
                 <select value={aoiRadiusKm} onChange={e=>setAoiRadiusKm(+e.target.value)}
@@ -1446,7 +1462,7 @@ export default function App(){
             </div>)}
           {ecoOn && (
             <div className="legend" style={{left:"auto",right:12,bottom:44}}>
-              <div style={{marginBottom:4}}>EPA L3 · AGB at 50 yr (ton/ac)</div>
+              <div style={{marginBottom:4}}>EPA L3 · AGB at 50 yr (ton ac⁻¹)</div>
               <div style={{height:10,width:150,borderRadius:2,
                 background:"linear-gradient(90deg,#edf8e9,#74c476,#005a32)"}}></div>
               <div style={{display:"flex",justifyContent:"space-between",width:150,fontSize:10.5}}>
@@ -1465,9 +1481,9 @@ export default function App(){
             </div>)}
           {tab!=="health" && mapMode === "coverage" && (
             <div className="legend">
-              <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid #f4c430"}}></i>PERSEUS focal (ME · IN · GA)</div>
-              <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6–19 &nbsp;<i style={{background:"#54b88a"}}></i>4–5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1–3</div>
-              <div><i style={{background:"#2a3a47"}}></i>no model data yet</div>
+              <div style={{marginBottom:3}}><i style={{background:"transparent",border:"2px solid var(--map-focal)"}}></i>PERSEUS focal (ME · IN · GA)</div>
+              <div><i style={{background:"#1b7a4d"}}></i>20+ &nbsp;<i style={{background:"#2f9e6a"}}></i>6 to 19 &nbsp;<i style={{background:"#54b88a"}}></i>4 to 5 &nbsp;<i style={{background:"#9ad9b8"}}></i>1 to 3</div>
+              <div><i style={{background:"var(--nodata)",border:"1px solid var(--line-strong)"}}></i>no model data yet</div>
               {baseOn && <div><i style={{background:"#5f9c70"}}></i>forest cover (NLCD 2023)</div>}
             </div>)}
           {tab!=="health" && mapMode === "carbon" && (
@@ -1525,16 +1541,19 @@ export default function App(){
         </div>
         <div className="detail">
           {introOpen && (
-            <div style={{margin:"0 4px 8px",padding:"8px 11px",borderRadius:7,
-              background:"rgba(63,182,139,0.10)",border:"1px solid var(--line,#2a3a47)",
-              fontSize:12.5,lineHeight:1.45,color:"var(--ink,#e8edf2)",display:"flex",gap:8,alignItems:"flex-start"}}>
+            <div className="intro-card">
               <span style={{flex:1}}>
-                <b>New here?</b> This is the <b>Landowner view</b>: pick your state, or click <b>◎&nbsp;Forest&nbsp;near&nbsp;me</b> / draw an area with <b>AOI&nbsp;↑</b>.
+                {simple ? <>
+                <b>New here?</b> This is the <b>Landowner view</b>. Pick your state, click <b>Forest&nbsp;near&nbsp;me</b>, or draw an area with <b>AOI</b>.
                 Then use the three tabs: <b>Compare areas</b> (how your forest stacks up), <b>Build a run</b> (test management and climate scenarios), and <b>Forest health</b> (stress and resilience).
-                Want the full multi-model detail and every data layer? Switch to <b>Researcher</b> up top. Unsure of a term? See <b>Glossary</b>.
+                For every model engine and data layer, switch to <b>Researcher</b> up top. Unsure of a term? See <b>Glossary</b>.
+                </> : <>
+                <b>Researcher view.</b> Every engine, metric and CONUS layer is available. Open <b>Research tools</b> for engine comparison, engine spread, the cross-model ensemble, stumpage, LANDIS, spatial biomass and rotation economics.
+                Each chart names its uncertainty band, and <b>Methods</b> and <b>Data &amp; cite</b> link the provenance and DOIs.
+                </>}
               </span>
               <button onClick={()=>setIntroOpen(false)} aria-label="dismiss"
-                style={{background:"transparent",border:"none",color:"var(--mut,#8a93a0)",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button>
+                className="intro-x">×</button>
             </div>
           )}
           {/* When an AOI is active, the research surface is collapsed by default. */}
@@ -1566,7 +1585,7 @@ export default function App(){
             <button className="tab" style={{marginLeft:6,borderColor:"var(--accent)",color:"var(--accent)"}}
               onClick={()=>openMyForestReport(sel, cov.name, hrr, hrrDetail, econParams && econParams.stumpage_usd_m3 ? econParams.stumpage_usd_m3[sel] : null, aoi, hrrEco, econParams)}
               title="Open a plain-language one-page summary of this state's forest: health, your species, and what you might do. Print or save to PDF.">
-              🌲 My forest summary</button>)}
+              <svg className="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 3.5 7h2L3 10.5h3.5V14.5h3V10.5H13L10.5 7h2Z"/></svg> My forest summary</button>)}
           </div>}
           {(!aoi || researchOpen) && <div className="who">{cov ? <><b>{cov.name}</b> <span style={{color:"var(--mut)"}}>· {cov.engines} engines · {cov.metrics} metrics · {cov.rows.toLocaleString()} rows</span></> : sel}</div>}
           {aoi && <Suspense fallback={<div className="note" style={{padding:8}}>Loading area report…</div>}><AOIReport aoi={aoi} stumpage={stumpage} units={units} hrr={hrr && hrr.states} hrrGrid={hrrGrid} fia={fia} l3yields={l3yields} onClose={()=>setAoi(null)} onRun={(s)=>{ if(s) setSel(s); setAoi(null); setTab("runbuilder"); }} onMyForest={()=>{ const st=aoi.state||sel; openMyForestReport(st, (states&&states[st]&&states[st].name)||st, hrr, hrrDetail, econParams&&econParams.stumpage_usd_m3?econParams.stumpage_usd_m3[st]:null, aoi, hrrEco, econParams); }}/></Suspense>}
@@ -1617,8 +1636,8 @@ export default function App(){
                   onChange={e=>setGcbmOpacity(+e.target.value)} style={{verticalAlign:"middle"}}/>
               </label>}
             </div>)}
-          {!series && <div className="empty">No multi-year model series for this state yet. {FOCAL.includes(sel) ? "Model projections for this focal state are pending ingest." : "Pick a focal state — ME · IN · GA."}</div>}
-          {series && !hasCarbon && <div className="note" style={{color:"#f4c430"}}>Model carbon projections pending for {cov && cov.name} — showing FIA-observed metrics below. (libcbm cross-state covers ME &amp; GA; IN projections not yet ingested.)</div>}
+          {!series && <div className="empty">No multi-year model series for this state yet. {FOCAL.includes(sel) ? "Model projections for this focal state are pending ingest." : "Pick a focal state: ME, IN or GA."}</div>}
+          {series && !hasCarbon && <div className="note" style={{color:"var(--warn)"}}>Model carbon projections pending for {cov && cov.name}; showing FIA-observed metrics below. (libcbm cross-state covers ME &amp; GA; IN projections not yet ingested.)</div>}
           {series && (<>
             <div className="controls">
               <select value={metric} onChange={e=>setMetric(e.target.value)}>
@@ -1640,7 +1659,7 @@ export default function App(){
                 </select>)}
               <select value={yMode} onChange={e=>setYMode(e.target.value)} title="Y-axis scaling">
                 <option value="full">Y: full range</option>
-                <option value="auto">Y: zoom to median (q10–q90)</option>
+                <option value="auto">Y: zoom to median (q10 to q90)</option>
                 <option value="log">Y: log scale</option>
               </select>
               <select value={xHorizon} onChange={e=>setXHorizon(e.target.value)} title="Time horizon (x-axis)">
@@ -1674,16 +1693,17 @@ export default function App(){
                   const off = hiddenClasses.has(c);
                   const dash = CLASS_DASH[c] || "0";
                   return <button key={c} className="filt" onClick={()=>toggleClass(c)}
-                    title={`${c} model family — line style: ${dash==="0"?"solid":"dashed"}`}
-                    style={{display:"inline-flex",alignItems:"center",gap:5,background:off?"transparent":CLASS_COL[c]||"#bbb",
-                      color:off?"var(--mut)":"#0b1015", border:`1px solid ${CLASS_COL[c]||"#bbb"}`,
-                      borderRadius:6,padding:"1px 7px",fontSize:11,cursor:"pointer",
-                      opacity:off?0.55:1}}>
-                    <svg width="16" height="6"><line x1="0" y1="3" x2="16" y2="3"
-                      stroke={off?"var(--mut)":"#0b1015"} strokeWidth="1.6" strokeDasharray={dash}/></svg>
+                    title={`${c} model family; line style: ${dash==="0"?"solid":"dashed"}`}
+                    aria-pressed={!off}
+                    style={{display:"inline-flex",alignItems:"center",gap:6,background:off?"transparent":"var(--panel-2)",
+                      color:off?"var(--mut)":"var(--ink)", border:`1px solid ${off?"var(--line)":(CLASS_COL[c]||"#9AA0A6")}`,
+                      borderRadius:"var(--r)",padding:"1px 8px",fontSize:11,cursor:"pointer",fontWeight:off?400:600,
+                      opacity:off?0.6:1}}>
+                    <svg width="18" height="6" aria-hidden="true"><line x1="0" y1="3" x2="18" y2="3"
+                      stroke={off?"var(--mut)":(CLASS_COL[c]||"#9AA0A6")} strokeWidth="2.4" strokeDasharray={dash}/></svg>
                     {c}{off?" (off)":""} · {rawNode.filter(s=>s.cls===c).length}</button>;
                 })}
-                {fiaRef && <span style={{marginLeft:8}}><i style={{background:"#9fb3c0"}}></i>FIA observed</span>}
+                {fiaRef && <span style={{marginLeft:8}}><i style={{background:"var(--accent)"}}></i>FIA observed</span>}
               </div>)}
             <div className="chartcard">
               <GrowthChart node={node} fiaRef={fiaRef} fiaYear={fia[sel] && fia[sel].year}
@@ -1708,7 +1728,7 @@ export default function App(){
                       }
                     });
                     setHiddenEngines(next);
-                  }} style={{background:"transparent",color:"#f4c430",border:"1px dashed #f4c430",
+                  }} style={{background:"transparent",color:"var(--accent)",border:"1px dashed var(--accent)",
                     borderRadius:5,padding:"1px 8px",fontSize:10.5,cursor:"pointer",fontWeight:600}}>
                     hide FVS outliers
                   </button>
@@ -1719,7 +1739,7 @@ export default function App(){
                   {allEngines.map(eng=>{
                     const off = hiddenEngines.has(eng);
                     const cls = rawNode.find(s=>s.model===eng)?.cls;
-                    const col = CLASS_COL[cls] || "#bbb";
+                    const col = CLASS_COL[cls] || "#9AA0A6";
                     return <button key={eng} onClick={()=>toggleEngine(eng)}
                       style={{background:off?"transparent":col+"33",
                         color:off?"var(--mut)":"var(--ink)",border:`1px solid ${col}`,
@@ -1733,7 +1753,7 @@ export default function App(){
               {scenarioFocus === "all"
                 ? <>Each solid line is one engine's median for <b>{mlabel(metric)}</b> under <b>{bucket}</b>
                     {node && ` (${node.filter(s=>!hiddenEngines.has(s.model)).length} visible / ${rawNode.length})`}.
-                    {" "}Uncalibrated FVS variants are hidden by default — use <b>show all engines</b> to expose them.
+                    {" "}Uncalibrated FVS variants are hidden by default; use <b>show all engines</b> to expose them.
                     {compareOn && overlayNode && <> Dashed = <b>{cmpState}</b> ({overlayNode.length} engines).</>}</>
                 : <>Showing libcbm cross-state v2 trajectory for <b>{scenarioFocus.replace(/_/g," ")}</b> only.
                     Switch to "all engines" to see the full multi-model spread under managed/reserve buckets.</>}
@@ -1745,7 +1765,7 @@ export default function App(){
                 {" "}<b>Disturbance-exposed reserve:</b> the YC line is the no-harvest trajectory with an
                 explicit FIA-based disturbance drag. Central line = ~2× historical disturbance frequency;
                 turn on <b>uncertainty</b> to see the band from historical rates (upper) to ~3× /
-                stand-replacing severity (lower). It shows that passive carbon storage is conditional —
+                stand-replacing severity (lower). It shows that passive carbon storage is conditional:
                 under climate-elevated fire/insect/wind it can plateau or turn into a net source.</>}
               {bucket === "reserve (no harvest, mortality-stressed)" && <>
                 {" "}<b>Mortality-stressed reserve:</b> endogenous decline from the FIA GRM

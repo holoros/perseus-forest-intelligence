@@ -1,0 +1,37 @@
+/* Chart chrome and chart component styles (taste-engine INFORMATION GRAPHICS). Uses tokens from styles.css. */
+
+/* Chart-local tokens. Map highlight strokes need a theme-aware value that styles.css does not carry. */
+:root{ --map-focal:#FFD23A; --map-sel:var(--ink); --map-edge:var(--line-strong); }
+:root[data-theme="light"]{ --map-focal:#A87800; }
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --map-focal:#A87800; }
+}
+
+/* SVG chart text and rules. Presentation attributes do not resolve var(), so these are classes. */
+.ch-txt{fill:var(--axis);font-family:var(--font-sans);font-size:10px;font-variant-numeric:tabular-nums}
+.ch-ttl{fill:var(--ink-2);font-family:var(--font-sans);font-size:11px;font-weight:600}
+.ch-note{fill:var(--mut2);font-family:var(--font-sans);font-size:10px;font-style:italic}
+.ch-grid{stroke:var(--grid);stroke-width:1}
+.ch-base{stroke:var(--line-strong);stroke-width:1}
+
+/* Chart buttons (download, isolate) */
+.ch-btn{background:var(--panel);color:var(--mut);border:1px solid var(--line);border-radius:5px;
+  padding:1px 7px;font-size:10.5px;cursor:pointer;font-family:var(--font-sans);
+  transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.ch-btn:hover{border-color:var(--accent);color:var(--ink)}
+.ch-btn.on{color:var(--accent);border:1px dashed var(--accent)}
+
+/* Hover readout */
+.ch-tip{position:absolute;top:8px;background:var(--overlay);color:var(--ink);border:1px solid var(--line);
+  border-radius:6px;padding:4px 8px;font-size:11px;pointer-events:none;max-width:220px;
+  font-variant-numeric:tabular-nums}
+.ch-tip .yr{color:var(--axis);margin-bottom:2px;font-weight:600}
+
+/* Divergence heatmap */
+.dv-tbl{border-collapse:separate;border-spacing:1px;font-size:10.5px;font-variant-numeric:tabular-nums}
+.dv-tbl th{color:var(--mut);font-weight:600}
+.dv-tbl td.cell{text-align:center;min-width:34px;padding:3px 4px;border-radius:2px}
+.dv-tbl td.cell.na{color:var(--mut2);opacity:.5}
+
+/* Text halo: a panel-colored stroke behind in-plot labels so they stay legible over lines and bands. */
+.ch-halo{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}
