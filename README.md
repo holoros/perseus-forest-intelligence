@@ -48,6 +48,17 @@ npm run build      # static bundle -> dist/
 npm run preview    # serve the built bundle
 ```
 
+Checks (all run in CI on every push and pull request):
+
+```
+npm test                                              # Vitest unit suites (tests/unit)
+python3 -m pytest -q tests/py                         # data check scripts
+python3 scripts/check_restricted_fields.py public docs   # restricted data tripwire
+python3 scripts/check_api_integrity.py public/api --strict
+node scripts/check_versions.mjs                       # one version everywhere
+node scripts/smoke.mjs [baseURL]                      # optional smoke test of a build or the live site
+```
+
 ## Deploy
 
 Continuous deploy: `.github/workflows/deploy-pages.yml` builds with Vite and publishes
