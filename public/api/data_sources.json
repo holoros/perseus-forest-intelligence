@@ -85,6 +85,34 @@
       "url": "https://www.timbermart-south.com/",
       "note": "Feeds the region-aware blended stumpage (econ_params).",
       "applies_to": ["stumpage", "economics"]
+    },
+    "maine_agb_yield_curves": {
+      "name": "Generic aboveground biomass yield curves for Maine forest types and ecoregions from FIA remeasurements (v1.0.0)",
+      "authors": "Weiskittel, A. R.",
+      "year": 2026,
+      "doi": "10.5281/zenodo.23406410",
+      "url": "https://doi.org/10.5281/zenodo.23406410",
+      "license": "CC-BY-4.0",
+      "note": "Six Maine forest type groups by six ecological sections, 0 to 250 yr: median and mean curves, 95% plot cluster bootstrap bands, PI90, cap and extrapolation flags. Published 2026-10-15.",
+      "applies_to": ["tab:agbyc"]
+    },
+    "lakes_nhvt_agb_yield_curves": {
+      "name": "FIA remeasurement AGB yield curves for NH, VT, MI, WI and MN",
+      "authors": "Weiskittel, A. R.",
+      "year": 2026,
+      "license": "CC-BY-4.0",
+      "note": "CRSF Cardinal builds of 16 October 2026, same method as the Maine record; Zenodo deposit pending",
+      "applies_to": ["tab:agbyc"]
+    },
+    "rdgrowth_thresholds": {
+      "name": "Relative density thresholds for growth and mortality by forest type and EPA Level III ecoregion (Supplementary Data S1 of: Evaluating relative density-stand dynamics relationships across contrasting forest types of the conterminous United States; submitted to Forest Ecology and Management)",
+      "authors": "Chivhenge, E., Weiskittel, A. R., Ray, D., Woodall, C. W., D'Amato, A. W., Daigneault, A.",
+      "year": 2026,
+      "doi": "10.5281/zenodo.23397937",
+      "url": "https://doi.org/10.5281/zenodo.23397937",
+      "license": "CC-BY-4.0",
+      "note": "Concept DOI, resolves to the latest version; Supplementary Data S1 is unchanged across versions. 2,020 type by ecoregion cells with 95% intervals and source codes.",
+      "applies_to": ["tab:rd"]
     }
   }
 }

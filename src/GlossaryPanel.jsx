@@ -19,6 +19,8 @@ const SOURCES = [
   "FIA: USDA Forest Service Forest Inventory and Analysis (observed inventory anchor).",
   "Potter, Crane & Hargrove (2017), Project CAPTURE: species climate vulnerability.",
   "Model families: libcbm / GCBM, CEM, FVS (Bayesian), LANDIS-II, and FIADB/TreeMap yield curves.",
+  "FIA remeasurement AGB yield curves (ME, NH, VT, MI, WI, MN): Maine record doi:10.5281/zenodo.23406410; the other five states are CRSF builds of 16 October 2026 with the same method, deposit pending.",
+  "Relative density thresholds by forest type and EPA Level III ecoregion: Chivhenge et al., submitted to Forest Ecology and Management; Supplementary Data S1, doi:10.5281/zenodo.23397937.",
 ];
 
 export default function GlossaryPanel({ onClose }){
