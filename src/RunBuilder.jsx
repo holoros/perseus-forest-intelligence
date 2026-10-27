@@ -4,6 +4,7 @@
 // path animates a Cardinal HPC submission of the same run-spec. Economics and a
 // plain-language recommendation come from the per-L3 yield curves.
 import { useState, useEffect } from "react";
+import { rotationTimber, R_MIN } from "./rotation.js";
 import { fmtUnit } from "./units.js";
 import { FAMILY_COL } from "./palette.js";
 
@@ -96,39 +97,20 @@ function computeScores(rs, emphasis){
   return {scored,best};
 }
 
-// Faustmann rotation economics. Instead of discounting the standing volume at the curve's
-// final age (which collapses to ~0 at high discount rates), find the optimal rotation age R*
-// that maximizes the single-rotation NPV of the harvest, and also report the perpetual
-// soil/land expectation value (LEV). Gross of establishment and management costs.
-function rotationTimber(merch, stumpageCuft, disc, estCost = 0, mgmtCost = 0) {
-  if (!merch || merch.length < 2) return null;
-  const vol = (a) => {
-    if (a <= merch[0][0]) return merch[0][1] * a / Math.max(merch[0][0], 1);
-    for (let i = 1; i < merch.length; i++) {
-      if (a <= merch[i][0]) { const [x0,y0]=merch[i-1], [x1,y1]=merch[i]; return y0 + (y1-y0)*(a-x0)/((x1-x0)||1); }
-    }
-    return merch[merch.length - 1][1];
-  };
-  // Net single-rotation NPV: harvest revenue at R, less establishment cost (age 0) and the
-  // present value of annual management cost over the rotation. estCost/mgmtCost default 0 (gross).
-  const ann = (R) => disc > 0 ? (1 - Math.pow(1+disc, -R)) / disc : R;
-  const srNPV = (R) => vol(R)*stumpageCuft*Math.pow(1+disc, -R) - estCost - mgmtCost*ann(R);
-  let bestNPV = -Infinity, R = 10;
-  for (let a = 10; a <= 120; a++) { const v = srNPV(a); if (v > bestNPV) { bestNPV = v; R = a; } }
-  const lev = bestNPV / (1 - Math.pow(1+disc, -R));   // perpetual land value (identical rotations)
-  return { npv: bestNPV, rotation: R, lev };
-}
+// Faustmann rotation economics live in src/rotation.js: R* maximizes the land expectation
+// value LEV(R) = NPV(R)(1+r)^R/((1+r)^R - 1) over an annual 10 to 120 yr grid; the single
+// rotation NPV is reported at that R*. Gross of establishment and management costs by default.
 
 // stumpageCuft = effective $/cu ft (real per-state $/m3 x price-scenario mult, converted).
-// Timber value is the optimal single-rotation NPV (rotation R*); carbon value is the flow-basis
-// NPV of annual net sequestration (carbonFlowNPV). LEV (perpetual land value) is carried for display.
+// Timber value is the single-rotation NPV at the LEV-maximizing rotation R*; carbon value is the
+// flow-basis NPV of annual net sequestration (carbonFlowNPV). The Faustmann LEV is carried for display.
 function econFromL3(node, curveKey, stumpageCuft, carbonPrice, disc, estCost = 0, mgmtCost = 0) {
   const cm = (node && node.curves) || {};
   const merch = cm.merchvol_cuftac && cm.merchvol_cuftac[curveKey];
   const carb = cm.carbon_lbac && cm.carbon_lbac[curveKey];
   const o = {};
   const ft = rotationTimber(merch, stumpageCuft, disc, estCost, mgmtCost);
-  if (ft) { o.npvH = ft.npv; o.rotation = ft.rotation; o.lev = ft.lev; }
+  if (ft) { o.npvH = ft.npv; o.rotation = ft.rotation; o.lev = ft.lev; o.rotationAtGridMin = ft.atGridMin; }
   if (carb && carb.length) { const cf=carbonFlowNPV(carb, carbonPrice, disc); o.age=cf.age; o.npvC=cf.npv; }
   return o;
 }
@@ -379,7 +361,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
 <h2>Run specification (Cardinal contract)</h2>
 <pre>${esc(JSON.stringify(spec,null,2))}</pre>
 <h2>Methods &amp; caveats</h2>
-<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the optimal single-rotation (Faustmann) NPV at rotation age R*, with the perpetual land value (LEV) also reported; gross of establishment and management costs.</p>
+<p class="muted">Free-tier results resolve from precomputed PERSEUS multi-model series (FVS, CBM, CEM, yield) by state, management, and metric; model spread is the honest uncertainty. Economics use per-acre yield curves with real per-state blended stumpage for timber and the chosen discount rate. Timber value is the single-rotation NPV at the Faustmann rotation R*, where R* maximizes the land expectation value LEV = NPV(R)(1+r)^R/((1+r)^R - 1) over a 10 to 120 yr grid; the LEV is also reported. Both are gross of establishment and management costs unless rotation costs are entered.</p>
 <p class="muted">Carbon value is the flow-basis NPV of annual net sequestration (the discounted stream of yearly carbon gain), which is how a carbon program pays a landowner; this keeps early sequestration in the value rather than discounting a single horizon stock. The carbon price is anchored to voluntary and compliance market benchmarks (the EPA social cost of carbon, ~$190 tCO₂e⁻¹, is higher but is a societal value, not a payment); ecosystem-service payments and policy effects are illustrative.</p>
 <p class="muted">Resilience is the state HRR baseline with an illustrative management adjustment. A subscriber custom run dispatches the run-spec above to the OSC Cardinal HPC cluster for the exact area and inventory. This prototype is for discussion, not financial or management advice.</p>
 </body></html>`;
@@ -537,7 +519,7 @@ ${run.results.map((r,i)=>`<div style="font-size:12px;font-weight:600;margin:10px
             <MultiLineChart rows={allRows}/>
             <div className="pn-key">{present.map(e=><span key={e.cls}><i className="pn-sw" style={{background:CLS_COL[e.cls]}}/>{e.cls} ({e.rows.length})</span>)}</div>
             {repNode && (r.econ.npvH!=null||r.econ.npvC!=null) && (
-              <div className="note" style={{marginTop:4}}>Economics (NPV, {fmtUnit("$/"+PER)}; {p.label} market{esAnnual?`, ES $${esAnnual} ac⁻¹ yr⁻¹`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span>carbon market-anchored</span></span>{r.sc.mgmt!=="reserve" && r.econ.rotation ? <span style={{color:"var(--mut)"}}> · optimal rotation <b>{r.econ.rotation} yr</b>, Faustmann land value {mpa(r.econ.lev)} {PER}⁻¹</span> : null}</div>
+              <div className="note" style={{marginTop:4}}>Economics (NPV, {fmtUnit("$/"+PER)}; {p.label} market{esAnnual?`, ES $${esAnnual} ac⁻¹ yr⁻¹`:""}): timber {mpa(r.econ.npvH)} · carbon {mpa(r.econ.npvC)} · eco-services {mpa(r.econ.esv)} · <b>total {mpa(r.econ.total)}</b> <span style={{color:"var(--mut)"}}>· timber: real stumpage; <span>carbon market-anchored</span></span>{r.sc.mgmt!=="reserve" && r.econ.rotation ? <span style={{color:"var(--mut)"}}> · R* <b>{r.econ.rotation} yr</b>, Faustmann LEV (R* maximizes LEV) {r.econ.lev!=null ? <>{mpa(r.econ.lev)} {PER}⁻¹</> : "n/a at 0% discount"}, {(estCost||mgmtCost) ? "net of the entered rotation costs" : "gross of establishment and management cost"}{r.econ.rotationAtGridMin ? <>; R* sits at the {R_MIN} yr lower edge of the rotation grid (the blended price carries no sawlog premium)</> : null}</span> : null}</div>
             )}
           </div>
         );
