@@ -73,6 +73,9 @@ standing it up requires creating the accounts and supplying credentials (see
   composition from the USDA FS forest-ownership raster (RDS-2025-0045).
 - `stumpage.json`, `faustmann_rotation.json`, `landowner_yields.json`, `landis_stratified.json`.
 - `geo/us_counties.geojson` — CONUS county boundaries for the county map unit.
+- `fia_plots/{ST}.json` — FIA plot attributes for the AOI report. Coordinates are the public,
+  perturbed FIADB values rounded to 0.01 degree, never true plot locations; see
+  `docs/methods_fia_plot_coordinates.md`.
 
 Raster overlays are in `public/raster/`, produced by `scripts/50_raster_image_overlays.sh`.
 
@@ -80,6 +83,7 @@ Raster overlays are in `public/raster/`, produced by `scripts/50_raster_image_ov
 
 - Yield-curve methodology: `docs/yc_engine_provenance.md` and the in-app methods page.
 - Inventory stratification analysis: `public/methods/inventory-stratification/`.
+- FIA plot coordinates (public, perturbed, rounded): `docs/methods_fia_plot_coordinates.md`.
 - Per-state HTML reports: `public/reports/{GA,ID,IN,ME,MN,OR,WA}_report.html`.
 
 ## Known limitations
