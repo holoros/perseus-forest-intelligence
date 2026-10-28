@@ -66,3 +66,69 @@
 /* Notes split into short paragraphs keep the .note rhythm. */
 .note p{margin:0 0 6px}
 .note p:last-child{margin-bottom:0}
+
+/* ---- taste pass, 27 October: surfaces added after the September pass ---- */
+/* Section heading and its metadata line. */
+.pn-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:2px 0 8px}
+.pn-h{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-0.015em;margin:0}
+.pn-meta{font-size:12px;color:var(--mut);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+/* Panel: 24 px padding on desktop, 16 px on phone, one left alignment edge. */
+.pn-panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;margin:0 0 10px}
+.pn-panel.pn-tight{padding:16px}
+/* Stat tiles: eyebrow label over a tabular figure. */
+.pn-stats{display:flex;flex-wrap:wrap;gap:12px 20px}
+.pn-stat{flex:1 1 120px;min-width:120px}
+.pn-stat .eyebrow{display:block;margin-bottom:2px}
+.pn-stat b{display:block;font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-0.015em;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.pn-stat b small{font-size:12px;font-weight:400;color:var(--mut);letter-spacing:0;margin-left:4px}
+.pn-stat span{display:block;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+/* Scenario tile keyed to its series color by a left rule (not a filled or colored icon). */
+.pn-stat.pn-keyed{border-left:3px solid var(--key,var(--line-strong));padding-left:10px}
+/* Status callout: the only place a status color appears (text and left rule). */
+.pn-status{border-left:3px solid currentColor;padding:3px 0 3px 10px;max-width:560px}
+.pn-status b{display:block;font-size:12.5px;font-weight:600}
+.pn-status p{margin:2px 0 0;font-size:12px;line-height:1.5;color:var(--ink-2)}
+/* Table caption sits above the scroll wrapper so it never scrolls out of view. */
+.tbl-cap{font-size:12px;color:var(--ink-2);margin:10px 0 6px;line-height:1.45}
+.tbl-cap b{color:var(--ink)}
+/* Tables scroll inside their wrapper on narrow screens; the page never scrolls sideways. */
+.tbl-wrap{max-width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tbl th{white-space:normal}
+.tbl.pn-dense{font-size:11.5px}
+.tbl.pn-dense th,.tbl.pn-dense td{padding:4px 5px}
+.pn-sel,.detail select{max-width:100%}
+.tbl th.sortable{cursor:pointer}
+.tbl th.sortable:hover{color:var(--accent)}
+.tbl th .sort{display:inline-block;width:1em;color:var(--mut2);font-size:9px;vertical-align:1px}
+.tbl th[aria-sort="ascending"] .sort,.tbl th[aria-sort="descending"] .sort{color:var(--accent)}
+.tbl td.pn-left,.tbl th.pn-left{text-align:left}
+.tbl tr.pn-group td{text-align:left;font-weight:700;padding-top:8px;color:var(--ink-2)}
+.tbl tr.pn-group td span{font-weight:400;color:var(--mut)}
+.tbl sup{font-size:10.5px;color:var(--mut);margin-left:2px;line-height:0}
+.tbl .pn-iv{color:var(--mut)}
+/* Text field with a visible label (no placeholder). */
+.pn-field{display:inline-flex;align-items:center;gap:8px;margin:0 0 8px}
+.pn-input{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);
+  padding:4px 8px;font-size:12px;width:min(320px,100%);transition:border-color var(--dur) var(--ease)}
+.pn-input:focus{outline:none;border-color:var(--accent)}
+/* Chart card that hosts a responsive inline SVG. */
+.pn-chart{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 12px 6px;margin:0 0 8px}
+.pn-chart svg{width:100%;height:auto;display:block}
+/* Choropleth legend under the map: ramp swatches and end labels. */
+.pn-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:8px;font-size:11.5px;color:var(--mut);
+  font-variant-numeric:tabular-nums}
+.pn-legend .eyebrow{margin-right:2px}
+.pn-ramp{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.pn-ramp i{display:block;width:22px;height:10px}
+.pn-ramp-lab{display:inline-flex;align-items:center;gap:5px}
+/* Map legend caption under a choropleth. */
+.pn-cap{font-size:12px;color:var(--mut);line-height:1.5;margin:6px 0 0}
+.pn-note{font-size:12px;color:var(--mut);line-height:1.55;margin:10px 0 0;max-width:640px}
+.pn-note a{color:var(--accent)}
+.pn-hl{color:var(--ink)}
+@media (max-width:760px){
+  .pn-panel{padding:16px}
+  .pn-chart{padding:10px 8px 4px}
+  .pn-stats{gap:10px 20px}
+}
