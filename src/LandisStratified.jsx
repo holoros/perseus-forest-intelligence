@@ -4,8 +4,12 @@
 // ecological section, with the lo-hi band.
 import { useState, useEffect } from "react";
 import MiniChart from "./MiniChart.jsx";
+import { fmtUnit } from "./units.js";
 
-const ECO_PALETTE = ["#3fb68b","#6baed6","#e6ab02","#d95f02","#8da0cb","#a6761d","#e7298a","#66c2a5"];
+// Okabe-Ito categorical order (colorblind safe, six hues); sections beyond six repeat.
+const ECO_PALETTE = ["#0072B2","#E69F00","#009E73","#CC79A7","#56B4E9","#D55E00"];
+const fmtLabel = s => typeof s !== "string" ? s
+  : s.replace(/(?<![A-Za-z])((?:\$|[A-Za-z]{1,3})(?: C)?)\/([A-Za-z]{1,3})(?:\/([A-Za-z]{1,3}))?(?![A-Za-z])/g, m => fmtUnit(m));
 const keys = o => (o && typeof o === "object") ? Object.keys(o) : [];
 
 export default function LandisStratified({ data, state }){
@@ -38,6 +42,7 @@ export default function LandisStratified({ data, state }){
   const series = keys(ecoObj).map((eco, i) => ({
     label: eco,
     color: ECO_PALETTE[i % ECO_PALETTE.length],
+    bandName: "q_lo to q_hi band",
     pts: ecoObj[eco].map(r => [r[0], r[2], r[1], r[3]]), // [age, q_lo, mean, q_hi]
   }));
 
@@ -62,7 +67,7 @@ export default function LandisStratified({ data, state }){
         {series.map(s => <span key={s.label}><i style={{background:s.color,width:14,height:3}}/>{s.label}</span>)}
       </div>
       <div className="note">
-        Mean {data.meta.response_label} vs stand age (solid) with the lo-hi band,
+        Mean {fmtLabel(data.meta.response_label)} vs stand age (solid) with the q_lo to q_hi band (shaded),
         for <b>{cl}</b> climate, <b>{hv}</b> harvest, <b>{ow}</b> ownership,
         <b> {ftSel}</b>. One line per ecological section. Engine: {data.meta.engine}.
         Data: api/landis_stratified.json.

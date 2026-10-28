@@ -8,4 +8,6 @@ export default defineConfig({
   base: "./",
   plugins: [react()],
   build: { outDir: "dist", chunkSizeWarningLimit: 1500 },
+  // Vitest: only the front end unit suites; run-service has its own node:test and pytest.
+  test: { include: ["tests/unit/**/*.test.js"], environment: "node" },
 });

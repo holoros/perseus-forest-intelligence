@@ -7,6 +7,10 @@
 import { useState, useEffect } from "react";
 import { conv, unitLabel } from "./units.js";
 
+// Pathway series colors (data encodings, legible on light and dark panels). The
+// "now" marker is chrome, so it uses the ink token rather than a decorative yellow.
+const C_RES = "#3fb68b", C_MAN = "#d98a3c", C_NOW = "var(--ink)";
+
 const RESP = [
   { key: "carbon_lbac",     label: "AG carbon",        unit: "ton C/ac", scale: 1 / 2000 },
   { key: "value",           label: "Timber value",     unit: "$/ac (est)", from: "merchvol_cuftac", dollars: true },
@@ -28,7 +32,7 @@ function interp(curve, age) {
   }
   return curve[curve.length - 1][1];
 }
-const fmt = (v) => v == null ? "—" : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString()
+const fmt = (v) => v == null ? "n/a" : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString()
   : Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1));
 
 // stumpage -> $/cu ft for the AOI's state (approx; sawlog $/MBF, pulpwood $/cord)
@@ -40,7 +44,7 @@ function valuePerCuft(stumpage, st) {
   if (!saw && !pulp) return null;
   const sawCuft = saw ? saw.value / 90 : 0;   // ~90 cu ft per MBF
   const pulpCuft = pulp ? pulp.value / 79 : 0; // ~79 cu ft per cord
-  const note = `${st}: ${saw ? `sawlog $${saw.value}/MBF` : ""}${saw && pulp ? " · " : ""}${pulp ? `pulp $${pulp.value}/cord` : ""}`;
+  const note = `${st}: ${saw ? `sawlog $${saw.value} MBF⁻¹` : ""}${saw && pulp ? " · " : ""}${pulp ? `pulp $${pulp.value} cord⁻¹` : ""}`;
   return { dpc: 0.55 * sawCuft + 0.45 * pulpCuft, note };
 }
 
@@ -127,24 +131,24 @@ export default function StandOutlook({ aoi, stumpage, units = "imperial" }) {
         {xt.map(t => <text key={t} x={sx(t)} y={H - 9} textAnchor="middle" fontSize="9" fill="var(--mut)">{t}</text>)}
         <text x={(P.l + W - P.r) / 2} y={H - 0.5} textAnchor="middle" fontSize="9" fill="var(--mut)">Stand age (yr)</text>
         <text x={4} y={10} fontSize="9" fill="var(--mut)">{dispUnit}</text>
-        <line x1={sx(age)} x2={sx(age)} y1={P.t} y2={H - P.b} stroke="#f4c430" strokeWidth="1" strokeDasharray="3 2" />
-        <path d={band(valU)} fill="#3fb68b" opacity="0.16" />
-        <path d={band(valH)} fill="#e6ab02" opacity="0.16" />
-        <path d={line(valU)} fill="none" stroke="#3fb68b" strokeWidth="2" />
-        <path d={line(valH)} fill="none" stroke="#e6ab02" strokeWidth="2" />
-        <line x1={sx(age)} x2={sx(age)} y1={sy(nowLo)} y2={sy(nowHi)} stroke="#f4c430" strokeWidth="3" strokeLinecap="round" />
-        <circle cx={sx(age)} cy={sy(nowU)} r="3" fill="#f4c430" stroke="#fff" strokeWidth="1" />
-        <text x={sx(age)} y={P.t + 9} textAnchor="middle" fontSize="9" fill="#f4c430">est. now</text>
+        <line x1={sx(age)} x2={sx(age)} y1={P.t} y2={H - P.b} stroke={C_NOW} strokeWidth="1" strokeDasharray="3 2" opacity="0.6" />
+        <path d={band(valU)} fill={C_RES} opacity="0.16" />
+        <path d={band(valH)} fill={C_MAN} opacity="0.16" />
+        <path d={line(valU)} fill="none" stroke={C_RES} strokeWidth="2" />
+        <path d={line(valH)} fill="none" stroke={C_MAN} strokeWidth="2" />
+        <line x1={sx(age)} x2={sx(age)} y1={sy(nowLo)} y2={sy(nowHi)} stroke={C_NOW} strokeWidth="3" strokeLinecap="round" />
+        <circle cx={sx(age)} cy={sy(nowU)} r="3" fill={C_NOW} stroke="var(--panel)" strokeWidth="1" />
+        <text x={sx(age)} y={P.t + 9} textAnchor="middle" fontSize="9" fill={C_NOW}>est. now</text>
       </svg>
       <div className="lgd" style={{ marginTop: 4 }}>
-        <span><i style={{ background: "#3fb68b", width: 14, height: 3 }} />reserve (carbon) pathway</span>
-        <span><i style={{ background: "#e6ab02", width: 14, height: 3 }} />managed (fiber) pathway</span>
-        <span><i style={{ background: "#f4c430", width: 14, height: 3 }} />estimate ± interval</span>
+        <span><i style={{ background: C_RES, width: 14, height: 3 }} />reserve (carbon) pathway</span>
+        <span><i style={{ background: C_MAN, width: 14, height: 3 }} />managed (fiber) pathway</span>
+        <span><i style={{ background: C_NOW, width: 14, height: 3 }} />estimate ± interval</span>
       </div>
 
       <div className="so-now">
         Estimated now (age <b>{age}</b>): <b>{r.dollars ? "$" : ""}{fmt(nowU)}</b>{" "}
-        <span style={{ color: "var(--mut)" }}>{r.dollars ? (units==="metric"?"/ha":"/ac") : dispUnit} (likely {r.dollars ? "$" : ""}{fmt(nowLo)}–{r.dollars ? "$" : ""}{fmt(nowHi)})</span>
+        <span style={{ color: "var(--mut)" }}>{r.dollars ? (units==="metric"?"ha⁻¹":"ac⁻¹") : dispUnit} (likely {r.dollars ? "$" : ""}{fmt(nowLo)} to {r.dollars ? "$" : ""}{fmt(nowHi)})</span>
         {r.dollars && vpc && <div style={{ color: "var(--mut)", fontSize: 10.5, marginTop: 2 }}>standing timber value · {vpc.note}</div>}
       </div>
 
@@ -158,16 +162,17 @@ export default function StandOutlook({ aoi, stumpage, units = "imperial" }) {
           value={cal} onChange={e => setCal(e.target.value)} />
       </div>}
 
-      <table className="so-table">
-        <thead><tr><th>Pathway outlook</th><th>Age</th><th style={{ color: "#3fb68b" }}>Reserve</th><th style={{ color: "#e6ab02" }}>Managed</th></tr></thead>
+      <table className="tbl so-table">
+        <caption><b>Pathway outlook.</b> Likely range in {dispUnit}.</caption>
+        <thead><tr><th>Horizon</th><th>Age (yr)</th><th><span className="pn-th-sw"><i className="pn-sw" style={{ background: C_RES }} />Reserve ({dispUnit})</span></th><th><span className="pn-th-sw"><i className="pn-sw" style={{ background: C_MAN }} />Managed ({dispUnit})</span></th></tr></thead>
         <tbody>
           {HORIZONS.map(h => {
             const fa = Math.min(age + h, 100);
             const u = interp(unt, fa), hv = interp(har, fa), c = ci(fa);
-            const rng = (v) => `${r.dollars ? "$" : ""}${fmt(v * (1 - c))}–${r.dollars ? "$" : ""}${fmt(v * (1 + c))}`;
+            const rng = (v) => `${fmt(v * (1 - c))} to ${fmt(v * (1 + c))}`;
             const lbl = h === 0 ? "Now" : h <= 10 ? `+${h} yr (short)` : h >= 50 ? `+${h} yr (long)` : `+${h} yr`;
             return (<tr key={h}><td>{lbl}</td><td>{fa}{age + h > 100 ? "+" : ""}</td>
-              <td style={{ color: "#3fb68b" }}>{rng(u)}</td><td style={{ color: "#e6ab02" }}>{rng(hv)}</td></tr>);
+              <td>{rng(u)}</td><td>{rng(hv)}</td></tr>);
           })}
         </tbody>
       </table>
@@ -178,15 +183,15 @@ export default function StandOutlook({ aoi, stumpage, units = "imperial" }) {
           <div className="so-trow" key={t.label}>
             <span className="so-tlab">{t.label}{!t.hard && <i title="indicative">~</i>}</span>
             <span className="so-tbars">
-              <span className="so-tbar"><i style={{ width: `${Math.round(t.r * 100)}%`, background: "#3fb68b" }} /></span>
-              <span className="so-tbar"><i style={{ width: `${Math.round(t.m * 100)}%`, background: "#e6ab02" }} /></span>
+              <span className="so-tbar"><i style={{ width: `${Math.round(t.r * 100)}%`, background: C_RES }} /></span>
+              <span className="so-tbar"><i style={{ width: `${Math.round(t.m * 100)}%`, background: C_MAN }} /></span>
             </span>
           </div>
         ))}
       </div>
       <div className="note" style={{ marginTop: 4 }}>
-        From the decision point the two pathways diverge: <b style={{ color: "#3fb68b" }}>reserve</b> (let it grow:
-        carbon, habitat, water) versus <b style={{ color: "#e6ab02" }}>managed</b> (active harvest: fiber, income).
+        From the decision point the two pathways diverge: <b><i className="pn-sw" style={{ background: C_RES, marginRight: 4 }} />reserve</b> (let it grow:
+        carbon, habitat, water) versus <b><i className="pn-sw" style={{ background: C_MAN, marginRight: 4 }} />managed</b> (active harvest: fiber, income).
         Carbon and timber value are modeled from the FIA yield curves and {aoi.state || "state"} stumpage; the
         ecosystem-service rows (marked ~) are indicative tradeoffs to be refined with the PERSEUS service layers.
         Scrub the stand age or calibrate to your own inventory to iterate. Ecoregion {aoi.l3name || aoi.l3code}.

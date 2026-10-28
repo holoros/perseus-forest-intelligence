@@ -12,16 +12,38 @@ The scenario runner itself (cardinal/run_scenario.py + submit_scenario.slurm)
 reads the spec and runs the selected engines for the AOI under each assumption.
 """
 from __future__ import annotations
-import json, subprocess, shlex
+import json, os, re, subprocess, shlex
 from typing import Any
 
-CARDINAL = "cardinal"            # ssh host alias (see hpc-cardinal config)
-REMOTE_RUNS = "~/perseus_runs"   # per-run working dirs on Cardinal
+# Compute host is configurable; Phase 1 moves the default to firebreather with Cardinal
+# reserved for national ensembles. No host names or credentials are hard coded beyond aliases.
+CARDINAL = os.environ.get("PERSEUS_COMPUTE_HOST", "cardinal")   # ssh host alias
+SSH_CONFIG = os.path.expanduser(os.environ.get("PERSEUS_SSH_CONFIG", "~/.ssh/config"))
+REMOTE_RUNS = "~/perseus_runs"   # per-run working dirs on the compute host
+_RUN_ID = re.compile(r"^[A-Za-z0-9-]{8,64}$")
+_HOST = re.compile(r"^[A-Za-z0-9._-]+$")
 
 
-def _ssh(cmd: str) -> str:
-    full = f"ssh -F ~/.ssh/config {CARDINAL} {shlex.quote(cmd)}"
-    return subprocess.run(full, shell=True, capture_output=True, text=True).stdout.strip()
+def safe_run_id(rid: str) -> str:
+    """Run ids become remote path components; allow only a strict character set."""
+    if not isinstance(rid, str) or not _RUN_ID.match(rid):
+        raise ValueError("invalid run id")
+    return rid
+
+
+def _ssh(cmd: str, timeout: int = 60) -> str:
+    """Run one remote command over ssh WITHOUT a local shell.
+
+    The argument vector goes straight to execve, so nothing in cmd is interpreted locally.
+    The remote side still runs cmd through the login shell, so callers must build cmd only
+    from constants and values passed through safe_run_id or shlex.quote.
+    """
+    if not _HOST.match(CARDINAL):
+        raise ValueError("invalid compute host alias")
+    argv = ["ssh", "-F", SSH_CONFIG, "-o", "BatchMode=yes", "--", CARDINAL, cmd]
+    res = subprocess.run(argv, shell=False, capture_output=True, text=True,
+                         timeout=timeout, check=False)
+    return res.stdout.strip()
 
 
 def submit(spec: dict[str, Any], rid: str) -> str:

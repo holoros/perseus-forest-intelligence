@@ -1,0 +1,134 @@
+/* Panel, report and table styles for the detail components. Uses tokens from styles.css. */
+
+/* Toggle chips (data source, models, scenarios, market, emphasis). One functional
+   accent: a selected chip fills with --accent; idle chips are hairline outlined. */
+.pn-chip{font-size:11px;padding:2px 9px;border-radius:var(--r);cursor:pointer;user-select:none;
+  border:1px solid var(--line-strong);background:transparent;color:var(--ink-2);white-space:nowrap;
+  gap:5px;transition:background-color var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.pn-chip:hover{border-color:var(--accent);color:var(--ink)}
+.pn-chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.pn-chip.soft.on{background:var(--accent-tint);color:var(--ink)}
+.pn-chip.off{opacity:.55;cursor:default}
+.pn-chip.off:hover{border-color:var(--line-strong);color:var(--ink-2)}
+.pn-chip:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* Small square data swatch that keys a chip, legend or label to its series color. */
+.pn-sw{display:inline-block;width:9px;height:9px;border-radius:2px;flex:0 0 auto;vertical-align:-1px}
+.pn-key{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:10.5px;color:var(--mut);margin-top:2px}
+.pn-key span{display:inline-flex;align-items:center;gap:5px}
+
+/* Form controls inside panels. */
+.pn-sel{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);
+  padding:2px 6px;font-size:11px;transition:border-color var(--dur) var(--ease)}
+.pn-sel:focus{outline:none;border-color:var(--accent)}
+
+/* Step labels ("1 · Area of interest"). */
+.pn-step{display:block;margin-bottom:4px}
+
+/* Callouts: accent-tint fill with a hairline border, no shadow. */
+.pn-tint{background:var(--accent-tint);border:1px solid var(--line);border-radius:var(--r);color:var(--ink)}
+.pn-quiet{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);color:var(--ink)}
+/* Recommendation card: hairline accent rule on the left edge. */
+.pn-rec{border-left:2px solid var(--accent)}
+
+/* Buttons with a line icon. */
+.pn-btn{display:inline-flex;align-items:center;gap:6px}
+.pn-btn .ico{flex:0 0 auto}
+
+/* HPC progress: a track with a scaled fill (transform, not width). */
+.pn-prog{height:6px;background:var(--panel-2);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.pn-prog i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left center;
+  transition:transform var(--dur-slow,320ms) var(--ease)}
+
+/* Agent and share bars (track + fill). */
+.pn-track{flex:1;height:9px;background:var(--panel-2);border-radius:2px;overflow:hidden;display:block}
+.pn-track > *{display:block;height:100%}
+
+/* Letter grades and band labels: status marks, outlined, never filled. */
+.pn-grade{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:46px;height:46px;
+  border-radius:var(--r-lg);border:1.5px solid currentColor;background:transparent}
+.pn-grade b{font-size:24px;font-weight:700;line-height:1}
+.pn-gchip{font-size:10.5px;padding:1px 7px;border-radius:var(--r);border:1px solid currentColor;white-space:nowrap}
+.pn-gchip b{font-weight:700}
+
+/* Collapsible section chevron. */
+.pn-chev{width:9px;height:9px;color:var(--mut2);flex:0 0 auto;transition:transform var(--dur) var(--ease)}
+.pn-chev.open{transform:rotate(90deg)}
+.pn-coll{transition:background-color var(--dur) var(--ease)}
+.pn-coll:hover{background:var(--accent-tint)}
+
+/* House table additions inside panels. */
+.tbl.pn-tbl{font-size:11px;margin-top:4px}
+.tbl tr.is-best td{font-weight:700}
+.tbl tbody tr.is-best{background:var(--accent-tint)}
+.tbl .pn-th-sw{display:inline-flex;align-items:center;gap:5px}
+
+/* Notes split into short paragraphs keep the .note rhythm. */
+.note p{margin:0 0 6px}
+.note p:last-child{margin-bottom:0}
+
+/* ---- taste pass, 27 October: surfaces added after the September pass ---- */
+/* Section heading and its metadata line. */
+.pn-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:2px 0 8px}
+.pn-h{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-0.015em;margin:0}
+.pn-meta{font-size:12px;color:var(--mut);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+/* Panel: 24 px padding on desktop, 16 px on phone, one left alignment edge. */
+.pn-panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;margin:0 0 10px}
+.pn-panel.pn-tight{padding:16px}
+/* Stat tiles: eyebrow label over a tabular figure. */
+.pn-stats{display:flex;flex-wrap:wrap;gap:12px 20px}
+.pn-stat{flex:1 1 120px;min-width:120px}
+.pn-stat .eyebrow{display:block;margin-bottom:2px}
+.pn-stat b{display:block;font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-0.015em;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.pn-stat b small{font-size:12px;font-weight:400;color:var(--mut);letter-spacing:0;margin-left:4px}
+.pn-stat span{display:block;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+/* Scenario tile keyed to its series color by a left rule (not a filled or colored icon). */
+.pn-stat.pn-keyed{border-left:3px solid var(--key,var(--line-strong));padding-left:10px}
+/* Status callout: the only place a status color appears (text and left rule). */
+.pn-status{border-left:3px solid currentColor;padding:3px 0 3px 10px;max-width:560px}
+.pn-status b{display:block;font-size:12.5px;font-weight:600}
+.pn-status p{margin:2px 0 0;font-size:12px;line-height:1.5;color:var(--ink-2)}
+/* Table caption sits above the scroll wrapper so it never scrolls out of view. */
+.tbl-cap{font-size:12px;color:var(--ink-2);margin:10px 0 6px;line-height:1.45}
+.tbl-cap b{color:var(--ink)}
+/* Tables scroll inside their wrapper on narrow screens; the page never scrolls sideways. */
+.tbl-wrap{max-width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tbl th{white-space:normal}
+.tbl.pn-dense{font-size:11.5px}
+.tbl.pn-dense th,.tbl.pn-dense td{padding:4px 5px}
+.pn-sel,.detail select{max-width:100%}
+.tbl th.sortable{cursor:pointer}
+.tbl th.sortable:hover{color:var(--accent)}
+.tbl th .sort{display:inline-block;width:1em;color:var(--mut2);font-size:9px;vertical-align:1px}
+.tbl th[aria-sort="ascending"] .sort,.tbl th[aria-sort="descending"] .sort{color:var(--accent)}
+.tbl td.pn-left,.tbl th.pn-left{text-align:left}
+.tbl tr.pn-group td{text-align:left;font-weight:700;padding-top:8px;color:var(--ink-2)}
+.tbl tr.pn-group td span{font-weight:400;color:var(--mut)}
+.tbl sup{font-size:10.5px;color:var(--mut);margin-left:2px;line-height:0}
+.tbl .pn-iv{color:var(--mut)}
+/* Text field with a visible label (no placeholder). */
+.pn-field{display:inline-flex;align-items:center;gap:8px;margin:0 0 8px}
+.pn-input{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);
+  padding:4px 8px;font-size:12px;width:min(320px,100%);transition:border-color var(--dur) var(--ease)}
+.pn-input:focus{outline:none;border-color:var(--accent)}
+/* Chart card that hosts a responsive inline SVG. */
+.pn-chart{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 12px 6px;margin:0 0 8px}
+.pn-chart svg{width:100%;height:auto;display:block}
+/* Choropleth legend under the map: ramp swatches and end labels. */
+.pn-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:8px;font-size:11.5px;color:var(--mut);
+  font-variant-numeric:tabular-nums}
+.pn-legend .eyebrow{margin-right:2px}
+.pn-ramp{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.pn-ramp i{display:block;width:22px;height:10px}
+.pn-ramp-lab{display:inline-flex;align-items:center;gap:5px}
+/* Map legend caption under a choropleth. */
+.pn-cap{font-size:12px;color:var(--mut);line-height:1.5;margin:6px 0 0}
+.pn-note{font-size:12px;color:var(--mut);line-height:1.55;margin:10px 0 0;max-width:640px}
+.pn-note a{color:var(--accent)}
+.pn-hl{color:var(--ink)}
+@media (max-width:760px){
+  .pn-panel{padding:16px}
+  .pn-chart{padding:10px 8px 4px}
+  .pn-stats{gap:10px 20px}
+}

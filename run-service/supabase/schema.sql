@@ -88,19 +88,55 @@ alter table public.subscriptions enable row level security;
 alter table public.runs          enable row level security;
 alter table public.uploads       enable row level security;
 
--- Profiles: a user sees and updates only their own row (tier/quota are not user-writable;
--- restrict updates to non-privileged columns at the app layer or via a column grant).
+-- Profiles: a user sees and updates only their own row. Entitlement columns (tier,
+-- runs_this_month, quota_monthly, quota_period_start) are NOT user-writable. Three layers:
+--   1. the RLS policy limits updates to the caller's own row (USING and WITH CHECK);
+--   2. column privileges: browser roles may update only email and updated_at;
+--   3. a trigger rejects any entitlement change not made by a privileged role, so a
+--      future broad GRANT cannot silently reopen the hole.
 drop policy if exists profiles_self_select on public.profiles;
 create policy profiles_self_select on public.profiles for select using (auth.uid() = id);
 drop policy if exists profiles_self_update on public.profiles;
-create policy profiles_self_update on public.profiles for update using (auth.uid() = id);
+create policy profiles_self_update on public.profiles for update
+  using (auth.uid() = id) with check (auth.uid() = id);
+
+revoke all on public.profiles from anon, authenticated;
+grant select on public.profiles to authenticated;
+grant update (email, updated_at) on public.profiles to authenticated;
+
+create or replace function public.profiles_guard_entitlement()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if current_user in ('anon', 'authenticated') and (
+       new.tier               is distinct from old.tier
+    or new.runs_this_month    is distinct from old.runs_this_month
+    or new.quota_monthly      is distinct from old.quota_monthly
+    or new.quota_period_start is distinct from old.quota_period_start
+    or new.id                 is distinct from old.id) then
+    raise exception 'entitlement columns are not user writable' using errcode = '42501';
+  end if;
+  return new;
+end; $$;
+drop trigger if exists profiles_guard_entitlement on public.profiles;
+create trigger profiles_guard_entitlement
+  before update on public.profiles for each row execute function public.profiles_guard_entitlement();
 
 -- Subscriptions: read-only to the owner (only the webhook, via service role, writes).
 drop policy if exists subs_self_select on public.subscriptions;
 create policy subs_self_select on public.subscriptions for select using (auth.uid() = user_id);
 
--- Runs: owner can read all their runs and INSERT only when entitled (active subscription
--- AND under monthly quota). This is the tier gate, in the database.
+-- Privileges. Supabase grants browser roles ALL on new public tables by default (which
+-- includes TRUNCATE, which RLS does not cover), so start from nothing and grant back only
+-- what the policies below need.
+revoke all on public.runs, public.subscriptions, public.uploads from anon, authenticated;
+grant select on public.runs, public.subscriptions to authenticated;
+grant insert (user_id, spec) on public.runs to authenticated;
+grant select, insert, update, delete on public.uploads to authenticated;
+
+-- Runs: owner can read all their runs and INSERT only with an active subscription. Browser
+-- roles may set only user_id and spec; status, result, job id and error are server written.
+-- The monthly quota is taken atomically by the runs_take_quota trigger below, so parallel
+-- submissions cannot overrun it and the counter resets when the month rolls over.
 drop policy if exists runs_self_select on public.runs;
 create policy runs_self_select on public.runs for select using (auth.uid() = user_id);
 
@@ -111,27 +147,109 @@ create policy runs_insert_entitled on public.runs for insert with check (
     select 1 from public.subscriptions s
     where s.user_id = auth.uid() and s.status in ('active','trialing')
   )
-  and exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.runs_this_month < p.quota_monthly
-  )
 );
 
--- Uploads: owner-scoped read/write.
+-- Uploads: owner scoped, and the Storage path must sit under the owner's own prefix.
 drop policy if exists uploads_self_all on public.uploads;
-create policy uploads_self_all on public.uploads for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy uploads_self_all on public.uploads for all using (auth.uid() = user_id)
+  with check (auth.uid() = user_id and storage_path like auth.uid()::text || '/%'
+              and position('..' in storage_path) = 0);
 
 -- ---------------------------------------------------------------------------
--- Quota helper: reset monthly counter and increment on a completed run.
--- Called by the dispatch/result edge functions (service role).
+-- Quota. One row lock per submission: reset the counter if the period is stale, refuse
+-- when the quota is spent, otherwise count the run. Runs for every insert, browser or
+-- server, so a direct PostgREST insert is charged exactly like one from submit-run.
 -- ---------------------------------------------------------------------------
-create or replace function public.increment_run_quota(p_user uuid)
+create or replace function public.runs_take_quota()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare p public.profiles%rowtype; m date := date_trunc('month', now())::date;
+begin
+  select * into p from public.profiles where id = new.user_id for update;
+  if not found then raise exception 'no profile' using errcode = '42501'; end if;
+  if p.quota_period_start < m then p.runs_this_month := 0; end if;
+  if p.runs_this_month >= p.quota_monthly then
+    raise exception 'monthly run quota reached' using errcode = '42501';
+  end if;
+  update public.profiles
+     set runs_this_month = p.runs_this_month + 1, quota_period_start = m, updated_at = now()
+   where id = new.user_id;
+  return new;
+end; $$;
+revoke all on function public.runs_take_quota() from public, anon, authenticated;
+drop trigger if exists runs_take_quota on public.runs;
+create trigger runs_take_quota before insert on public.runs
+  for each row execute function public.runs_take_quota();
+
+-- Refund one run when dispatch fails after the insert (server only).
+create or replace function public.refund_run_quota(p_user uuid)
 returns void language plpgsql security definer set search_path = public as $$
 begin
+  update public.profiles set runs_this_month = greatest(runs_this_month - 1, 0), updated_at = now()
+   where id = p_user and quota_period_start = date_trunc('month', now())::date;
+end; $$;
+revoke all on function public.refund_run_quota(uuid) from public, anon, authenticated;
+grant execute on function public.refund_run_quota(uuid) to service_role;
+
+-- Retired: counting now happens in runs_take_quota. Dropped so nothing can double count.
+drop function if exists public.increment_run_quota(uuid);
+
+-- ---------------------------------------------------------------------------
+-- Paddle events. apply_paddle_event records the event id and applies it in ONE
+-- transaction: a duplicate is a no-op, an older event never overwrites newer state, a
+-- subscription is never moved to a different user, and the profile tier is recomputed
+-- from ALL of the user's subscriptions. If anything fails the whole call rolls back,
+-- the event id is not recorded, and Paddle's retry can apply it. Service role only.
+-- ---------------------------------------------------------------------------
+create table if not exists public.paddle_events (
+  event_id     text primary key,
+  event_type   text,
+  occurred_at  timestamptz,
+  received_at  timestamptz not null default now()
+);
+alter table public.paddle_events enable row level security;  -- no policies: server only
+revoke all on public.paddle_events from anon, authenticated;
+alter table public.subscriptions add column if not exists last_event_at timestamptz;
+
+create or replace function public.apply_paddle_event(
+  p_event_id text, p_event_type text, p_occurred timestamptz, p_user uuid,
+  p_sub_id text, p_customer_id text, p_status text, p_plan text, p_period_end timestamptz,
+  p_quota int default 50)
+returns text language plpgsql security definer set search_path = public as $$
+declare cur public.subscriptions%rowtype; entitled boolean;
+begin
+  insert into public.paddle_events(event_id, event_type, occurred_at)
+  values (p_event_id, p_event_type, p_occurred) on conflict (event_id) do nothing;
+  if not found then return 'duplicate'; end if;
+  if p_status is null then return 'ignored'; end if;
+
+  select * into cur from public.subscriptions where paddle_subscription_id = p_sub_id for update;
+  if found then
+    if cur.user_id <> p_user then
+      raise exception 'subscription % belongs to another user', p_sub_id using errcode = '42501';
+    end if;
+    if cur.last_event_at is not null and cur.last_event_at >= p_occurred then
+      return 'stale';
+    end if;
+    update public.subscriptions
+       set status = p_status, paddle_customer_id = p_customer_id, plan = p_plan,
+           current_period_end = p_period_end, last_event_at = p_occurred, updated_at = now()
+     where paddle_subscription_id = p_sub_id;
+  else
+    insert into public.subscriptions(user_id, paddle_subscription_id, paddle_customer_id,
+                                     status, plan, current_period_end, last_event_at)
+    values (p_user, p_sub_id, p_customer_id, p_status, p_plan, p_period_end, p_occurred);
+  end if;
+
+  select exists (select 1 from public.subscriptions
+                  where user_id = p_user and status in ('active','trialing')) into entitled;
   update public.profiles
-     set runs_this_month = case when quota_period_start < date_trunc('month', now())::date
-                                then 1 else runs_this_month + 1 end,
-         quota_period_start = date_trunc('month', now())::date,
+     set tier = case when tier = 'admin' then tier when entitled then 'subscriber' else 'free' end,
+         quota_monthly = case when entitled then greatest(quota_monthly, p_quota) else 0 end,
          updated_at = now()
    where id = p_user;
+  return 'applied';
 end; $$;
+revoke all on function public.apply_paddle_event(text, text, timestamptz, uuid, text, text, text, text, timestamptz, int)
+  from public, anon, authenticated;
+grant execute on function public.apply_paddle_event(text, text, timestamptz, uuid, text, text, text, text, timestamptz, int)
+  to service_role;
