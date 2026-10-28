@@ -7,7 +7,8 @@
 // flag. Small multiples, one inline SVG per type: MiniChart draws one band per
 // series only, and these charts need two ribbons plus an extrapolation marker.
 import { useMemo, useState } from "react";
-import { TYPE_COL, CONTEXT_COL } from "./palette.js";
+import { TYPE_COL, CONTEXT_COL, labelColor } from "./palette.js";
+import useTheme from "./useTheme.js";
 import { fmtUnit } from "./units.js";
 
 const U = fmtUnit("Mg/ha"); // "Mg ha⁻¹" (thin space, true superscript)
@@ -20,7 +21,7 @@ const niceStep = raw => { const mag = Math.pow(10, Math.floor(Math.log10(raw || 
 const atAge = (cell, age) => { const i = cell.ages.indexOf(age); return i < 0 ? null : cell.med[i]; };
 
 // One small-multiple panel. Fixed viewBox, width 100% of its grid cell.
-function CurvePanel({ code, label, cell, pick }){
+function CurvePanel({ code, label, cell, pick, theme }){
   const W = 330, H = 212, P = { l: 44, r: 10, t: 34, b: 28 };
   const col = TYPE_COL[code] || CONTEXT_COL;
   const n = cell.ages.length;
@@ -50,9 +51,9 @@ function CurvePanel({ code, label, cell, pick }){
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%", height:"auto", display:"block"}} role="img"
         aria-label={`${label}: AGB yield curve with 95% bootstrap band and 90% prediction interval`}>
         <defs><clipPath id={clipId}><rect x={P.l} y={P.t} width={W-P.l-P.r} height={H-P.t-P.b}/></clipPath></defs>
-        {/* Title in ink (AA on both themes) keyed to the series by a swatch, not colored text. */}
+        {/* Title in the AA text variant of the series hue; the swatch keeps the Okabe-Ito hue. */}
         <rect x={P.l} y={4} width={8} height={8} rx={1.5} fill={col}/>
-        <text x={P.l+12} y={11.5} className="ch-ttl">{label}</text>
+        <text x={P.l+12} y={11.5} className="ch-ttl" style={{fill:labelColor(col, theme)}}>{label}</text>
         <text x={P.l} y={24} className="ch-note">{nplots}{sub ? ", " + sub : ""}</text>
         <text transform={`translate(10 ${(P.t+H-P.b)/2}) rotate(-90)`} textAnchor="middle" className="ch-txt">AGB ({U})</text>
         {yticks.map((t, i) => (
@@ -84,6 +85,7 @@ function CurvePanel({ code, label, cell, pick }){
 export default function AgbYieldCurves({ data, state, stateName }){
   const st = data && data.states && data.states[state];
   const [section, setSection] = useState("ALL");
+  const theme = useTheme();
   const sections = useMemo(() => st ? Object.keys(st.sections) : [], [st]);
   const sec = st && (st.sections[section] || st.sections.ALL || st.sections[sections[0]]);
   const secKey = sec ? (st.sections[section] ? section : (st.sections.ALL ? "ALL" : sections[0])) : null;
@@ -149,7 +151,7 @@ export default function AgbYieldCurves({ data, state, stateName }){
         <span><i className="pn-sw" style={{background:"var(--ink)", opacity:0.12, width:14, height:9}}/>beyond the 99th percentile age (extrapolated)</span>
       </div>
       <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(290px, 1fr))", gap:8}}>
-        {types.map(t => <CurvePanel key={t} code={t} label={typeLabel(t)} cell={sec.types[t]} pick={st.picks[t]}/>)}
+        {types.map(t => <CurvePanel key={t} code={t} label={typeLabel(t)} cell={sec.types[t]} pick={st.picks[t]} theme={theme}/>)}
       </div>
 
       <p className="tbl-cap" style={{marginTop:12}}><b>Chosen form, cap and median AGB by age</b>, {secName(secKey)}</p>

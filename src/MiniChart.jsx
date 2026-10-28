@@ -1,7 +1,8 @@
 // Generic dependency-free line + band chart used by the Landowner-yields and
 // LANDIS-stratified tabs. Each series is { label, color, pts:[[x,lo,mid,hi]] };
 // lo/hi may be null to draw a bare line. Optional per-series fields: dash (stroke
-// dasharray), width (stroke width) and bandName (visible name for its shaded band).
+// dasharray), width (stroke width), bandName (visible name for its shaded band) and
+// labelColor (AA text variant for the end label; the line keeps color).
 // Inline SVG; chrome colors come from theme tokens so light and dark both read.
 import { useEffect, useState } from "react";
 import { fmtUnit } from "./units.js";
@@ -45,7 +46,7 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
   // Collision-avoided trailing labels in the right gutter, so each line is named in place
   // rather than relying on a separate legend (Cross-model ensemble had unlabeled lines).
   const endLabels = present.map(s => { const last = s.pts[s.pts.length-1];
-    return { label: s.label, color: s.color, dash: s.dash, y: Math.max(P.t+4, Math.min(H-P.b-3, sy(last[2] != null ? last[2] : last[1]))) }; })
+    return { label: s.label, color: s.color, labelColor: s.labelColor, dash: s.dash, y: Math.max(P.t+4, Math.min(H-P.b-3, sy(last[2] != null ? last[2] : last[1]))) }; })
     .sort((a,b) => a.y - b.y);
   { let prev = -99; for(const it of endLabels){ it.ly = Math.max(it.y, prev + 12); prev = it.ly; }
     if(endLabels.length && endLabels[endLabels.length-1].ly > H-P.b-3){ let next = H-P.b-3+12;
@@ -93,7 +94,7 @@ export default function MiniChart({ series, unit, xlabel = "Stand age (yr)", hei
         <g key={"el"+i}>
           <line x1={W-P.r+1} y1={it.ly} x2={W-P.r+6} y2={it.ly} style={{stroke:it.color}} strokeWidth="1.8"
             strokeDasharray={it.dash ? "2 1.5" : undefined}/>
-          <text x={W-P.r+9} y={it.ly+3.5} className="ch-txt" style={{fill:it.color}}>
+          <text x={W-P.r+9} y={it.ly+3.5} className="ch-txt" style={{fill:it.labelColor || it.color}}>
             {String(it.label).replace(/ \(90% band\)/,"").slice(0,17)}<title>{it.label}</title></text>
         </g>
       ))}

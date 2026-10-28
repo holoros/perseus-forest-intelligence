@@ -8,7 +8,8 @@
 // turn into a net source?
 import { useMemo, useState } from "react";
 import PermanenceMap from "./PermanenceMap.jsx";
-import { SCENARIO_COL } from "./palette.js";
+import { SCENARIO_COL, labelColor } from "./palette.js";
+import useTheme from "./useTheme.js";
 import useWidth from "./useWidth.js";
 
 const BUCKETS = {
@@ -64,6 +65,7 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
 
   const [hl, setHl] = useState(null);
   const [setBox, W] = useWidth(560, 320, 720);
+  const theme = useTheme();
 
   const data = useMemo(()=>{
     if(!metric) return null;
@@ -203,7 +205,7 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
         {endLabels.map(it=>(
           <g key={"lab"+it.k} style={{pointerEvents:"none"}}>
             <line x1={W-R+1} y1={it.ly} x2={W-R+8} y2={it.ly} strokeWidth="2" strokeDasharray={it.k==="base"?"0":"3 2"} style={{stroke:COL[it.k]}}/>
-            <text x={W-R+11} y={it.ly+3.5} className="ch-txt ch-halo" style={{fill:COL[it.k]}}>{it.txt}</text>
+            <text x={W-R+11} y={it.ly+3.5} className="ch-txt ch-halo" style={{fill:labelColor(COL[it.k], theme)}}>{it.txt}</text>
           </g>
         ))}
       </svg>

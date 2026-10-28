@@ -9,7 +9,8 @@
 // and magnitudes; see the hybrid-production-hwp methods note).
 import MiniChart from "./MiniChart.jsx";
 import { conv, unitLabel } from "./units.js";
-import { SCENARIO_COL } from "./palette.js";
+import { SCENARIO_COL, labelColor } from "./palette.js";
+import useTheme from "./useTheme.js";
 
 const BASE = import.meta.env.BASE_URL;
 // Okabe-Ito scenario colors (categorical, shared palette), ordered from no harvest to intensive harvest.
@@ -40,6 +41,7 @@ const fmt = v => v == null || !isFinite(v) ? "n/a"
 const signed = v => v == null || !isFinite(v) ? "n/a" : (v > 0 ? "+" : "") + fmt(v);
 
 export default function WoodProducts({ series, meta, state, units = "imperial" }){
+  const theme = useTheme();
   if(!series) return <div className="empty">Series for {state} not loaded.</div>;
   const has = m => !!(series[m] && Object.keys(series[m]).length);
   if(!has("net_forest_hwp_c") && !has("hwp_carbon_stock"))
@@ -53,14 +55,14 @@ export default function WoodProducts({ series, meta, state, units = "imperial" }
   // Panel 1: forest + HWP + landfill net stock by scenario.
   const netEntries = SCEN.map(s => ({ s, e: pick(series, "net_forest_hwp_c", s.key, "yc_hwp_v1") }))
     .filter(x => x.e);
-  const netSeries = netEntries.map(({ s, e }) => ({ label: s.short, color: s.color,
+  const netSeries = netEntries.map(({ s, e }) => ({ label: s.short, color: s.color, labelColor: labelColor(s.color, theme),
     pts: toPts(e.pts).map(([x, lo, mid, hi]) => [x, lo, cv(mid, "net_forest_hwp_c"), hi]) }));
   const resEnd = endPoint(pick(series, "net_forest_hwp_c", "reserve (no harvest)", "yc_hwp_v1"));
 
   // Panel 2: HWP pool alone (whatever scenarios the store carries).
   const hwpSeries = SCEN.map(s => ({ s, e: pick(series, "hwp_carbon_stock", s.key) }))
     .filter(x => x.e)
-    .map(({ s, e }) => ({ label: s.short, color: s.color,
+    .map(({ s, e }) => ({ label: s.short, color: s.color, labelColor: labelColor(s.color, theme),
       pts: toPts(e.pts).map(([x, lo, mid, hi]) => [x, lo, cv(mid, "hwp_carbon_stock"), hi]) }));
 
   // Summary table at the end of each projection.
