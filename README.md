@@ -121,9 +121,11 @@ PNG URL goes through `rasterUrl()` so the overlays can move to object storage by
 - **Economics:** timber value now uses real per-state blended stumpage ($/m3, from
   `api/econ_params.json`) with a user-selectable discount rate. The carbon price,
   ecosystem-service payments, and policy multipliers remain illustrative placeholders. Timber
-  value in Build a run is the optimal single-rotation NPV at rotation age R*, with the
-  perpetual land expectation value (LEV) also reported, gross of establishment and management
-  costs; choosing R* by maximizing LEV rather than single-rotation NPV is an open item. The
+  value in Build a run is the single-rotation NPV at the Faustmann rotation R*, where R*
+  maximizes the land expectation value LEV = NPV(R)(1+r)^R/((1+r)^R - 1) over a 10 to 120 yr
+  grid (not the single-rotation NPV, which gave a Fisher rotation that understated LEV by about
+  16 percent on the Maine harvested curve); the LEV is also reported, gross of establishment and
+  management costs unless rotation costs are entered. The
   Faustmann rotation tab uses one blended price on all merchantable volume, so it carries no
   sawlog premium and R_opt sits at the 20 yr lower edge of the grid in 17 of 42 unconstrained
   Maine cells; a product split price is the planned fix.
