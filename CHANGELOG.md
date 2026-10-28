@@ -13,6 +13,7 @@ and the build reproduces the deployed bundle. Entries are most recent first.
 * Registry: three new entries in api/data_sources.json (Maine AGB yield curves, Lake States and NH/VT AGB yield curves, RD thresholds) surface on the Data and cite page and in the Glossary; CITATION.cff references extended; ORCID corrected to the iD on the author's Zenodo records.
 * CI: the run-service job now pins actions/setup-python@v7 like the build job.
 * Docs: docs/STATUS_2026-10-27.md replaces the June handoff index as the single status and roadmap page.
+* Taste pass on the October surfaces: house tokens, three rule tables with sticky headers, single hue sequential map ramps on the accent, neutral permanence map with the accent on the selected state, direct end labels in AA label variants of the Okabe-Ito hues (`LABEL_COL`, `labelColor`), stat tiles, phone layout with no horizontal page scroll at 390 px, reduced motion respected; no number or data file changed.
 
 ### v1.38 · 2026-07-02 (deployed) · layered views, Faustmann economics, Forest Health v6, citations
 * Reconstructed from the commit history (22 Jun to 2 Jul 2026) during the Phase 0 cleanup; no entry was written at the time.
