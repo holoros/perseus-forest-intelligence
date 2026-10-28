@@ -2,28 +2,19 @@
 // Optimal rotation age (R_opt) and soil expectation value (SEV) by forest type,
 // ecoregion and owner, with an optional carbon-floor constraint. Scatter of
 // R_opt vs SEV colored by forest type, plus the underlying table.
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fmtUnit } from "./units.js";
+import { FAUSTMANN_FT_COL } from "./palette.js";
+import useWidth from "./useWidth.js";
 
-// Okabe-Ito forest-type colors, shared with the Landowner yields chart.
-const FT_COL = {
-  "Northern hardwood":"#009E73", "Spruce-fir":"#0072B2", "Mixedwood":"#56B4E9",
-  "Aspen-birch":"#E69F00", "White/Red pine":"#D55E00", "Oak/Pine/Hemlock":"#CC79A7",
-};
-const col = ft => FT_COL[ft] || "var(--context)";
+// Okabe-Ito forest-type colors from the shared palette.
+const col = ft => FAUSTMANN_FT_COL[ft] || "var(--context)";
 const niceStep = raw => { const mag = Math.pow(10, Math.floor(Math.log10(raw || 1))); const n = raw / mag;
   return (n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10) * mag; };
 
 function Scatter({ rows }){
-  // Viewbox follows the rendered width so axis text holds its 10 px floor.
-  const [box, setBox] = useState(null);
-  const [W, setW] = useState(460);
-  useEffect(() => {
-    if(!box || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(([e]) => { const cw = Math.round(Math.min(e.contentRect.width, 720)); if(cw > 0) setW(Math.max(320, cw)); });
-    ro.observe(box);
-    return () => ro.disconnect();
-  }, [box]);
+  // Viewbox follows the rendered width so axis text holds its size on screen.
+  const [setBox, W] = useWidth(460, 320, 720);
   const H = 250, P = { l: 56, r: 14, t: 34, b: 36 };
   if(!rows.length) return <div className="note" style={{margin:"8px 4px"}}>No rows for this selection.</div>;
   const xs = rows.map(r=>r.R_opt), ys = rows.map(r=>r.sev_opt);
@@ -34,7 +25,8 @@ function Scatter({ rows }){
   ymax = Math.ceil(ymax / ystep - 1e-9) * ystep;
   const sx = x => P.l + (xmax===xmin?0.5:(x-xmin)/(xmax-xmin)) * (W-P.l-P.r);
   const sy = v => H - P.b - (ymax===ymin?0:(v-ymin)/(ymax-ymin)) * (H-P.t-P.b);
-  const xt = []; for(let x=Math.ceil(xmin/10)*10; x<=xmax; x+=10) xt.push(x);
+  const xstep = W < 480 ? 20 : 10;
+  const xt = []; for(let x=Math.ceil(xmin/xstep)*xstep; x<=xmax; x+=xstep) xt.push(x);
   const yt = []; for(let v = Math.ceil(ymin/ystep)*ystep; v <= ymax + ystep*1e-6; v += ystep) yt.push(+v.toFixed(6));
   return (
     <div ref={setBox} style={{width:"100%"}}>
@@ -44,15 +36,15 @@ function Scatter({ rows }){
         <text x={P.l-6} y={sy(t)+3.5} textAnchor="end" className="ch-txt">{t.toLocaleString()}</text>
       </g>))}
       {xt.map(t => <text key={t} x={sx(t)} y={H-P.b+15} textAnchor="middle" className="ch-txt">{t}</text>)}
-      <text x={(P.l+W-P.r)/2} y={H-4} textAnchor="middle" className="ch-txt">Optimal rotation R_opt (yr), axis zoomed to data</text>
+      <text x={(P.l+W-P.r)/2} y={H-4} textAnchor="middle" className="ch-txt">Optimal rotation age (yr), axis zoomed to data</text>
       <text x={P.l-6} y={13} textAnchor="start" className="ch-ttl">Soil expectation value, SEV ({fmtUnit("$/ac")})</text>
-      <text x={P.l-6} y={27} textAnchor="start" className="ch-note">small solid points: no carbon floor · large outlined points: carbon floor</text>
+      <text x={P.l-6} y={27} textAnchor="start" className="ch-note">{W<480 ? "solid: no carbon floor; outlined: carbon floor" : "small solid points: no carbon floor; large outlined points: carbon floor"}</text>
       {rows.map((r,i) => (
         <circle key={i} cx={sx(r.R_opt)} cy={sy(r.sev_opt)} r={r.carbon_floor>0?5:3.4}
           fillOpacity={r.carbon_floor>0?0.55:0.9}
           strokeWidth={r.carbon_floor>0?1:0}
           style={{fill:col(r.ft), stroke:r.carbon_floor>0?"var(--ink)":"none"}}>
-          <title>{`${r.ft} · ${r.eco} · ${r.owner}\nR_opt ${r.R_opt} yr · SEV $${r.sev_opt.toFixed(0)} ${fmtUnit("per ac")}\ncarbon floor ${r.carbon_floor} tons AGB ac⁻¹ (rotation mean) · vol@R ${r.vol_at_R} ft³ ac⁻¹`}</title>
+          <title>{`${r.ft}, ${r.eco}, ${r.owner}\noptimal rotation ${r.R_opt} yr, SEV $${r.sev_opt.toFixed(0)} ${fmtUnit("per ac")}\ncarbon floor ${r.carbon_floor} tons AGB ac⁻¹ (rotation mean), volume at rotation ${r.vol_at_R} ft³ ac⁻¹`}</title>
         </circle>
       ))}
     </svg>
@@ -60,7 +52,7 @@ function Scatter({ rows }){
   );
 }
 
-export default function FaustmannRotation({ data, state }){
+export default function FaustmannRotation({ data, state, stateName }){
   const rowsAll = (data && data[state]) || [];
   const owners = [...new Set(rowsAll.map(r=>r.owner))].sort();
   const treatments = [...new Set(rowsAll.map(r=>r.treatment))].sort();
@@ -93,87 +85,96 @@ export default function FaustmannRotation({ data, state }){
   const pr = data.meta && data.meta.params;
 
   return (
-    <div>
+    <div style={{margin:"4px 4px 8px"}}>
+      <div className="pn-head">
+        <h3 className="pn-h">Faustmann optimal rotation: {stateName || state}</h3>
+        <span className="pn-meta">by forest type, ecoregion and owner, with and without a carbon floor</span>
+      </div>
       {data.meta && data.meta.known_issue && (
-        <div role="note" className="note" style={{margin:"4px 4px 10px",padding:"8px 10px",color:"var(--ink, #e8eef2)",
-          border:"1px solid var(--warn, #d9a441)",borderLeftWidth:3,borderRadius:6,background:"transparent"}}>
-          <b>Known data issue: soil expectation values are overstated.</b> These precomputed SEVs reproduce
+        <div role="note" className="pn-status" style={{color:"var(--warn)",margin:"0 0 10px"}}>
+          <b>Known data issue: soil expectation values are overstated.</b>
+          <p>These precomputed SEVs reproduce
           exactly with a stumpage of $12 per ft³, about 17 times the Maine blended price, so dollar values
           and optimal rotations on this tab are not reliable until the source table is regenerated. Use
-          <b> Build a run</b> for land values at current prices.
+          <span style={{fontWeight:600}}> Build a run</span> for land values at current prices.</p>
         </div>)}
-      <div className="controls" style={{marginTop:0}}>
-        <select value={owner} onChange={e=>setOwner(e.target.value)} title="Owner">
+      <div className="controls" style={{margin:"0 0 8px"}}>
+        <select className="pn-sel" value={owner} onChange={e=>setOwner(e.target.value)} title="Owner">
           <option value="all">all owners</option>
           {owners.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
-        <select value={treatment} onChange={e=>setTreatment(e.target.value)} title="Treatment">
+        <select className="pn-sel" value={treatment} onChange={e=>setTreatment(e.target.value)} title="Treatment">
           <option value="all">both treatments</option>
           {treatments.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
-        <span style={{color:"var(--mut)",fontSize:12,alignSelf:"center"}}>{rows.length} rows</span>
+        <span className="pn-meta" style={{alignSelf:"center"}}>{rows.length} rows</span>
       </div>
-      <div className="chartcard" style={{padding:"6px 8px"}}>
+      <div className="pn-chart">
         <Scatter rows={rows}/>
-      </div>
-      <div className="lgd" style={{marginTop:8}}>
-        {[...new Set(rows.map(r=>r.ft))].map(ft =>
-          <span key={ft}><i style={{background:col(ft),width:10,height:10,borderRadius:"50%"}}/>{ft}</span>)}
+        {/* Points of four types overlap, so a keyed legend (square swatches) stands in for direct labels. */}
+        <div className="pn-key" style={{margin:"6px 0 2px"}}>
+          {[...new Set(rows.map(r=>r.ft))].map(ft =>
+            <span key={ft}><i className="pn-sw" style={{background:col(ft)}}/>{ft}</span>)}
+        </div>
       </div>
       {pairs.length > 0 && !(data.meta && data.meta.known_issue) && (
-        <div className="chartcard" style={{padding:"7px 9px",marginTop:8,borderLeft:"3px solid var(--warn, #caa15a)"}}>
-          <div style={{fontSize:12.5,fontWeight:600,color:"var(--warn, #caa15a)",marginBottom:5}}>Cost of the carbon floor</div>
-          <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-            {[["Rotation", `+${mdR.toFixed(0)} yr`, "longer"],
-              ["Soil expectation value", `$${mdSEV.toFixed(0)} ac⁻¹`, "forgone"],
-              ["Standing biomass", `+${mdAGB.toFixed(1)} tons ac⁻¹`, "carried (rotation mean)"]
+        <div className="pn-panel pn-rec">
+          <div className="pn-head" style={{marginBottom:10}}>
+            <h3 className="pn-h">Cost of the carbon floor</h3>
+            <span className="pn-meta">medians over {pairs.length} paired cells</span>
+          </div>
+          <div className="pn-stats">
+            {[["Rotation, longer", `+${mdR.toFixed(0)}`, "yr"],
+              ["Soil expectation value, forgone", `$${mdSEV.toFixed(0)}`, "ac⁻¹"],
+              ["Standing biomass carried, rotation mean", `+${mdAGB.toFixed(1)}`, "tons ac⁻¹"]
              ].map((c,i)=>(
-              <div key={i} style={{minWidth:130}}>
-                <div style={{fontSize:12,fontWeight:600}}>{c[1]}</div>
-                <div style={{color:"var(--mut)",fontSize:10.5}}>{c[0]} {c[2]}</div>
+              <div key={i} className="pn-stat">
+                <span className="eyebrow">{c[0]}</span>
+                <b>{c[1]}<small>{c[2]}</small></b>
               </div>))}
           </div>
-          <div className="note" style={{marginTop:5}}>
-            Medians over {pairs.length} paired cells (each floored row against the same cell without a floor).
-            {mdRatio!=null && <> Implied cost: about <b>${mdRatio.toFixed(0)} of soil expectation value per additional ton ac⁻¹</b> of
+          <p className="pn-cap" style={{marginTop:10}}>
+            Each floored row is compared with the same cell (forest type, ecoregion, owner, treatment) without a floor.
+            {mdRatio!=null && <> Implied cost: about <b className="pn-hl">${mdRatio.toFixed(0)} of soil expectation value per additional ton ac⁻¹</b> of
             standing biomass, roughly ${(mdRatio/CO2E_PER_STON_AGB).toFixed(0)} per t CO₂e held (C fraction 0.45). A within-model
             ratio, not a market carbon price.</>}
-          </div>
+          </p>
         </div>
       )}
-      <div className="chartcard" style={{padding:"4px 8px",marginTop:8,maxHeight:200,overflow:"auto"}}>
+      <p className="tbl-cap"><b>Optimal rotation and soil expectation value by cell</b>, sorted by SEV</p>
+      <div className="tbl-wrap" style={{maxHeight:260}}>
         <table className="tbl">
           <thead><tr>
-            <th>forest type</th><th>eco</th>
-            <th>owner</th><th>floor, rotation mean AGB (tons ac⁻¹)</th>
-            <th>R_opt (yr)</th>
+            <th className="pn-left">Forest type</th><th>Ecoregion</th>
+            <th>Owner</th><th>Carbon floor, rotation mean AGB (tons ac⁻¹)</th>
+            <th>Optimal rotation (yr)</th>
             <th>SEV ({fmtUnit("$/ac")})</th>
-            <th>vol@R (ft³ ac⁻¹)</th>
+            <th>Volume at rotation (ft³ ac⁻¹)</th>
           </tr></thead>
           <tbody>
             {rows.slice().sort((a,b)=>b.sev_opt-a.sev_opt).map((r,i) => (
-              <tr key={i} style={{borderTop:"1px solid var(--line)"}}>
-                <td><i style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:col(r.ft),marginRight:5}}/>{r.ft}</td>
+              <tr key={i}>
+                <td className="pn-left" style={{whiteSpace:"nowrap"}}><span className="pn-th-sw"><i className="pn-sw" aria-hidden="true" style={{background:col(r.ft)}}/>{r.ft}</span></td>
                 <td style={{color:"var(--mut)"}}>{r.eco}</td>
                 <td style={{color:"var(--mut)"}}>{r.owner}</td>
                 <td>{r.carbon_floor}</td>
                 <td>{r.R_opt}</td>
                 <td>{r.sev_opt.toFixed(0)}</td>
-                <td style={{color:"var(--mut)"}}>{r.vol_at_R}</td>
+                <td>{r.vol_at_R}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="note">
-        Each point is one forest-type / ecoregion / owner combination: optimal
-        Faustmann rotation age vs soil expectation value. Larger outlined points
+      <p className="pn-note">
+        Each point is one forest type, ecoregion and owner combination: optimal
+        Faustmann rotation age against soil expectation value. Larger outlined points
         carry a carbon-floor constraint.
         {pr && <> Prices: ${pr.price_usd_ft3.toFixed(2)} ft⁻³ of merchantable volume ({pr.price_usd_m3} $ m⁻³ Maine blend),
         regeneration cost ${pr.regen_cost_usd_ac} ac⁻¹, {(pr.discount_rate*100).toFixed(0)}% real discount rate.
-        One blended price on all volume favors short rotations; R_opt = 20 yr is the lower edge of the search.</>}
+        One blended price on all volume favors short rotations; a 20 yr optimum is the lower edge of the search.</>}
         {" "}Source: {data.meta.source}. Data: api/faustmann_rotation.json.
-      </div>
+      </p>
     </div>
   );
 }

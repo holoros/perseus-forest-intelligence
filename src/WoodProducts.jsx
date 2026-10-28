@@ -9,25 +9,16 @@
 // and magnitudes; see the hybrid-production-hwp methods note).
 import MiniChart from "./MiniChart.jsx";
 import { conv, unitLabel } from "./units.js";
+import { SCENARIO_COL } from "./palette.js";
 
 const BASE = import.meta.env.BASE_URL;
-// Okabe-Ito scenario colors (categorical), ordered from no harvest to intensive harvest.
+// Okabe-Ito scenario colors (categorical, shared palette), ordered from no harvest to intensive harvest.
 const SCEN = [
-  { key: "reserve (no harvest)",   short: "Reserve",      color: "#009E73" },
-  { key: "managed (conservation)", short: "Conservation", color: "#56B4E9" },
-  { key: "managed (harvest)",      short: "Harvest",      color: "#E69F00" },
-  { key: "managed (intensive)",    short: "Intensive",    color: "#D55E00" },
+  { key: "reserve (no harvest)",   short: "Reserve",      color: SCENARIO_COL.reserve },
+  { key: "managed (conservation)", short: "Conservation", color: SCENARIO_COL.conservation },
+  { key: "managed (harvest)",      short: "Harvest",      color: SCENARIO_COL.harvest },
+  { key: "managed (intensive)",    short: "Intensive",    color: SCENARIO_COL.intensive },
 ];
-// House table on main and taste alike: centered cells, bold centered header, three rules
-// (above header, below header, below last row), no interior rules. so-table carries the
-// taste-ui hover tint; the inline rules override main's right-aligned, ruled rows.
-const RULE = "1px solid var(--line-strong, var(--line))";
-const TBL = { margin:"10px 8px 0", width:"calc(100% - 16px)", borderCollapse:"collapse",
-  borderTop:RULE, borderBottom:RULE, fontVariantNumeric:"tabular-nums" };
-const TH = { textAlign:"center", verticalAlign:"middle", fontWeight:700, color:"var(--ink)",
-  padding:"4px 6px", borderBottom:RULE };
-const TD = { textAlign:"center", verticalAlign:"middle", padding:"3px 6px", borderBottom:"none", color:"var(--ink)" };
-const CAP = { captionSide:"top", textAlign:"left", fontSize:12, color:"var(--ink-2, var(--mut))", padding:"0 0 6px" };
 
 // Series-store points are [year, v] or [year, lo, mid, hi]; MiniChart wants 4-tuples.
 const toPts = pts => (pts || []).filter(p => p && (p.length === 2 ? p[1] != null : p[2] != null))
@@ -87,55 +78,55 @@ export default function WoodProducts({ series, meta, state, units = "imperial" }
   const yr = k => { const ys = [...new Set(rows.map(r => r[k]).filter(Boolean))]; return ys.length ? ys.join(" and ") : ""; };
 
   return (
-    <div>
-      <div className="controls" style={{marginTop:0}}>
-        <span style={{color:"var(--mut)",fontSize:12,alignSelf:"center"}}>
-          {mm("net_forest_hwp_c").label} ({u("net_forest_hwp_c")})</span>
+    <div style={{margin:"4px 4px 8px"}}>
+      <div className="pn-head">
+        <h3 className="pn-h">{mm("net_forest_hwp_c").label}</h3>
+        <span className="pn-meta">{state}, by scenario, {u("net_forest_hwp_c")}</span>
       </div>
       {netSeries.length ? (
-        <div className="chartcard" style={{padding:"6px 8px"}}>
+        <div className="pn-chart">
+          {/* Lines are named at their right end in the series color; no separate legend. */}
           <MiniChart series={netSeries} unit={`Carbon stock (${u("net_forest_hwp_c")})`} xlabel="Year"/>
         </div>
       ) : <div className="note">No forest + wood products series for {state}.</div>}
-      <div className="lgd" style={{marginTop:8}}>
-        {netEntries.map(({ s }) => <span key={s.key}><i style={{background:s.color,width:14,height:3}}/>{s.key}</span>)}
-      </div>
 
       {hwpSeries.length > 0 && (<>
-        <div className="controls">
-          <span style={{color:"var(--mut)",fontSize:12,alignSelf:"center"}}>
-            {mm("hwp_carbon_stock").label} ({u("hwp_carbon_stock")}), CBM pathway</span>
+        <div className="pn-head">
+          <h3 className="pn-h">{mm("hwp_carbon_stock").label}</h3>
+          <span className="pn-meta">CBM pathway, {u("hwp_carbon_stock")}</span>
         </div>
-        <div className="chartcard" style={{padding:"6px 8px"}}>
+        <div className="pn-chart">
           <MiniChart series={hwpSeries} unit={`Carbon stock (${u("hwp_carbon_stock")})`} xlabel="Year" height={170}/>
         </div>
       </>)}
 
-      {rows.length > 0 && (
-        <table className="so-table" style={TBL}>
-          <caption style={CAP}><b style={{color:"var(--ink)"}}>Carbon by scenario at the end of each projection</b>, state totals</caption>
+      {rows.length > 0 && (<>
+        <p className="tbl-cap"><b>Carbon by scenario at the end of each projection</b>, state totals</p>
+        <div className="tbl-wrap">
+        <table className="tbl">
           <thead><tr>
-            <th style={TH}>Scenario</th>
-            <th style={TH} title={mm("net_forest_hwp_c").label}>Forest + HWP {yr("nYear")} ({u("net_forest_hwp_c")})</th>
-            <th style={TH}>Change since start ({u("net_forest_hwp_c")})</th>
-            <th style={TH}>vs reserve ({u("net_forest_hwp_c")})</th>
-            <th style={TH} title={mm("hwp_carbon_stock").label}>HWP pool {yr("hYear")} ({u("hwp_carbon_stock")})</th>
-            <th style={TH} title={mm("net_climate_carbon").label}>Net climate C {yr("cYear")} ({u("net_climate_carbon")})</th>
+            <th className="pn-left">Scenario</th>
+            <th title={mm("net_forest_hwp_c").label}>Forest + HWP {yr("nYear")} ({u("net_forest_hwp_c")})</th>
+            <th>Change since start ({u("net_forest_hwp_c")})</th>
+            <th>Versus reserve ({u("net_forest_hwp_c")})</th>
+            <th title={mm("hwp_carbon_stock").label}>HWP pool {yr("hYear")} ({u("hwp_carbon_stock")})</th>
+            <th title={mm("net_climate_carbon").label}>Net climate C {yr("cYear")} ({u("net_climate_carbon")})</th>
           </tr></thead>
           <tbody>{rows.map(r => (
             <tr key={r.s.key}>
-              <td style={TD}><i aria-hidden="true" style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:r.s.color,marginRight:5}}/>{r.s.key}</td>
-              <td style={TD}>{fmt(cv(r.n1, "net_forest_hwp_c"))}</td>
-              <td style={TD}>{r.n0 != null && r.n1 != null ? signed(cv(r.n1 - r.n0, "net_forest_hwp_c")) : "n/a"}</td>
-              <td style={TD}>{r.vsRes != null ? signed(cv(r.vsRes, "net_forest_hwp_c")) : "n/a"}</td>
-              <td style={TD}>{fmt(cv(r.h, "hwp_carbon_stock"))}</td>
-              <td style={TD}>{signed(cv(r.c, "net_climate_carbon"))}</td>
+              <td className="pn-left" style={{whiteSpace:"nowrap"}}><span className="pn-th-sw"><i className="pn-sw" aria-hidden="true" style={{background:r.s.color}}/>{r.s.key}</span></td>
+              <td>{fmt(cv(r.n1, "net_forest_hwp_c"))}</td>
+              <td>{r.n0 != null && r.n1 != null ? signed(cv(r.n1 - r.n0, "net_forest_hwp_c")) : "n/a"}</td>
+              <td>{r.vsRes != null ? signed(cv(r.vsRes, "net_forest_hwp_c")) : "n/a"}</td>
+              <td>{fmt(cv(r.h, "hwp_carbon_stock"))}</td>
+              <td>{signed(cv(r.c, "net_climate_carbon"))}</td>
             </tr>))}
           </tbody>
         </table>
-      )}
+        </div>
+      </>)}
 
-      <div className="note">
+      <div className="pn-note">
         All values are state totals in {u("net_forest_hwp_c")} (teragrams of carbon; 1 Tg = 10<sup>12</sup> g).
         The top chart is net system carbon: standing live carbon plus wood products in use plus
         landfill, from an IPCC-style first-order-decay pool on the hybrid yield engine
@@ -144,7 +135,7 @@ export default function WoodProducts({ series, meta, state, units = "imperial" }
         and use a different engine and start year, so compare them within a column, not across.
         Avoided emissions from product substitution are not a carbon stock and are not published
         per state; the methods note reports them only as a CONUS sensitivity.
-        Method: <a href={`${BASE}methods/hybrid-production-hwp/`} target="_blank" rel="noopener noreferrer" style={{color:"var(--accent)"}}>hybrid in production + harvested wood products</a>.
+        Method: <a href={`${BASE}methods/hybrid-production-hwp/`} target="_blank" rel="noopener noreferrer">hybrid in production + harvested wood products</a>.
         Data: api/series/{state}.json (net_forest_hwp_c, hwp_carbon_stock, net_climate_carbon).
       </div>
     </div>

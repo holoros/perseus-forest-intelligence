@@ -2,23 +2,25 @@
 // PERSEUS already ships the disturbance-exposed and mortality-stressed reserve
 // scenarios in the API (v1.4). This view contrasts the passive no-harvest
 // reserve against those stressed siblings to answer the question competitor
-// tools (e.g. carbon-reversal-risk) center on — but on PERSEUS's own
+// tools (e.g. carbon-reversal-risk) center on, but on PERSEUS's own
 // multi-engine footing: how durable is stored carbon under elevated
 // disturbance / mortality, and where does a no-harvest reserve plateau or
 // turn into a net source?
 import { useMemo, useState } from "react";
 import PermanenceMap from "./PermanenceMap.jsx";
+import { SCENARIO_COL } from "./palette.js";
+import useWidth from "./useWidth.js";
 
 const BUCKETS = {
   base:  "reserve (no harvest)",
   dist:  "reserve (no harvest, disturbance-exposed)",
   mort:  "reserve (no harvest, mortality-stressed)",
 };
-// Okabe-Ito scenario colors (categorical, not status): bluish green, orange, reddish purple.
-const COL = { base:"#009E73", dist:"#E69F00", mort:"#CC79A7" };
-// Verdict colors are status marks: tokens with fallbacks equal to main's literals.
-const STATUS = { hi:"var(--alert, #e05a5a)", mod:"var(--warn, #e6a23c)", lo:"var(--ok, #66c2a5)", na:"var(--mut2, #8aa0b0)" };
-const EASE = "var(--dur, 200ms) var(--ease, cubic-bezier(0.25,1,0.5,1))";
+// Okabe-Ito scenario colors (categorical, not status), from the shared palette.
+const COL = { base:SCENARIO_COL.reserve, dist:SCENARIO_COL.dist, mort:SCENARIO_COL.mort };
+// Verdict colors are status marks (the only status color on this view).
+const STATUS = { hi:"var(--alert)", mod:"var(--warn)", lo:"var(--ok)", na:"var(--mut2)" };
+const EASE = "var(--dur) var(--ease)";
 // display-only unit form: exponents as literal superscripts (Mm3 to Mm³)
 const showUnit = u => String(u).replace(/(\b[A-Za-z]*m)3\b/g, "$1³").replace(/(\b[A-Za-z]*m)2\b/g, "$1²");
 
@@ -61,6 +63,7 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
   }, [series]);
 
   const [hl, setHl] = useState(null);
+  const [setBox, W] = useWidth(560, 320, 720);
 
   const data = useMemo(()=>{
     if(!metric) return null;
@@ -94,8 +97,9 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
   const unit = showUnit((meta && meta.metrics && meta.metrics[metric] && meta.metrics[metric].unit) || "Tg C");
   const label = (meta && meta.metrics && meta.metrics[metric] && meta.metrics[metric].label) || metric;
 
-  // ---- chart geometry ----
-  const W=560,H=310,L=52,R=120,T=24,B=36;
+  // ---- chart geometry (viewBox follows the rendered width so text keeps its size) ----
+  const narrow=W<480;
+  const H=310,L=52,R=narrow?84:124,T=30,B=36;
   const lines = [["base",data.base],["dist",data.dist],["mort",data.mort]].filter(([,l])=>l.length);
   const xs=[], ys=[];
   lines.forEach(([,l])=>l.forEach(p=>{ xs.push(p[0]); ys.push(p[1]); }));
@@ -108,7 +112,7 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
   const Y=v=>(H-B)-(v-y0)/((y1-y0)||1)*(H-T-B);
   const path=l=>l.map((p,k)=>(k?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1)).join(" ");
   const yticks=[]; for(let v=0;v<=y1+step*1e-6;v+=step) yticks.push(+v.toFixed(6));
-  const xticks=[]; { const span=x1-x0, rs=span/4, xm=Math.pow(10,Math.floor(Math.log10(rs||1)));
+  const xticks=[]; { const span=x1-x0, rs=span/(narrow?3:4), xm=Math.pow(10,Math.floor(Math.log10(rs||1)));
     const xn=(rs||1)/xm, xstep=Math.max(1,(xn<1.5?1:xn<3?2:xn<7?5:10)*xm);
     for(let t=Math.ceil(x0/xstep)*xstep;t<=x1+1e-6;t+=xstep) xticks.push(t); }
 
@@ -119,6 +123,11 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
     const dn=data.base.slice().reverse().map(p=>"L"+X(p[0]).toFixed(1)+" "+Y(valAt(data.dist,p[0])).toFixed(1)).join(" ");
     gapPoly=up+" "+dn+" Z";
   }
+  // End labels in the series color, nudged apart so they never overprint.
+  const endLabels = lines.map(([k,l])=>{ const last=l[l.length-1];
+    return { k, y:Math.max(T+4, Math.min(H-B-3, Y(last[1]))), txt:(narrow?{base:"passive",dist:"disturbance",mort:"mortality"}:{base:"passive reserve",dist:"disturbance-exposed",mort:"mortality-stressed"})[k] }; })
+    .sort((a,b)=>a.y-b.y);
+  { let prev=-99; for(const it of endLabels){ it.ly=Math.max(it.y, prev+12); prev=it.ly; } }
 
   const sparse = data.bEnd < 25 || (data.distPct!=null && data.distPct < -5);
   const verdict = (()=>{
@@ -139,48 +148,48 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
   return (
     <div style={{margin:"4px 4px 8px"}}>
       {geo && risk && (
-        <div style={{marginBottom:10}}>
-          <div style={{fontSize:12.5,fontWeight:600,marginBottom:4,color:"var(--ink)"}}>CONUS reversal risk</div>
+        <div className="pn-chart">
+          <div className="pn-head" style={{marginBottom:6}}>
+            <h3 className="pn-h">CONUS reversal risk</h3>
+            <span className="pn-meta">disturbance-exposed reserve, shortfall below passive at horizon</span>
+          </div>
           <PermanenceMap geo={geo} risk={risk} selected={state} onPick={onPick}/>
         </div>
       )}
-      <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap",marginBottom:4}}>
-        <b style={{fontSize:13,color:"var(--ink)"}}>Permanence and reversal risk: {stateName||state}</b>
-        <span style={{color:"var(--mut)",fontSize:11}}>{label} · ensemble median of {data.nEng} reserve engine{data.nEng===1?"":"s"} · {unit}</span>
+      <div className="pn-head">
+        <h3 className="pn-h">Permanence and reversal risk: {stateName||state}</h3>
+        <span className="pn-meta">{label}, ensemble median of {data.nEng} reserve engine{data.nEng===1?"":"s"}, {unit}</span>
       </div>
 
-      <div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"6px 0 8px"}}>
-        <div style={{borderLeft:`3px solid ${verdict.c}`,padding:"3px 0 3px 9px",maxWidth:540}}>
-          <div style={{color:verdict.c,fontSize:12.5,fontWeight:600}}>{verdict.t}</div>
-          <div style={{color:"var(--ink-2, var(--mut))",fontSize:11.5,lineHeight:1.45}}>{verdict.d}</div>
-        </div>
+      <div className="pn-status" style={{color:verdict.c,margin:"6px 0 12px"}}>
+        <b>{verdict.t}</b>
+        <p>{verdict.d}</p>
       </div>
 
-      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:6}}>
-        {/* Scenario tiles: neutral card, scenario color as a left key bar; value in ink so it
+      <div className="pn-stats" style={{marginBottom:10}}>
+        {/* Scenario tiles: neutral card, scenario color as a left key rule; value in ink so it
             reads on both themes; the shortfall vs the passive reserve sits under the value. */}
         {[["Passive reserve at "+data.endYr, fmt(data.bEnd), "", COL.base],
           ["Disturbance-exposed", fmt(data.dEnd), data.distPct!=null?`${data.distPct.toFixed(0)}% below passive`:"", COL.dist],
           ["Mortality-stressed", fmt(data.mEnd), data.mortPct!=null?`${data.mortPct.toFixed(0)}% below passive`:"", COL.mort]].map((c,i)=>(
-          <div key={i} style={{background:"var(--panel-2, rgba(255,255,255,0.03))",border:"1px solid var(--line)",
-            borderLeft:`3px solid ${c[3]}`,borderRadius:6,padding:"5px 10px",minWidth:130}}>
-            <div style={{color:"var(--mut)",fontSize:11}}>{c[0]}</div>
-            <div style={{fontSize:16,fontWeight:600,color:"var(--ink)",fontVariantNumeric:"tabular-nums"}}>{c[1]} <span style={{fontSize:10.5,color:"var(--mut)",fontWeight:400}}>{unit}</span></div>
-            {c[2] && <div style={{fontSize:11,color:"var(--ink-2, var(--mut))",fontVariantNumeric:"tabular-nums"}}>{c[2]}</div>}
+          <div key={i} className="pn-stat pn-keyed" style={{"--key":c[3]}}>
+            <span className="eyebrow">{c[0]}</span>
+            <b>{c[1]}<small>{unit}</small></b>
+            {c[2] && <span>{c[2]}</span>}
           </div>
         ))}
       </div>
 
-      <div style={{background:"var(--panel)",border:"1px solid var(--line)",borderRadius:8,padding:"6px 6px 2px",maxWidth:720}}>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block",fontVariantNumeric:"tabular-nums"}}>
+      <div className="pn-chart" ref={setBox}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label} by year under the passive, disturbance-exposed and mortality-stressed reserve`}>
         {yticks.map((v,i)=>(<g key={"y"+i}>
-          <line x1={L} y1={Y(v)} x2={W-R} y2={Y(v)} strokeWidth="1"
-            style={{stroke: v===0 ? "var(--line-strong, #3a4a57)" : "var(--grid, #2a3a47)"}}/>
-          <text x={L-6} y={Y(v)+3.5} textAnchor="end" fontSize="10" style={{fill:"var(--axis, #8aa0b0)"}}>{v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0)}</text>
+          <line x1={L} y1={Y(v)} x2={W-R} y2={Y(v)} className={v===0?"ch-base":"ch-grid"}/>
+          <text x={L-6} y={Y(v)+3.5} textAnchor="end" className="ch-txt">{v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0)}</text>
         </g>))}
-        {xticks.map((t,i)=>(<text key={"x"+i} x={X(t)} y={H-B+15} textAnchor="middle" fontSize="10" style={{fill:"var(--axis, #8aa0b0)"}}>{Math.round(t)}</text>))}
-        <text x={(L+W-R)/2} y={H-4} textAnchor="middle" fontSize="10" style={{fill:"var(--axis, #8aa0b0)"}}>Year</text>
-        <text x={L-6} y={12} textAnchor="start" fontSize="11" fontWeight="600" style={{fill:"var(--ink-2, #cddbe4)"}}>{label}, ensemble median ({unit})</text>
+        {xticks.map((t,i)=>(<text key={"x"+i} x={X(t)} y={H-B+15} textAnchor="middle" className="ch-txt">{Math.round(t)}</text>))}
+        <text x={(L+W-R)/2} y={H-4} textAnchor="middle" className="ch-txt">Year</text>
+        <text x={L-6} y={12} textAnchor="start" className="ch-ttl">{narrow ? label : `${label}, ensemble median (${unit})`}</text>
+        <text x={L-6} y={25} textAnchor="start" className="ch-note">{narrow ? `ensemble median (${unit})${gapPoly ? "; shaded: reversal gap" : ""}` : (gapPoly ? "shaded: reversal gap, passive minus disturbance-exposed" : "")}</text>
         {gapPoly && <path d={gapPoly} opacity={hl&&hl!=="dist"?0.04:0.16}
           style={{fill:COL.dist,stroke:"none",transition:`opacity ${EASE}`}}/>}
         {lines.map(([k,l])=>(
@@ -190,21 +199,19 @@ export default function PermanenceRisk({ series, state, meta, stateName, geo, ri
             onMouseEnter={()=>setHl(k)} onMouseLeave={()=>setHl(null)}
             style={{stroke:COL[k],cursor:"pointer",transition:`opacity ${EASE}`}}/>
         ))}
-        {/* end labels */}
-        {lines.map(([k,l])=>{
-          const last=l[l.length-1];
-          const txt={base:"passive reserve",dist:"disturbance-exposed",mort:"mortality-stressed"}[k];
-          return <g key={"lab"+k} style={{pointerEvents:"none"}}>
-            <line x1={W-R+1} y1={Y(last[1])} x2={W-R+9} y2={Y(last[1])} strokeWidth="2" strokeDasharray={k==="base"?"0":"3 2"} style={{stroke:COL[k]}}/>
-            <text x={W-R+12} y={Y(last[1])+3.5} fontSize="10" style={{fill:"var(--ink-2, #cddbe4)"}}>{txt}</text>
-          </g>;
-        })}
+        {/* direct end labels in the series color */}
+        {endLabels.map(it=>(
+          <g key={"lab"+it.k} style={{pointerEvents:"none"}}>
+            <line x1={W-R+1} y1={it.ly} x2={W-R+8} y2={it.ly} strokeWidth="2" strokeDasharray={it.k==="base"?"0":"3 2"} style={{stroke:COL[it.k]}}/>
+            <text x={W-R+11} y={it.ly+3.5} className="ch-txt ch-halo" style={{fill:COL[it.k]}}>{it.txt}</text>
+          </g>
+        ))}
       </svg>
       </div>
 
-      <div style={{color:"var(--mut)",fontSize:11,lineHeight:1.5,marginTop:8,maxWidth:600}}>
+      <p className="pn-note">
         Reversal risk is the shortfall of a stressed no-harvest reserve against the passive reserve at {data.endYr}. The disturbance-exposed band spans historical, 2× and 3× disturbance frequency (grounded in FIA COND and GRM); mortality-stressed elevates background mortality. Hover a line to isolate. Unlike single-model reversal tools, this is the cross-engine reserve median, so the risk read carries PERSEUS's multi-model spread.
-      </div>
+      </p>
     </div>
   );
 }
